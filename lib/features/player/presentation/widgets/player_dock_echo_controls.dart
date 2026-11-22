@@ -39,7 +39,7 @@ class DockEchoControls extends StatelessWidget {
   final Future<void> Function() onReplay;
   final VoidCallback onTogglePlay;
   final VoidCallback onRecord;
-  final VoidCallback onSpeed;
+  final void Function(BuildContext anchor) onSpeed;
 
   @override
   Widget build(BuildContext context) {

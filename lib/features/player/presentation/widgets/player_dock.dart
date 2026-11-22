@@ -46,8 +46,10 @@ class _PlayerDockState extends ConsumerState<PlayerDock> {
     _practiceTips = ref.read(practiceTipTriggerProvider).transportBar();
   }
 
-  void _openPlaybackRateSheet() {
-    unawaited(showPlaybackRateSheet(context: context, ref: ref));
+  void _openPlaybackRatePicker(BuildContext anchor) {
+    unawaited(
+      showPlaybackRatePicker(context: context, ref: ref, anchor: anchor),
+    );
   }
 
   @override
@@ -114,7 +116,7 @@ class _PlayerDockState extends ConsumerState<PlayerDock> {
                             phone: phone,
                             showLineMeta: showLineMeta,
                             playbackRate: playbackRate,
-                            onSpeed: _openPlaybackRateSheet,
+                            onSpeed: _openPlaybackRatePicker,
                             onCancel: () => ref
                                 .read(shadowReadingHotkeyBusProvider.notifier)
                                 .pulseRecordingCancel(),
@@ -140,7 +142,7 @@ class _PlayerDockState extends ConsumerState<PlayerDock> {
                             onRecord: () => ref
                                 .read(shadowReadingHotkeyBusProvider.notifier)
                                 .pulseRecording(),
-                            onSpeed: _openPlaybackRateSheet,
+                            onSpeed: _openPlaybackRatePicker,
                           )
                         : DockListenControls(
                             key: ValueKey<bool>(echoActive),
@@ -159,7 +161,7 @@ class _PlayerDockState extends ConsumerState<PlayerDock> {
                             onTogglePlay: () => ref
                                 .read(playerControllerProvider.notifier)
                                 .togglePlay(),
-                            onSpeed: _openPlaybackRateSheet,
+                            onSpeed: _openPlaybackRatePicker,
                           ),
                   ),
                 ),

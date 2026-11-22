@@ -478,12 +478,17 @@ class DockPlayPausePill extends StatelessWidget {
 }
 
 /// The `1.0×` speed control: a 54 px mono icon button that opens the
-/// playback-rate sheet.
+/// playback-rate picker. [onOpen] receives this button's own [BuildContext]
+/// so desktop can anchor the popup menu right at the button.
 class DockSpeedButton extends StatelessWidget {
-  const DockSpeedButton({required this.rate, required this.onOpen, super.key});
+  const DockSpeedButton({
+    required this.rate,
+    required this.onOpen,
+    super.key,
+  });
 
   final double rate;
-  final VoidCallback onOpen;
+  final void Function(BuildContext anchor) onOpen;
 
   @override
   Widget build(BuildContext context) {
@@ -493,7 +498,7 @@ class DockSpeedButton extends StatelessWidget {
       message: l10n.speed,
       child: EnjoyPressable(
         key: const ValueKey('dock-speed'),
-        onTap: onOpen,
+        onTap: () => onOpen(context),
         borderRadius: BorderRadius.circular(t.radiusControl),
         washColor: t.sunk,
         child: SizedBox(

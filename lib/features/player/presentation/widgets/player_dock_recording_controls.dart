@@ -29,7 +29,7 @@ class DockRecordingControls extends StatelessWidget {
   final bool phone;
   final bool showLineMeta;
   final double playbackRate;
-  final VoidCallback onSpeed;
+  final void Function(BuildContext anchor) onSpeed;
   final VoidCallback onCancel;
   final VoidCallback onStop;
 

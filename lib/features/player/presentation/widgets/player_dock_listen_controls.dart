@@ -43,7 +43,7 @@ class DockListenControls extends StatelessWidget {
   final Future<void> Function() onNext;
   final Future<void> Function() onReplay;
   final VoidCallback onTogglePlay;
-  final VoidCallback onSpeed;
+  final void Function(BuildContext anchor) onSpeed;
 
   @override
   Widget build(BuildContext context) {

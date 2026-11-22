@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-Enjoy Player ships on TestFlight (iOS), Play test (Android), and direct downloads (Windows installer, notarized macOS zip, Android sideload APK). Only direct-download channels lack an update path. Store channels must not implement custom download/install flows (policy + platforms already notify testers).
+SP Player ships on TestFlight (iOS), Play test (Android), and direct downloads (Windows installer, notarized macOS zip, Android sideload APK). Only direct-download channels lack an update path. Store channels must not implement custom download/install flows (policy + platforms already notify testers).
 
 We host installers on `https://dl.enjoy.bot/player/` (S3 + CDN). Flutter has no single `electron-updater` equivalent; desktop uses Sparkle/WinSparkle, Android sideload uses install-intent OTA.
 

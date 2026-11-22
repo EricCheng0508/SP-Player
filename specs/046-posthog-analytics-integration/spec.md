@@ -12,7 +12,7 @@
 
 ### User Story 1 - App usage is measured from first launch (Priority: P1)
 
-Ana installs Enjoy Player and opens it. Without her doing anything special, her app session — the open itself and subsequent foreground/background sessions — is recorded in the team's PostHog dashboard. The team can finally see how many people actually use the app, on which platforms, and how often, without asking anyone or shipping a survey.
+Ana installs SP Player and opens it. Without her doing anything special, her app session — the open itself and subsequent foreground/background sessions — is recorded in the team's PostHog dashboard. The team can finally see how many people actually use the app, on which platforms, and how often, without asking anyone or shipping a survey.
 
 **Why this priority**: This is the foundation. Initialization plus automatic session/lifecycle capture delivers standalone value (real usage numbers) and every other story builds on it. It requires no changes to any feature surface.
 
@@ -28,7 +28,7 @@ Ana installs Enjoy Player and opens it. Without her doing anything special, her 
 
 ### User Story 2 - Usage is attributed to the signed-in account (Priority: P2)
 
-Enjoy Player is login-only: every user has an Enjoy account. After Ana signs in, her usage is attributed to her stable account identity, so her phone, tablet, and desktop all count as one person and her history survives reinstalls. On a shared device, signing out and signing in as someone else switches attribution cleanly — the previous user is never credited with the next user's activity.
+SP Player is login-only: every user has an Enjoy account. After Ana signs in, her usage is attributed to her stable account identity, so her phone, tablet, and desktop all count as one person and her history survives reinstalls. On a shared device, signing out and signing in as someone else switches attribution cleanly — the previous user is never credited with the next user's activity.
 
 **Why this priority**: Login-only access makes identity nearly free and dramatically increases the value of the data (retention per person, cross-device behavior). It is the highest-value refinement of the P1 stream but depends on initialization existing first.
 

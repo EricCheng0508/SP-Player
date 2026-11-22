@@ -12,7 +12,7 @@
 
 - **[P]**: Can run in parallel (different files, no dependencies on incomplete tasks)
 - **[Story]**: User story label (`[US1]`…`[US6]`)
-- Paths are repo-relative from Enjoy Player root
+- Paths are repo-relative from SP Player root
 
 ## Path Conventions
 

@@ -1,6 +1,6 @@
 {
   "@@locale": "en",
-  "appTitle": "Enjoy Player",
+  "appTitle": "SP Player",
   "libraryTitle": "Library",
   "librarySourceLocal": "Local",
   "librarySourceCloud": "Cloud",
@@ -199,7 +199,7 @@
   "settingsSectionAppearance": "Appearance",
   "settingsAppearanceSubtitle": "Theme follows your system settings.",
   "settingsSectionAbout": "About",
-  "settingsAboutSubtitle": "Enjoy Player — local transcripts and shadow reading.",
+  "settingsAboutSubtitle": "SP Player — local transcripts and shadow reading.",
   "settingsThemeRowTitle": "Theme",
   "settingsThemeDarkLocked": "Follows your system appearance.",
   "settingsThemeSystem": "System",
@@ -394,7 +394,7 @@
   "@settingsAiProvidersTitle": {
     "description": "Screen title for AI provider settings."
   },
-  "settingsAiProvidersSubtitle": "Configure how Enjoy Player calls AI for each feature.",
+  "settingsAiProvidersSubtitle": "Configure how SP Player calls AI for each feature.",
   "@settingsAiProvidersSubtitle": {
     "description": "Screen subtitle for AI provider settings."
   },
@@ -1665,7 +1665,7 @@
   "practicePosterStatTakes": "Takes",
   "practicePosterStatSentences": "Sentences",
   "practicePosterStatSpoken": "Spoken",
-  "practicePosterQrHint": "Scan to download Enjoy Player\nplayer.enjoy.bot",
+  "practicePosterQrHint": "Scan to download SP Player\nplayer.enjoy.bot",
   "practicePosterShareAction": "Share poster",
   "practicePosterShareLabel": "Share",
   "practicePosterShareSuccess": "Poster shared.",
@@ -1681,7 +1681,7 @@
   },
   "notFoundBackHome": "Back to home",
   "recoveryTitle": "Local data needs attention",
-  "recoverySubtitle": "Enjoy Player could not open its local database. The most common cause is a partial update. Your data is still on disk; you can copy the error before continuing.",
+  "recoverySubtitle": "SP Player could not open its local database. The most common cause is a partial update. Your data is still on disk; you can copy the error before continuing.",
   "recoveryOpenLogs": "Open logs folder",
   "recoveryOpenLogsError": "Could not open the logs folder.",
   "recoveryCopyError": "Copy error",

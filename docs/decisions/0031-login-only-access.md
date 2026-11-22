@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-Enjoy Player previously allowed signed-out (guest) usage of home, library, discover, and settings, with optional sign-in for profile, sync, and cloud features. Guest local data could be migrated into an account after sign-in. The native auth flow (ADR-0027) is now smooth enough to require authentication up front. The app is pre-production with no legacy users requiring guest migration.
+SP Player previously allowed signed-out (guest) usage of home, library, discover, and settings, with optional sign-in for profile, sync, and cloud features. Guest local data could be migrated into an account after sign-in. The native auth flow (ADR-0027) is now smooth enough to require authentication up front. The app is pre-production with no legacy users requiring guest migration.
 
 ## Decision
 

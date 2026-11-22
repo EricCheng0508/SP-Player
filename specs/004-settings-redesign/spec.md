@@ -112,7 +112,7 @@ A user visually compares Settings to the rest of the app (Home, Library, Player)
 
 ### Quality, UX, and Performance Requirements
 
-- **QR-001**: Implementation MUST preserve Enjoy Player's feature-first architecture and avoid feature-to-feature shortcuts unless the plan documents an exception.
+- **QR-001**: Implementation MUST preserve SP Player's feature-first architecture and avoid feature-to-feature shortcuts unless the plan documents an exception.
 - **QR-002**: Changed behavior MUST have automated tests (widget tests for the redesigned hub and any new/changed shared components) or a documented manual verification reason where automated coverage is impractical (e.g. pure visual polish).
 - **QR-003**: User-facing strings, controls, haptics, tooltips, and keyboard affordances MUST follow existing localization and shared UI patterns (`EnjoyButton`, `Haptics`, `showEnjoySheet`/`showEnjoyAlertDialog`, `EditorialHeader`).
 - **QR-004**: The redesigned hub MUST remain responsive: initial render and section expansion/navigation must not introduce visible jank (dropped frames) versus the current implementation on the same reference devices/build configuration.

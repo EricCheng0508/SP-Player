@@ -11,7 +11,7 @@ Accepted
 
 ## Context
 
-Enjoy Player historically targeted **local-first** media only ([ADR-0005](0005-mvp-scope-local-only.md)) and a **single `media_kit`** playback surface ([ADR-0003](0003-player-core-media-kit.md)). Users want **YouTube** videos for the same transcript + echo / shadow-reading workflows without downloading media files.
+SP Player historically targeted **local-first** media only ([ADR-0005](0005-mvp-scope-local-only.md)) and a **single `media_kit`** playback surface ([ADR-0003](0003-player-core-media-kit.md)). Users want **YouTube** videos for the same transcript + echo / shadow-reading workflows without downloading media files.
 
 YouTube **embed** playback is unreliable inside embedded WebViews (policy errors). A proven approach loads the **mobile watch page** (`m.youtube.com/watch?v=…`), drives the page’s HTML5 `<video>` via JavaScript, and hides chrome with injected CSS.
 

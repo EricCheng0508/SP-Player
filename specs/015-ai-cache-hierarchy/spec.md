@@ -129,7 +129,7 @@ A learner who opens a media item, the app decodes the transcript `timelineJson`,
 
 ### Quality, UX, and Performance Requirements
 
-- **QR-001**: Implementation MUST preserve Enjoy Player's feature-first architecture (constitution § I). The cache abstraction lives under `lib/features/ai/application/` (or `lib/core/cache/` if multiple features use it). It MUST NOT introduce feature-to-feature shortcuts — `lookup_section_providers.dart` calls into the cache, not into `transcript_repository.dart`.
+- **QR-001**: Implementation MUST preserve SP Player's feature-first architecture (constitution § I). The cache abstraction lives under `lib/features/ai/application/` (or `lib/core/cache/` if multiple features use it). It MUST NOT introduce feature-to-feature shortcuts — `lookup_section_providers.dart` calls into the cache, not into `transcript_repository.dart`.
 - **QR-002**: Changed behavior MUST have automated tests (constitution § II). The new tests under `test/features/ai/`, `test/features/lookup/`, and `test/features/transcript/` MUST cover the P1 acceptance criteria end-to-end.
 - **QR-003**: User-facing strings, controls, haptics, tooltips, and keyboard affordances MUST follow existing localization and shared UI patterns (constitution § III). The cache is internal — no UI changes are introduced by this spec.
 - **QR-004**: User-visible flows MUST define measurable performance expectations (constitution § IV):

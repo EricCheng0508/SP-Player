@@ -67,9 +67,9 @@ description: "Task list for Linux Desktop Platform Support"
 
 ---
 
-## Phase 3: User Story 1 — Linux desktop user can install and run Enjoy Player (Priority: P1) 🎯 MVP
+## Phase 3: User Story 1 — Linux desktop user can install and run SP Player (Priority: P1) 🎯 MVP
 
-**Goal**: A Linux user can build, install, and launch Enjoy Player on a clean Ubuntu 22.04 LTS VM without developer tools beyond the apt package list. The app starts cold, the library loads, and a local media file plays back with transcript tracking. The build is reproducible on the self-hosted Linux runner.
+**Goal**: A Linux user can build, install, and launch SP Player on a clean Ubuntu 22.04 LTS VM without developer tools beyond the apt package list. The app starts cold, the library loads, and a local media file plays back with transcript tracking. The build is reproducible on the self-hosted Linux runner.
 
 **Independent Test**: Download the AppImage from `dl.enjoy.bot/player/v<version>/enjoy-player-<version>-x86_64.AppImage`, `chmod +x` it, run it on a clean Ubuntu 22.04 LTS VM, import a local `.mp4`, start playback, close the app, reopen it, and confirm the library + position are preserved.
 

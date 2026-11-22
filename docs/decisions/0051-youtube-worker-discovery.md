@@ -9,7 +9,7 @@
 
 ## Context
 
-The Enjoy Player app previously performed YouTube channel/video discovery entirely on the client side using a dual-source pipeline:
+The SP Player app previously performed YouTube channel/video discovery entirely on the client side using a dual-source pipeline:
 
 1. **Primary**: InnerTube `browse` endpoint via `youtubei.googleapis.com` (anonymous, no API key)
 2. **Fallback**: Public Atom RSS endpoint (`youtube.com/feeds/videos.xml?channel_id=...`)

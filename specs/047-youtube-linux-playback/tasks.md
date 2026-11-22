@@ -53,7 +53,7 @@ Single Flutter project: `lib/` and `test/` at repository root (test/ mirrors lib
 
 ---
 
-## Phase 3: User Story 1 — A Linux user can watch a YouTube video inside Enjoy Player (Priority: P1) 🎯 MVP
+## Phase 3: User Story 1 — A Linux user can watch a YouTube video inside SP Player (Priority: P1) 🎯 MVP
 
 **Goal**: On a dev-class Linux machine, pasting a YouTube URL plays video in-app with working transport controls and transcript tracking.
 

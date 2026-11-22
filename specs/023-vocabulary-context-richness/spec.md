@@ -127,7 +127,7 @@ As a learner on the Context tab, I can enter shadow reading for the current medi
 
 ### Quality, UX, and Performance Requirements
 
-- **QR-001**: Implementation MUST preserve Enjoy Player's feature-first architecture and avoid feature-to-feature shortcuts unless the plan documents an exception.
+- **QR-001**: Implementation MUST preserve SP Player's feature-first architecture and avoid feature-to-feature shortcuts unless the plan documents an exception.
 - **QR-002**: Changed behavior MUST have automated tests or a documented manual verification reason — especially explanation persist, clip play hand-off, open-in-player confirm/exit, and shadow entry availability.
 - **QR-003**: User-facing strings, controls, tooltips, and confirmations MUST follow existing localization and shared UI patterns; destructive or session-ending actions (Open in player, and shadow if it ends review) MUST use clear confirm copy.
 - **QR-004**: Opening Dictionary/Context with cached explanations, starting clip playback, and advancing cards MUST stay responsive (no multi-second freezes on ordinary device storage for typical explanation sizes). Clip playback MUST NOT introduce a second media player instance.

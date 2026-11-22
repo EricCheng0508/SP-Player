@@ -12,7 +12,7 @@
 
 ### User Story 1 - Phones stay upright; tablets may rotate (Priority: P1)
 
-A learner using Enjoy Player on a **phone** keeps the app in a stable upright orientation while they browse the library, discover content, open settings, or practice. Tilting or flipping the phone does **not** re-layout the whole app into landscape. On a **tablet** (pad-class device), rotating the device *does* change the app orientation in the normal system way, so landscape and portrait both remain useful for reading and browsing.
+A learner using SP Player on a **phone** keeps the app in a stable upright orientation while they browse the library, discover content, open settings, or practice. Tilting or flipping the phone does **not** re-layout the whole app into landscape. On a **tablet** (pad-class device), rotating the device *does* change the app orientation in the normal system way, so landscape and portrait both remain useful for reading and browsing.
 
 **Why this priority**: Accidental phone rotation is a common distraction during language practice and navigation. Tablets are large enough that landscape browsing is expected. Getting the device-class policy right is the foundation for every other orientation-related behavior.
 
@@ -88,7 +88,7 @@ When rotation is allowed (tablets and freely resized desktop windows), switching
 
 ### Quality, UX, and Performance Requirements
 
-- **QR-001**: Implementation MUST preserve Enjoy Player's feature-first architecture and avoid feature-to-feature shortcuts unless the plan documents an exception.
+- **QR-001**: Implementation MUST preserve SP Player's feature-first architecture and avoid feature-to-feature shortcuts unless the plan documents an exception.
 - **QR-002**: Changed behavior MUST have automated tests or a documented manual verification reason (device-class orientation policy and player portrait/landscape layout selection are both in scope for coverage).
 - **QR-003**: User-facing strings, controls, haptics, tooltips, and keyboard affordances MUST follow existing localization and shared UI patterns. This feature SHOULD NOT introduce new user-facing settings copy unless a later clarification adds an override preference.
 - **QR-004**: Orientation transitions on tablet/desktop MUST complete without sustained jank: layout should settle within one interactive frame budget after the orientation metrics update, and playback chrome must remain operable without a full player restart.

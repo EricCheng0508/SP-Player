@@ -3,7 +3,7 @@
 **Input**: Design documents from `/specs/048-dictation-practice/`
 **Prerequisites**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md), [data-model.md](data-model.md), [contracts/dictation-ui-and-data-contract.md](contracts/dictation-ui-and-data-contract.md), [quickstart.md](quickstart.md)
 
-**Tests**: Unit and widget tests are included per the Enjoy Player Constitution (`flutter analyze` and `flutter test` gates) and the verification plan in [plan.md](plan.md).
+**Tests**: Unit and widget tests are included per the SP Player Constitution (`flutter analyze` and `flutter test` gates) and the verification plan in [plan.md](plan.md).
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 

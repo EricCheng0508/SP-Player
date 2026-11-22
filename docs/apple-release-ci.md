@@ -33,7 +33,7 @@ Without this record, IPA export/upload fails with *Error Downloading App Informa
 
 1. [App Store Connect → Users and Access → Integrations → App Store Connect API](https://appstoreconnect.apple.com/access/integrations/api)
 2. Click **+** to generate a key.
-3. Name: e.g. `Enjoy Player CI`
+3. Name: e.g. `SP Player CI`
 4. Access: **App Manager** (or **Admin**)
 5. Download the **`.p8`** file — **you can only download it once**.
 6. Note:
@@ -257,8 +257,8 @@ Manual steps (equivalent to what the script runs):
 brew bundle install --file=macos/Brewfile
 (cd macos && pod install)
 bash .github/scripts/build_macos_release.sh
-./macos/scripts/notarize_release.sh "build/macos/Build/Products/Release/Enjoy Player.app"
-ditto -c -k --norsrc --keepParent "build/macos/Build/Products/Release/Enjoy Player.app" \
+./macos/scripts/notarize_release.sh "build/macos/Build/Products/Release/SP Player.app"
+ditto -c -k --norsrc --keepParent "build/macos/Build/Products/Release/SP Player.app" \
   "EnjoyPlayer-macOS-v$(bash .github/scripts/read_pubspec_version.sh).zip"
 ```
 

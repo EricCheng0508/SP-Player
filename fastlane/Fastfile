@@ -1,4 +1,4 @@
-# Store uploads and review automation for Enjoy Player.
+# Store uploads and review automation for SP Player.
 #
 # All lanes read credentials from the environment (same variables as the
 # release scripts); `~/.config/enjoy-player/asc.env` +

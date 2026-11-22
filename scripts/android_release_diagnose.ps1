@@ -1,7 +1,7 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  Diagnose Enjoy Player Android release blank screen (repro + logcat).
+  Diagnose SP Player Android release blank screen (repro + logcat).
 
 .DESCRIPTION
   1) Optionally runs `flutter run --release` on a connected Android device/emulator.
@@ -119,7 +119,7 @@ if ($androidIds.Count -eq 0) {
   exit 0
 }
 
-Write-Host "`n--- Logcat interpretation (Enjoy Player) ---"
+Write-Host "`n--- Logcat interpretation (SP Player) ---"
 Write-Host "  Tip: Install a release APK first (e.g. flutter install, or adb install build/app/outputs/flutter-apk/app-<abi>-release.apk)."
 Write-Host "  prefs: build start / prefs: build done  -> from AppPreferencesCtrl (Drift settings)."
 Write-Host "  auth: loadInitialAuthState start/done   -> from AuthCtrl cold path."

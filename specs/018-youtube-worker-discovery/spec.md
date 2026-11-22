@@ -73,7 +73,7 @@ The learner builds a collection of YouTube sources over time and occasionally wa
 
 ### User Story 4 - Multi-device subscription sync via cloud account (Priority: P4)
 
-The learner uses Enjoy Player on both their desktop and mobile device, signed into the same account. When they subscribe to a YouTube channel on their desktop, the subscription record syncs to their mobile device via the existing cloud sync infrastructure (ADR-0010, ADR-0013). The worker is not involved in subscription sync; it remains a stateless feed provider. Video entries are fetched independently on each device from the worker feed after the local subscription appears via sync.
+The learner uses SP Player on both their desktop and mobile device, signed into the same account. When they subscribe to a YouTube channel on their desktop, the subscription record syncs to their mobile device via the existing cloud sync infrastructure (ADR-0010, ADR-0013). The worker is not involved in subscription sync; it remains a stateless feed provider. Video entries are fetched independently on each device from the worker feed after the local subscription appears via sync.
 
 **Why this priority**: Cross-device sync leverages existing infrastructure and is not dependent on new worker capabilities. It amplifies value but is not required for single-device use.
 

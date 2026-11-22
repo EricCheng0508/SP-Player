@@ -6,7 +6,7 @@ Validation guide for implementers after `/speckit-tasks` / implementation. No fu
 
 ## Prerequisites
 
-- Signed-in Enjoy Player build (import requires session per ADR-0031).
+- Signed-in SP Player build (import requires session per ADR-0031).
 - A large local video (≥ ~500 MB recommended for disk-dupe check) on desktop.
 - A small local audio/video for mobile smoke.
 - Dev tree green baseline: `bash .github/scripts/validate_ci_gates.sh` (or analyze + test).

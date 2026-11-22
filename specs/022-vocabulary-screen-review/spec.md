@@ -136,7 +136,7 @@ As a learner on **All Words**, I can find items by search and status/language fi
 
 ### Quality, UX, and Performance Requirements
 
-- **QR-001**: Implementation MUST preserve Enjoy Player's feature-first architecture and avoid feature-to-feature shortcuts unless the plan documents an exception.
+- **QR-001**: Implementation MUST preserve SP Player's feature-first architecture and avoid feature-to-feature shortcuts unless the plan documents an exception.
 - **QR-002**: Changed behavior MUST have automated tests or a documented manual verification reason — especially review selection, flip/rate/skip/undo session flow, list filters/search/delete, and stats/due counts.
 - **QR-003**: User-facing strings, controls, tooltips, and keyboard affordances MUST follow existing localization and shared UI patterns; desktop shortcuts SHOULD be discoverable in the review UI.
 - **QR-004**: Opening Vocabulary, switching tabs, filtering/searching a typical personal book, and advancing a flashcard MUST stay responsive (no multi-second freezes on ordinary device storage).

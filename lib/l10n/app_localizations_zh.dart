@@ -892,7 +892,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsAiProvidersTitle => 'AI 提供商';
 
   @override
-  String get settingsAiProvidersSubtitle => '配置 Enjoy Player 各 AI 功能的调用方式。';
+  String get settingsAiProvidersSubtitle => '配置 SP Player 各 AI 功能的调用方式。';
 
   @override
   String get settingsAiProvidersPrivacyNotice =>
@@ -3165,7 +3165,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get practicePosterStatSpoken => '开口';
 
   @override
-  String get practicePosterQrHint => '扫码下载 Enjoy Player\nplayer.enjoy.bot';
+  String get practicePosterQrHint => '扫码下载 SP Player\nplayer.enjoy.bot';
 
   @override
   String get practicePosterShareAction => '分享海报';
@@ -3201,7 +3201,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get recoverySubtitle =>
-      'Enjoy Player 无法打开本地数据库。最常见的原因是更新不完整。数据仍然在磁盘上;继续操作前你可以先复制错误信息。';
+      'SP Player 无法打开本地数据库。最常见的原因是更新不完整。数据仍然在磁盘上;继续操作前你可以先复制错误信息。';
 
   @override
   String get recoveryOpenLogs => '打开日志文件夹';
@@ -7309,7 +7309,7 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String get practicePosterStatSpoken => '开口';
 
   @override
-  String get practicePosterQrHint => '扫码下载 Enjoy Player\nplayer.enjoy.bot';
+  String get practicePosterQrHint => '扫码下载 SP Player\nplayer.enjoy.bot';
 
   @override
   String get practicePosterShareAction => '分享海报';
@@ -7345,7 +7345,7 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get recoverySubtitle =>
-      'Enjoy Player 无法打开本地数据库，最常见的原因是更新不完整。数据仍在磁盘上；继续操作前可先复制错误信息。';
+      'SP Player 无法打开本地数据库，最常见的原因是更新不完整。数据仍在磁盘上；继续操作前可先复制错误信息。';
 
   @override
   String get recoveryOpenLogs => '打开日志文件夹';

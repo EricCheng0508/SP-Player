@@ -212,7 +212,7 @@ No change. `auto_updater: 0.2.1` (exact pin) is already correctly excluded from 
 ### Rationale
 
 - The package's Linux implementation is stable enough for v1.
-- Most Enjoy Player users on Linux will want to sign in.
+- Most SP Player users on Linux will want to sign in.
 - The graceful-disable path is a one-line change in `auth_platform_support.dart`; no architecture impact.
 
 ### Alternatives Considered

@@ -107,7 +107,7 @@ As a signed-in user, I can tell at a glance which profile fields I can change an
 
 ### Quality, UX, and Performance Requirements
 
-- **QR-001**: Implementation MUST preserve Enjoy Player's feature-first architecture and avoid feature-to-feature shortcuts unless the plan documents an exception.
+- **QR-001**: Implementation MUST preserve SP Player's feature-first architecture and avoid feature-to-feature shortcuts unless the plan documents an exception.
 - **QR-002**: Changed behavior MUST have automated tests or a documented manual verification reason (identity card Enjoy ID, form field editability, username save, avatar happy-path and failure-path when API exists).
 - **QR-003**: User-facing strings, controls, haptics, tooltips, and keyboard affordances MUST follow existing localization and shared UI patterns.
 - **QR-004**: Opening the profile update form and saving username MUST feel responsive (form interactive within 1 second on a warm session; save feedback within 3 seconds under normal network conditions). Avatar upload feedback MUST show in-progress state for longer uploads.

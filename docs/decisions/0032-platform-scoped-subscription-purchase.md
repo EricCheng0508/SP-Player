@@ -7,7 +7,7 @@ Accepted — 2026-06-30
 
 ## Context
 
-Enjoy web sells Pro subscriptions via Stripe/Mixin external checkout. Enjoy Player must port subscription management while respecting mobile store policies:
+Enjoy web sells Pro subscriptions via Stripe/Mixin external checkout. SP Player must port subscription management while respecting mobile store policies:
 
 - **Apple App Store** requires StoreKit for digital Pro unlocks consumed in the app.
 - **Google Play** has similar requirements for Play-distributed builds.

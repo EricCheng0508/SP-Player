@@ -89,7 +89,7 @@ void main() {
     db = AppDatabase(executor: NativeDatabase.memory());
     fakeEngine = FakePlayerEngine();
     PackageInfo.setMockInitialValues(
-      appName: 'Enjoy Player',
+      appName: 'SP Player',
       packageName: 'com.enjoy.player.test',
       version: '1.0.0',
       buildNumber: '100',

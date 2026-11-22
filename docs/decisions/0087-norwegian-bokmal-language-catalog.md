@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-`#786` proposed adding Norwegian to Enjoy Player; `#787` recorded the code
+`#786` proposed adding Norwegian to SP Player; `#787` recorded the code
 audit and the concrete change list. The player ships three independent language
 catalogs in [`lib/core/application/app_language_catalog.dart`](../../lib/core/application/app_language_catalog.dart) —
 focus (learning), media (content), and lookup (source/target) — plus three

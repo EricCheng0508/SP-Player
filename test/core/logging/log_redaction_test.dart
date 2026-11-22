@@ -26,7 +26,7 @@ void main() {
 
     test('shortens long Windows absolute paths', () {
       const path =
-          r'C:\Users\alice\AppData\Roaming\Enjoy\Enjoy Player\logs\enjoy-player.log';
+          r'C:\Users\alice\AppData\Roaming\Enjoy\SP Player\logs\enjoy-player.log';
       final out = redactLogLine('wrote to $path');
       expect(out, contains('.../enjoy-player.log'));
       expect(out, isNot(contains(r'C:\Users\alice')));

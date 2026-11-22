@@ -12,7 +12,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Enjoy Player</string>
+	<string>SP Player</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -20,7 +20,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>Enjoy Player</string>
+	<string>SP Player</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -71,14 +71,14 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Enjoy Player uses the microphone for shadow-reading practice recordings.</string>
+	<string>SP Player uses the microphone for shadow-reading practice recordings.</string>
 	<!-- Required by App Store Connect even when camera is only referenced via
 	     dependencies (e.g. file_picker); the app may offer capture when picking
 	     a profile photo or media on device. -->
 	<key>NSCameraUsageDescription</key>
-	<string>Enjoy Player may use the camera when you choose to take a photo for your profile avatar or to import media for learning.</string>
+	<string>SP Player may use the camera when you choose to take a photo for your profile avatar or to import media for learning.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Enjoy Player accesses your photo library when you choose an image for your profile avatar or import media for learning.</string>
+	<string>SP Player accesses your photo library when you choose an image for your profile avatar or import media for learning.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<!-- `app_links` (AuthDeepLinkListener) owns enjoyplayer:// callbacks.

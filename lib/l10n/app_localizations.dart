@@ -102,7 +102,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:
-  /// **'Enjoy Player'**
+  /// **'SP Player'**
   String get appTitle;
 
   /// No description provided for @libraryTitle.
@@ -1014,7 +1014,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsAboutSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Enjoy Player — local transcripts and shadow reading.'**
+  /// **'SP Player — local transcripts and shadow reading.'**
   String get settingsAboutSubtitle;
 
   /// No description provided for @settingsThemeRowTitle.
@@ -1746,7 +1746,7 @@ abstract class AppLocalizations {
   /// Screen subtitle for AI provider settings.
   ///
   /// In en, this message translates to:
-  /// **'Configure how Enjoy Player calls AI for each feature.'**
+  /// **'Configure how SP Player calls AI for each feature.'**
   String get settingsAiProvidersSubtitle;
 
   /// Privacy notice on the AI providers settings screen.
@@ -6096,7 +6096,7 @@ abstract class AppLocalizations {
   /// No description provided for @practicePosterQrHint.
   ///
   /// In en, this message translates to:
-  /// **'Scan to download Enjoy Player\nplayer.enjoy.bot'**
+  /// **'Scan to download SP Player\nplayer.enjoy.bot'**
   String get practicePosterQrHint;
 
   /// No description provided for @practicePosterShareAction.
@@ -6162,7 +6162,7 @@ abstract class AppLocalizations {
   /// No description provided for @recoverySubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Enjoy Player could not open its local database. The most common cause is a partial update. Your data is still on disk; you can copy the error before continuing.'**
+  /// **'SP Player could not open its local database. The most common cause is a partial update. Your data is still on disk; you can copy the error before continuing.'**
   String get recoverySubtitle;
 
   /// No description provided for @recoveryOpenLogs.

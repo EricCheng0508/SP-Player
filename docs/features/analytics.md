@@ -2,7 +2,7 @@
 
 ## Summary
 
-Enjoy Player ships opt-out-able product analytics via [PostHog](https://posthog.com) (spec [`specs/046-posthog-analytics-integration/`](../../specs/046-posthog-analytics-integration/spec.md), [ADR-0086](../decisions/0086-posthog-product-analytics.md)). Capture is **on by default** with a visible switch in Settings → About → *Usage analytics*. All vendor access is confined to `lib/core/analytics/`; feature code uses the `Analytics` facade only and never imports `package:posthog_flutter`.
+SP Player ships opt-out-able product analytics via [PostHog](https://posthog.com) (spec [`specs/046-posthog-analytics-integration/`](../../specs/046-posthog-analytics-integration/spec.md), [ADR-0086](../decisions/0086-posthog-product-analytics.md)). Capture is **on by default** with a visible switch in Settings → About → *Usage analytics*. All vendor access is confined to `lib/core/analytics/`; feature code uses the `Analytics` facade only and never imports `package:posthog_flutter`.
 
 ## Platform & build behavior
 

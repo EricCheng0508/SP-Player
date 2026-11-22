@@ -378,7 +378,7 @@ void main() {
   setUpAll(setUpGallery);
   setUp(() {
     PackageInfo.setMockInitialValues(
-      appName: 'Enjoy Player',
+      appName: 'SP Player',
       packageName: 'ai.enjoy.player',
       version: '0.9.0',
       buildNumber: '15',

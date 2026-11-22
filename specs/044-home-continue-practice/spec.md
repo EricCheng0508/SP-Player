@@ -149,7 +149,7 @@ A learner who has several recent items sees the Continue card for **the last thi
 
 ## Assumptions
 
-- Enjoy Player is a **practice** app, not a background-music or podcast app. Leaving the player means leaving playback.
+- SP Player is a **practice** app, not a background-music or podcast app. Leaving the player means leaving playback.
 - The prototype Home “Continue learning” hero is the visual intent for this card (prominent 16:9-style hero with progress and metadata). Product copy is **Continue practicing**.
 - Saved position and Echo mode already persist today when the learner uses the player; this feature **surfaces** that data on Home and **stops** live collapsed playback. It does not invent a second progress store.
 - Collapse / back from the player already returns to the previous tab; after this change that return simply has no mini bar.

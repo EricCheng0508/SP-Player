@@ -2,7 +2,7 @@
 ///
 /// ## Why this exists
 ///
-/// Enjoy Player's macOS build is sandboxed with only
+/// SP Player's macOS build is sandboxed with only
 /// `com.apple.security.files.user-selected.read-write`. `NSOpenPanel` grants
 /// a *temporary* security-scoped URL: it covers the picked file for the
 /// current process only and is gone by the next launch. Without help,

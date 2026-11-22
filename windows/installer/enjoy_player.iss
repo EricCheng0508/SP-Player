@@ -1,14 +1,14 @@
 ; Inno Setup 6 — compile after a release build:
 ;   flutter build windows --release
-;   iscc enjoy_player.iss
+;   iscc sp_player.iss
 ;
 ; Install Inno Setup from https://jrsoftware.org/isinfo.php
 ; Sync #define MyAppVersion from pubspec.yaml before release:
 ;   pwsh .github/scripts/sync_windows_installer_version.ps1
 
-#define MyAppName "Enjoy Player"
+#define MyAppName "SP Player"
 #define MyAppPublisher "Enjoy"
-#define MyAppExeName "enjoy_player.exe"
+#define MyAppExeName "sp_player.exe"
 #define MyAppVersion "0.10.3"
 
 [Setup]
@@ -43,7 +43,7 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
 [Registry]
-Root: HKCR; Subkey: "enjoyplayer"; ValueType: string; ValueName: ""; ValueData: "URL:Enjoy Player Auth"; Flags: uninsdeletekey
+Root: HKCR; Subkey: "enjoyplayer"; ValueType: string; ValueName: ""; ValueData: "URL:SP Player Auth"; Flags: uninsdeletekey
 Root: HKCR; Subkey: "enjoyplayer"; ValueType: string; ValueName: "URL Protocol"; ValueData: ""; Flags: uninsdeletekey
 Root: HKCR; Subkey: "enjoyplayer\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\{#MyAppExeName},0"
 Root: HKCR; Subkey: "enjoyplayer\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""

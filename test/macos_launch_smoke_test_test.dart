@@ -16,20 +16,20 @@ class _FakeApp {
   static _FakeApp create() {
     final root = Directory.systemTemp.createTempSync('macos_launch_smoke_');
     final fake = _FakeApp(root);
-    fake.app = Directory('${root.path}/Enjoy Player.app')
+    fake.app = Directory('${root.path}/SP Player.app')
       ..createSync(recursive: true);
     Directory('${fake.app.path}/Contents/MacOS').createSync(recursive: true);
     return fake;
   }
 
   void writeExecutable(String body) {
-    final file = File('${app.path}/Contents/MacOS/Enjoy Player');
+    final file = File('${app.path}/Contents/MacOS/SP Player');
     file.writeAsStringSync(body);
     Process.runSync('chmod', ['+x', file.path]);
   }
 
   void writeBinaryExecutable(List<int> bytes) {
-    final file = File('${app.path}/Contents/MacOS/Enjoy Player');
+    final file = File('${app.path}/Contents/MacOS/SP Player');
     file.writeAsBytesSync(bytes);
     Process.runSync('chmod', ['+x', file.path]);
   }

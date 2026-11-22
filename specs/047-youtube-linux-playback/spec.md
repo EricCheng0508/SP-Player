@@ -10,7 +10,7 @@
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - A Linux user can watch a YouTube video inside Enjoy Player (Priority: P1)
+### User Story 1 - A Linux user can watch a YouTube video inside SP Player (Priority: P1)
 
 A Linux user pastes a YouTube URL, taps a video from the Discover feed, or opens a previously saved YouTube item from the library. The video renders inside the player, starts playing, and the standard transport controls (play/pause, seek, playback speed, volume) work exactly as they do on Windows and macOS today. If the user has a transcript open for that video, the transcript highlights and tracks along with the audio.
 

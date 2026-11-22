@@ -6,7 +6,7 @@
 
 ## Summary
 
-Bring Enjoy Web billing parity into Enjoy Player: **monthly/yearly Stripe auto-renew** (catalog, start checkout, cancel-at-period-end, rich status) and **one-time credits packages** ($2 / $5 / $50 → permanent credits), while keeping existing prepaid Pro months. Purchase initiation stays **external checkout** on Windows, macOS, and **Linux** (see research); iOS/Android keep status + cancel + “coming soon” for purchase. Client calls existing Rails `/api/v1/subscriptions*` and `/api/v1/credits/packages*` plus Worker `GET /credits/summary` for permanent-balance refresh after package purchase. Extend `lib/features/subscription` and `lib/features/credits` (no new top-level feature module).
+Bring Enjoy Web billing parity into SP Player: **monthly/yearly Stripe auto-renew** (catalog, start checkout, cancel-at-period-end, rich status) and **one-time credits packages** ($2 / $5 / $50 → permanent credits), while keeping existing prepaid Pro months. Purchase initiation stays **external checkout** on Windows, macOS, and **Linux** (see research); iOS/Android keep status + cancel + “coming soon” for purchase. Client calls existing Rails `/api/v1/subscriptions*` and `/api/v1/credits/packages*` plus Worker `GET /credits/summary` for permanent-balance refresh after package purchase. Extend `lib/features/subscription` and `lib/features/credits` (no new top-level feature module).
 
 ## Technical Context
 

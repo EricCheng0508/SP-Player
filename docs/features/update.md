@@ -2,7 +2,7 @@
 
 ## Summary
 
-Enjoy Player distributes **direct** updates (not via a store) on **Windows**, **macOS**, and **Android sideload** (`direct` flavor). Store-channel builds (Play / TestFlight) use a **NoOp** strategy — the store owns updates. The flow fetches a remote **version manifest**, compares against the running version, and either **silently logs up-to-date**, shows an **optional** prompt, or blocks on a **mandatory** update. Snooze is honored until a per-release deadline.
+SP Player distributes **direct** updates (not via a store) on **Windows**, **macOS**, and **Android sideload** (`direct` flavor). Store-channel builds (Play / TestFlight) use a **NoOp** strategy — the store owns updates. The flow fetches a remote **version manifest**, compares against the running version, and either **silently logs up-to-date**, shows an **optional** prompt, or blocks on a **mandatory** update. Snooze is honored until a per-release deadline.
 
 ## Channel split
 

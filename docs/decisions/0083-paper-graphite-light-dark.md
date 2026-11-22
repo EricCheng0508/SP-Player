@@ -7,7 +7,7 @@
 
 ## Context
 
-ADR-0011 locked the product to a single zinc OLED dark theme (`#09090B`) with no Settings appearance control. The Enjoy Player prototype specifies a warmer **paper** light surface and **graphite** dark ink, fill-versus-ink accents, and a System / Light / Dark appearance preference defaulting to follow the OS.
+ADR-0011 locked the product to a single zinc OLED dark theme (`#09090B`) with no Settings appearance control. The SP Player prototype specifies a warmer **paper** light surface and **graphite** dark ink, fill-versus-ink accents, and a System / Light / Dark appearance preference defaulting to follow the OS.
 
 Maintaining one dark-only identity reduced contrast bugs historically, but it blocked the prototype visual language and users who need a light reading surface for transcripts.
 

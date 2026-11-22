@@ -35,7 +35,7 @@ while [ $# -gt 0 ]; do
 done
 
 if [ -z "${APP_BUNDLE}" ] || [ ! -d "${APP_BUNDLE}" ]; then
-  echo "usage: $0 <path/to/Enjoy Player.app> [--sign-only|--skip-sign]" >&2
+  echo "usage: $0 <path/to/SP Player.app> [--sign-only|--skip-sign]" >&2
   exit 1
 fi
 

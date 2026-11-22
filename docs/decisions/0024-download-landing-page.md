@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-Enjoy Player ships on four platforms (Windows, macOS, Android, iOS), with binaries distributed through `dl.enjoy.bot` (direct) and through TestFlight / Play test track (store). There is no human-facing page that helps a new user identify the right download for their OS. Links are scattered across release notes and the README.
+SP Player ships on four platforms (Windows, macOS, Android, iOS), with binaries distributed through `dl.enjoy.bot` (direct) and through TestFlight / Play test track (store). There is no human-facing page that helps a new user identify the right download for their OS. Links are scattered across release notes and the README.
 
 The app explicitly forbids Flutter web (ADR-0005), so the landing page must be a separate static site, not a Flutter web build.
 

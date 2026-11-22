@@ -6,7 +6,7 @@ Validation guide after `/speckit-tasks` / implementation. Contracts and data-mod
 
 ## Prerequisites
 
-- Signed-in Enjoy Player build with a local or library media item that has a transcript.
+- Signed-in SP Player build with a local or library media item that has a transcript.
 - Access to Enjoy web fixtures (optional) under `~/dev/enjoy/apps/web` for parity comparison.
 - Dev tree: `bash .github/scripts/validate_ci_gates.sh` baseline green before starting.
 

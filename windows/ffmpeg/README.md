@@ -1,8 +1,8 @@
 # Windows FFmpeg (embedded subtitles)
 
-Enjoy Player uses **FFmpeg** on Windows to demux embedded subtitle streams into SRT text (same role as `ffmpeg_kit_flutter_new` on other platforms). The app looks for:
+SP Player uses **FFmpeg** on Windows to demux embedded subtitle streams into SRT text (same role as `ffmpeg_kit_flutter_new` on other platforms). The app looks for:
 
-1. **`ffmpeg.exe` next to `enjoy_player.exe`** (recommended for releases), or  
+1. **`ffmpeg.exe` next to `sp_player.exe`** (recommended for releases), or  
 2. **`ffmpeg` on `PATH`** (e.g. after installing FFmpeg system-wide).
 
 ## Bundled binary (recommended)

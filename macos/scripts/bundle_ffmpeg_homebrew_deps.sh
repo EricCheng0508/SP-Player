@@ -9,7 +9,7 @@ set -eu
 
 APP_BUNDLE="${1:-}"
 if [ -z "${APP_BUNDLE}" ] || [ ! -d "${APP_BUNDLE}" ]; then
-  echo "usage: $0 <path/to/Enjoy Player.app>" >&2
+  echo "usage: $0 <path/to/SP Player.app>" >&2
   exit 1
 fi
 
@@ -65,7 +65,7 @@ resolve_sign_identity() {
 # Every LC_LOAD_DYLIB of $1, across all slices of a fat binary, as otool -L
 # prints them: one "<path>:" header per slice, the load commands indented with
 # their "(compatibility version ...)" suffix. Install names may contain spaces
-# (an app called "Enjoy Player" links @rpath/Enjoy Player.debug.dylib), so the
+# (an app called "SP Player" links @rpath/SP Player.debug.dylib), so the
 # name is everything before the suffix, not the first whitespace field.
 otool_deps() {
   otool -L "$1" 2>/dev/null | awk '

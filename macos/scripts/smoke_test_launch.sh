@@ -8,12 +8,12 @@
 # any other exit is reported and passed, because a runner without a window
 # server makes the app quit for unrelated reasons.
 #
-# Usage: smoke_test_launch.sh <path/to/Enjoy Player.app>
+# Usage: smoke_test_launch.sh <path/to/SP Player.app>
 set -eu
 
 APP_BUNDLE="${1:-}"
 if [ -z "${APP_BUNDLE}" ] || [ ! -d "${APP_BUNDLE}" ]; then
-  echo "usage: $0 <path/to/Enjoy Player.app>" >&2
+  echo "usage: $0 <path/to/SP Player.app>" >&2
   exit 1
 fi
 

@@ -22,7 +22,7 @@ Templates requiring updates:
 Follow-up TODOs:
 - None
 -->
-# Enjoy Player Constitution
+# SP Player Constitution
 
 ## Core Principles
 
@@ -47,7 +47,7 @@ input, localization, or platform chrome require widget or integration coverage
 when the behavior cannot be proven with unit tests alone. Generated code changes
 MUST run `dart run build_runner build` before analysis and tests.
 
-Rationale: Enjoy Player is local-first and cross-platform; regressions in media,
+Rationale: SP Player is local-first and cross-platform; regressions in media,
 transcripts, sync, or practice flows are expensive for users to diagnose after
 release.
 

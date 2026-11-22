@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-ADR-0014 left Enjoy-backed pronunciation assessment as `UnimplementedError` in Flutter because Azure ships no Dart/Flutter SDK. The web stack uses the JavaScript Speech SDK with short-lived tokens from the Enjoy worker (`POST /azure/tokens`). Enjoy Player targets Android, iOS, macOS, and Windows and needs the same assessment semantics for future shadow-reading UX.
+ADR-0014 left Enjoy-backed pronunciation assessment as `UnimplementedError` in Flutter because Azure ships no Dart/Flutter SDK. The web stack uses the JavaScript Speech SDK with short-lived tokens from the Enjoy worker (`POST /azure/tokens`). SP Player targets Android, iOS, macOS, and Windows and needs the same assessment semantics for future shadow-reading UX.
 
 ## Decision
 

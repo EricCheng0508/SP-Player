@@ -13,7 +13,7 @@ Same-origin proxy at `https://player.enjoy.bot/player/latest.json` is the URL th
 ```json
 {
   "$schema": "https://json-schema.org/draft-07/schema",
-  "title": "Enjoy Player release manifest",
+  "title": "SP Player release manifest",
   "type": "object",
   "required": ["version", "assets"],
   "additionalProperties": false,

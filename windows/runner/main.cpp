@@ -6,7 +6,7 @@
 #include "flutter_window.h"
 #include "utils.h"
 
-// Windows always relaunches enjoy_player.exe when the `enjoyplayer://`
+// Windows always relaunches sp_player.exe when the `enjoyplayer://`
 // protocol handler (registered by the installer) is invoked, e.g. when the
 // OAuth PKCE sign-in flow redirects back from the system browser. Without
 // this forwarding step, the freshly-launched process has none of the
@@ -46,7 +46,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
                       _In_ wchar_t *command_line, _In_ int show_command) {
   // If another instance is already running, forward this launch's deep link
   // (if any) to it and exit rather than opening a second window.
-  if (SendAppLinkToInstance(L"Enjoy Player")) {
+  if (SendAppLinkToInstance(L"SP Player")) {
     return EXIT_SUCCESS;
   }
 
@@ -70,7 +70,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   FlutterWindow window(project);
   Win32Window::Point origin(10, 10);
   Win32Window::Size size(1280, 720);
-  if (!window.Create(L"Enjoy Player", origin, size)) {
+  if (!window.Create(L"SP Player", origin, size)) {
     return EXIT_FAILURE;
   }
   window.SetQuitOnClose(true);

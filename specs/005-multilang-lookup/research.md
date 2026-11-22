@@ -23,7 +23,7 @@ All Technical Context unknowns from [plan.md](./plan.md) are resolved below befo
   - `it-IT`
   - `pt-BR`, `pt-PT`
   - `ru-RU`
-- **Rationale**: Covers the top languages requested by Enjoy Player users as of 2026-07-08, matches the Azure pronunciation-assessment locale table where it overlaps (so future TTS / pronunciation work reuses the same set without re-mapping), and stays small enough that the in-sheet picker doesn't need a search box. Aligns with the spec's FR-001 / FR-002 / Assumptions.
+- **Rationale**: Covers the top languages requested by SP Player users as of 2026-07-08, matches the Azure pronunciation-assessment locale table where it overlaps (so future TTS / pronunciation work reuses the same set without re-mapping), and stays small enough that the in-sheet picker doesn't need a search box. Aligns with the spec's FR-001 / FR-002 / Assumptions.
 - **Alternatives considered**:
   - *Match Azure Speech full locale table (24+ tags)* — rejected for v1; the user-reported need is "any target language", not "every pronunciation locale". Bundling pronunciation / TTS surface area into this change would expand the spec beyond FR-001 / FR-002.
   - *Match every ISO 639-1 primary subtag* — rejected; the picker would become unusable (≈ 180 entries) and most would not be supported by the worker.

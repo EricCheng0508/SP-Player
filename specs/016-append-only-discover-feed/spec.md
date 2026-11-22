@@ -76,7 +76,7 @@ The refresh contract remains unchanged from the outside: per-channel RSS fetches
 
 ### Quality, UX, and Performance Requirements
 
-- **QR-001**: Implementation MUST preserve Enjoy Player's feature-first architecture under `lib/features/discover/` and not introduce cross-feature shortcuts.
+- **QR-001**: Implementation MUST preserve SP Player's feature-first architecture under `lib/features/discover/` and not introduce cross-feature shortcuts.
 - **QR-002**: Changed behavior MUST have automated tests covering: (a) cache grows when new entries arrive, (b) cache is preserved when RSS omits existing entries, (c) refresh is idempotent on identical RSS responses, (d) unsubscribe clears the channel's entries, (e) failed refresh leaves the cache untouched.
 - **QR-003**: User-facing strings (refresh notice, empty state, channel feed) MUST follow existing localization patterns and reuse the existing ARB strings; new strings are not required for this refactor.
 - **QR-004**: The merged timeline MUST remain responsive (no jank on scroll, no full-list rebuild) with up to 500 cached entries per channel, leveraging the existing `ValueKey` + `findChildIndexCallback` sliver performance pattern documented in `docs/features/discover.md`.

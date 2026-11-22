@@ -6,7 +6,7 @@
 
 **Status**: Draft
 
-**Input**: User description: "Let's bring BYOK feature. User could use Enjoy AI API as default, but they could provide their own keys to use their own subscription too. For the pronunciation assessment, we need user to bring the azure subscription key. Just ref the Enjoy project — we mostly port from it. But Enjoy Player does not support native AI for now. Just BYOK or Enjoy AI."
+**Input**: User description: "Let's bring BYOK feature. User could use Enjoy AI API as default, but they could provide their own keys to use their own subscription too. For the pronunciation assessment, we need user to bring the azure subscription key. Just ref the Enjoy project — we mostly port from it. But SP Player does not support native AI for now. Just BYOK or Enjoy AI."
 
 ## Scope
 
@@ -22,7 +22,7 @@
 
 ### Out of scope
 
-- **Local / on-device AI** (`AIProvider.local`) — not supported in Enjoy Player; settings MUST NOT expose a local provider option.
+- **Local / on-device AI** (`AIProvider.local`) — not supported in SP Player; settings MUST NOT expose a local provider option.
 - Cloud sync of BYOK keys across devices (keys stay on the device where configured unless a future ADR adds encrypted sync).
 - Changes to Enjoy worker pricing, credits, or Pro subscription logic (see `002-pro-upgrade`).
 - New AI modalities beyond those already defined in the player AI layer.
@@ -196,7 +196,7 @@ A learner updates an expired API key, edits vendor or model, or removes BYOK ent
 
 ### Quality, UX, and Performance Requirements
 
-- **QR-001**: Implementation MUST preserve Enjoy Player's feature-first architecture and avoid feature-to-feature shortcuts unless the plan documents an exception.
+- **QR-001**: Implementation MUST preserve SP Player's feature-first architecture and avoid feature-to-feature shortcuts unless the plan documents an exception.
 - **QR-002**: Changed behavior MUST have automated tests or a documented manual verification reason.
 - **QR-003**: User-facing strings, controls, haptics, tooltips, and keyboard affordances MUST follow existing localization and shared UI patterns (`EnjoyTappableSurface`, tooltips on icon actions, ARB strings).
 - **QR-004**: Provider resolution and settings reads MUST not add perceptible delay to AI feature launches; target under 100 ms for reading cached modality config on cold feature open.
@@ -226,7 +226,7 @@ A learner updates an expired API key, edits vendor or model, or removes BYOK ent
 ## Assumptions
 
 - BYOK vendor allow-lists follow Enjoy **`packages/ai` capability routing** (source of truth). ASR includes **Azure** per `createBYOKAzureASRProvider` even though Enjoy web settings validation currently lists OpenAI only — player settings MUST expose both vendors.
-- Enjoy Player calls third-party vendor APIs directly from the native app where feasible; the Enjoy worker BYOK proxy exists primarily for browser CORS and is not required for Flutter native clients.
+- SP Player calls third-party vendor APIs directly from the native app where feasible; the Enjoy worker BYOK proxy exists primarily for browser CORS and is not required for Flutter native clients.
 - LLM BYOK backend uses **`ai_sdk_dart`** (see [research.md](research.md)); **UI uses API-spec forms**, not Enjoy web's vendor-only dropdown alone.
 - **LLM settings UI** uses **protocol spec types** (OpenAI-compatible, Anthropic-compatible, Google-compatible). **All specs share the same customizable fields** (base URL, API key, model). Presets are optional shortcuts, not a separate “Custom” type.
 - OpenAI-compatible covers DeepSeek, Groq, Azure OpenAI, etc.; Anthropic-compatible and Google-compatible also support non-vendor-default base URLs (proxies, regional hosts).

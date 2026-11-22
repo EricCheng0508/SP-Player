@@ -8,7 +8,7 @@ description: "Task list for feature 045-ai-credits-error-ux"
 
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/worker-402-envelope.md, contracts/client-presentation-api.md, quickstart.md — all present.
 
-**Tests**: Included throughout. The tasks template marks tests optional, but Enjoy Player's constitution (Principle II: "Testing Defines the Contract") requires the narrowest automated tests for every behavior change; the plan's Constitution Check commits to them. Each surface task bundles its test update so tasks stay atomic.
+**Tests**: Included throughout. The tasks template marks tests optional, but SP Player's constitution (Principle II: "Testing Defines the Contract") requires the narrowest automated tests for every behavior change; the plan's Constitution Check commits to them. Each surface task bundles its test update so tasks stay atomic.
 
 **Organization**: Grouped by user story (US1 P1 message everywhere → US2 P2 recovery CTA → US3 P3 resume after purchase), preceded by shared infrastructure.
 

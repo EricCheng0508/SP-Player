@@ -10,9 +10,9 @@
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Linux desktop user can install and run Enjoy Player (Priority: P1)
+### User Story 1 - Linux desktop user can install and run SP Player (Priority: P1)
 
-A Linux user (Ubuntu, Fedora, Debian, Arch, or other mainstream distribution) can download Enjoy Player as an AppImage or a `.deb` / `.rpm` / `.tar.gz` archive from the public landing page, make the file executable when required, and launch the app from their desktop environment or the command line. The app starts, the window opens, the library loads, and the user can play local audio/video files the same way a Windows or macOS user does today.
+A Linux user (Ubuntu, Fedora, Debian, Arch, or other mainstream distribution) can download SP Player as an AppImage or a `.deb` / `.rpm` / `.tar.gz` archive from the public landing page, make the file executable when required, and launch the app from their desktop environment or the command line. The app starts, the window opens, the library loads, and the user can play local audio/video files the same way a Windows or macOS user does today.
 
 **Why this priority**: Without a real install path and a successful cold-start on Linux, none of the other Linux work is visible to users. This is the only user-visible proof that Linux is a first-class platform; it is the headline deliverable of the whole change.
 
@@ -120,7 +120,7 @@ Every shared piece of code that today branches on `Platform.isWindows`, `Platfor
 
 ### Quality, UX, and Performance Requirements
 
-- **QR-001**: Implementation MUST preserve Enjoy Player's feature-first architecture and avoid feature-to-feature shortcuts unless the plan documents an exception. The Linux scaffolding lives under the existing `lib/features/` and `lib/core/` layout — no new top-level folders are introduced.
+- **QR-001**: Implementation MUST preserve SP Player's feature-first architecture and avoid feature-to-feature shortcuts unless the plan documents an exception. The Linux scaffolding lives under the existing `lib/features/` and `lib/core/` layout — no new top-level folders are introduced.
 - **QR-002**: Changed behavior MUST have automated tests or a documented manual verification reason. The new `linux/` folder, the new workflow, and every platform-conditional adjustment MUST be covered either by an automated test or by a clearly written manual verification step in the new docs page.
 - **QR-003**: User-facing strings, controls, haptics, tooltips, and keyboard affordances MUST follow existing localization and shared UI patterns. The new Linux download card and Linux-specific UI strings MUST be added to both `landing/index.html` (via `data-i18n`) and `landing/i18n.js` (under both `en` and `zh`).
 - **QR-004**: User-visible flows MUST define measurable performance expectations for playback, startup, scrolling, transcript rendering, sync, import, or other affected paths. The Linux cold-start budget (time-to-window on the documented test VM) MUST be measured and recorded in the new docs page.

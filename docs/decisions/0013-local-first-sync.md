@@ -19,7 +19,7 @@ The web app uses deterministic IDs for local uploads (`hashBlob` + `sha256(conte
 
 ## Consequences
 
-- ADR-0010 remains the historical record for "metadata sync exists"; this ADR **supersedes** its automatic **download-all-on-sign-in** behavior for Enjoy Player.
+- ADR-0010 remains the historical record for "metadata sync exists"; this ADR **supersedes** its automatic **download-all-on-sign-in** behavior for SP Player.
 - [ADR-0056](0056-uservideo-library-membership.md) partially supersedes Decision #4: new video uploads are content-addressed (no `userId` salt); audio ids remain user-scoped.
 - Users who relied on the old "everything appears in Library after sign-in" flow must use **Cloud → Add to library** (or re-import local files).
 - Fewer large SQLite merges on sign-in; recording API traffic moves to **on-demand** per played title.

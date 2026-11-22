@@ -6,7 +6,7 @@
 
 ## Summary
 
-Port Enjoy web subscription management into Enjoy Player as a new `subscription` feature module. All platforms get a `/subscription` screen (status card, Free vs Pro comparison, profile/sidebar entry points, credits-limit upgrade CTAs). **Purchase is desktop-only (Windows + macOS)**: Stripe/Mixin external checkout via `url_launcher` and balance conversion, mirroring the web `PurchaseModal`. **iOS and Android show informational “mobile purchase coming soon”** instead of external checkout (App Store policy; StoreKit deferred to follow-up spec `003-*`).
+Port Enjoy web subscription management into SP Player as a new `subscription` feature module. All platforms get a `/subscription` screen (status card, Free vs Pro comparison, profile/sidebar entry points, credits-limit upgrade CTAs). **Purchase is desktop-only (Windows + macOS)**: Stripe/Mixin external checkout via `url_launcher` and balance conversion, mirroring the web `PurchaseModal`. **iOS and Android show informational “mobile purchase coming soon”** instead of external checkout (App Store policy; StoreKit deferred to follow-up spec `003-*`).
 
 Reuse existing `ApiClient` + Rails API base URL, `UserProfile.subscriptionTier` for profile chip parity, and `CreditsFailure` (HTTP 402) for upgrade discovery.
 

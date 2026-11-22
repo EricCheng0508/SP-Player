@@ -4,7 +4,7 @@
 Accepted
 
 ## Context
-The collapsed `GlobalTransportBar` (mini player) let playback continue while browsing Home, Discover, and Library. That is a music-app pattern. Enjoy Player’s value is transcript practice on the player route. The mini bar could not host Echo, lookup, or assessment; it stacked with the floating tab bar; and it forced dual-mode packing (ADR-0035 expand recovery).
+The collapsed `GlobalTransportBar` (mini player) let playback continue while browsing Home, Discover, and Library. That is a music-app pattern. SP Player’s value is transcript practice on the player route. The mini bar could not host Echo, lookup, or assessment; it stacked with the floating tab bar; and it forced dual-mode packing (ADR-0035 expand recovery).
 
 Home also lacked a first-class resume surface. Recents are “recently updated library rows,” not last practiced.
 

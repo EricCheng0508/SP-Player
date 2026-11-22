@@ -8,7 +8,7 @@ Superseded by ADR-0051
 
 YouTube import today requires a pasted URL ([ADR-0015](0015-youtube-playback.md)). Users without a specific target must browse YouTube externally. Language learners often want curated, captioned-friendly channels (TED, BBC Learning English, etc.) and a timeline of recent uploads to add to their practice library.
 
-YouTube exposes public Atom RSS feeds per channel (`/feeds/videos.xml?channel_id=…`) without OAuth or Data API keys. Enjoy Player is local-first (Drift) and already imports YouTube rows via oEmbed + `videos` table.
+YouTube exposes public Atom RSS feeds per channel (`/feeds/videos.xml?channel_id=…`) without OAuth or Data API keys. SP Player is local-first (Drift) and already imports YouTube rows via oEmbed + `videos` table.
 
 ## Decision
 
@@ -22,7 +22,7 @@ YouTube exposes public Atom RSS feeds per channel (`/feeds/videos.xml?channel_id
 
 ## Consequences
 
-- Cold-start users can browse in-app content without leaving Enjoy Player.
+- Cold-start users can browse in-app content without leaving SP Player.
 - RSS returns ~15 recent videos per channel; no duration or caption metadata in feed — duration filled on import/play as today.
 - Channel handle resolution depends on YouTube HTML patterns; may break if YouTube changes markup — recommended catalog uses hard-coded `channel_id` values as fallback.
 - Schema version bump adds tables; v6→v7 uses incremental migration (adds Discover tables only). Older upgrades still follow destructive `onUpgrade` until incremental migrations land.

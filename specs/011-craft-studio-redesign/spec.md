@@ -184,7 +184,7 @@ Translation failures, synthesis failures, and save failures each surface a calm,
 
 ### Quality, UX, and Performance Requirements
 
-- **QR-001**: Implementation MUST preserve Enjoy Player's feature-first architecture; the Craft screen lives in `lib/features/craft/presentation/` and routes through Riverpod providers.
+- **QR-001**: Implementation MUST preserve SP Player's feature-first architecture; the Craft screen lives in `lib/features/craft/presentation/` and routes through Riverpod providers.
 - **QR-002**: Every behavior change MUST ship with automated tests or a documented manual-verification reason.
 - **QR-003**: User-facing controls MUST reuse shared primitives (`EnjoyButton`, `EnjoyTappableSurface`, `showContentLanguagePicker`, existing `MediaCardTile` badge slot) and follow localization / haptics / tooltip conventions.
 - **QR-004**: The Craft screen MUST remain responsive while translation or synthesis runs. UI work MUST stay off the main isolate for heavy operations (file write, audio decode for duration).

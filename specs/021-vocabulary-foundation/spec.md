@@ -115,7 +115,7 @@ Vocabulary items use stable, deterministic identity from normalized word + langu
 
 ### Quality, UX, and Performance Requirements
 
-- **QR-001**: Implementation MUST preserve Enjoy Player's feature-first architecture and avoid feature-to-feature shortcuts unless the plan documents an exception.
+- **QR-001**: Implementation MUST preserve SP Player's feature-first architecture and avoid feature-to-feature shortcuts unless the plan documents an exception.
 - **QR-002**: Changed behavior MUST have automated tests or a documented manual verification reason — especially SRS branches, normalize/ids, add-with-context, duplicate no-op, cascade delete, due predicate, and undo.
 - **QR-003**: User-facing strings for the add/remove control states MUST follow existing localization and shared UI patterns on the lookup sheet.
 - **QR-004**: Add / existence-check / delete from lookup MUST remain responsive during playback (no multi-second UI freeze for a single add on a typical personal library).

@@ -116,7 +116,7 @@ A learner deletes a library item or views cloud-synced metadata for local media.
 
 ### Quality, UX, and Performance Requirements
 
-- **QR-001**: Implementation MUST preserve Enjoy Player's feature-first architecture and avoid feature-to-feature shortcuts unless the plan documents an exception.
+- **QR-001**: Implementation MUST preserve SP Player's feature-first architecture and avoid feature-to-feature shortcuts unless the plan documents an exception.
 - **QR-002**: Changed behavior MUST have automated tests or a documented manual verification reason.
 - **QR-003**: User-facing strings, controls, haptics, tooltips, and keyboard affordances MUST follow existing localization and shared UI patterns.
 - **QR-004**: Import of a multi‑GB local file on desktop MUST keep the UI responsive (no multi-second freeze of the main window) while hashing / linking; locate + fingerprint validation for a multi‑GB file MUST likewise keep the UI responsive.

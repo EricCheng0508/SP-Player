@@ -65,7 +65,7 @@ As a user, the Profile screen presents my identity, practice stats, language pre
 
 As a user switching between mobile and desktop layouts (e.g., resizing a window, rotating a tablet), the Profile tab and Settings access work consistently across all form factors without losing state or requiring redundant steps.
 
-**Why this priority**: Enjoy Player is a cross-platform app (mobile + desktop). The Profile/Settings redesign must work across all supported form factors.
+**Why this priority**: SP Player is a cross-platform app (mobile + desktop). The Profile/Settings redesign must work across all supported form factors.
 
 **Independent Test**: On a desktop device, resize the window from wide to narrow and back. Verify the Profile tab remains accessible and the Settings entry adapts appropriately at each breakpoint.
 
@@ -106,7 +106,7 @@ As a user switching between mobile and desktop layouts (e.g., resizing a window,
 
 ### Quality, UX, and Performance Requirements
 
-- **QR-001**: Implementation MUST preserve Enjoy Player's feature-first architecture and avoid feature-to-feature shortcuts unless the plan documents an exception.
+- **QR-001**: Implementation MUST preserve SP Player's feature-first architecture and avoid feature-to-feature shortcuts unless the plan documents an exception.
 - **QR-002**: Changed behavior MUST have automated tests (widget tests for Profile screen layout, navigation, signed-out state; unit tests for any refactored logic) or a documented manual verification reason.
 - **QR-003**: User-facing strings, controls, haptics, tooltips, and keyboard affordances MUST follow existing localization (ARB files updated with any new keys) and established shared UI interaction primitives from the design system.
 - **QR-004**: The Profile screen MUST scroll at 60fps on target devices, including on desktop with the full content visible.

@@ -177,7 +177,7 @@ As a learner on a phone, I can flip, read context, switch contexts, open the pra
 
 ### Quality, UX, and Performance Requirements
 
-- **QR-001**: Implementation MUST preserve Enjoy Player's feature-first architecture and avoid feature-to-feature shortcuts unless the plan documents an exception.
+- **QR-001**: Implementation MUST preserve SP Player's feature-first architecture and avoid feature-to-feature shortcuts unless the plan documents an exception.
 - **QR-002**: Changed behavior MUST have automated tests or a documented manual verification reason — especially compact Vocabulary home layout, practice-sheet clip play for YouTube and local, practice-sheet echo recorder exclusivity, open-in-player full-screen destination + timestamp, and multi-context switching.
 - **QR-003**: User-facing strings, controls, tooltips, and confirmations MUST follow existing localization and shared UI patterns; the practice sheet MUST reuse the app’s adaptive sheet pattern (not a one-off popup); session-ending Open in player MUST remain clearly labeled.
 - **QR-004**: Opening Vocabulary, switching contexts, opening/dismissing the practice sheet, and swapping clip/echo modes MUST stay responsive on ordinary devices (no multi-second UI freeze for typical context counts and clip lengths). Practice-sheet media chrome MUST NOT create a second independent media player engine outside the product’s single-player ownership rules.

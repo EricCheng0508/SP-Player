@@ -42,7 +42,7 @@ String schemeHandlerExecValue({
 String buildSchemeHandlerDesktopEntry({required String exec}) =>
     '[Desktop Entry]\n'
     'Type=Application\n'
-    'Name=Enjoy Player\n'
+    'Name=SP Player\n'
     'Exec=$exec\n'
     'Terminal=false\n'
     'MimeType=x-scheme-handler/$_scheme;\n'

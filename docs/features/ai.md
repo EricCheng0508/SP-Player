@@ -1,6 +1,6 @@
 # AI capabilities (Enjoy worker + BYOK)
 
-Enjoy Player calls the Enjoy / worker HTTP surface for cloud-backed AI, and supports **Bring Your Own Key (BYOK)** per modality so learners can use their own LLM and speech credentials. See [ADR-0033](../decisions/0033-byok-ai-provider-settings.md).
+SP Player calls the Enjoy / worker HTTP surface for cloud-backed AI, and supports **Bring Your Own Key (BYOK)** per modality so learners can use their own LLM and speech credentials. See [ADR-0033](../decisions/0033-byok-ai-provider-settings.md).
 
 ## Implemented (Enjoy provider)
 

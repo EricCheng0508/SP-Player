@@ -66,7 +66,7 @@ The amendment is part of the same PR as the rest of the change so reviewers see 
 
 ## Consequences
 
-- **Positive**: Linux users can install and run Enjoy Player from the public landing page with no more friction than Windows/macOS users.
+- **Positive**: Linux users can install and run SP Player from the public landing page with no more friction than Windows/macOS users.
 - **Positive**: Every PR that touches shared code is automatically verified on Linux by the new CI workflow, preventing silent Linux regressions on the other desktops.
 - **Positive**: The constitution, AGENTS.md, README.md, and landing page are now internally consistent (no more "experimental / may follow" vs. partial code support).
 - **Positive**: The new `LinuxPlatformAvailability` module centralizes Linux-specific decisions; a future ADR can flip a single constant to enable YouTube or auto-update on Linux without touching call sites.

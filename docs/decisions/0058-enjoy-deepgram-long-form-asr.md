@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-Enjoy Player already generates local-file transcripts through `AsrCapability`.
+SP Player already generates local-file transcripts through `AsrCapability`.
 Short clips on the Enjoy path use Worker Whisper (`multipart`). Longer media
 previously assumed Azure continuous recognition on the Enjoy path, which no
 longer matches the Worker. The Worker now exposes Deepgram long-form jobs

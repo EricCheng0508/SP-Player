@@ -94,7 +94,7 @@ The app orchestrates multiple transcript sources in a priority chain: locally st
 
 ### Quality, UX, and Performance Requirements
 
-- **QR-001**: Implementation MUST preserve Enjoy Player's feature-first architecture under `lib/features/transcript/` and not introduce cross-feature shortcuts.
+- **QR-001**: Implementation MUST preserve SP Player's feature-first architecture under `lib/features/transcript/` and not introduce cross-feature shortcuts.
 - **QR-002**: Changed behavior MUST have automated tests covering the direct fetch parser, client profile fallback logic, cache priority chain, and upload flow.
 - **QR-003**: User-facing strings for transcript status (loading, unavailable, retry) MUST follow existing localization patterns and use ARB files.
 - **QR-004**: Direct transcript fetch MUST complete within 5 seconds for the common case (video with readily available captions, good network).

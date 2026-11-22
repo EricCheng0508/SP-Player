@@ -8,7 +8,7 @@ Accepted
 
 ADR-0052 shipped a local-first vocabulary book (`vocabulary_items`, `vocabulary_contexts`, `vocabulary_reviews`) with sync bookkeeping columns already present but explicitly deferred `SyncEntityType` wiring pending a dedicated conflict policy. Plain last-write-wins on `updatedAt` — the policy ADR-0010 uses for audio/video/recording — is unsafe for a spaced-repetition word: a metadata-only edit on device A (e.g. re-fetching a dictionary explanation) could otherwise clobber newer review progress made on device B. Enjoy web solves this with a dedicated `resolveVocabularyItemConflict` merge; this ADR ports that behavior to Flutter and extends ADR-0010's metadata-sync scope to cover vocabulary.
 
-Separately, ADR-0013 stopped Enjoy Player from auto-mirroring the remote audio/video/recording catalog into the local Library on sign-in, because the Library reflects what is physically on the machine. A word book has no such "is this file on disk" concept — it is inherently a cross-device dataset — so applying ADR-0013's no-auto-mirror policy to vocabulary would regress multi-device continuity without a matching product benefit. This ADR calls out that vocabulary is an intentional, scoped exception.
+Separately, ADR-0013 stopped SP Player from auto-mirroring the remote audio/video/recording catalog into the local Library on sign-in, because the Library reflects what is physically on the machine. A word book has no such "is this file on disk" concept — it is inherently a cross-device dataset — so applying ADR-0013's no-auto-mirror policy to vocabulary would regress multi-device continuity without a matching product benefit. This ADR calls out that vocabulary is an intentional, scoped exception.
 
 ## Decision
 

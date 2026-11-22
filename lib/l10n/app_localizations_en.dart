@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'Enjoy Player';
+  String get appTitle => 'SP Player';
 
   @override
   String get libraryTitle => 'Library';
@@ -526,7 +526,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsAboutSubtitle =>
-      'Enjoy Player — local transcripts and shadow reading.';
+      'SP Player — local transcripts and shadow reading.';
 
   @override
   String get settingsThemeRowTitle => 'Theme';
@@ -932,7 +932,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsAiProvidersSubtitle =>
-      'Configure how Enjoy Player calls AI for each feature.';
+      'Configure how SP Player calls AI for each feature.';
 
   @override
   String get settingsAiProvidersPrivacyNotice =>
@@ -3307,7 +3307,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get practicePosterQrHint =>
-      'Scan to download Enjoy Player\nplayer.enjoy.bot';
+      'Scan to download SP Player\nplayer.enjoy.bot';
 
   @override
   String get practicePosterShareAction => 'Share poster';
@@ -3344,7 +3344,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recoverySubtitle =>
-      'Enjoy Player could not open its local database. The most common cause is a partial update. Your data is still on disk; you can copy the error before continuing.';
+      'SP Player could not open its local database. The most common cause is a partial update. Your data is still on disk; you can copy the error before continuing.';
 
   @override
   String get recoveryOpenLogs => 'Open logs folder';

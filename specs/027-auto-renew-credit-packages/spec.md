@@ -10,7 +10,7 @@
 
 ## Platform Scope
 
-This milestone brings **web billing parity into Enjoy Player** for status, plan selection, auto-renew management, and credits packages. Purchase initiation follows the same platform policy as `002-pro-upgrade`.
+This milestone brings **web billing parity into SP Player** for status, plan selection, auto-renew management, and credits packages. Purchase initiation follows the same platform policy as `002-pro-upgrade`.
 
 | Capability | Windows | macOS | Linux | iOS | Android |
 |------------|---------|-------|-------|-----|---------|
@@ -217,7 +217,7 @@ A signed-in user whose AI request is blocked for credits/billing reasons can ope
 
 ## Assumptions
 
-- Enjoy Web / account backend already implements auto-renew (monthly/yearly) and credits packages; this feature is **client parity** in Enjoy Player, not a new billing backend.
+- Enjoy Web / account backend already implements auto-renew (monthly/yearly) and credits packages; this feature is **client parity** in SP Player, not a new billing backend.
 - Catalog list prices match web: Pro monthly $9.99, Pro yearly $99.99; packages $2 / $5 / $50 at 100,000 permanent credits per $1.
 - Platform purchase policy matches `002-pro-upgrade` / ADR-0032: external checkout on desktop (including Linux); StoreKit / Play Billing / RevenueCat deferred.
 - Cancel auto-renew from the app is supported by the existing account API for the user’s active non-store auto-renew source; store-managed subscriptions are out of scope until IAP lands.

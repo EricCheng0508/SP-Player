@@ -22,4 +22,4 @@ The app used a single Drift database (`enjoy_player`) for all local data. Switch
 
 ## Supersedes (partial)
 
-- [ADR-0006](0006-auth-and-profile-sync.md) — profile cold-start cache location (Drift → secure storage) for Enjoy Player.
+- [ADR-0006](0006-auth-and-profile-sync.md) — profile cold-start cache location (Drift → secure storage) for SP Player.

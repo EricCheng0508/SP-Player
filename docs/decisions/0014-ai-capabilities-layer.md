@@ -1,4 +1,4 @@
-# ADR-0014: AI capabilities layer in Enjoy Player
+# ADR-0014: AI capabilities layer in SP Player
 
 ## Status
 
@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-The web monorepo exposes AI features through `@enjoy/ai` (ASR, TTS, LLM, translation, dictionary, assessment) with a capability pattern and multiple backends (Enjoy worker, BYOK, local). Enjoy Player needs the same cloud surface for upcoming learning features, without coupling UI widgets to raw HTTP.
+The web monorepo exposes AI features through `@enjoy/ai` (ASR, TTS, LLM, translation, dictionary, assessment) with a capability pattern and multiple backends (Enjoy worker, BYOK, local). SP Player needs the same cloud surface for upcoming learning features, without coupling UI widgets to raw HTTP.
 
 ## Decision
 

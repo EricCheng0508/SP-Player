@@ -6,7 +6,7 @@
 
 **Status**: Draft
 
-**Input**: User description: "The YouTube transcripts API has update ... It support `languages` as param now. In YouTube video, we actually need to pull two caption, the original lang caption, and the translation caption(from user's native language). Help me to confirm the API backend(worker), and update the API in Enjoy Player, pull the primary and secondary subtitles at one request. Also if you find any improvement for this API request, we should consider it."
+**Input**: User description: "The YouTube transcripts API has update ... It support `languages` as param now. In YouTube video, we actually need to pull two caption, the original lang caption, and the translation caption(from user's native language). Help me to confirm the API backend(worker), and update the API in SP Player, pull the primary and secondary subtitles at one request. Also if you find any improvement for this API request, we should consider it."
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -179,7 +179,7 @@ appear instantly from local storage with zero transcript requests.
 
 ### Quality, UX, and Performance Requirements
 
-- **QR-001**: Implementation MUST preserve Enjoy Player's feature-first
+- **QR-001**: Implementation MUST preserve SP Player's feature-first
   architecture and avoid feature-to-feature shortcuts unless the plan documents
   an exception.
 - **QR-002**: Changed behavior MUST have automated tests (unit tests for the

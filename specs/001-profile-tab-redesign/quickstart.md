@@ -5,7 +5,7 @@
 
 ## Prerequisites
 
-- Enjoy Player development environment set up (Flutter SDK, platform toolchains per `README.md`)
+- SP Player development environment set up (Flutter SDK, platform toolchains per `README.md`)
 - A running instance of the app (or test runner) with a signed-in state for full profile content
 - (Optional) Resizeable window for testing desktop adaptive layout
 

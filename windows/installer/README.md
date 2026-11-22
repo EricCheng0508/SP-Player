@@ -12,7 +12,7 @@
 3. Sync installer version from `pubspec.yaml`, then compile:
    ```powershell
    pwsh .github/scripts/sync_windows_installer_version.ps1
-   iscc windows\installer\enjoy_player.iss
+   iscc windows\installer\sp_player.iss
    ```
 4. Output: `build/windows/installer/EnjoyPlayerSetup-v0.6.0.exe` (version matches `pubspec.yaml`; unsigned unless you add signing).
 

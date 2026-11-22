@@ -20,7 +20,7 @@
 
 ### User Story 1 - Sign in before using the app (Priority: P1)
 
-A new or signed-out user opens Enjoy Player and must sign in with their Enjoy account before they can access home, library, discover, player, or settings. The first screen they see is a welcoming sign-in experience that explains the value of signing in and offers the native sign-in hub (Google, Apple, email OTP, or other sign-in options) without extra steps or intimidating language.
+A new or signed-out user opens SP Player and must sign in with their Enjoy account before they can access home, library, discover, player, or settings. The first screen they see is a welcoming sign-in experience that explains the value of signing in and offers the native sign-in hub (Google, Apple, email OTP, or other sign-in options) without extra steps or intimidating language.
 
 **Why this priority**: This is the core product change — eliminating anonymous guest usage so every session is tied to an account and eligible for sync, profile, and cloud features.
 
@@ -123,7 +123,7 @@ A first-time or signed-out user sees a welcoming sign-in screen that feels appro
 
 ### Quality, UX, and Performance Requirements
 
-- **QR-001**: Implementation MUST preserve Enjoy Player's feature-first architecture and avoid feature-to-feature shortcuts unless the plan documents an exception.
+- **QR-001**: Implementation MUST preserve SP Player's feature-first architecture and avoid feature-to-feature shortcuts unless the plan documents an exception.
 - **QR-002**: Changed behavior MUST have automated tests or a documented manual verification reason.
 - **QR-003**: User-facing strings, controls, haptics, tooltips, and keyboard affordances MUST follow existing localization and shared UI patterns.
 - **QR-004**: Cold start for users with a valid session MUST NOT add perceptible delay beyond current auth initialization; sign-in gate resolution MUST complete within 2 seconds on typical devices under normal conditions.

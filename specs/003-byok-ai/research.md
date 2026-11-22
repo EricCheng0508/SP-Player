@@ -16,7 +16,7 @@ if (mergedConfig.byok.provider === BYOKProvider.AZURE) {
 return createBYOKASRProvider(mergedConfig.byok) // OpenAI Whisper
 ```
 
-Enjoy Player should follow **capability routing** as source of truth and expose Azure for ASR in settings (product request).
+SP Player should follow **capability routing** as source of truth and expose Azure for ASR in settings (product request).
 
 | Modality | BYOK vendors (Enjoy `packages/ai`) | Required fields |
 |----------|-----------------------------------|-----------------|
@@ -56,7 +56,7 @@ Goal: implement `LlmCapability.generateText` / `generateChatCompletion` against 
 - Smaller community than LangChain.dart or `openai_dart`.
 - Needs a short implementation spike before committing (verify chat completions + temperature/maxTokens map cleanly to `LlmCapability`).
 
-**Fit for Enjoy Player**: **Best** — thinnest port of existing Enjoy BYOK client logic into Dart.
+**Fit for SP Player**: **Best** — thinnest port of existing Enjoy BYOK client logic into Dart.
 
 ---
 
@@ -221,7 +221,7 @@ llmByok: {
 
 ## 5. ASR BYOK implementation notes
 
-| Vendor | Enjoy reference | Enjoy Player approach |
+| Vendor | Enjoy reference | SP Player approach |
 |--------|-----------------|----------------------|
 | OpenAI | `createBYOKASRProvider` → OpenAI Whisper multipart | `openai_dart` audio API **or** `http` multipart (already have `postMultipartJson` pattern on worker client) |
 | Azure | `createBYOKAzureASRProvider` → Speech SDK | Extend `packages/azure_speech` with **subscription-key transcription** (recognize-once), reusing WAV normalization from assessment path |

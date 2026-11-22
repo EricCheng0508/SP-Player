@@ -34,7 +34,7 @@
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Enjoy Player uses the microphone for shadow-reading practice recordings.</string>
+	<string>SP Player uses the microphone for shadow-reading practice recordings.</string>
 	<key>SUPublicEDKey</key>
 	<string>XnT9Tv0IiX0mWTgWUGu8wit0C+6+G27hSCaCD3OTjWY=</string>
 	<!-- `app_links` (AuthDeepLinkListener) owns enjoyplayer:// callbacks.

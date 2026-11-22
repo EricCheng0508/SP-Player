@@ -52,7 +52,7 @@ Future<T> _guardedRethrow<T>(String name, Future<T> Function() body) async {
 Future<bool> copyErrorToClipboard(Object error, StackTrace? stack) =>
     _guarded('copyErrorToClipboard', false, () async {
       final buf = StringBuffer()
-        ..writeln('Enjoy Player — local data recovery')
+        ..writeln('SP Player — local data recovery')
         ..writeln('Captured: ${DateTime.now().toUtc().toIso8601String()}')
         ..writeln()
         ..writeln('Error:')

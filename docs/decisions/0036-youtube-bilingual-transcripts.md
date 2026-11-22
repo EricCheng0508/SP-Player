@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-Enjoy Player fetches a single YouTube caption per video from the Enjoy Worker
+SP Player fetches a single YouTube caption per video from the Enjoy Worker
 (`POST /youtube/transcripts`). Language learners reading along almost always
 want **two** captions at once: the video's **original** language and a caption
 translated into their **native** language. Today they must manually pick a

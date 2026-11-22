@@ -81,7 +81,7 @@ final Map<String, String> kLookupLanguageLabels = <String, String>{
 /// Lookup-sheet source / target catalog (separate from profile / focus / media
 /// lists so widening the lookup picker does not regress profile / settings UI).
 ///
-/// First-wave tags cover the top languages requested by Enjoy Player users as
+/// First-wave tags cover the top languages requested by SP Player users as
 /// of 2026-07-08 and overlap with the Azure pronunciation-assessment locale
 /// table where relevant. Derived: the descriptor rows carrying a lookup label,
 /// in table order — "every lookup tag has a label" holds by construction.

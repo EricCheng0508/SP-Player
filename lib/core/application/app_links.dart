@@ -1,10 +1,10 @@
-/// Public URLs for the Enjoy Player app.
+/// Public URLs for the SP Player app.
 library;
 
 /// Canonical open-source repository.
 const String kEnjoyPlayerGitHubUrl = 'https://github.com/an-lee/enjoy_player';
 
-/// Base URL for Enjoy Player release artifacts and update feeds (no trailing slash).
+/// Base URL for SP Player release artifacts and update feeds (no trailing slash).
 const String kEnjoyPlayerDownloadBaseUrl = 'https://dl.enjoy.bot/player';
 
 /// Sparkle / WinSparkle appcast consumed by [auto_updater] on desktop direct builds.

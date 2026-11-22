@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-ADR-0014 introduced the AI capabilities layer with Enjoy worker implementations and `UnimplementedError` stubs for BYOK/local. Users of the web `@enjoy/ai` package can supply their own LLM and speech credentials; Enjoy Player learners need the same option on native platforms without routing BYOK traffic through the Enjoy worker (no `/byok-proxy`).
+ADR-0014 introduced the AI capabilities layer with Enjoy worker implementations and `UnimplementedError` stubs for BYOK/local. Users of the web `@enjoy/ai` package can supply their own LLM and speech credentials; SP Player learners need the same option on native platforms without routing BYOK traffic through the Enjoy worker (no `/byok-proxy`).
 
 Requirements (spec `003-byok-ai`):
 

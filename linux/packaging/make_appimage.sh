@@ -174,7 +174,7 @@ mkdir -p "$APPDIR"/usr/share/applications
 cat > "$APPDIR"/enjoy-player.desktop <<EOF
 [Desktop Entry]
 Type=Application
-Name=Enjoy Player
+Name=SP Player
 Comment=Cross-platform language-learning player
 Exec=enjoy_player %u
 Icon=enjoy_player

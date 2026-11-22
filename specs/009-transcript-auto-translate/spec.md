@@ -256,7 +256,7 @@ immediately and only missing/invalid lines are scheduled.
 
 ### Quality, UX, and Performance Requirements
 
-- **QR-001**: Implementation MUST preserve Enjoy Player's feature-first
+- **QR-001**: Implementation MUST preserve SP Player's feature-first
   architecture and avoid feature-to-feature shortcuts unless the plan documents
   an exception.
 - **QR-002**: Changed behavior MUST have automated tests or a documented manual

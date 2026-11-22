@@ -192,7 +192,7 @@ ASR fails (network drop), the LLM rewrite returns an error, TTS fails (BYOK misc
 
 ### Quality, UX, and Performance Requirements
 
-- **QR-001**: Implementation MUST preserve Enjoy Player's feature-first architecture (Craft lives in `lib/features/craft/{application,data,domain,presentation}` with persistence via Drift DAOs).
+- **QR-001**: Implementation MUST preserve SP Player's feature-first architecture (Craft lives in `lib/features/craft/{application,data,domain,presentation}` with persistence via Drift DAOs).
 - **QR-002**: Every behavior change MUST ship with automated tests or a documented manual-verification reason.
 - **QR-003**: Craft UI MUST reuse existing shared primitives (`EnjoyButton`, `EnjoyTappableSurface`, `showContentLanguagePicker`, existing badge slot) and follow localization / haptics / tooltip conventions.
 - **QR-004**: Voice recording, ASR, LLM, and TTS calls MUST keep the UI responsive. Heavy operations (audio file write, audio decode for duration) MUST run off the main isolate.

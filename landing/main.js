@@ -188,14 +188,14 @@ function applyConfig() {
     cfg.testFlightUrl,
     'download.ios.btn',
     isUsableTestFlightUrl,
-    'Join the TestFlight beta for Enjoy Player on iOS',
+    'Join the TestFlight beta for SP Player on iOS',
   );
   applyStoreButton(
     'btn-play-beta',
     cfg.playBetaUrl,
     'download.android.btn.play',
     isUsablePlayBetaUrl,
-    'Join the Google Play beta for Enjoy Player',
+    'Join the Google Play beta for SP Player',
   );
 }
 

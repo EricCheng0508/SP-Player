@@ -4,7 +4,7 @@
 
 **Prerequisites**: [plan.md](plan.md) (required), [spec.md](spec.md) (required), [research.md](research.md), [data-model.md](data-model.md), [contracts/azure-speech-word-boundaries.md](contracts/azure-speech-word-boundaries.md), [quickstart.md](quickstart.md)
 
-**Tests**: Included — the Enjoy Player constitution (Principle II) mandates automated tests for every behavior change. The segmenter is pure Dart and fully unit-testable; the native Swift change relies on manual device verification (quickstart.md Scenario B) since the `azure_speech` plugin has no hostless native test harness.
+**Tests**: Included — the SP Player constitution (Principle II) mandates automated tests for every behavior change. The segmenter is pure Dart and fully unit-testable; the native Swift change relies on manual device verification (quickstart.md Scenario B) since the `azure_speech` plugin has no hostless native test harness.
 
 **Organization**: Tasks are grouped by user story. US1 (Apple word-boundary capture) and US2 (shadow-friendly sizing) are the two P1 slices and are **independent of each other** — US1 touches only the native Swift plugin; US2–US4 touch only the Dart segmenter + controller. They can be developed in parallel by different people.
 

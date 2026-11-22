@@ -9,9 +9,9 @@ const _header = '''
 <?xml version="1.0" encoding="utf-8"?>
 <rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
   <channel>
-    <title>Enjoy Player</title>
+    <title>SP Player</title>
     <link>https://enjoy.bot</link>
-    <description>Enjoy Player direct-download updates</description>
+    <description>SP Player direct-download updates</description>
     <language>en</language>
 ''';
 

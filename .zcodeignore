@@ -87,7 +87,7 @@ mise.local.toml
 dsa_priv.pem
 
 *.zip
-Enjoy Player*.app
+SP Player*.app
 .superpowers
 
 # Temporary files

@@ -96,7 +96,7 @@ As a learner, I see clear status when export needs Pro, when sync is pending or 
 
 ### Quality, UX, and Performance Requirements
 
-- **QR-001**: Implementation MUST preserve Enjoy Player's feature-first architecture and avoid feature-to-feature shortcuts unless the plan documents an exception.
+- **QR-001**: Implementation MUST preserve SP Player's feature-first architecture and avoid feature-to-feature shortcuts unless the plan documents an exception.
 - **QR-002**: Changed behavior MUST have automated tests or a documented manual verification reason — especially Anki CSV shape/Pro gate, sync upload/download, and SRS-preserving merge.
 - **QR-003**: User-facing strings, controls, tooltips, and Pro/upgrade affordances MUST follow existing localization and shared UI patterns.
 - **QR-004**: Export generation for typical word-book sizes and a routine sync cycle MUST stay responsive (no multi-second UI freezes on ordinary device storage); large exports MAY show progress but MUST remain cancellable or completable without crashing.

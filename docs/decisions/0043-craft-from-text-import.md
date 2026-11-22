@@ -4,7 +4,7 @@
 
 ## Context
 
-Enjoy Player supports local files and YouTube videos as practice materials.
+SP Player supports local files and YouTube videos as practice materials.
 Some learners want to "homecook" their own materials — pasting a paragraph of
 text and generating synthesized audio for shadow reading. The Enjoy web app
 implements this as two separate routes: "Smart Translation" (text → translate)

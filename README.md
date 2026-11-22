@@ -1,4 +1,4 @@
-# Enjoy Player 本地版
+# SP Player 本地版
 
 > 只在自己电脑上用的外语精听播放器。无账号、无订阅、无积分、无云端；
 > AI 只连自己填的端点，字幕识别用本机的 faster-whisper。
@@ -15,7 +15,7 @@
 
 | | 是什么 | 在哪 | 干什么 |
 |---|---|---|---|
-| **播放器** | 本仓库，Flutter + libmpv | `D:\code\idea\enjoy_player` → 编译到 `D:\Tool\EnjoyPlayer-Local` | 播放、字幕、跟读、生词本、AI 翻译 |
+| **播放器** | 本仓库，Flutter + libmpv | `D:\code\idea\sp_player` → 编译到 `D:\Tool\SPPlayer-Local` | 播放、字幕、跟读、生词本、AI 翻译 |
 | **字幕引擎** | Python + faster-whisper | `D:\Tool\subgen`（独立项目） | 音频转带时间轴的字幕，也能给播放器当识别服务 |
 
 播放和识别都在本地，音频不出机器。翻译、查词走你自己填的 OpenAI 兼容端点。
@@ -55,12 +55,12 @@ pwsh windows/scripts/fetch_ffmpeg.ps1
 已经有现成的也可以直接拷：`copy "D:\Tool\Enjoy Player\ffmpeg.exe" windows\ffmpeg\`
 
 > **不做这一步，「提取字幕」和「提取内嵌字幕」都会失败。**
-> 应用找的是 `enjoy_player.exe` 同目录下的 `ffmpeg.exe`，其次才是 PATH。
+> 应用找的是 `sp_player.exe` 同目录下的 `ffmpeg.exe`，其次才是 PATH。
 
 ### 3. 编译
 
 ```powershell
-cd D:\code\idea\enjoy_player
+cd D:\code\idea\sp_player
 flutter pub get
 flutter build windows --release
 ```
@@ -68,10 +68,10 @@ flutter build windows --release
 产物在 `build\windows\x64\runner\Release\`，**整个目录**复制过去：
 
 ```powershell
-robocopy build\windows\x64\runner\Release D:\Tool\EnjoyPlayer-Local /E
+robocopy build\windows\x64\runner\Release D:\Tool\SPPlayer-Local /E
 ```
 
-> 不能只拿 `enjoy_player.exe`——它只有 0.1 MB。主体是旁边的
+> 不能只拿 `sp_player.exe`——它只有 0.1 MB。主体是旁边的
 > `data\app.so`（16.7 MB）、`libmpv-2.dll`（29 MB）、`flutter_windows.dll`（21 MB）、
 > `ffmpeg.exe`（101 MB），合计约 202 MB。
 

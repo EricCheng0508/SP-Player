@@ -6,7 +6,7 @@
 
 ## Summary
 
-Redesign account identity editing in Enjoy Player: the Profile hero shows **Enjoy ID** (not email); a dedicated **Edit profile** screen hosts username + avatar editing and read-only Enjoy ID / email / Mixin ID; Preferences keeps learning/display controls and drops username. Avatar persistence and Mixin ID values depend on [enjoy_web#227](https://github.com/baizhiheizi/enjoy_web/issues/227) — the client ships the form and username path immediately, gates avatar upload behind the new API contract, and shows a not-linked Mixin state until `mixinId` is returned.
+Redesign account identity editing in SP Player: the Profile hero shows **Enjoy ID** (not email); a dedicated **Edit profile** screen hosts username + avatar editing and read-only Enjoy ID / email / Mixin ID; Preferences keeps learning/display controls and drops username. Avatar persistence and Mixin ID values depend on [enjoy_web#227](https://github.com/baizhiheizi/enjoy_web/issues/227) — the client ships the form and username path immediately, gates avatar upload behind the new API contract, and shows a not-linked Mixin state until `mixinId` is returned.
 
 ## Technical Context
 

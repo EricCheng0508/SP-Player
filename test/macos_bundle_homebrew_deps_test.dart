@@ -179,7 +179,7 @@ class _Sandbox {
     sandbox.state = Directory('${root.path}/state')
       ..createSync(recursive: true);
     sandbox.opt = Directory('${root.path}/opt')..createSync(recursive: true);
-    sandbox.app = Directory('${root.path}/Enjoy Player.app')
+    sandbox.app = Directory('${root.path}/SP Player.app')
       ..createSync(recursive: true);
     return sandbox;
   }
@@ -313,7 +313,7 @@ _Sandbox _buildSandbox({bool withBrotliCommon = true}) {
     '/usr/lib/libSystem.B.dylib',
   ]);
   sandbox.writeDeps(_brotlicommonKegDylib, ['/usr/lib/libSystem.B.dylib']);
-  sandbox.writeDeps('Enjoy Player', [
+  sandbox.writeDeps('SP Player', [
     '/opt/homebrew/opt/freetype/lib/$_freetypeKegDylib',
     '/usr/lib/libSystem.B.dylib',
   ]);
@@ -323,8 +323,8 @@ _Sandbox _buildSandbox({bool withBrotliCommon = true}) {
     '@loader_path/../lib',
     '@loader_path',
   ]);
-  sandbox.writeRpaths('Enjoy Player', ['@executable_path/../Frameworks']);
-  sandbox.writeAppFile('Contents/MacOS/Enjoy Player', 'mach-o');
+  sandbox.writeRpaths('SP Player', ['@executable_path/../Frameworks']);
+  sandbox.writeAppFile('Contents/MacOS/SP Player', 'mach-o');
   sandbox.createAppDir('Contents/Frameworks');
   return sandbox;
 }
@@ -378,7 +378,7 @@ void main() {
       reason: 'bundler failed:\n${result.stdout}\n${result.stderr}',
     );
     expect(
-      sandbox.depsOf('Enjoy Player'),
+      sandbox.depsOf('SP Player'),
       contains('@rpath/$_freetypeKegDylib'),
     );
   }, skip: skipOnWindows);
@@ -428,19 +428,19 @@ void main() {
     final sandbox = _buildSandbox();
     addTearDown(sandbox.dispose);
 
-    sandbox.writeDeps('Enjoy Player', [
+    sandbox.writeDeps('SP Player', [
       '/opt/homebrew/opt/freetype/lib/$_freetypeKegDylib',
-      '@rpath/Enjoy Player.debug.dylib',
+      '@rpath/SP Player.debug.dylib',
       '/usr/lib/libSystem.B.dylib',
     ]);
-    sandbox.writeRpaths('Enjoy Player', [
+    sandbox.writeRpaths('SP Player', [
       '@executable_path/../Frameworks',
       '@executable_path',
     ]);
-    sandbox.writeDeps('Enjoy Player.debug.dylib', [
+    sandbox.writeDeps('SP Player.debug.dylib', [
       '/usr/lib/libSystem.B.dylib',
     ]);
-    sandbox.writeAppFile('Contents/MacOS/Enjoy Player.debug.dylib', 'mach-o');
+    sandbox.writeAppFile('Contents/MacOS/SP Player.debug.dylib', 'mach-o');
 
     final result = sandbox.runBundler();
 
@@ -449,7 +449,7 @@ void main() {
       0,
       reason:
           'Xcode debug builds load the debug dylib through the spaced install '
-          'name @rpath/Enjoy Player.debug.dylib; truncating the name at the '
+          'name @rpath/SP Player.debug.dylib; truncating the name at the '
           'space fails the closure check on every Debug build:\n${result.stdout}\n${result.stderr}',
     );
     expect(result.stderr, isNot(contains('cannot resolve')));
@@ -485,7 +485,7 @@ void main() {
       'Contents/Frameworks/libswift_Concurrency.dylib',
       'mach-o',
     );
-    sandbox.writeRpaths('Enjoy Player', [
+    sandbox.writeRpaths('SP Player', [
       '@executable_path/../Frameworks',
       '/usr/lib/swift',
     ]);
@@ -511,7 +511,7 @@ void main() {
       '@rpath/libpng16.16.dylib',
       '/usr/lib/libSystem.B.dylib',
     ]);
-    sandbox.writeRpaths('Enjoy Player', [
+    sandbox.writeRpaths('SP Player', [
       '@executable_path/../Frameworks',
       '/usr/lib/swift',
     ]);

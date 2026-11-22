@@ -7,7 +7,7 @@ Validation guide for implementers. Server contracts: [api-v1-subscriptions-auto-
 
 ## Prerequisites
 
-- Enjoy Player checkout with signed-in test user against an environment where Rails has Stripe Price ids for `pro_month` / `pro_year` and credits packages enabled
+- SP Player checkout with signed-in test user against an environment where Rails has Stripe Price ids for `pro_month` / `pro_year` and credits packages enabled
 - Desktop or Linux build for purchase paths; iOS/Android simulator/device for gates
 - Ability to complete or abandon Stripe Checkout in an external browser
 

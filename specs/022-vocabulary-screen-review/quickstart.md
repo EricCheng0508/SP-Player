@@ -7,7 +7,7 @@ Validation guide after `/speckit-tasks` / implementation. Contracts and data-mod
 ## Prerequisites
 
 - Foundation (021) green: lookup **Add to Vocabulary** works; Drift schema 15 present.
-- Signed-in Enjoy Player build with at least a few saved vocabulary items (mix of statuses/languages if possible). Seed via lookup during playback or repository fixtures in tests.
+- Signed-in SP Player build with at least a few saved vocabulary items (mix of statuses/languages if possible). Seed via lookup during playback or repository fixtures in tests.
 - Dev tree: `bash .github/scripts/validate_ci_gates.sh` baseline green before starting.
 
 ## Automated checks

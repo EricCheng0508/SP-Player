@@ -1,4 +1,4 @@
-/// Root Drift database for Enjoy Player (native SQLite via drift_flutter).
+/// Root Drift database for SP Player (native SQLite via drift_flutter).
 library;
 
 import 'package:drift/drift.dart';

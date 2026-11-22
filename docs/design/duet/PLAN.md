@@ -315,7 +315,7 @@ Already done: `docs/design/duet/`, ADR-0093, this plan, `STATUS.md`, the Literat
 - **Change:**
   - Remove the floating content panel. Pages sit on `ground` beside a 244 px sidebar.
   - Top of the sidebar:
-    - brand row: logo + "Enjoy Player";
+    - brand row: logo + "SP Player";
     - search field with the `/` keycap;
     - rows for Home, Discover, Library, **Vocabulary** (due count from `vocabularyStatsProvider.due`) and **Craft** (`C` keycap).
   - Footer: sync status line, **Settings** row, account chip (avatar, name, plan, Upgrade pill).
@@ -630,7 +630,7 @@ Record the results in `STATUS.md` Notes.
 
 ### Phase 6 — One player with the web app and extension (canvas v30)
 
-Source: issue [#915](https://github.com/baizhiheizi/enjoy_player/issues/915). On 2026-10-13 the canvas took two rounds of changes (v28–v30) so that Enjoy Player, the web app and the browser extension share one player design: a 14-point player audit, decided item by item (the extension shipped the same decisions in baizhiheizi/enjoy#1512), and a desktop parity pass against the web desktop player (top bar, Subtitles panel, ⋯ More, transcript rail, margin, dock, video layout). The `System` board is now the same sheet as the Enjoy Redesign canvas; change both together.
+Source: issue [#915](https://github.com/baizhiheizi/enjoy_player/issues/915). On 2026-10-13 the canvas took two rounds of changes (v28–v30) so that SP Player, the web app and the browser extension share one player design: a 14-point player audit, decided item by item (the extension shipped the same decisions in baizhiheizi/enjoy#1512), and a desktop parity pass against the web desktop player (top bar, Subtitles panel, ⋯ More, transcript rail, margin, dock, video layout). The `System` board is now the same sheet as the Enjoy Redesign canvas; change both together.
 
 The rules above still apply. Rows marked **behavior** wait for their decision in [STATUS → Decisions](STATUS.md#decisions) before that part ships; build the rest of the task without it.
 

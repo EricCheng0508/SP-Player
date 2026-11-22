@@ -6,7 +6,7 @@
 
 **Status**: Draft
 
-**Input**: User description: "If you import some materials, if there're no subtitles there, Enjoy Player should provide the ASR capability, generate the transcription from the material, video or audio. We'll use Azure ASR as default, both Enjoy API and BYOK. You need ref the similar implementation of the webapp in `~/dev/enjoy/apps/web`. Design it concisely. Take care of the format of the transcript. We should always provide an option to generate/re-generate transcript."
+**Input**: User description: "If you import some materials, if there're no subtitles there, SP Player should provide the ASR capability, generate the transcription from the material, video or audio. We'll use Azure ASR as default, both Enjoy API and BYOK. You need ref the similar implementation of the webapp in `~/dev/enjoy/apps/web`. Design it concisely. Take care of the format of the transcript. We should always provide an option to generate/re-generate transcript."
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -328,7 +328,7 @@ record.
 
 ### Quality, UX, and Performance Requirements
 
-- **QR-001**: Implementation MUST preserve Enjoy Player's feature-first
+- **QR-001**: Implementation MUST preserve SP Player's feature-first
   architecture and reuse the existing `AsrCapability` / `AsrService` /
   `asrServiceProvider` abstraction; no vendor HTTP calls directly in UI or
   feature widgets.

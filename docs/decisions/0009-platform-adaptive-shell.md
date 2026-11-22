@@ -5,7 +5,7 @@
 
 ## Context
 
-Enjoy Player targets iOS, Android, Windows, and macOS. A single Material 3 shell works functionally but feels generic. Premium apps on each platform follow platform-specific navigation idioms.
+SP Player targets iOS, Android, Windows, and macOS. A single Material 3 shell works functionally but feels generic. Premium apps on each platform follow platform-specific navigation idioms.
 
 ## Decision
 

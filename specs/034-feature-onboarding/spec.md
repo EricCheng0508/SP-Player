@@ -6,7 +6,7 @@
 
 **Status**: Draft
 
-**Input**: User description: "We need to add onboarding for new users for every important features, guide user to know what Enjoy Player could do, and how to use Enjoy Player. Like on the home screen, we should introduce the craft button, import button; On player screen, if no transcript available, guide user to extract/import transcript from local video, fetch YT transcript from cloud for YT video. Then guide user to toggle echo mode, guide user to record, assess pronounce after record etc. We should build a maintainable onboarding system, follow the best practices. Do some research first, what library could we use."
+**Input**: User description: "We need to add onboarding for new users for every important features, guide user to know what SP Player could do, and how to use SP Player. Like on the home screen, we should introduce the craft button, import button; On player screen, if no transcript available, guide user to extract/import transcript from local video, fetch YT transcript from cloud for YT video. Then guide user to toggle echo mode, guide user to record, assess pronounce after record etc. We should build a maintainable onboarding system, follow the best practices. Do some research first, what library could we use."
 
 **Related**: [ADR-0031 login-only access](../../docs/decisions/0031-login-only-access.md) (welcome is sign-in only — this feature is *post-sign-in* product discovery) | [029-craft-history-home](../029-craft-history-home/spec.md) | [013-client-yt-transcripts](../013-client-yt-transcripts/spec.md)
 
@@ -151,7 +151,7 @@ A returning learner forgot how a control works. From a discoverable place in Set
 - **FR-010**: Tip copy MUST be localizable with the rest of the app’s user-visible strings.
 - **FR-011**: The guidance system MUST support adding, reordering, or retiring tips for important features over time using stable tip identities and clear triggers, without redesigning unrelated screens each time.
 - **FR-012**: Only one guidance overlay/sequence may be active at a time; conflicting triggers defer or cancel cleanly.
-- **FR-013**: Guidance presentation MUST remain usable across supported phone, tablet, and desktop layouts used by Enjoy Player.
+- **FR-013**: Guidance presentation MUST remain usable across supported phone, tablet, and desktop layouts used by SP Player.
 
 ### Key Entities
 
@@ -184,5 +184,5 @@ A returning learner forgot how a control works. From a discoverable place in Set
 - Tip interaction model is **learn-by-doing**: highlighted targets remain actionable; Next/Skip are always available for learners who prefer not to act yet.
 - v1 exposes one full **Reset product tips** control (not per-surface reset or “replay without wipe”).
 - Practice-loop tips may chain in one player visit as preconditions unlock; empty-transcript tips still gate practice tips until a transcript exists for the current media.
-- Visual style should feel native to Enjoy Player (readable contrast, non-blocking dismiss, no playful clutter that fights video).
+- Visual style should feel native to SP Player (readable contrast, non-blocking dismiss, no playful clutter that fights video).
 - Presentation will use a spotlight-style coach experience (highlight real controls with short explanations). Tip identity, triggers, sequencing, and progress persistence remain Enjoy-owned so the system stays maintainable and testable independent of the overlay toolkit. Concrete overlay package choice is deferred to the implementation plan.

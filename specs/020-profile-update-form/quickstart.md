@@ -6,7 +6,7 @@ Validation guide. Contracts: [profile-api.md](./contracts/profile-api.md), [prof
 
 ## Prerequisites
 
-- Signed-in Enjoy Player build against an enjoy_web with #227 (avatar + `mixin_id`).
+- Signed-in SP Player build against an enjoy_web with #227 (avatar + `mixin_id`).
 - Account where Enjoy ID and email differ.
 
 ## Automated checks

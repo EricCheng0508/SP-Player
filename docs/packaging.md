@@ -698,13 +698,13 @@ git-ignored.
   ```
 - **`deadlineExceeded` / `abortedUpload` during notary upload**: signing succeeded; Apple's notary upload timed out (large ~200MB+ bundle, slow/VPN network). Retry upload only:
   ```bash
-  ./macos/scripts/notarize_release.sh "build/macos/Build/Products/Release/Enjoy Player.app" --skip-sign
+  ./macos/scripts/notarize_release.sh "build/macos/Build/Products/Release/SP Player.app" --skip-sign
   ```
   The script retries automatically (5 attempts). Disable VPN/proxy if uploads keep failing.
 - **No Developer ID identity**: install Developer ID Application cert or set `SIGN_IDENTITY` before running `notarize_release.sh`.
 - **`HTTP status code: 403. A required agreement is missing or has expired.`**: not a build problem — the Apple Developer team (`46X685R747`) has an unsigned/expired legal agreement (e.g. annual Program License Agreement or Paid Apps Agreement renewal). Sign in to [App Store Connect](https://appstoreconnect.apple.com) or [developer.apple.com/account](https://developer.apple.com/account) with an Admin/Legal role, accept the pending agreement, then retry the upload only (app is already signed):
   ```bash
-  ./macos/scripts/notarize_release.sh "build/macos/Build/Products/Release/Enjoy Player.app" --skip-sign
+  ./macos/scripts/notarize_release.sh "build/macos/Build/Products/Release/SP Player.app" --skip-sign
   ```
 - **ITMS-90426 / 90429 Invalid Swift Support**: App Store Connect reports this when a standalone `.dylib` is in `Runner.app/Frameworks/` (TN2435). iOS embeds `eSpeakNG.xcframework`, not `libespeak-ng.dylib`. `check_ios_ipa.sh` fails the release if any naked `.dylib` is present, with **one exemption**: Xcode's own Swift runtime shim `libswiftCompatibilitySpan.dylib` (code-signing identifier `com.apple.dt.runtime.swiftCompatibilitySpan`, which Xcode preserves when re-signing it into the bundle). Apps that link Swift under a Swift 6 toolchain — the case since flutter_inappwebview 6.2.0-beta.3 moved to Swift Package Manager — get this shim embedded; TN2435 exempts the system Swift libraries Xcode provides and App Store Connect accepts the upload (verified with `xcrun altool --validate-app`). Every other naked `.dylib` is still a packaging bug. Do not inject a fake `SwiftSupport/` folder to paper over this.
 - **TestFlight credentials missing** (local): put `asc.env` + `AuthKey_<KEY_ID>.p8` under `~/.config/enjoy-player/` (or export the three `APP_STORE_CONNECT_*` env vars), then re-run `bash .github/scripts/verify_macos_release_env.sh`. With `--testflight`, a missing key is a hard error — not a soft skip.

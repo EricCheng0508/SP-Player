@@ -6,7 +6,7 @@
 
 ## Summary
 
-Add **Bring Your Own Key (BYOK)** for all AI modalities in Enjoy Player while keeping **Enjoy AI** the default. Users configure per-modality provider choice (Enjoy vs BYOK) in **Settings → AI providers** (user-facing, not developer-only).
+Add **Bring Your Own Key (BYOK)** for all AI modalities in SP Player while keeping **Enjoy AI** the default. Users configure per-modality provider choice (Enjoy vs BYOK) in **Settings → AI providers** (user-facing, not developer-only).
 
 **LLM BYOK** uses **protocol spec types** (OpenAI-compatible, Anthropic-compatible, Google-compatible) with **uniform customizable fields** (base URL, API key, model) and optional presets (OpenAI, DeepSeek, Claude, Gemini). Backend: **`ai_sdk_dart`** provider packages calling vendor HTTPS directly (no Enjoy worker BYOK proxy on native).
 

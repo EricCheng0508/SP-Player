@@ -3,7 +3,7 @@ info:
   title: Enjoy API — Native Auth v2
   version: 1.0.0
   description: |
-    Synchronous token exchange for Enjoy Player native sign-in.
+    Synchronous token exchange for SP Player native sign-in.
     Supersedes client usage of `/api/v1/sessions/start_auth` + `/poll`.
     JSON bodies use snake_case on the wire; clients may send camelCase if
     the existing `@enjoy/api` transform applies.

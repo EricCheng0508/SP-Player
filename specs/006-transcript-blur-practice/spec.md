@@ -121,7 +121,7 @@ The toggle state and the mobile hold duration are exposed in the user-facing set
 
 ### Quality, UX, and Performance Requirements
 
-- **QR-001**: Implementation MUST preserve Enjoy Player's feature-first architecture under `lib/features/transcript/` and avoid shortcuts from other features. Reuse existing hover/active/tap plumbing where possible; do not duplicate cue rendering paths.
+- **QR-001**: Implementation MUST preserve SP Player's feature-first architecture under `lib/features/transcript/` and avoid shortcuts from other features. Reuse existing hover/active/tap plumbing where possible; do not duplicate cue rendering paths.
 - **QR-002**: Behavior changes MUST have automated tests or a documented manual verification reason. Required coverage at minimum: toggle on/off, hover reveal on desktop, the rule that the active cue stays blurred, mobile tap-seek-plus-reveal with expiry, persistence, and reduced-motion behavior.
 - **QR-003**: The blur effect, toggle button, and any settings entry MUST follow existing localization (`AppLocalizations`) and shared UI primitive patterns (`EnjoyTappableSurface` / `EnjoyButton` / `EnjoyTappableIcon` where they fit). Tooltips, haptics on toggle, and keyboard focus styling MUST match the rest of the transcript panel.
 - **QR-004**: Blur rendering and the per-cue hover/active/tap state MUST NOT noticeably degrade transcript scrolling performance. The plan MUST include a performance expectation (e.g. smooth scroll on a 10k-line transcript on the slowest supported target) and evidence or a manual verification path.

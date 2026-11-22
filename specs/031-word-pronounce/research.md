@@ -38,7 +38,7 @@
 
 ## R4 — Locale resolution (learning + lookup languages)
 
-**Decision**: Support every Enjoy Player **focus learning** and **lookup** language tag by mapping 1:1 onto the Worker pronounce allowlist (Azure neural defaults server-side):
+**Decision**: Support every SP Player **focus learning** and **lookup** language tag by mapping 1:1 onto the Worker pronounce allowlist (Azure neural defaults server-side):
 
 | Client tags | Worker locale |
 |-------------|----------------|

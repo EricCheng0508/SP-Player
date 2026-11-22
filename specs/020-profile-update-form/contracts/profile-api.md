@@ -2,7 +2,7 @@
 
 **Feature**: [spec.md](../spec.md) · **Plan**: [plan.md](../plan.md)
 
-> Client-facing HTTP contracts for Enjoy Player. Server: [enjoy_web#227](https://github.com/baizhiheizi/enjoy_web/issues/227) (**resolved**). Wire JSON is camelCase after `ApiClient` decode.
+> Client-facing HTTP contracts for SP Player. Server: [enjoy_web#227](https://github.com/baizhiheizi/enjoy_web/issues/227) (**resolved**). Wire JSON is camelCase after `ApiClient` decode.
 
 ---
 

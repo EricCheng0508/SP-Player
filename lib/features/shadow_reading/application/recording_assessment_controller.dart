@@ -13,6 +13,7 @@ import 'package:enjoy_player/core/analytics/analytics_provider.dart';
 import 'package:enjoy_player/core/application/app_language_catalog.dart';
 import 'package:enjoy_player/core/application/app_preferences_provider.dart';
 import 'package:enjoy_player/core/errors/app_failure.dart';
+import 'package:enjoy_player/features/ai/domain/byok_not_configured_failure.dart';
 import 'package:enjoy_player/core/logging/log.dart';
 import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/data/db/media_registry_provider.dart';
@@ -223,7 +224,11 @@ class RecordingAssessmentController extends _$RecordingAssessmentController {
           ),
           onGeneric: (e, st) => RecordingAssessmentFailure(
             RecordingAssessmentFailureKind.serviceError,
-            debugMessage: e.toString(),
+            // Raw exception names read as gibberish in the UI; give BYOK
+            // misconfiguration a targeted hint instead.
+            debugMessage: e is ByokNotConfiguredFailure
+                ? '发音评分需要 Azure 语音服务：请在 设置 → AI 服务商 的语音识别卡片中改选/填写 Azure Speech 并保存。'
+                : e.toString(),
           ),
         );
         return outcome!;

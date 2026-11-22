@@ -82,6 +82,7 @@ class _MediaKitStageGateState extends State<MediaKitVideoStage> {
       color: Colors.black,
       child: _MediaKitVideoStage(
         controller: engine.videoController,
+        positionStream: engine.position,
         maxWidth: widget.maxWidth,
         maxHeight: widget.maxHeight,
       ),
@@ -98,11 +99,18 @@ class _MediaKitStageGateState extends State<MediaKitVideoStage> {
 class _MediaKitVideoStage extends StatefulWidget {
   const _MediaKitVideoStage({
     required this.controller,
+    required this.positionStream,
     required this.maxWidth,
     required this.maxHeight,
   });
 
   final VideoController controller;
+
+  /// Player position stream used to detect seeks: seeking does not change the
+  /// viewport or the texture id, yet the compositor may still serve the stale
+  /// black frame until the next relayout.
+  final Stream<Duration> positionStream;
+
   final double maxWidth;
   final double maxHeight;
 
@@ -113,6 +121,8 @@ class _MediaKitVideoStage extends StatefulWidget {
 class _MediaKitVideoStageState extends State<_MediaKitVideoStage> {
   var _nudge = false;
   var _kicked = false;
+  StreamSubscription<Duration>? _positionSub;
+  Duration? _lastPosition;
 
   @override
   void initState() {
@@ -121,6 +131,17 @@ class _MediaKitVideoStageState extends State<_MediaKitVideoStage> {
     widget.controller.rect.addListener(_onTexture);
     _onTexture();
     unawaited(_kickAfterFirstFrame());
+    _positionSub = widget.positionStream.listen(_onPositionTick);
+    // Burst kicks over the first two seconds: a single kick can land while
+    // mpv has not yet presented into the texture (or during the loading →
+    // chrome viewport swap) and the frame stays black. The user-visible
+    // symptom of missing one is a black stage that only recovers after a
+    // mode-tab switch relayouts the column.
+    for (final delayMs in const [150, 350, 600, 900, 1300, 1800]) {
+      unawaited(Future<void>.delayed(Duration(milliseconds: delayMs)).then((_) {
+        if (mounted) _scheduleKick();
+      }));
+    }
   }
 
   @override
@@ -140,7 +161,22 @@ class _MediaKitVideoStageState extends State<_MediaKitVideoStage> {
   void dispose() {
     widget.controller.id.removeListener(_onTexture);
     widget.controller.rect.removeListener(_onTexture);
+    unawaited(_positionSub?.cancel());
     super.dispose();
+  }
+
+  /// Kicks on seek jumps. Natural playback ticks advance monotonically in
+  /// small steps; a backwards jump or a forward leap over ~1s means the user
+  /// (or the app) seeked, and the texture may need a relayout pulse to
+  /// present the new frame.
+  void _onPositionTick(Duration position) {
+    final last = _lastPosition;
+    _lastPosition = position;
+    if (last == null) return;
+    final deltaMs = position.inMilliseconds - last.inMilliseconds;
+    if (deltaMs < 0 || deltaMs > 1000) {
+      _scheduleKick();
+    }
   }
 
   Future<void> _kickAfterFirstFrame() async {

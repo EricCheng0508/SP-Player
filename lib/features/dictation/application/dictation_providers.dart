@@ -6,7 +6,9 @@ import 'package:enjoy_player/core/logging/log.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/features/ai/application/ai_services.dart';
+import 'package:enjoy_player/features/ai/domain/byok_not_configured_failure.dart';
 import 'package:enjoy_player/features/ai/domain/models/asr_request.dart';
+import 'package:enjoy_player/features/ai/domain/modality_kind.dart';
 import 'package:enjoy_player/features/dictation/domain/dictation_diff.dart';
 import 'package:enjoy_player/features/dictation/domain/dictation_models.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -110,7 +112,7 @@ class DictationSessionCtrl extends _$DictationSessionCtrl {
       if (!_disposed) {
         state = state.copyWith(
           status: DictationAttemptStatus.failed,
-          errorMessage: () => e.toString(),
+          errorMessage: () => _friendlyAiError(e),
         );
       }
     } finally {
@@ -241,9 +243,24 @@ class DictationSessionCtrl extends _$DictationSessionCtrl {
       try {
         state = state.copyWith(
           status: DictationAttemptStatus.failed,
-          errorMessage: () => e.toString(),
+          errorMessage: () => _friendlyAiError(e),
         );
       } catch (_) {}
     }
   }
+}
+
+/// Replaces raw exception names (e.g. `ByokNotConfiguredFailure(asr)`) with
+/// an actionable hint — users see this string verbatim in the dictation UI.
+String _friendlyAiError(Object e) {
+  if (e is ByokNotConfiguredFailure) {
+    return switch (e.modality) {
+      ModalityKind.asr =>
+        '语音识别未配置：请先在 设置 → AI 服务商 中填写语音识别的接口地址、模型和 API Key，然后点「重试识别」。',
+      ModalityKind.llm =>
+        'AI 未配置：请先在 设置 → AI 服务商 中填写语言模型的接口地址、模型和 API Key。',
+      _ => 'AI 服务未配置：请先在 设置 → AI 服务商 中完成配置。',
+    };
+  }
+  return e.toString();
 }

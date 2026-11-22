@@ -10,9 +10,7 @@ import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:enjoy_player/core/application/app_preferences_provider.dart';
-import 'package:enjoy_player/core/interaction/enjoy_pressable.dart';
 import 'package:enjoy_player/core/riverpod/async_value_x.dart';
-import 'package:enjoy_player/core/theme/enjoy_icons.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/typography.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_card.dart';
@@ -21,19 +19,14 @@ import 'package:enjoy_player/features/ai/application/ai_modality_config_controll
 import 'package:enjoy_player/features/ai/domain/ai_provider.dart';
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/auth/domain/user_profile.dart';
-import 'package:enjoy_player/features/auth/presentation/subscription_tier_label.dart';
 import 'package:enjoy_player/features/settings/application/settings_search_query_provider.dart';
 import 'package:enjoy_player/features/settings/domain/settings_search_entry.dart';
 import 'package:enjoy_player/features/settings/presentation/settings_section_spec.dart';
-import 'package:enjoy_player/features/settings/presentation/widgets/profile_identity.dart';
-import 'package:enjoy_player/features/settings/presentation/widgets/sections/account_section.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/sections/appearance_language_section.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/sections/cloud_sync_section.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/settings_layout_single_column.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/settings_row.dart';
 import 'package:enjoy_player/features/shadow_reading/application/recording_input_device_controller.dart';
-import 'package:enjoy_player/features/subscription/application/current_tier_provider.dart';
 import 'package:enjoy_player/features/sync/application/sync_providers.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
@@ -61,10 +54,6 @@ class SettingsLayoutHub extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (sections.any(
-          (spec) => spec.sectionId == SettingsSectionIds.account,
-        ))
-          const _AccountEntry(),
         SizedBox(height: t.space16),
         if (hubSections.isNotEmpty)
           EnjoyCard(
@@ -83,43 +72,6 @@ class SettingsLayoutHub extends ConsumerWidget {
         const _VersionFooter(),
         SizedBox(height: t.space32),
       ],
-    );
-  }
-}
-
-class _AccountEntry extends ConsumerWidget {
-  const _AccountEntry();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final auth = ref.watch(authCtrlProvider).valueOrNull;
-    if (auth is! AuthSignedIn) return const AccountSection();
-    return _AccountCard(profile: auth.profile);
-  }
-}
-
-class _AccountCard extends ConsumerWidget {
-  const _AccountCard({required this.profile});
-
-  final UserProfile profile;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final t = EnjoyThemeTokens.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    final tier = subscriptionTierLabel(l10n, ref.watch(currentTierProvider));
-
-    return EnjoyPressable(
-      onTap: () => context.go('/profile'),
-      borderRadius: BorderRadius.circular(t.radiusCard),
-      child: EnjoyCard(
-        padding: EdgeInsets.all(t.space16),
-        child: SettingsProfileIdentityRow(
-          name: profile.name,
-          secondaryText: '$tier · ${profile.email}',
-          trailing: Icon(EnjoyIcons.chevronRight, size: 16, color: t.ink3),
-        ),
-      ),
     );
   }
 }

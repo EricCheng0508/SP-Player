@@ -29,7 +29,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:enjoy_player/features/craft/domain/craft_failure.dart';
-import 'package:enjoy_player/features/subscription/presentation/credits_failure_actions.dart';
+import 'package:enjoy_player/core/errors/ai_failure_messages.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 /// Non-blocking failure caption plus its action, for the Advanced tool panels.

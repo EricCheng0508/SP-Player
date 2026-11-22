@@ -8,17 +8,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:enjoy_player/data/api/api_client_provider.dart';
 import 'package:enjoy_player/data/api/secure_token_store.dart';
-import 'package:enjoy_player/data/api/services/ai/credits_api.dart';
 import 'package:enjoy_player/data/api/services/ai/pronounce_api.dart';
 import 'package:enjoy_player/data/api/services/ai/youtube_feed_api.dart';
 import 'package:enjoy_player/data/api/services/ai/youtube_transcripts_api.dart';
 
 final pronounceApiProvider = Provider<PronounceApi>(
   (ref) => PronounceApi(ref.watch(aiApiClientProvider)),
-);
-
-final creditsApiProvider = Provider<CreditsApi>(
-  (ref) => CreditsApi(ref.watch(aiApiClientProvider)),
 );
 
 final youtubeTranscriptsClientProvider = Provider<YoutubeTranscriptsClient>(

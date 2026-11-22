@@ -11,7 +11,7 @@ import 'package:enjoy_player/core/interaction/enjoy_tappable.dart';
 import 'package:enjoy_player/core/interaction/haptics.dart';
 import 'package:enjoy_player/core/notices/app_notice.dart';
 import 'package:enjoy_player/features/pronounce/application/pronounce_playback_controller.dart';
-import 'package:enjoy_player/features/subscription/presentation/credits_failure_actions.dart';
+import 'package:enjoy_player/core/errors/ai_failure_messages.dart';
 import 'package:enjoy_player/features/pronounce/domain/pronounce_locale.dart';
 import 'package:enjoy_player/features/pronounce/domain/pronounce_target.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';

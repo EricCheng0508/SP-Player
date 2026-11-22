@@ -13,7 +13,6 @@ import 'package:enjoy_player/core/theme/widgets/editorial_header.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_button.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_page.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_segmented_control.dart';
-import 'package:enjoy_player/features/cloud/presentation/cloud_library_body.dart';
 import 'package:enjoy_player/features/library/presentation/library_actions.dart';
 import 'package:enjoy_player/features/library/presentation/widgets/library_search_field.dart';
 import 'package:enjoy_player/features/library/application/library_media_provider.dart';
@@ -33,35 +32,25 @@ class LibraryScreen extends ConsumerStatefulWidget {
 class _LibraryScreenState extends ConsumerState<LibraryScreen>
     with TickerProviderStateMixin {
   late final TabController _localKindController;
-  late final TabController _cloudKindController;
-  final _cloudBodyKey = GlobalKey<CloudLibraryBodyState>();
 
   @override
   void initState() {
     super.initState();
     _localKindController = TabController(length: 2, vsync: this);
-    _cloudKindController = TabController(length: 2, vsync: this);
   }
 
   @override
   void dispose() {
     _localKindController.dispose();
-    _cloudKindController.dispose();
     super.dispose();
   }
 
-  TabController _kindControllerFor(LibrarySource source) {
-    return source == LibrarySource.local
-        ? _localKindController
-        : _cloudKindController;
-  }
+  // 本地版只有本地媒体库，云端来源已下线。
+  TabController _kindControllerFor(LibrarySource source) => _localKindController;
 
   void _setKindIndex(int index) {
     if (_localKindController.index != index) {
       _localKindController.animateTo(index);
-    }
-    if (_cloudKindController.index != index) {
-      _cloudKindController.animateTo(index);
     }
   }
 
@@ -112,10 +101,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
         key: const ValueKey('library-local-body'),
         tabController: _localKindController,
       ),
-      LibrarySource.cloud => CloudLibraryBody(
-        key: _cloudBodyKey,
-        tabController: _cloudKindController,
-      ),
+      LibrarySource.cloud => const SizedBox.shrink(),
     };
 
     return AnimatedSwitcher(
@@ -145,7 +131,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
         final refreshButton = EnjoyIconButton(
           icon: EnjoyIcons.refresh,
           tooltip: l10n.cloudRefreshTooltip,
-          onPressed: () => _cloudBodyKey.currentState?.refreshActiveTab(),
+          onPressed: () {},
         );
         final Widget titleAccessory;
         final Widget? trailing;

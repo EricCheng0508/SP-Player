@@ -13,7 +13,7 @@ import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/editorial_header.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_button.dart';
 import 'package:enjoy_player/core/theme/widgets/skeleton.dart';
-import 'package:enjoy_player/features/subscription/presentation/credits_failure_actions.dart';
+import 'package:enjoy_player/core/errors/ai_failure_messages.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 import '../application/all_transcripts_provider.dart';
 import '../application/transcript_repository_provider.dart';

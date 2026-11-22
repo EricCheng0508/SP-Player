@@ -7,7 +7,7 @@ import 'package:enjoy_player/core/errors/app_failure.dart';
 import 'package:enjoy_player/features/lookup/presentation/widgets/latched_retry_state.dart';
 import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_callout.dart';
 import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_retry_button.dart';
-import 'package:enjoy_player/features/subscription/presentation/credits_failure_actions.dart';
+import 'package:enjoy_player/core/errors/ai_failure_messages.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 /// User-facing text for lookup failures (translation, dictionary, contextual).

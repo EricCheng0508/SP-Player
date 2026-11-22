@@ -6,7 +6,6 @@ import 'package:enjoy_player/data/api/byok_secret_store.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/features/ai/application/ai_modality_configs.dart';
 import 'package:enjoy_player/features/ai/data/ai_modality_config_repository.dart';
-import 'package:enjoy_player/features/ai/domain/ai_provider.dart';
 import 'package:enjoy_player/features/ai/domain/ai_service_config.dart';
 import 'package:enjoy_player/features/ai/domain/byok_config_validator.dart';
 import 'package:enjoy_player/features/ai/domain/modality_kind.dart';

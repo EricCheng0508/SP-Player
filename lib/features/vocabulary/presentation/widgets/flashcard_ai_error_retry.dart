@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_button.dart';
-import 'package:enjoy_player/features/subscription/presentation/credits_failure_actions.dart';
+import 'package:enjoy_player/core/errors/ai_failure_messages.dart';
 import 'package:enjoy_player/features/vocabulary/domain/vocabulary_ai_error.dart';
 import 'package:enjoy_player/features/vocabulary/presentation/widgets/flashcard_soft_error.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';

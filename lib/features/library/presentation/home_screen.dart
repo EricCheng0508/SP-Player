@@ -24,7 +24,6 @@ import 'package:enjoy_player/core/theme/widgets/media_card.dart';
 import 'package:enjoy_player/core/theme/widgets/skeleton.dart';
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/community/presentation/community_activity_card.dart';
 import 'package:enjoy_player/features/library/application/continue_practice_provider.dart';
 import 'package:enjoy_player/features/library/presentation/continue_practice_card.dart';
 import 'package:enjoy_player/features/library/presentation/todays_goal_card.dart';
@@ -376,7 +375,6 @@ class _HomeOverview extends ConsumerWidget {
         ? null
         : const _HomeEmptyCard();
     const goal = TodaysGoalCard();
-    const community = CommunityActivityCard(outerPadding: EdgeInsets.zero);
 
     if (!isSignedIn) return hero ?? const SizedBox.shrink();
 
@@ -395,7 +393,7 @@ class _HomeOverview extends ConsumerWidget {
                 ),
                 child: const Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [goal, SizedBox(height: 20), community],
+                  children: [goal],
                 ),
               ),
             ),
@@ -410,14 +408,12 @@ class _HomeOverview extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Expanded(child: goal),
-                SizedBox(width: 20),
-                Expanded(child: community),
               ],
             ),
           )
         : const Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [goal, SizedBox(height: 16), community],
+            children: [goal],
           );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

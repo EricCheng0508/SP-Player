@@ -15,7 +15,7 @@ import 'package:enjoy_player/features/onboarding/presentation/onboarding_showcas
 import 'package:enjoy_player/features/player/application/player_controller.dart';
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
 import 'package:enjoy_player/features/player/presentation/widgets/player_dock.dart';
-import 'package:enjoy_player/features/subscription/presentation/tier_reconcile_host.dart';
+import 'package:enjoy_player/core/local/no_tier_host.dart';
 import 'package:enjoy_player/features/sync/application/sync_controller.dart';
 import 'package:enjoy_player/features/discover/application/discover_providers.dart';
 import 'package:enjoy_player/features/update/application/update_controller.dart';

@@ -2,7 +2,7 @@
 library;
 
 import 'package:enjoy_player/core/errors/app_failure.dart';
-import 'package:enjoy_player/features/subscription/presentation/credits_failure_actions.dart';
+import 'package:enjoy_player/core/errors/ai_failure_messages.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 /// What the learner can do next when a Craft failure occurs.

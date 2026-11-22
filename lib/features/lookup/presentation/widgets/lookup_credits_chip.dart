@@ -1,86 +1,13 @@
-/// Remaining-credits chip at the top of the lookup sheet (issue #870 2.5).
+/// 本地版：查词面板不再显示积分余额（没有积分体系）。
 library;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
-import 'package:enjoy_player/core/format/cached_number_format.dart';
-import 'package:enjoy_player/core/interaction/enjoy_pressable.dart';
-import 'package:enjoy_player/core/routing/route_paths.dart';
-import 'package:enjoy_player/core/riverpod/async_value_x.dart';
-import 'package:enjoy_player/core/theme/enjoy_icons.dart';
-import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
-import 'package:enjoy_player/core/theme/typography.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/credits/application/credits_summary_provider.dart';
-import 'package:enjoy_player/features/credits/domain/credits_thresholds.dart';
-import 'package:enjoy_player/features/subscription/application/daily_credits_limit_provider.dart';
-import 'package:enjoy_player/l10n/app_localizations.dart';
+class LookupCreditsChip extends StatelessWidget {
+  const LookupCreditsChip({super.key, this.compact = false});
 
-/// Signed-in-only stadium chip showing today's remaining worker credits so
-/// the sheet warns before a lookup is rejected, not after. Renders nothing
-/// while signed out, or while the summary has not loaded: an anonymous or
-/// offline lookup has no quota context to show, and a stale/failed balance
-/// must not claim one.
-class LookupCreditsChip extends ConsumerWidget {
-  const LookupCreditsChip({super.key});
-
-  static const double _hPad = 20;
+  final bool compact;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final auth = ref.watch(authCtrlProvider).valueOrNull;
-    if (auth is! AuthSignedIn) return const SizedBox.shrink();
-
-    final summary = ref.watch(creditsSummaryProvider).valueOrNull;
-    if (summary == null) return const SizedBox.shrink();
-
-    final l10n = AppLocalizations.of(context)!;
-    final t = EnjoyThemeTokens.of(context);
-    final limit = ref.watch(dailyCreditsLimitProvider);
-
-    final remaining = summary.dailyRemaining.clamp(0, limit);
-    final isLow = creditsLow(used: limit - remaining, limit: limit);
-    final locale = Localizations.localeOf(context).toLanguageTag();
-    final count = cachedDecimalPattern(locale).format(remaining);
-    final label = isLow
-        ? l10n.lookupCreditsRunningLowLabel(count)
-        : l10n.lookupCreditsRemainingLabel(count);
-    final tone = isLow ? t.danger : t.ink2;
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(_hPad, 0, _hPad, 6),
-      child: Align(
-        alignment: Alignment.centerRight,
-        child: EnjoyPressable(
-          shape: const StadiumBorder(),
-          semanticsLabel: label,
-          onTap: () =>
-              context.push(isLow ? kSubscriptionRoutePath : kCreditsRoutePath),
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: t.space8, vertical: 3),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(EnjoyIcons.wallet, size: 14, color: tone),
-                SizedBox(width: t.space4),
-                Text(
-                  label,
-                  style: enjoyMonoStyle(
-                    context,
-                    size: 11.5,
-                    weight: FontWeight.w600,
-                    color: tone,
-                    height: 1.2,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => const SizedBox.shrink();
 }

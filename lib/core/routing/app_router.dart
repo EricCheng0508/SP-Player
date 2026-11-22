@@ -16,18 +16,12 @@ import 'package:enjoy_player/core/player/player_surface_overlay_navigator_observ
 import 'package:enjoy_player/core/routing/auth_redirect.dart';
 import 'package:enjoy_player/core/routing/auth_router_tick.dart';
 import 'package:enjoy_player/core/routing/not_found_screen.dart';
-import 'package:enjoy_player/core/routing/route_paths.dart';
 import 'package:enjoy_player/core/window/desktop_window.dart';
 import 'package:enjoy_player/features/ai/presentation/ai_playground_screen.dart';
 import 'package:enjoy_player/features/ai/presentation/settings/ai_providers_screen.dart';
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/craft/presentation/craft_history_screen.dart';
 import 'package:enjoy_player/features/craft/presentation/craft_screen.dart';
-import 'package:enjoy_player/features/auth/presentation/profile_edit_screen.dart';
-import 'package:enjoy_player/features/auth/presentation/profile_preferences_screen.dart';
-import 'package:enjoy_player/features/auth/presentation/profile_screen.dart';
-import 'package:enjoy_player/features/credits/presentation/credits_usage_screen.dart';
-import 'package:enjoy_player/features/auth/presentation/sign_in_screen.dart';
 import 'package:enjoy_player/core/routing/library_source.dart';
 import 'package:enjoy_player/features/discover/presentation/channel_feed_screen.dart';
 import 'package:enjoy_player/features/discover/presentation/discover_screen.dart';
@@ -44,8 +38,6 @@ import 'package:enjoy_player/features/settings/domain/settings_search_entry.dart
 import 'package:enjoy_player/features/settings/presentation/hotkeys_settings_screen.dart';
 import 'package:enjoy_player/features/settings/presentation/settings_screen.dart';
 import 'package:enjoy_player/features/settings/presentation/settings_section_page.dart';
-import 'package:enjoy_player/features/settings/presentation/sync_status_screen.dart';
-import 'package:enjoy_player/features/subscription/presentation/subscription_screen.dart';
 import 'package:enjoy_player/features/transcript/presentation/transcript_editor_screen.dart';
 import 'package:enjoy_player/features/vocabulary/application/vocabulary_review_session.dart';
 import 'package:enjoy_player/features/vocabulary/presentation/vocabulary_review_session_screen.dart';
@@ -144,18 +136,6 @@ GoRouter appRouter(Ref ref) {
       return resolveAuthRedirect(matchedLocation: loc, auth: auth);
     },
     routes: [
-      GoRoute(
-        name: 'sign-in',
-        path: '/sign-in',
-        builder: (context, state) => const SignInScreen(),
-        routes: [
-          GoRoute(
-            name: 'sign-in-email',
-            path: 'email',
-            builder: (context, state) => const EmailEntryScreen(),
-          ),
-        ],
-      ),
       ShellRoute(
         navigatorKey: enjoyShellNavigatorKey,
         observers: [
@@ -256,11 +236,6 @@ GoRouter appRouter(Ref ref) {
             builder: (context, state) => const SettingsScreen(),
           ),
           GoRoute(
-            name: 'settings-sync',
-            path: '/settings/sync',
-            builder: (context, state) => const SyncStatusScreen(),
-          ),
-          GoRoute(
             name: 'settings-keyboard',
             path: '/settings/keyboard',
             builder: (context, state) => const HotkeysSettingsScreen(),
@@ -302,36 +277,6 @@ GoRouter appRouter(Ref ref) {
             name: 'settings-ai-playground',
             path: '/settings/ai-playground',
             builder: (context, state) => const AiPlaygroundScreen(),
-          ),
-          GoRoute(
-            name: 'profile',
-            path: '/profile',
-            pageBuilder: (context, state) => _shellPage(
-              key: const ValueKey<String>('shell-profile'),
-              child: const ProfileScreen(),
-            ),
-            routes: [
-              GoRoute(
-                name: 'profile-edit',
-                path: 'edit',
-                builder: (context, state) => const ProfileEditScreen(),
-              ),
-              GoRoute(
-                name: 'profile-preferences',
-                path: 'preferences',
-                builder: (context, state) => const ProfilePreferencesScreen(),
-              ),
-            ],
-          ),
-          GoRoute(
-            name: 'credits',
-            path: kCreditsRoutePath,
-            builder: (context, state) => const CreditsUsageScreen(),
-          ),
-          GoRoute(
-            name: 'subscription',
-            path: kSubscriptionRoutePath,
-            builder: (context, state) => const SubscriptionScreen(),
           ),
           GoRoute(
             name: 'vocabulary',

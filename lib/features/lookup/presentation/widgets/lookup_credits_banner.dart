@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:enjoy_player/core/theme/enjoy_icons.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_callout.dart';
-import 'package:enjoy_player/features/subscription/presentation/credits_failure_actions.dart';
+import 'package:enjoy_player/core/errors/ai_failure_messages.dart';
 
 class LookupCreditsBanner extends StatelessWidget {
   const LookupCreditsBanner({required this.message, super.key});

@@ -26,7 +26,7 @@ import 'package:enjoy_player/features/sync/application/sync_controller.dart';
 import 'package:enjoy_player/features/vocabulary/application/vocabulary_providers.dart';
 import 'package:enjoy_player/features/vocabulary/domain/vocabulary_models.dart';
 import 'package:enjoy_player/features/vocabulary/domain/vocabulary_session_selection.dart';
-import 'package:enjoy_player/features/vocabulary/presentation/vocabulary_anki_export_dialog.dart';
+import 'package:enjoy_player/features/vocabulary/presentation/vocabulary_anki_export_local.dart';
 import 'package:enjoy_player/features/vocabulary/presentation/vocabulary_word_list.dart';
 import 'package:enjoy_player/features/vocabulary/presentation/widgets/vocabulary_empty_states.dart';
 import 'package:enjoy_player/features/vocabulary/presentation/widgets/vocabulary_review_launch.dart';

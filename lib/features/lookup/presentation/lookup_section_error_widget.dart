@@ -9,7 +9,7 @@ import 'package:enjoy_player/features/lookup/application/lookup_credits_exhauste
 import 'package:enjoy_player/features/lookup/presentation/lookup_credits_reporting.dart';
 import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_credits_notice.dart';
 import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_error_row.dart';
-import 'package:enjoy_player/features/subscription/presentation/credits_failure_actions.dart';
+import 'package:enjoy_player/core/errors/ai_failure_messages.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 /// Renders the shared error surface for a lookup sheet section

@@ -84,6 +84,7 @@ class _MediaKitStageGateState extends State<MediaKitVideoStage> {
         controller: engine.videoController,
         positionStream: engine.position,
         playingStream: engine.playing,
+        nudgeMpvRender: engine.nudgeVideoRender,
         maxWidth: widget.maxWidth,
         maxHeight: widget.maxHeight,
       ),
@@ -102,6 +103,7 @@ class _MediaKitVideoStage extends StatefulWidget {
     required this.controller,
     required this.positionStream,
     required this.playingStream,
+    required this.nudgeMpvRender,
     required this.maxWidth,
     required this.maxHeight,
   });
@@ -117,6 +119,13 @@ class _MediaKitVideoStage extends StatefulWidget {
   /// can trigger from elsewhere (mode-tab switches pause, echo loops seek);
   /// each transition is another chance to un-black a stale texture.
   final Stream<bool> playingStream;
+
+  /// Forces mpv to re-render the current frame (1 ms seek). The hard-kick
+  /// escalation pairs this with a [Video] remount: remounting alone only
+  /// re-presents whatever is in the texture — if mpv never painted (fresh
+  /// open, audio playing, black stage), the seek is what actually produces
+  /// a frame. Same effect as the user's tab-switch-to-dictate workaround.
+  final Future<void> Function() nudgeMpvRender;
 
   final double maxWidth;
   final double maxHeight;
@@ -158,7 +167,7 @@ class _MediaKitVideoStageState extends State<_MediaKitVideoStage> {
     // texture (the freshly-imported first open stayed black until a mode-tab
     // switch). A hard kick remounts the [Video] element, which re-registers
     // the texture with the compositor — strictly stronger than relayout.
-    for (final delayMs in const [1200, 2600, 4500, 7000, 10000]) {
+    for (final delayMs in const [800, 1800, 3200, 5000, 7500]) {
       unawaited(Future<void>.delayed(Duration(milliseconds: delayMs)).then((_) {
         if (mounted) _scheduleKick(hard: true);
       }));
@@ -237,9 +246,11 @@ class _MediaKitVideoStageState extends State<_MediaKitVideoStage> {
     if (hard) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        // Remount: a new element re-registers the texture with the
-        // compositor even when the id/rect did not change.
+        // Remount re-registers the texture with the compositor; the paired
+        // mpv nudge (1 ms seek) is what actually makes mpv paint a frame
+        // into it when it has been sitting silent since a fresh open.
         setState(() => _hardKickEpoch++);
+        unawaited(widget.nudgeMpvRender());
       });
       return;
     }

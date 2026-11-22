@@ -21,6 +21,7 @@ import 'core/logging/log.dart';
 import 'core/logging/setup_logging.dart';
 import 'core/platform/linux_url_scheme_handler.dart';
 import 'core/webview/platform_webview_environment.dart';
+import 'features/ai/data/local_subgen_asr_service.dart';
 
 Future<void> main() async {
   await runZonedGuarded<Future<void>>(_bootstrap, _onZoneError);
@@ -50,6 +51,11 @@ Future<void> _bootstrap() async {
   _installFrameworkErrorHandlers();
   if (defaultTargetPlatform == TargetPlatform.linux) {
     unawaited(ensureEnjoyplayerSchemeHandler());
+  }
+  // 本地版:启动时后台拉起内置语音识别服务(subgen, large-v3),
+  // 让首次听写/生成字幕无需等待冷启动;失败静默,懒加载路径兜底。
+  if (defaultTargetPlatform == TargetPlatform.windows) {
+    unawaited(warmUpLocalAsrService());
   }
   MediaKit.ensureInitialized();
 

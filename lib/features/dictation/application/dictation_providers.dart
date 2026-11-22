@@ -3,6 +3,7 @@ library;
 import 'dart:io';
 
 import 'package:enjoy_player/core/logging/log.dart';
+import 'package:enjoy_player/data/api/api_exception.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/features/ai/application/ai_services.dart';
@@ -262,5 +263,6 @@ String _friendlyAiError(Object e) {
       _ => 'AI 服务未配置：请先在 设置 → AI 服务商 中完成配置。',
     };
   }
+  if (e is ApiException && e.message.isNotEmpty) return e.message;
   return e.toString();
 }

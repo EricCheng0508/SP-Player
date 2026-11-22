@@ -13,6 +13,7 @@ import 'package:enjoy_player/features/ai/data/byok/byok_llm_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_tts_azure_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_tts_openai_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_translation_capability.dart';
+import 'package:enjoy_player/features/ai/data/local_subgen_asr_capability.dart';
 import 'package:enjoy_player/features/ai/data/stub_ai_capabilities.dart';
 import 'package:enjoy_player/features/ai/domain/ai_provider.dart';
 import 'package:enjoy_player/features/ai/domain/ai_service_config.dart';
@@ -31,7 +32,14 @@ AsrCapability resolveAsrCapability(Ref ref, AIServiceConfig config) {
   switch (config.provider) {
     case AIProvider.byok:
       final speechByok = config.speechByok;
-      if (speechByok == null) return const ByokNotConfiguredAsrCapability();
+      if (speechByok == null) {
+        // 本地版:语音识别未配置时默认绑定 subgen 本地识别服务
+        // (D:\Tool\subgen\start-asr-server.bat → 127.0.0.1:8000,large-v3),
+        // 零配置可用;设置里显式配置过的用户仍以配置为准。
+        return LocalSubgenAsrCapability(
+          httpClient: ref.read(httpClientProvider),
+        );
+      }
       return switch (speechByok.kind) {
         SpeechByokKind.openAiCompatible => ByokAsrOpenAiCapability(
           config: speechByok,

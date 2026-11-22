@@ -8,6 +8,7 @@
 library;
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:archive/archive_io.dart';
@@ -414,13 +415,17 @@ final class ComponentStore {
   }) async {
     final client = _newClient(url);
     try {
-      // Range capability probe: 206 + content length → parallel path.
+      // Range capability probe with a SMALL bounded range: some CDN
+      // frontends mishandle open-ended ranges (`bytes=N-`), and a 206 probe
+      // for the full remaining body is dangerous to drain (the original
+      // "stuck forever" bug). Content-Range reveals the true total size.
       final probe = await client
           .getUrl(Uri.parse(url))
           .timeout(const Duration(seconds: 15));
-      if (resumeFrom > 0) {
-        probe.headers.set(HttpHeaders.rangeHeader, 'bytes=$resumeFrom-');
-      }
+      probe.headers.set(
+        HttpHeaders.rangeHeader,
+        'bytes=$resumeFrom-${resumeFrom + (1 << 20)}',
+      );
       final probeResponse = await probe.close().timeout(
             const Duration(seconds: 45),
             onTimeout: () => throw TimeoutException('no response: $url'),
@@ -433,10 +438,7 @@ final class ComponentStore {
       if (status != 200 && status != 206) {
         throw HttpException('HTTP $status for $url');
       }
-      final probeLength = probeResponse.contentLength;
-      // Abort the probe body — it is the FULL remaining file for a 206, and
-      // draining it would silently re-download everything single-threaded
-      // with no progress events (the exact "stuck forever" bug).
+      // Discard the small probe body (bounded to 1 MB by the range above).
       final sub = probeResponse.listen(null);
       try {
         await sub.cancel();
@@ -444,14 +446,23 @@ final class ComponentStore {
         // Cancel is best-effort; the force close below finishes the job.
       }
 
-      if (status == 206 &&
-          probeLength > 0 &&
-          probeLength - resumeFrom >= _kParallelMinBytes) {
+      // "Content-Range: bytes <start>-<end>/<total>"
+      var total = 0;
+      if (status == 206) {
+        final contentRange =
+            probeResponse.headers.value(HttpHeaders.contentRangeHeader);
+        final match = RegExp(r'/(\d+)\s*$').firstMatch(contentRange ?? '');
+        if (match != null) total = int.tryParse(match.group(1)!) ?? 0;
+      } else {
+        total = probeResponse.contentLength;
+      }
+      final remaining = total - resumeFrom;
+      if (status == 206 && total > 0 && remaining >= _kParallelMinBytes) {
         return await _downloadParallel(
           url,
           dest,
           resumeFrom: resumeFrom,
-          total: resumeFrom + probeLength,
+          total: total,
           fileLabel: fileLabel,
           onProgress: onProgress,
         );
@@ -473,10 +484,11 @@ final class ComponentStore {
   static const _kParallelChunks = 16;
   static const _kParallelMinBytes = 64 << 20; // 64 MB
 
-  /// Parallel segmented download. Chunk 0 appends to [dest] (preserving the
-  /// existing resume prefix); other chunks land in `dest.partN` files and are
-  /// assembled at the end. Partial chunk files survive failures and candidate
-  /// switches (same byte ranges), so progress is never wasted.
+  /// Parallel segmented download. EVERY chunk — including chunk 0 — lands in
+  /// `dest.partN` files; [dest] keeps only the single-stream resume prefix
+  /// `[0, base)` and stays untouched during the run. A `dest.meta` sidecar
+  /// records the layout (url/total/base/chunkLen): if a later run's layout
+  /// differs, stale part files are discarded instead of corrupting assembly.
   Future<int> _downloadParallel(
     String url,
     File dest, {
@@ -488,9 +500,33 @@ final class ComponentStore {
     final base = resumeFrom;
     final remaining = total - base;
     final chunkLen = remaining ~/ _kParallelChunks;
+    final metaFile = File('${dest.path}.meta');
+
+    // Validate or reset the part-file layout against this run's parameters.
+    var layoutOk = false;
+    if (metaFile.existsSync()) {
+      try {
+        final meta = jsonDecode(metaFile.readAsStringSync()) as Map;
+        layoutOk = meta['url'] == url &&
+            meta['total'] == total &&
+            meta['base'] == base &&
+            meta['chunkLen'] == chunkLen;
+      } on Object {
+        layoutOk = false;
+      }
+    }
+    if (!layoutOk) {
+      for (var i = 0; i < _kParallelChunks; i++) {
+        final part = File('${dest.path}.part$i');
+        if (part.existsSync()) part.deleteSync();
+      }
+    }
+    metaFile.writeAsStringSync(
+      jsonEncode({'url': url, 'total': total, 'base': base, 'chunkLen': chunkLen}),
+    );
 
     Future<void> pullChunk(int index, int start, int end) async {
-      final target = index == 0 ? dest : File('${dest.path}.part$index');
+      final target = File('${dest.path}.part$index');
       for (var attempt = 1; attempt <= 4; attempt++) {
         var offset = 0;
         if (target.existsSync()) offset = target.lengthSync();
@@ -541,14 +577,18 @@ final class ComponentStore {
     var lastTick = DateTime.now();
     var lastBytes = base;
     var lastSpeed = 0;
+    int receivedNow() {
+      var received = base;
+      for (var i = 0; i < _kParallelChunks; i++) {
+        final part = File('${dest.path}.part$i');
+        if (part.existsSync()) received += part.lengthSync();
+      }
+      return received.clamp(0, total);
+    }
+
     final reporter = Timer.periodic(const Duration(milliseconds: 500), (_) {
       try {
-        var received = dest.existsSync() ? dest.lengthSync() : 0;
-        for (var i = 1; i < _kParallelChunks; i++) {
-          final part = File('${dest.path}.part$i');
-          if (part.existsSync()) received += part.lengthSync();
-        }
-        received = received.clamp(0, total);
+        final received = receivedNow();
         final now = DateTime.now();
         final elapsed = now.difference(lastTick).inMilliseconds;
         if (elapsed > 0) {
@@ -585,10 +625,11 @@ final class ComponentStore {
       reporter.cancel();
     }
 
-    // Assemble part files into dest at their absolute offsets.
-    final raf = dest.openSync(mode: FileMode.append);
+    // Assemble part files into dest at their absolute offsets. FileMode.write
+    // does NOT truncate; the resume prefix [0, base) is preserved.
+    final raf = dest.openSync(mode: FileMode.write);
     try {
-      for (var i = 1; i < _kParallelChunks; i++) {
+      for (var i = 0; i < _kParallelChunks; i++) {
         final part = File('${dest.path}.part$i');
         if (!part.existsSync()) {
           throw HttpException('missing chunk file $i');
@@ -603,6 +644,7 @@ final class ComponentStore {
     } finally {
       await raf.close();
     }
+    if (metaFile.existsSync()) metaFile.deleteSync();
     return total;
   }
 

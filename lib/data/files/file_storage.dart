@@ -8,6 +8,7 @@ import 'dart:typed_data';
 
 import 'package:cross_file/cross_file.dart';
 import 'package:crypto/crypto.dart';
+import 'package:enjoy_player/core/logging/log.dart';
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 
@@ -141,6 +142,8 @@ class FileStorage {
   // ignore: prefer_const_constructors
   static final Uuid _uuid = Uuid();
 
+  static final _importLog = logNamed('file_storage.import');
+
   /// Prefer lasting external link; otherwise copy into app `media/`.
   ///
   /// When [expectedHashHex] is set, fails with [FileFailure] if the chunked
@@ -165,10 +168,18 @@ class FileStorage {
       final tempFileName = '.tmp_${_uuid.v4()}$ext';
       final title = p.basenameWithoutExtension(file.name);
       final linkExternally = await canLinkExternally(path);
+      final sw = Stopwatch()..start();
+      _importLog.info(
+        'import start: link=$linkExternally path=$path',
+      );
 
       final bookmarkData = linkExternally
           ? await SecurityScopedBookmarkChannel.createBookmark(path)
           : null;
+      _importLog.info(
+        'import bookmark done: ${sw.elapsedMilliseconds}ms '
+        '(bookmark=${bookmarkData != null})',
+      );
 
       final worker = await Isolate.run(
         () => _importMediaFileInIsolate((
@@ -180,6 +191,11 @@ class FileStorage {
           expectedHashHex: expectedHashHex,
           linkExternally: linkExternally,
         )),
+      );
+      _importLog.info(
+        'import isolate done: ${sw.elapsedMilliseconds}ms '
+        'hash=${worker.contentHashHex.substring(0, 8)} '
+        'copied=${!linkExternally}',
       );
 
       return FileImportResult(

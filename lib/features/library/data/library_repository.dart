@@ -59,16 +59,25 @@ class MediaLibraryRepository {
       if (!isImportableLocalMediaFileName(file.name)) {
         throw const UnsupportedImportFileFailure();
       }
+      final importSw = Stopwatch()..start();
       final result = await _storage.importOrLinkPickedFile(file);
+      _log.info(
+        'importMedia storage done: ${importSw.elapsedMilliseconds}ms '
+        '(${file.name})',
+      );
       final kind = isVideoFileName(file.name)
           ? MediaKind.video
           : MediaKind.audio;
-      return await _importLocalFile(
+      final id = await _importLocalFile(
         kind: kind,
         result: result,
         signedInUserId: signedInUserId,
         contentLanguage: contentLanguage,
       );
+      _log.info(
+        'importMedia finished: ${importSw.elapsedMilliseconds}ms id=$id',
+      );
+      return id;
     } on AppFailure {
       rethrow;
     } catch (e, st) {

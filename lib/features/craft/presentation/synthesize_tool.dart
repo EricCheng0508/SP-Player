@@ -1,0 +1,229 @@
+/// Synthesize tool panel for the Craft screen.
+library;
+
+import 'package:enjoy_player/core/theme/enjoy_icons.dart';
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:enjoy_player/core/presentation/loading_icon.dart';
+import 'package:enjoy_player/core/routing/player_navigation.dart';
+import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
+import 'package:enjoy_player/core/theme/typography.dart';
+import 'package:enjoy_player/core/theme/widgets/editorial_header.dart';
+import 'package:enjoy_player/features/craft/presentation/craft_lang_tile.dart';
+import 'package:enjoy_player/core/theme/widgets/enjoy_button.dart';
+import 'package:enjoy_player/core/theme/widgets/enjoy_card.dart';
+import 'package:enjoy_player/core/theme/widgets/enjoy_modal.dart';
+import 'package:enjoy_player/features/craft/application/craft_controller.dart';
+import 'package:enjoy_player/features/craft/presentation/widgets/craft_busy_label.dart';
+import 'package:enjoy_player/features/craft/presentation/widgets/craft_failure_card.dart';
+import 'package:enjoy_player/features/craft/presentation/widgets/craft_paste_text_field.dart';
+import 'package:enjoy_player/features/craft/presentation/widgets/craft_synced_text_controller.dart';
+import 'package:enjoy_player/features/craft/domain/craft_request.dart';
+import 'package:enjoy_player/features/craft/presentation/craft_solid_transcript_stt_hint.dart';
+import 'package:enjoy_player/features/craft/presentation/voice_picker.dart';
+import 'package:enjoy_player/features/craft/presentation/widgets/craft_preview_player.dart';
+import 'package:enjoy_player/features/library/presentation/widgets/content_language_picker.dart';
+import 'package:enjoy_player/l10n/app_localizations.dart';
+
+class SynthesizeTool extends ConsumerStatefulWidget {
+  const SynthesizeTool({super.key});
+
+  @override
+  ConsumerState<SynthesizeTool> createState() => _SynthesizeToolState();
+}
+
+class _SynthesizeToolState extends ConsumerState<SynthesizeTool> {
+  late final CraftSyncedTextController _text;
+
+  @override
+  void initState() {
+    super.initState();
+    _text = CraftSyncedTextController();
+  }
+
+  @override
+  void dispose() {
+    _text.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final state = ref.watch(craftControllerProvider);
+    final controller = ref.read(craftControllerProvider.notifier);
+
+    _text.sync(state.synthText);
+
+    final tokens = EnjoyThemeTokens.of(context);
+    final canSynthesize =
+        !state.isSynthesizing &&
+        !state.isSaving &&
+        meetsCraftMinTextLength(state.synthText);
+
+    return EnjoyCard(
+      padding: EdgeInsets.all(tokens.space16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          EnjoySectionHeader(title: l10n.craftSynthesizeTool),
+          SizedBox(height: tokens.space16),
+          _SynthLangTile(
+            label: l10n.craftTargetLanguageLabel,
+            value: state.synthLanguage.toUpperCase(),
+            onTap: () => _pickLanguage(state.synthLanguage, controller),
+          ),
+          SizedBox(height: tokens.space12),
+          VoicePicker(
+            language: state.synthLanguage,
+            selectedVoice: state.selectedVoice,
+            onChanged: controller.setSelectedVoice,
+          ),
+          SizedBox(height: tokens.space16),
+          CraftPasteTextField(
+            controller: _text.controller,
+            focusNode: _text.focusNode,
+            labelText: l10n.craftSynthText,
+            hintText: l10n.craftTextInputHint,
+            onChanged: controller.setSynthText,
+          ),
+          SizedBox(height: tokens.space16),
+          EnjoyButton.brand(
+            onPressed: canSynthesize
+                ? () => _synthesizeWithOverlay(l10n)
+                : null,
+            icon: state.isSynthesizing ? null : EnjoyIcons.speak,
+            child: state.isSynthesizing
+                ? CraftBusyLabel(label: l10n.craftLoadingSynthesizing)
+                : Text(
+                    state.hasPreview
+                        ? l10n.craftReSynthesizeButton
+                        : l10n.craftSynthesizeButton,
+                  ),
+          ),
+          if (state.hasPreview) ...[
+            SizedBox(height: tokens.space20),
+            EnjoySectionHeader(title: l10n.craftPreviewLabel),
+            SizedBox(height: tokens.space8),
+            CraftPreviewPlayer(audioBytes: state.previewAudioBytes!),
+            SizedBox(height: tokens.space12),
+            EnjoyButton.secondary(
+              onPressed: state.isSaving ? null : _save,
+              icon: state.isSaving ? null : EnjoyIcons.save,
+              child: state.isSaving
+                  ? const CraftBusyLabel(label: '…')
+                  : Text(l10n.craftSaveToLibrary),
+            ),
+          ],
+          if (state.failure != null)
+            CraftInlineFailure(failure: state.failure!, l10n: l10n),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _pickLanguage(String current, CraftController controller) async {
+    final picked = await showContentLanguagePicker(
+      context: context,
+      ref: ref,
+      selectedValue: current,
+    );
+    if (!mounted || picked == null) return;
+    controller.setSynthLanguage(picked);
+  }
+
+  Future<void> _synthesizeWithOverlay(AppLocalizations l10n) async {
+    final controller = ref.read(craftControllerProvider.notifier);
+
+    unawaited(
+      showEnjoyDialog<void>(
+        context: context,
+        useRootNavigator: true,
+        barrierDismissible: false,
+        builder: (dialogContext) {
+          return PopScope(
+            canPop: false,
+            child: AlertDialog(
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const LoadingIcon(size: 28, strokeWidth: 2.5),
+                  SizedBox(height: EnjoyThemeTokens.of(context).space16),
+                  Text(l10n.craftCraftingProgress),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+    await WidgetsBinding.instance.endOfFrame;
+
+    await controller.synthesize();
+
+    if (!mounted) return;
+    final nav = Navigator.of(context, rootNavigator: true);
+    if (nav.canPop()) nav.pop();
+  }
+
+  Future<void> _save() async {
+    final controller = ref.read(craftControllerProvider.notifier);
+    final result = await controller.saveToLibrary();
+    if (!mounted || result == null) return;
+
+    maybeShowCraftSolidTranscriptSttHint(
+      context,
+      savedSolidTimeline: result.wroteSolidTranscript,
+    );
+    controller.clearResult();
+    openPlayerRoute(context, result.mediaId);
+  }
+}
+
+class _SynthLangTile extends StatelessWidget {
+  const _SynthLangTile({
+    required this.label,
+    required this.value,
+    required this.onTap,
+  });
+
+  final String label;
+  final String value;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = EnjoyThemeTokens.of(context);
+    final cs = Theme.of(context).colorScheme;
+    return CraftLangTile(
+      onTap: onTap,
+      verticalPadding: t.space12,
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
+            ),
+          ),
+          Text(
+            value,
+            style: enjoyMonoStyle(
+              context,
+              size: 14,
+              weight: FontWeight.w600,
+              color: cs.onSurface,
+            ),
+          ),
+          SizedBox(width: t.space4),
+          Icon(EnjoyIcons.chevronRight, size: 18, color: t.ink3),
+        ],
+      ),
+    );
+  }
+}

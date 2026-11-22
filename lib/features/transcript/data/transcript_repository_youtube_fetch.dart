@@ -1,8 +1,12 @@
 part of 'transcript_repository.dart';
 
-/// YouTube transcript fetching for [TranscriptRepository]: the three-tier
-/// fallback chain (worker cache → direct InnerTube fetch), worker id /
-/// caption-language resolution, and the post-fetch primary picker.
+/// YouTube transcript fetching for [TranscriptRepository]: canonical video id /
+/// caption-language resolution, the direct InnerTube fetch, and the post-fetch
+/// primary picker.
+///
+/// 本地版：原来的 Tier 1（Enjoy worker 字幕缓存 GET）与抓取后的 worker 上传
+/// 已全部移除 —— 这里只保留直连 YouTube InnerTube 的本地抓取，不再向
+/// `worker.enjoy.bot` 发起任何请求。
 extension _TranscriptRepositoryYoutubeFetch on TranscriptRepository {
   /// Worker body `video_id` / `videoId`: prefer [VideoRow.vid] when it is an
   /// 11-character YouTube id; otherwise fall back to [youtubePlaybackVideoId].
@@ -24,84 +28,36 @@ extension _TranscriptRepositoryYoutubeFetch on TranscriptRepository {
     return workerLanguageBase(lang);
   }
 
-  /// Three-tier fallback chain for YouTube transcript fetching.
+  /// Direct client-side YouTube caption fetch.
   ///
-  /// Tier 1: Worker GET cache (skipped when [force] is true; also skipped
-  /// when the video row has no usable content language).
-  /// Tier 2: Client-side direct YouTube fetch (bypasses worker).
-  /// Every direct fetch uploads all tracks to the worker for caching.
+  /// 只用本地 InnerTube 抓取：`POST youtubei.googleapis.com/youtubei/v1/player`
+  /// 拿到 captionTracks，再逐轨 `GET timedtext?fmt=json3` 取时间轴。
+  /// 全部落本地 SQLite，不上传、不查远端缓存。
   ///
   /// Tier 2 always runs when the row resolves to YouTube playback, even
   /// when `videos.language` is empty / `und` / unknown — the InnerTube
   /// fetch itself discovers every available language. The unknown
-  /// language only narrows the Tier 1 lookup and the `preferredLang`
-  /// hint handed to the fetcher.
-  ///
-  /// Every branch logs its outcome (at INFO or WARNING) so the chain is
-  /// observable in production. Without these logs a Windows → worker → Android
-  /// failure mode looks like a true no-op: no server-side upload log, no
-  /// client-side failure, no UI signal.
+  /// language only narrows the `preferredLang` hint handed to the fetcher.
   Future<TranscriptCloudFetchResult> _fetchYoutubeTranscriptsWithFallback({
     required String mediaId,
     required VideoRow video,
-    required bool force,
     String? learningLanguage,
   }) async {
     final workerVideoId = _workerYoutubeVideoId(video);
     final videoLanguage = video.language.trim();
     final workerLanguage = _workerCaptionLanguage(video);
 
-    if (!force && workerLanguage != null) {
+    if (workerLanguage == null) {
       _log.info(
-        'YouTube Tier 1 (worker cache) GET '
-        '$workerVideoId/$workerLanguage',
-      );
-      final cached = await _fetchWorkerCachedTranscript(
-        videoId: workerVideoId,
-        language: workerLanguage,
-      );
-      if (cached != null) {
-        final result = await _upsertWorkerCachedTranscript(
-          mediaId: mediaId,
-          response: cached,
-          fallbackNow: DateTime.now(),
-        );
-        if (result) {
-          _log.info(
-            'YouTube Tier 1 hit for $workerVideoId/$workerLanguage — '
-            'using cached transcript (skipping InnerTube)',
-          );
-          await _pickYoutubePrimary(
-            mediaId: mediaId,
-            videoLanguage: videoLanguage.isEmpty ? null : videoLanguage,
-            learningLanguage: learningLanguage,
-          );
-          return const TranscriptCloudFetchResult(
-            status: TranscriptCloudFetchStatus.success,
-            storedCount: 1,
-          );
-        }
-        _log.info(
-          'YouTube Tier 1 returned a body but stored 0 lines for '
-          '$workerVideoId/$workerLanguage — falling through to InnerTube',
-        );
-      } else {
-        _log.info(
-          'YouTube Tier 1 miss for $workerVideoId/$workerLanguage — '
-          'falling through to direct InnerTube fetch',
-        );
-      }
-    } else if (workerLanguage == null) {
-      _log.info(
-        'YouTube Tier 1 skipped for $workerVideoId — '
-        'videos.language is empty/"und" (Tier 2 will still discover)',
+        'YouTube direct fetch for $workerVideoId — '
+        'videos.language is empty/"und" (InnerTube will still discover)',
       );
     }
 
     final fetcher = _youtubeFetcher;
     if (fetcher == null) {
       _log.warning(
-        'YouTube Tier 2 unavailable: YoutubeCaptionFetcher is not wired',
+        'YouTube fetch unavailable: YoutubeCaptionFetcher is not wired',
       );
       return const TranscriptCloudFetchResult(
         status: TranscriptCloudFetchStatus.skipped,
@@ -116,7 +72,7 @@ extension _TranscriptRepositoryYoutubeFetch on TranscriptRepository {
 
     if (!allResult.isSuccess) {
       _log.warning(
-        'YouTube Tier 2 (direct InnerTube) failed for '
+        'YouTube direct InnerTube fetch failed for '
         '$workerVideoId/$preferredLang: ${allResult.error}',
       );
       return TranscriptCloudFetchResult(
@@ -150,18 +106,11 @@ extension _TranscriptRepositoryYoutubeFetch on TranscriptRepository {
         createdAt: now,
       );
       storedCount++;
-
-      _uploadToWorkerAfterDirectFetch(
-        videoId: workerVideoId,
-        language: trackResult.language,
-        source: source,
-        lines: trackResult.subtitles,
-      );
     }
 
     if (storedCount == 0) {
       _log.info(
-        'YouTube Tier 2 succeeded profile=${allResult.fetchProfile} '
+        'YouTube direct fetch succeeded profile=${allResult.fetchProfile} '
         'but stored 0 valid tracks for $workerVideoId/$preferredLang',
       );
       return const TranscriptCloudFetchResult(
@@ -170,9 +119,8 @@ extension _TranscriptRepositoryYoutubeFetch on TranscriptRepository {
     }
 
     _log.info(
-      'YouTube Tier 2 stored $storedCount track(s) via '
-      'profile=${allResult.fetchProfile} for $workerVideoId/$preferredLang; '
-      'uploads dispatched to worker',
+      'YouTube direct fetch stored $storedCount track(s) via '
+      'profile=${allResult.fetchProfile} for $workerVideoId/$preferredLang',
     );
 
     await _pickYoutubePrimary(

@@ -14,15 +14,13 @@
 ///
 /// Payload snapshots on the upsert variants are fallback-only: the drain
 /// re-reads the live row before uploading, so `payloadJson` is decorative
-/// except for deletes (always null) and [SyncYoutubeUploadRetry] (the
-/// payload *is* the job — there is no local row to re-read).
+/// except for deletes (always null).
 library;
 
 import 'dart:convert';
 
 import 'package:enjoy_player/core/json/gated_json_decode.dart';
 import 'package:enjoy_player/core/json/json_cast.dart';
-import 'package:enjoy_player/data/api/services/ai/youtube_transcripts_api.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/media_registry.dart';
 import 'package:enjoy_player/features/sync/data/sync_serializers.dart';
@@ -31,7 +29,6 @@ import 'package:enjoy_player/features/sync/domain/sync_types.dart';
 part 'sync_queue_job/delete_jobs.dart';
 part 'sync_queue_job/snapshot.dart';
 part 'sync_queue_job/upsert_jobs.dart';
-part 'sync_queue_job/youtube_upload_retry.dart';
 
 /// The `sync_queue` wire columns a [SyncQueueJob] persists to — the exact
 /// pre-seam row shape (`entityType` / `entityId` / `action` / `payloadJson`),
@@ -118,12 +115,6 @@ sealed class SyncQueueJob {
 
   /// Interprets a persisted [SyncQueueRow] as a typed job.
   ///
-  /// Video upsert rows are returned as [SyncVideoUpsert] with the raw
-  /// `payloadJson` — the `youtube_upload` retry hiding inside that payload is
-  /// resolved lazily by [decodeYoutubeUploadRetry] at dispatch time, because
-  /// the retry payload embeds the whole caption timeline (potentially MBs of
-  /// JSON) and must not be parsed on every drain scan.
-  ///
   /// Returns `null` when the row cannot be interpreted — an unknown
   /// `entityType`/`action` pair. The drain drops such rows instead of
   /// retrying them forever; never crash the drain loop over an
@@ -183,21 +174,4 @@ sealed class SyncQueueJob {
       ),
     };
   }
-
-  /// Resolves the durable YouTube worker-upload retry (issue #717) hiding
-  /// inside a `video` upsert payload — there is deliberately no
-  /// [SyncEntityType] value for the worker upload (web/Dexie wire parity pins
-  /// the enum), so the `kind` discriminator is decoded here.
-  ///
-  /// Called by the drain only when the retry is actually dispatched: the
-  /// quoted-key probe [_kYoutubeUploadKindProbe] skips plain video snapshots
-  /// without any JSON parse — in valid JSON an unescaped `"kind":` can only
-  /// introduce an object member, never string content, so user text that
-  /// merely mentions `youtube_upload` cannot trip it — and the full payload
-  /// decode (the embedded caption timeline can reach MBs) leaves the UI
-  /// isolate via [decodeJsonGated]. Returns `null` for a plain video payload
-  /// or a malformed retry.
-  static Future<SyncYoutubeUploadRetry?> decodeYoutubeUploadRetry(
-    String? payloadJson,
-  ) => _decodeYoutubeUploadRetry(payloadJson);
 }

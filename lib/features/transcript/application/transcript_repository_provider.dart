@@ -21,7 +21,6 @@ part 'transcript_repository_provider.g.dart';
 TranscriptRepository transcriptRepository(Ref ref) {
   final db = ref.watch(appDatabaseProvider);
   final api = ref.watch(transcriptApiProvider);
-  final yt = ref.watch(youtubeTranscriptsClientProvider);
   final profilesAsync = ref.watch(youtubeProfilesProvider);
   final profiles = profilesAsync.maybeWhen(
     data: (p) => p,
@@ -39,8 +38,6 @@ TranscriptRepository transcriptRepository(Ref ref) {
   return TranscriptRepository(
     db,
     transcriptApi: api,
-    youtubeTranscripts: yt,
     youtubeFetcher: fetcher,
-    enqueueJob: ref.watch(syncEnqueueJobProvider),
   );
 }

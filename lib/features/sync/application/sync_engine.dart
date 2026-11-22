@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:enjoy_player/core/logging/log.dart';
-import 'package:enjoy_player/data/api/services/ai/youtube_transcripts_api.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/media_registry.dart';
 import 'package:enjoy_player/features/sync/data/sync_download_service.dart';
@@ -43,7 +42,6 @@ class SyncEngine {
     required this._queue,
     required this._upload,
     required this._download,
-    required this._youtubeTranscripts,
     SyncRetryPolicy? retryPolicy,
   }) : _retryPolicy = retryPolicy ?? SyncRetryPolicy();
 
@@ -51,7 +49,6 @@ class SyncEngine {
   final SyncQueueRepository _queue;
   final SyncUploadService _upload;
   final SyncDownloadService _download;
-  final YoutubeTranscriptsClient _youtubeTranscripts;
 
   /// Threshold, backoff, and clock for every retry decision in the drain
   /// (issue #752). Injectable so tests can pin wall time.
@@ -174,22 +171,6 @@ class SyncEngine {
     return SyncResult(success: failed == 0, synced: synced, failed: failed);
   }
 
-  Future<bool> _processYoutubeUploadRetry(
-    SyncYoutubeUploadRetry retry,
-    SyncQueueRow item,
-  ) async {
-    await retry.processRetry(
-      rowId: item.id,
-      upload: retry.toUploadCall(_youtubeTranscripts),
-      removeByIdIfPayload: _queue.removeByIdIfPayload,
-    );
-    _log.info(
-      'youtube_upload retry accepted for ${retry.videoId}/${retry.language} '
-      '(source=${retry.source}, ${retry.timeline.length} lines)',
-    );
-    return true;
-  }
-
   Future<void> _dropQueueRow(SyncQueueRow item) async {
     if (item.payloadJson == null) {
       await _queue.removeById(item.id);
@@ -235,15 +216,9 @@ class SyncEngine {
         case SyncVideoUpsert(:final id):
           final row = await MediaRegistry(_db).getVideoById(id);
           if (row == null) {
-            final retry = await SyncQueueJob.decodeYoutubeUploadRetry(
-              item.payloadJson,
-            );
-            if (retry == null) {
-              _log.warning('sync video $id: missing locally, drop queue row');
-              await _dropQueueRow(item);
-              return true;
-            }
-            return await _processYoutubeUploadRetry(retry, item);
+            _log.warning('sync video $id: missing locally, drop queue row');
+            await _dropQueueRow(item);
+            return true;
           }
           await _upload.uploadVideo(row);
         case SyncRecordingUpsert(:final id):
@@ -276,9 +251,6 @@ class SyncEngine {
           await _upload.uploadVocabularyContext(row);
         case SyncYoutubeSubscriptionUpsert():
           break;
-
-        case SyncYoutubeUploadRetry():
-          return await _processYoutubeUploadRetry(job, item);
       }
 
       await _queue.removeById(item.id);

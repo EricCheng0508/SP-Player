@@ -79,7 +79,6 @@ SyncEngine syncEngine(Ref ref) => SyncEngine(
   queue: ref.watch(syncQueueRepositoryProvider),
   upload: ref.watch(syncUploadServiceProvider),
   download: ref.watch(syncDownloadServiceProvider),
-  youtubeTranscripts: ref.watch(youtubeTranscriptsClientProvider),
 );
 
 @Riverpod(keepAlive: true)

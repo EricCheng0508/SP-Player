@@ -56,7 +56,6 @@ extension _TranscriptRepositoryCloudFetch on TranscriptRepository {
             return await _fetchYoutubeTranscriptsWithFallback(
               mediaId: mediaId,
               video: video,
-              force: force,
               learningLanguage: learningLanguage,
             );
           } on Object catch (e, st) {

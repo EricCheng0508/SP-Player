@@ -7,9 +7,13 @@
 library;
 
 import 'dart:async';
+import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/data/db/settings_keys.dart';
@@ -78,11 +82,12 @@ enum _TranslationChoice { cloud, localNow, localLater }
 enum _InstallRowState { pending, downloading, extracting, done, failed }
 
 class _RowState {
-  _RowState(this.state, {this.received = 0, this.total = 0, this.error});
+  _RowState(this.state, {this.received = 0, this.total = 0, this.error, this.speedBps});
   final _InstallRowState state;
   final int received;
   final int total;
   final String? error;
+  final int? speedBps;
 }
 
 class SetupWizardDialog extends ConsumerStatefulWidget {
@@ -165,6 +170,7 @@ class _SetupWizardDialogState extends ConsumerState<SetupWizardDialog> {
               received: progress.receivedBytes,
               total: progress.totalBytes,
               error: progress.error,
+              speedBps: progress.speedBps,
             );
           });
         });
@@ -185,6 +191,63 @@ class _SetupWizardDialogState extends ConsumerState<SetupWizardDialog> {
     // Warm the translation server so the first use is instant.
     if (_choice == _TranslationChoice.localNow) {
       unawaited(warmUpLocalLlmServer());
+    }
+  }
+
+  /// Manual import: pick a user-downloaded zip (fetched with a proper
+  /// download manager from the GitHub release) and install it offline.
+  Future<void> _importManually() async {
+    final picked = await FilePicker.pickFile(
+      dialogTitle: '选择已下载的组件压缩包',
+      type: FileType.any,
+    );
+    final path = picked?.path;
+    if (path == null || path.isEmpty) return;
+
+    final name = path.split(Platform.pathSeparator).last.toLowerCase();
+    ComponentSpec? spec;
+    for (final s in _targets) {
+      if (!s.extract) continue;
+      final base = s.files.first.remotePath.split('/').last.toLowerCase();
+      if (name == base || name.contains(base.replaceAll('.zip', ''))) {
+        spec = s;
+        break;
+      }
+    }
+    if (spec == null) {
+      final expected = _targets
+          .where((s) => s.extract)
+          .map((s) => s.files.first.remotePath.split('/').last)
+          .join(' / ');
+      setState(() {
+        _installError = '这个 zip 匹配不到待安装组件，需要的是：$expected';
+      });
+      return;
+    }
+
+    final target = spec;
+    setState(() {
+      _installError = null;
+      _rows[target.kind] = _RowState(_InstallRowState.extracting);
+    });
+    try {
+      await ref.read(componentStoreProvider).importArchive(target, path, (p) {
+        if (!mounted) return;
+        setState(() {
+          _rows[target.kind] = _RowState(
+            switch (p.phase) {
+              ComponentDownloadPhase.extracting => _InstallRowState.extracting,
+              ComponentDownloadPhase.done => _InstallRowState.done,
+              ComponentDownloadPhase.failed => _InstallRowState.failed,
+              _ => _InstallRowState.extracting,
+            },
+            error: p.error,
+          );
+        });
+      });
+    } on Object catch (e) {
+      if (!mounted) return;
+      setState(() => _installError = '$e');
     }
   }
 
@@ -278,6 +341,26 @@ class _SetupWizardDialogState extends ConsumerState<SetupWizardDialog> {
         Text('按顺序下载安装以下组件', style: theme.textTheme.titleMedium),
         const SizedBox(height: 12),
         for (final spec in _targets) _buildRow(spec, theme),
+        if (!_installing) ...[
+          const SizedBox(height: 8),
+          for (final spec in _targets)
+            if (spec.extract &&
+                _rows[spec.kind]?.state != _InstallRowState.done)
+              _buildManualDownloadRow(spec, theme),
+          const SizedBox(height: 4),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              onPressed: _importManually,
+              icon: const Icon(Icons.file_open, size: 18),
+              label: const Text('已下载好 zip？导入安装'),
+            ),
+          ),
+          Text(
+            '在线下载慢？点上面链接用浏览器/下载工具手动下 zip，下完点"导入安装"即可，无需其他操作。',
+            style: theme.textTheme.bodySmall,
+          ),
+        ],
         if (_installError != null) ...[
           const SizedBox(height: 12),
           Text(
@@ -309,9 +392,18 @@ class _SetupWizardDialogState extends ConsumerState<SetupWizardDialog> {
       ),
     };
     String? detail;
-    if (row.state == _InstallRowState.downloading && row.total > 0) {
-      final pct = ((row.received / row.total) * 100).clamp(0, 100).toStringAsFixed(0);
-      detail = '下载中 $pct%';
+    if (row.state == _InstallRowState.downloading) {
+      final parts = <String>[];
+      if (row.total > 0) {
+        final pct = ((row.received / row.total) * 100).clamp(0, 100).toStringAsFixed(0);
+        parts.add('$pct%');
+        parts.add('${_fmtBytes(row.received)} / ${_fmtBytes(row.total)}');
+      } else {
+        parts.add(_fmtBytes(row.received));
+      }
+      final speed = row.speedBps;
+      if (speed != null && speed > 0) parts.add('${_fmtBytes(speed)}/s');
+      detail = '下载中 ${parts.join(' · ')}';
     } else if (row.state == _InstallRowState.extracting) {
       detail = '正在解压…';
     } else if (row.state == _InstallRowState.failed) {
@@ -338,6 +430,77 @@ class _SetupWizardDialogState extends ConsumerState<SetupWizardDialog> {
           ),
         ],
       ),
+    );
+  }
+
+  /// Direct-download affordances for one archive component: accelerated link
+  /// (gh-proxy), original link, open-in-browser, plus copy buttons.
+  Widget _buildManualDownloadRow(ComponentSpec spec, ThemeData theme) {
+    final original = spec.host.startsWith(kHfOfficial)
+        ? componentFileUrl(spec, spec.files.first, kHfChinaMirror)
+        : '${spec.host}/${spec.files.first.remotePath}';
+    final accelerated = 'https://gh-proxy.com/$original';
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${spec.displayName} · 手动下载',
+            style: theme.textTheme.labelLarge,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            accelerated,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodySmall
+                ?.copyWith(fontFamily: 'monospace'),
+          ),
+          const SizedBox(height: 6),
+          Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            children: [
+              ActionChip(
+                avatar: const Icon(Icons.link, size: 16),
+                label: const Text('复制加速链接'),
+                onPressed: () => _copyUrl(accelerated, theme),
+              ),
+              ActionChip(
+                avatar: const Icon(Icons.link_off, size: 16),
+                label: const Text('复制原始链接'),
+                onPressed: () => _copyUrl(original, theme),
+              ),
+              ActionChip(
+                avatar: const Icon(Icons.open_in_browser, size: 16),
+                label: const Text('浏览器打开'),
+                onPressed: () async {
+                  final uri = Uri.parse(original);
+                  try {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  } on Object {
+                    // Ignore: user can copy the link instead.
+                  }
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _copyUrl(String url, ThemeData theme) {
+    // Clipboard needs a messenger; use the global one when available.
+    Clipboard.setData(ClipboardData(text: url));
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+      SnackBar(content: Text('已复制：$url'), duration: const Duration(seconds: 2)),
     );
   }
 
@@ -405,6 +568,19 @@ class _SetupWizardDialogState extends ConsumerState<SetupWizardDialog> {
       ],
     );
   }
+}
+
+String _fmtBytes(int bytes) {
+  const units = ['B', 'KB', 'MB', 'GB'];
+  var v = bytes.toDouble();
+  var u = 0;
+  while (v >= 1024 && u < units.length - 1) {
+    v /= 1024;
+    u++;
+  }
+  return v >= 100 || u == 0
+      ? '${v.toStringAsFixed(0)} ${units[u]}'
+      : '${v.toStringAsFixed(1)} ${units[u]}';
 }
 
 class _StepIndicator extends StatelessWidget {

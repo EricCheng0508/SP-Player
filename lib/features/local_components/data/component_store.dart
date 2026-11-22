@@ -1,7 +1,8 @@
 /// Install, probe and remove managed local components.
 ///
-/// Components live under a configurable root (default
-/// `%LOCALAPPDATA%\SPPlayer\components`). Downloads support resume via HTTP
+/// Components live under a configurable root (default: a `components` folder
+/// next to the exe for portable installs, `%LOCALAPPDATA%\SPPlayer\components`
+/// when the install dir is read-only). Downloads support resume via HTTP
 /// Range, validate a minimum byte size, and Hugging Face URLs auto-switch to
 /// hf-mirror.com on mainland China networks.
 library;
@@ -33,6 +34,7 @@ final class ComponentProgress {
     this.totalBytes = 0,
     this.fileLabel = '',
     this.error,
+    this.speedBps,
   });
 
   final ComponentDownloadPhase phase;
@@ -40,6 +42,9 @@ final class ComponentProgress {
   final int totalBytes;
   final String fileLabel;
   final String? error;
+
+  /// Smoothed download throughput in bytes/s; `null` when not downloading.
+  final int? speedBps;
 
   double? get fraction =>
       totalBytes > 0 ? (receivedBytes / totalBytes).clamp(0.0, 1.0) : null;
@@ -55,13 +60,34 @@ final class ComponentStore {
   /// Persisted mirror endpoint; `null` → auto-detect by region.
   final String? hfEndpointOverride;
 
+  /// Default root: a `components` folder NEXT TO THE EXE (portable style,
+  /// like Transub's install root) when that directory is writable; otherwise
+  /// (e.g. Program Files installs) fall back to %LOCALAPPDATA%\SPPlayer.
   static String defaultRoot() {
+    final exe = Platform.resolvedExecutable;
+    if (exe.isNotEmpty) {
+      final exeDir = File(exe).parent.path;
+      final portable = Directory('$exeDir\\components');
+      if (_isWritable(portable)) return portable.path;
+    }
     final appData = Platform.environment['LOCALAPPDATA'];
     return Directory(
       appData != null && appData.isNotEmpty
           ? '$appData\\SPPlayer\\components'
           : 'SPPlayer-components',
     ).path;
+  }
+
+  static bool _isWritable(Directory dir) {
+    try {
+      dir.createSync(recursive: true);
+      final probe = File('${dir.path}\\.write-probe');
+      probe.writeAsStringSync('ok', flush: true);
+      probe.deleteSync();
+      return true;
+    } on Object {
+      return false;
+    }
   }
 
   String get root {
@@ -172,6 +198,13 @@ final class ComponentStore {
     void Function(ComponentProgress) onProgress,
   ) async {
     try {
+      // Already installed (pre-imported or previous run) → nothing to do.
+      if (isInstalled(spec)) {
+        onProgress(
+          const ComponentProgress(phase: ComponentDownloadPhase.done),
+        );
+        return;
+      }
       final dir = installDir(spec);
       await dir.create(recursive: true);
       final downloads = Directory('$root\\_downloads');
@@ -241,7 +274,6 @@ final class ComponentStore {
     // hf-mirror; GitHub Release URLs get gh-proxy prefixes appended.
     final candidates = _candidateUrls(url);
     Object? lastError;
-    final client = HttpClient();
     try {
       for (final candidate in candidates) {
         try {
@@ -265,34 +297,99 @@ final class ComponentStore {
       throw lastError ??
           HttpException('all download candidates failed for $fileLabel');
     } finally {
-      client.close(force: true);
+      _closeStrayClients();
     }
   }
 
+  final List<HttpClient> _liveClients = [];
+
+  HttpClient _newClient() {
+    final client = HttpClient();
+    // Dart ignores the Windows system proxy; route through it when present.
+    final proxy = _windowsSystemProxy();
+    if (proxy != null) client.findProxy = (uri) => proxy;
+    client.connectionTimeout = const Duration(seconds: 15);
+    client.idleTimeout = const Duration(seconds: 45);
+    _liveClients.add(client);
+    return client;
+  }
+
+  void _closeStrayClients() {
+    for (final c in List<HttpClient>.of(_liveClients)) {
+      c.close(force: true);
+    }
+    _liveClients.clear();
+  }
+
   /// Mirrors/accelerator proxies for [url]: HuggingFace alternates official ↔
-  /// hf-mirror.com; GitHub release assets gain gh-proxy prefixes. The
-  /// original URL always comes first (system proxy handles the rest).
+  /// hf-mirror.com; GitHub release assets gain gh-proxy prefixes. Accelerator
+  /// proxies come FIRST — direct github.com is unreachable on many mainland
+  /// networks, and a hanging direct attempt must never block the ladder.
   static List<String> _candidateUrls(String url) {
-    final candidates = <String>[url];
+    final candidates = <String>[];
     final lower = url.toLowerCase();
     if (lower.startsWith(kHfOfficial)) {
-      candidates.add(url.replaceFirst(kHfOfficial, kHfChinaMirror));
+      candidates
+        ..add(url.replaceFirst(kHfOfficial, kHfChinaMirror))
+        ..add(url);
     } else if (lower.contains('github.com') &&
         lower.contains('/releases/download/')) {
       for (final prefix in _kGitHubProxyPrefixes) {
         candidates.add('$prefix$url');
       }
+      candidates.add(url);
+    } else {
+      candidates.add(url);
     }
     return candidates;
   }
 
   static const _kGitHubProxyPrefixes = <String>[
     'https://gh-proxy.com/',
+    'https://ghfast.top/',
     'https://mirror.ghproxy.com/',
   ];
 
-  /// One attempt at [url] with byte-range resume; returns received bytes.
-  /// Throws on HTTP errors; partial bytes stay in [dest] for the next try.
+  /// Windows system HTTP proxy ("host:port") from the registry, or `null`
+  /// when disabled/unavailable. Dart's HttpClient does NOT read the Windows
+  /// system proxy — without this, users behind Clash/v2ray等本地代理 cannot
+  /// reach github.com at all.
+  static String? _windowsSystemProxy() {
+    if (!Platform.isWindows) return null;
+    try {
+      final query = Process.runSync('reg', [
+        'query',
+        r'HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings',
+        '/v', 'ProxyServer',
+      ]);
+      if (query.exitCode != 0) return null;
+      final match = RegExp(
+        r'ProxyServer\s+REG_SZ\s+(\S+)',
+      ).firstMatch(query.stdout.toString());
+      if (match == null) return null;
+      final raw = match.group(1)!;
+      // "http=...;https=...;ftp=..." per-protocol form → take https/http.
+      String hostPort = raw;
+      if (raw.contains(';') || raw.contains('=')) {
+        final parts = Map.fromEntries(
+          raw.split(';').map((p) {
+            final i = p.indexOf('=');
+            return i < 0 ? MapEntry(p, p) : MapEntry(p.substring(0, i), p.substring(i + 1));
+          }),
+        );
+        hostPort = parts['https'] ?? parts['http'] ?? '';
+      }
+      if (!hostPort.contains(':')) return null;
+      return 'PROXY $hostPort';
+    } on Object {
+      return null;
+    }
+  }
+
+  /// One attempt at [url]; returns received bytes. Large files go through
+  /// parallel range chunks (accelerator mirrors throttle per connection —
+  /// 2 connections doubled throughput in testing); small files / range-less
+  /// servers fall back to a single stream.
   Future<int> _downloadSingle(
     String url,
     File dest,
@@ -301,15 +398,213 @@ final class ComponentStore {
     required String fileLabel,
     required void Function(ComponentProgress) onProgress,
   }) async {
-    final client = HttpClient();
+    final client = _newClient();
+    try {
+      // Range capability probe: 206 + content length → parallel path.
+      final probe = await client
+          .getUrl(Uri.parse(url))
+          .timeout(const Duration(seconds: 15));
+      if (resumeFrom > 0) {
+        probe.headers.set(HttpHeaders.rangeHeader, 'bytes=$resumeFrom-');
+      }
+      final probeResponse = await probe.close().timeout(
+            const Duration(seconds: 45),
+            onTimeout: () => throw TimeoutException('no response: $url'),
+          );
+      final status = probeResponse.statusCode;
+      if (status == 416) {
+        if (resumeFrom >= minBytes ~/ 2) return resumeFrom;
+        throw HttpException('range not satisfiable: $url');
+      }
+      if (status != 200 && status != 206) {
+        throw HttpException('HTTP $status for $url');
+      }
+      final probeLength = probeResponse.contentLength;
+      await probeResponse.drain<void>().timeout(const Duration(seconds: 10));
+
+      if (status == 206 &&
+          probeLength > 0 &&
+          probeLength - resumeFrom >= _kParallelMinBytes) {
+        return await _downloadParallel(
+          url,
+          dest,
+          resumeFrom: resumeFrom,
+          total: resumeFrom + probeLength,
+          fileLabel: fileLabel,
+          onProgress: onProgress,
+        );
+      }
+      return await _downloadStream(
+        url,
+        dest,
+        minBytes,
+        resumeFrom: resumeFrom,
+        fileLabel: fileLabel,
+        onProgress: onProgress,
+      );
+    } finally {
+      client.close(force: true);
+      _liveClients.remove(client);
+    }
+  }
+
+  static const _kParallelChunks = 16;
+  static const _kParallelMinBytes = 64 << 20; // 64 MB
+
+  /// Parallel segmented download. Chunk 0 appends to [dest] (preserving the
+  /// existing resume prefix); other chunks land in `dest.partN` files and are
+  /// assembled at the end. Partial chunk files survive failures and candidate
+  /// switches (same byte ranges), so progress is never wasted.
+  Future<int> _downloadParallel(
+    String url,
+    File dest, {
+    required int resumeFrom,
+    required int total,
+    required String fileLabel,
+    required void Function(ComponentProgress) onProgress,
+  }) async {
+    final base = resumeFrom;
+    final remaining = total - base;
+    final chunkLen = remaining ~/ _kParallelChunks;
+
+    Future<void> pullChunk(int index, int start, int end) async {
+      final target = index == 0 ? dest : File('${dest.path}.part$index');
+      for (var attempt = 1; attempt <= 4; attempt++) {
+        var offset = 0;
+        if (target.existsSync()) offset = target.lengthSync();
+        if (offset >= end - start) return;
+        final client = _newClient();
+        try {
+          final request = await client
+              .getUrl(Uri.parse(url))
+              .timeout(const Duration(seconds: 15));
+          request.headers.set(
+            HttpHeaders.rangeHeader,
+            'bytes=${start + offset}-${end - 1}',
+          );
+          final response = await request.close().timeout(
+                const Duration(seconds: 45),
+                onTimeout: () => throw TimeoutException('chunk stall: $url'),
+              );
+          if (response.statusCode != 206) {
+            throw HttpException('HTTP ${response.statusCode} chunk $index');
+          }
+          final sink = target.openWrite(mode: FileMode.append);
+          try {
+            await for (final chunk in response.timeout(
+              const Duration(seconds: 45),
+              onTimeout: (s) {
+                s.addError(TimeoutException('chunk stalled: $url'));
+                s.close();
+              },
+            )) {
+              sink.add(chunk);
+            }
+            if (target.lengthSync() >= end - start) return;
+            throw HttpException('chunk $index incomplete');
+          } finally {
+            await sink.flush();
+            await sink.close();
+          }
+        } on Object {
+          if (attempt == 4) rethrow;
+          await Future<void>.delayed(Duration(seconds: 2 * attempt));
+        } finally {
+          client.close(force: true);
+          _liveClients.remove(client);
+        }
+      }
+    }
+
+    var lastTick = DateTime.now();
+    var lastBytes = base;
+    final reporter = Timer.periodic(const Duration(milliseconds: 500), (_) {
+      try {
+        var received = dest.existsSync() ? dest.lengthSync() : 0;
+        for (var i = 1; i < _kParallelChunks; i++) {
+          final part = File('${dest.path}.part$i');
+          if (part.existsSync()) received += part.lengthSync();
+        }
+        received = received.clamp(0, total);
+        final now = DateTime.now();
+        final elapsed = now.difference(lastTick).inMilliseconds;
+        var speed = 0;
+        if (elapsed > 0) {
+          speed = ((received - lastBytes) * 1000) ~/ elapsed;
+          lastTick = now;
+          lastBytes = received;
+        }
+        onProgress(
+          ComponentProgress(
+            phase: ComponentDownloadPhase.downloading,
+            receivedBytes: received,
+            totalBytes: total,
+            fileLabel: fileLabel,
+            speedBps: speed > 0 ? speed : null,
+          ),
+        );
+      } on Object {
+        // Reporter must never break the download.
+      }
+    });
+    try {
+      final futures = <Future<void>>[];
+      for (var i = 0; i < _kParallelChunks; i++) {
+        final start = base + i * chunkLen;
+        final end = i == _kParallelChunks - 1
+            ? total
+            : base + (i + 1) * chunkLen;
+        futures.add(pullChunk(i, start, end));
+      }
+      await Future.wait(futures);
+    } finally {
+      reporter.cancel();
+    }
+
+    // Assemble part files into dest at their absolute offsets.
+    final raf = dest.openSync(mode: FileMode.append);
+    try {
+      for (var i = 1; i < _kParallelChunks; i++) {
+        final part = File('${dest.path}.part$i');
+        if (!part.existsSync()) {
+          throw HttpException('missing chunk file $i');
+        }
+        await raf.setPosition(base + i * chunkLen);
+        await for (final bytes in part.openRead()) {
+          await raf.writeFrom(bytes);
+        }
+        await part.delete();
+      }
+      await raf.truncate(total);
+    } finally {
+      await raf.close();
+    }
+    return total;
+  }
+
+  /// Single-stream fallback (small files, or servers without range support).
+  Future<int> _downloadStream(
+    String url,
+    File dest,
+    int minBytes, {
+    required int resumeFrom,
+    required String fileLabel,
+    required void Function(ComponentProgress) onProgress,
+  }) async {
+    final client = _newClient();
     try {
       var received = resumeFrom;
       while (true) {
-        final request = await client.getUrl(Uri.parse(url));
+        final request = await client
+            .getUrl(Uri.parse(url))
+            .timeout(const Duration(seconds: 15));
         if (received > 0) {
           request.headers.set(HttpHeaders.rangeHeader, 'bytes=$received-');
         }
-        final response = await request.close();
+        final response = await request.close().timeout(
+              const Duration(seconds: 45),
+              onTimeout: () => throw TimeoutException('no response: $url'),
+            );
         if (response.statusCode == 416) {
           // Range beyond EOF with a complete-enough file — accept.
           if (received >= minBytes ~/ 2) return received;
@@ -331,17 +626,45 @@ final class ComponentStore {
                 : 0);
         final sink = dest.openWrite(mode: FileMode.append);
         try {
-          await for (final chunk in response) {
+          // Stall guard: any 45s gap between chunks aborts this candidate
+          // (error surfaces into the ladder and the next mirror resumes).
+          var lastTick = DateTime.now();
+          var lastBytes = received;
+          await for (final chunk in response.timeout(
+            const Duration(seconds: 45),
+            onTimeout: (sink) {
+              sink.addError(TimeoutException('stalled: $url'));
+              sink.close();
+            },
+          )) {
             received += chunk.length;
             sink.add(chunk);
-            onProgress(
-              ComponentProgress(
-                phase: ComponentDownloadPhase.downloading,
-                receivedBytes: received,
-                totalBytes: total > 0 ? total : 0,
-                fileLabel: fileLabel,
-              ),
-            );
+            final now = DateTime.now();
+            if (now.difference(lastTick).inMilliseconds >= 500) {
+              final speed =
+                  ((received - lastBytes) * 1000) ~/
+                      now.difference(lastTick).inMilliseconds;
+              lastTick = now;
+              lastBytes = received;
+              onProgress(
+                ComponentProgress(
+                  phase: ComponentDownloadPhase.downloading,
+                  receivedBytes: received,
+                  totalBytes: total > 0 ? total : 0,
+                  fileLabel: fileLabel,
+                  speedBps: speed,
+                ),
+              );
+            } else {
+              onProgress(
+                ComponentProgress(
+                  phase: ComponentDownloadPhase.downloading,
+                  receivedBytes: received,
+                  totalBytes: total > 0 ? total : 0,
+                  fileLabel: fileLabel,
+                ),
+              );
+            }
           }
         } finally {
           await sink.flush();
@@ -360,7 +683,67 @@ final class ComponentStore {
       }
     } finally {
       client.close(force: true);
+      _liveClients.remove(client);
     }
+  }
+
+  /// Manual import: validate and install a user-downloaded archive (e.g.
+  /// fetched from the GitHub release with a proper download manager). No
+  /// network involved — verify, extract, mark done.
+  Future<void> importArchive(
+    ComponentSpec spec,
+    String zipPath,
+    void Function(ComponentProgress) onProgress,
+  ) async {
+    try {
+      final file = File(zipPath);
+      if (!file.existsSync()) {
+        throw Exception('找不到文件：$zipPath');
+      }
+      if (!zipPath.toLowerCase().endsWith('.zip')) {
+        throw Exception('请选择 .zip 压缩包');
+      }
+      final minBytes =
+          spec.files.map((f) => f.minBytes).reduce((a, b) => a < b ? a : b);
+      if (file.lengthSync() < minBytes) {
+        throw Exception(
+          '文件不完整（${_fmtSize(file.lengthSync())}，应为约 ${_fmtSize(minBytes)}）'
+          '——请重新下载完整压缩包',
+        );
+      }
+      onProgress(
+        const ComponentProgress(phase: ComponentDownloadPhase.extracting),
+      );
+      final dir = installDir(spec);
+      await dir.create(recursive: true);
+      await _extractZip(file, dir);
+      if (spec.archiveEntry != null &&
+          installedEntryPath(spec) == null) {
+        throw Exception('压缩包内容不对：缺少 ${spec.archiveEntry}');
+      }
+      onProgress(
+        const ComponentProgress(phase: ComponentDownloadPhase.done),
+      );
+    } on Object catch (e) {
+      onProgress(
+        ComponentProgress(
+          phase: ComponentDownloadPhase.failed,
+          error: e.toString(),
+        ),
+      );
+      rethrow;
+    }
+  }
+
+  static String _fmtSize(int bytes) {
+    const units = ['B', 'KB', 'MB', 'GB'];
+    var v = bytes.toDouble();
+    var u = 0;
+    while (v >= 1024 && u < units.length - 1) {
+      v /= 1024;
+      u++;
+    }
+    return '${v.toStringAsFixed(1)} ${units[u]}';
   }
 
   Future<void> _extractZip(File zip, Directory destDir) async {

@@ -103,7 +103,8 @@ const kComponentSpecs = <ComponentSpec>[
       ComponentFile(
         remotePath: 'sp-asr-server-windows-x64.zip',
         relativePath: 'sp-asr-server-windows-x64.zip',
-        minBytes: 2 * 1024 * 1024 * 1024 ~/ 1,
+        // Actual release asset is ~1.98 GiB — keep the floor well below.
+        minBytes: 1800 * 1024 * 1024 ~/ 1,
       ),
     ],
     sizeHint: '约 2.1 GB',

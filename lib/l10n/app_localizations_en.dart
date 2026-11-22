@@ -4864,4 +4864,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get playerDictationNoSpeechDetected => 'No speech detected';
+
+  @override
+  String get settingsSectionLocalComponents => 'Local components';
+
+  @override
+  String get settingsSectionLocalComponentsHint =>
+      'Manage offline transcription / translation model components.';
 }

@@ -116,6 +116,24 @@ abstract final class SettingsKeys {
     defaultValue: null,
   );
 
+  /// Root directory for managed local components (ASR runtime/model, local
+  /// MT runtime/model). Nullable: missing resolves to the platform default
+  /// under %LOCALAPPDATA%.
+  static const localComponentsRoot = SettingKey<String?>(
+    name: 'local_components.root',
+    scope: SettingsScope.device,
+    codec: StringSettingCodec(),
+    defaultValue: null,
+  );
+
+  /// Set once the first-run setup wizard finishes (with or without local
+  /// components) so it does not reopen on every launch. Missing ≡ `false`.
+  static final setupWizardCompletedV1 = SettingKey.flag(
+    name: 'setup.wizard_completed_v1',
+    scope: SettingsScope.device,
+    whenMissing: false,
+  );
+
   /// Display locale tag. Nullable: missing lets [AppPreferencesCtrl]
   /// canonicalize and persist the platform default on first read.
   static const prefsLocale = SettingKey<String?>(
@@ -366,6 +384,8 @@ abstract final class SettingsKeys {
     hotkeysCustomBindings,
     aiModalityConfigsV1,
     onboardingTipProgressV1,
+    localComponentsRoot,
+    setupWizardCompletedV1,
   ];
 
   /// Every declared dynamic key family.

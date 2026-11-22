@@ -17,8 +17,12 @@
   "@homeGreetingNamed": {
     "description": "Home header greeting with the signed-in user's name.",
     "placeholders": {
-      "greeting": {"type": "String"},
-      "name": {"type": "String"}
+      "greeting": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
     }
   },
   "homeEmptyTitle": "No recent media",
@@ -26,13 +30,17 @@
   "homeContinueProgressSemantics": "{percent} percent complete",
   "@homeContinueProgressSemantics": {
     "placeholders": {
-      "percent": {"type": "int"}
+      "percent": {
+        "type": "int"
+      }
     }
   },
   "homeContinueOpenSemantics": "Continue practicing, {title}",
   "@homeContinueOpenSemantics": {
     "placeholders": {
-      "title": {"type": "String"}
+      "title": {
+        "type": "String"
+      }
     }
   },
   "homeEmptyHint": "Import media or drop a file here to start.",
@@ -51,8 +59,12 @@
   "transcriptAccessibilityCue": "{time}. {snippet}",
   "@transcriptAccessibilityCue": {
     "placeholders": {
-      "time": {"type": "String"},
-      "snippet": {"type": "String"}
+      "time": {
+        "type": "String"
+      },
+      "snippet": {
+        "type": "String"
+      }
     }
   },
   "transcriptAccessibilityCurrentLine": "Current playback line.",
@@ -98,7 +110,9 @@
   "asrLongMediaConfirmBody": "Generating a transcript for {minutes} minutes of audio may take several minutes. Recognition runs on your own machine, so nothing is billed. Continue?",
   "@asrLongMediaConfirmBody": {
     "placeholders": {
-      "minutes": { "type": "int" }
+      "minutes": {
+        "type": "int"
+      }
     }
   },
   "asrLongMediaConfirmContinue": "Continue",
@@ -136,8 +150,12 @@
   "discoverRefreshPartialFailedDetail": "Could not refresh {count, plural, one{1 channel} other{{count} channels}}: {names}",
   "@discoverRefreshPartialFailedDetail": {
     "placeholders": {
-      "count": { "type": "int" },
-      "names": { "type": "String" }
+      "count": {
+        "type": "int"
+      },
+      "names": {
+        "type": "String"
+      }
     }
   },
   "discoverRefreshSingleFailed": "Could not refresh {name}.",
@@ -213,14 +231,43 @@
   "echoMode": "Echo mode",
   "playerListenModeTitle": "Listen",
   "playerDockHideText": "Hide text",
-  "@playerDockHideText": {"description": "Dock pill that toggles hiding the transcript text (blur practice)."},
+  "@playerDockHideText": {
+    "description": "Dock pill that toggles hiding the transcript text (blur practice)."
+  },
   "playerDockLinePosition": "Line {line} of {total}",
-  "@playerDockLinePosition": {"description": "Dock readout of the active transcript line.", "placeholders": {"line": {"type": "int"}, "total": {"type": "int"}}},
+  "@playerDockLinePosition": {
+    "description": "Dock readout of the active transcript line.",
+    "placeholders": {
+      "line": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "playerDockLooping": "· looping",
   "playerDockLinesSpanPosition": "Lines {start}–{end} of {total}",
-  "@playerDockLinesSpanPosition": {"description": "Dock readout when the Echo loop spans several lines.", "placeholders": {"start": {"type": "int"}, "end": {"type": "int"}, "total": {"type": "int"}}},
-  "@playerDockLooping": {"description": "Suffix shown in the dock while the Echo loop is active."},
-  "@playerListenModeTitle": {"description": "Player top-bar segmented option for reading along (the non-echo mode)."},
+  "@playerDockLinesSpanPosition": {
+    "description": "Dock readout when the Echo loop spans several lines.",
+    "placeholders": {
+      "start": {
+        "type": "int"
+      },
+      "end": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@playerDockLooping": {
+    "description": "Suffix shown in the dock while the Echo loop is active."
+  },
+  "@playerListenModeTitle": {
+    "description": "Player top-bar segmented option for reading along (the non-echo mode)."
+  },
   "exitEchoMode": "Exit echo mode",
   "transcript": "Transcript",
   "transcriptNowReading": "Now reading",
@@ -228,13 +275,21 @@
   "importSubtitle": "Import subtitle",
   "noTranscript": "No transcript yet",
   "transcriptEmptyOverline": "Transcript",
-  "@transcriptEmptyOverline": {"description": "Overline above the empty-transcript title."},
+  "@transcriptEmptyOverline": {
+    "description": "Overline above the empty-transcript title."
+  },
   "transcriptEmptyGenerateDesc": "Transcribe the speech in this item. Uses credits.",
-  "@transcriptEmptyGenerateDesc": {"description": "Empty-state row description for the AI transcript action."},
+  "@transcriptEmptyGenerateDesc": {
+    "description": "Empty-state row description for the AI transcript action."
+  },
   "transcriptEmptyExtractDesc": "Use the subtitle tracks inside the file, if it has any.",
-  "@transcriptEmptyExtractDesc": {"description": "Empty-state row description for the extract action."},
+  "@transcriptEmptyExtractDesc": {
+    "description": "Empty-state row description for the extract action."
+  },
   "transcriptEmptyImportDesc": "Import an .srt or .vtt file and choose its language.",
-  "@transcriptEmptyImportDesc": {"description": "Empty-state row description for the import action."},
+  "@transcriptEmptyImportDesc": {
+    "description": "Empty-state row description for the import action."
+  },
   "importSrtOrVtt": "Import an .srt or .vtt file.",
   "loading": "Loading…",
   "error": "Error",
@@ -306,32 +361,75 @@
   },
   "subtitlesRefreshDone": "Transcripts updated from cloud.",
   "transcriptDownloadDialogTitle": "Download transcript",
-  "@transcriptDownloadDialogTitle": {"description": "Title of the dialog that picks the subtitle format for a transcript download."},
+  "@transcriptDownloadDialogTitle": {
+    "description": "Title of the dialog that picks the subtitle format for a transcript download."
+  },
   "transcriptDownloadFormatSrtLabel": "SRT",
-  "@transcriptDownloadFormatSrtLabel": {"description": "SubRip format choice in the transcript download dialog."},
+  "@transcriptDownloadFormatSrtLabel": {
+    "description": "SubRip format choice in the transcript download dialog."
+  },
   "transcriptDownloadFormatSrtHint": "SubRip subtitle file (.srt)",
-  "@transcriptDownloadFormatSrtHint": {"description": "Hint under the SRT choice in the transcript download dialog."},
+  "@transcriptDownloadFormatSrtHint": {
+    "description": "Hint under the SRT choice in the transcript download dialog."
+  },
   "transcriptDownloadFormatVttLabel": "VTT",
-  "@transcriptDownloadFormatVttLabel": {"description": "WebVTT format choice in the transcript download dialog."},
+  "@transcriptDownloadFormatVttLabel": {
+    "description": "WebVTT format choice in the transcript download dialog."
+  },
   "transcriptDownloadFormatVttHint": "WebVTT subtitle file (.vtt)",
-  "@transcriptDownloadFormatVttHint": {"description": "Hint under the VTT choice in the transcript download dialog."},
+  "@transcriptDownloadFormatVttHint": {
+    "description": "Hint under the VTT choice in the transcript download dialog."
+  },
   "transcriptDownloadEmpty": "No transcript to download yet.",
-  "@transcriptDownloadEmpty": {"description": "Notice when the download is triggered with no active transcript."},
+  "@transcriptDownloadEmpty": {
+    "description": "Notice when the download is triggered with no active transcript."
+  },
   "transcriptDownloadSuccess": "Transcript downloaded.",
-  "@transcriptDownloadSuccess": {"description": "Notice after the transcript file was saved or shared."},
+  "@transcriptDownloadSuccess": {
+    "description": "Notice after the transcript file was saved or shared."
+  },
   "transcriptDownloadError": "Could not download the transcript.",
-  "@transcriptDownloadError": {"description": "Notice when saving or sharing the transcript file failed."},
+  "@transcriptDownloadError": {
+    "description": "Notice when saving or sharing the transcript file failed."
+  },
   "subtitlesNoPlayableUri": "Could not resolve a playable file for this item.",
   "expandEchoBackward": "Expand echo backward",
   "expandEchoForward": "Expand echo forward",
   "shrinkEchoBackward": "Shrink echo backward",
   "shrinkEchoForward": "Shrink echo forward",
   "echoLoopCaptionLine": "LOOP · LINE {range} · {seconds} S",
-  "@echoLoopCaptionLine": {"description": "Echo loop caption for a single line.", "placeholders": {"range": {"type": "String"}, "seconds": {"type": "String"}}},
+  "@echoLoopCaptionLine": {
+    "description": "Echo loop caption for a single line.",
+    "placeholders": {
+      "range": {
+        "type": "String"
+      },
+      "seconds": {
+        "type": "String"
+      }
+    }
+  },
   "echoLoopCaptionLines": "LOOP · LINES {range} · {seconds} S",
-  "@echoLoopCaptionLines": {"description": "Echo loop caption for a line span.", "placeholders": {"range": {"type": "String"}, "seconds": {"type": "String"}}},
+  "@echoLoopCaptionLines": {
+    "description": "Echo loop caption for a line span.",
+    "placeholders": {
+      "range": {
+        "type": "String"
+      },
+      "seconds": {
+        "type": "String"
+      }
+    }
+  },
   "echoLoopCaptionRecording": "RECORDING TAKE {count}",
-  "@echoLoopCaptionRecording": {"description": "Echo loop caption while recording a take.", "placeholders": {"count": {"type": "int"}}},
+  "@echoLoopCaptionRecording": {
+    "description": "Echo loop caption while recording a take.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "shadowReadingTitle": "Shadow reading",
   "shadowReadingHint": "Practice speaking along this segment. Record your voice and compare pitch with the reference.",
   "shadowReadingReferenceSnippet": "Reference",
@@ -560,9 +658,13 @@
   },
   "settingsAiProvidersSpeechKindAzure": "Azure Speech",
   "settingsAiProvidersSpeechKindHintOpenAi": "OpenAI-compatible: speech-to-text (generate subtitles, dictation, echo transcription).",
-  "@settingsAiProvidersSpeechKindHintOpenAi": {"description": "Hint under the speech provider segmented button, OpenAI option."},
+  "@settingsAiProvidersSpeechKindHintOpenAi": {
+    "description": "Hint under the speech provider segmented button, OpenAI option."
+  },
   "settingsAiProvidersSpeechKindHintAzure": "Azure Speech: required for pronunciation scoring. Also supports speech-to-text.",
-  "@settingsAiProvidersSpeechKindHintAzure": {"description": "Hint under the speech provider segmented button, Azure option."},
+  "@settingsAiProvidersSpeechKindHintAzure": {
+    "description": "Hint under the speech provider segmented button, Azure option."
+  },
   "@settingsAiProvidersSpeechKindAzure": {
     "description": "Azure Speech option for speech BYOK"
   },
@@ -715,8 +817,14 @@
   "@transcriptEnrichProgress": {
     "description": "Busy enrich tile subtitle while aligning cues on a long transcript.",
     "placeholders": {
-      "completed": { "type": "int", "example": "12" },
-      "total": { "type": "int", "example": "240" }
+      "completed": {
+        "type": "int",
+        "example": "12"
+      },
+      "total": {
+        "type": "int",
+        "example": "240"
+      }
     }
   },
   "settingsRecordingMicTitle": "Microphone",
@@ -894,9 +1002,13 @@
   "authSignInTitle": "Welcome to Enjoy",
   "authSignInSubtitle": "Sign in to sync your library, track learning progress, and pick up where you left off.",
   "authBrandHeadline": "First the original voice. Then yours.",
-  "@authBrandHeadline": {"description": "Sign-in brand panel headline (wide windows)."},
+  "@authBrandHeadline": {
+    "description": "Sign-in brand panel headline (wide windows)."
+  },
   "authBrandBody": "Listen line by line, echo every sentence, and hear how close you are.",
-  "@authBrandBody": {"description": "Sign-in brand panel body (wide windows)."},
+  "@authBrandBody": {
+    "description": "Sign-in brand panel body (wide windows)."
+  },
   "authSignInCta": "Continue",
   "authContinueWithGoogle": "Continue with Google",
   "authContinueWithApple": "Continue with Apple",
@@ -1013,14 +1125,18 @@
   "subscriptionExpiresOn": "Expires on {date}",
   "@subscriptionExpiresOn": {
     "placeholders": {
-      "date": {"type": "String"}
+      "date": {
+        "type": "String"
+      }
     }
   },
   "subscriptionStatusCreditsLimit": "Daily credits limit",
   "subscriptionDailyCredits": "{count} credits",
   "@subscriptionDailyCredits": {
     "placeholders": {
-      "count": {"type": "String"}
+      "count": {
+        "type": "String"
+      }
     }
   },
   "subscriptionTierComparisonTitle": "Choose your plan",
@@ -1061,7 +1177,9 @@
   "subscriptionPurchaseMonths": "{count} months",
   "@subscriptionPurchaseMonths": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "subscriptionPurchasePaymentMethod": "Payment method",
@@ -1081,7 +1199,9 @@
   "subscriptionTotalPrice": "{amount} USD",
   "@subscriptionTotalPrice": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "subscriptionContinueToPayment": "Continue to payment",
@@ -1130,13 +1250,17 @@
   "creditsUsagePageInfo": "Page {page}",
   "@creditsUsagePageInfo": {
     "placeholders": {
-      "page": {"type": "int"}
+      "page": {
+        "type": "int"
+      }
     }
   },
   "creditsUsageTotalRecords": "{count} shown",
   "@creditsUsageTotalRecords": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "creditsUsagePrevious": "Previous",
@@ -1161,8 +1285,12 @@
   "@syncSettingsTileSubtitleCounts": {
     "description": "Subtitle on Settings → Sync status when there are queue items.",
     "placeholders": {
-      "retryable": {"type": "int"},
-      "failed": {"type": "int"}
+      "retryable": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
     }
   },
   "syncScreenTitle": "Sync status",
@@ -1195,8 +1323,12 @@
   "syncSnackIssues": "Sync finished: {synced} succeeded, {failed} failed.",
   "@syncSnackIssues": {
     "placeholders": {
-      "synced": {"type": "int"},
-      "failed": {"type": "int"}
+      "synced": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
     }
   },
   "syncQueueDetails": "Queue details",
@@ -1213,7 +1345,14 @@
   "settingsAccountSignedOut": "Not signed in",
   "settingsAccountOpenProfile": "Open profile",
   "sidebarPlanSubtitle": "{tier} plan",
-  "@sidebarPlanSubtitle": {"description": "Sidebar account chip subtitle naming the subscription tier.", "placeholders": {"tier": {"type": "String"}}},
+  "@sidebarPlanSubtitle": {
+    "description": "Sidebar account chip subtitle naming the subscription tier.",
+    "placeholders": {
+      "tier": {
+        "type": "String"
+      }
+    }
+  },
   "settingsAccountSignIn": "Sign in",
   "errorNetwork": "Network error",
   "errorUnauthorized": "Session expired — please sign in again",
@@ -1352,18 +1491,29 @@
   "mediaLanguageUpdated": "Language updated.",
   "mediaLanguageUpdateFailed": "Could not update language.",
   "mediaEditDetails": "Edit details",
-  "@mediaEditDetails": {"description": "More menu Media entry and Edit details dialog title."},
+  "@mediaEditDetails": {
+    "description": "More menu Media entry and Edit details dialog title."
+  },
   "mediaDetailsTitleLabel": "Title",
-  "@mediaDetailsTitleLabel": {"description": "Edit details dialog: label of the title field."},
+  "@mediaDetailsTitleLabel": {
+    "description": "Edit details dialog: label of the title field."
+  },
   "mediaDetailsSave": "Save",
-  "@mediaDetailsSave": {"description": "Edit details dialog: save button."},
+  "@mediaDetailsSave": {
+    "description": "Edit details dialog: save button."
+  },
   "mediaDetailsUpdated": "Details updated.",
-  "@mediaDetailsUpdated": {"description": "Notice after saving media details."},
+  "@mediaDetailsUpdated": {
+    "description": "Notice after saving media details."
+  },
   "mediaDetailsUpdateFailed": "Could not update details.",
-  "@mediaDetailsUpdateFailed": {"description": "Notice when saving media details fails."},
+  "@mediaDetailsUpdateFailed": {
+    "description": "Notice when saving media details fails."
+  },
   "mediaDetailsMissing": "This item is no longer in your library.",
-  "@mediaDetailsMissing": {"description": "Notice when the media was deleted before Edit details opened."},
-
+  "@mediaDetailsMissing": {
+    "description": "Notice when the media was deleted before Edit details opened."
+  },
   "assessmentUnavailableLanguage": "Pronunciation assessment is not available for this language.",
   "discoverLanguageFilterAll": "All languages",
   "discoverLanguageFilterLabel": "Language",
@@ -1403,7 +1553,9 @@
   "settingsAboutVersion": "v{version}",
   "@settingsAboutVersion": {
     "placeholders": {
-      "version": {"type": "String"}
+      "version": {
+        "type": "String"
+      }
     }
   },
   "settingsAboutOpenSourceTitle": "Open source",
@@ -1431,8 +1583,12 @@
   "updateVersionLine": "Installed {current} → {latest}",
   "@updateVersionLine": {
     "placeholders": {
-      "current": {"type": "String"},
-      "latest": {"type": "String"}
+      "current": {
+        "type": "String"
+      },
+      "latest": {
+        "type": "String"
+      }
     }
   },
   "updateNow": "Update now",
@@ -1444,7 +1600,9 @@
   "updateDownloading": "Downloading update… {percent}%",
   "@updateDownloading": {
     "placeholders": {
-      "percent": {"type": "int"}
+      "percent": {
+        "type": "int"
+      }
     }
   },
   "updateVerifying": "Verifying download…",
@@ -1497,12 +1655,20 @@
   "lookupCreditsRemainingLabel": "{n} left today",
   "@lookupCreditsRemainingLabel": {
     "description": "Lookup sheet credits chip: today's remaining AI credits.",
-    "placeholders": {"n": {"type": "String"}}
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
   },
   "lookupCreditsRunningLowLabel": "Almost out — {n} left today",
   "@lookupCreditsRunningLowLabel": {
     "description": "Lookup sheet credits chip once remaining credits pass the low threshold.",
-    "placeholders": {"n": {"type": "String"}}
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
   },
   "vocabularyAddToVocabulary": "Add to Vocabulary",
   "vocabularyAddContext": "Add Context",
@@ -1547,7 +1713,9 @@
   "vocabularyQueueCount": "{count} words",
   "@vocabularyQueueCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "vocabularyStartReview": "Start review",
@@ -1562,14 +1730,20 @@
   "vocabularyProgress": "{current} / {total}",
   "@vocabularyProgress": {
     "placeholders": {
-      "current": { "type": "int" },
-      "total": { "type": "int" }
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "vocabularyRemaining": "{count} remaining",
   "@vocabularyRemaining": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "vocabularyFlipBack": "Flip back",
@@ -1593,20 +1767,26 @@
   "vocabularyInDays": "In {days} days",
   "@vocabularyInDays": {
     "placeholders": {
-      "days": { "type": "int" }
+      "days": {
+        "type": "int"
+      }
     }
   },
   "vocabularyKeyboardShortcuts": "Shortcuts: Space flip/back · 1/2/3 rate · ← previous · → skip · Esc exit",
   "vocabularyContextsCount": "{count} contexts",
   "@vocabularyContextsCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "vocabularyReviewsCount": "{count} reviews",
   "@vocabularyReviewsCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "vocabularyFlipHint": "Tap to flip",
@@ -1627,8 +1807,12 @@
   "vocabularyContextOfTotal": "{current} of {total}",
   "@vocabularyContextOfTotal": {
     "placeholders": {
-      "current": { "type": "int" },
-      "total": { "type": "int" }
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "vocabularyContextualTranslation": "Contextual translation",
@@ -1646,8 +1830,12 @@
   "vocabularyLocatorLabel": "{start}s · {duration}s",
   "@vocabularyLocatorLabel": {
     "placeholders": {
-      "start": { "type": "String" },
-      "duration": { "type": "String" }
+      "start": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
     }
   },
   "vocabularyExportToAnki": "Export to Anki",
@@ -1680,7 +1868,9 @@
   "notFoundSubtitle": "We couldn't find {uri}.",
   "@notFoundSubtitle": {
     "placeholders": {
-      "uri": { "type": "String" }
+      "uri": {
+        "type": "String"
+      }
     }
   },
   "notFoundBackHome": "Back to home",
@@ -1707,7 +1897,6 @@
   "settingsSectionExpandSemantics": "Expand section",
   "settingsSectionCollapseSemantics": "Collapse section",
   "settingsSectionNeedsAttention": "Needs attention",
-
   "transcriptBlurDisplayTitle": "Hide transcript text",
   "transcriptBlurToggleTooltip": "Blur practice (focus on listening)",
   "transcriptBlurToggleOn": "Listening-focus mode on",
@@ -1715,7 +1904,6 @@
   "transcriptBlurEmptyTooltip": "No transcript lines to practice with",
   "transcriptBlurSemanticsOn": "Blur practice on. Tap or hover to reveal a line.",
   "transcriptBlurSemanticsOff": "Blur practice off.",
-
   "importCraftFromText": "Craft…",
   "homeCraftAction": "Craft",
   "craftHistoryTooltip": "History",
@@ -1762,10 +1950,11 @@
   "craftLengthCapNotice": "Crafted the first 5000 characters; the rest was not synthesized.",
   "libraryProviderCraftBadge": "Craft",
   "craftTtsSettingsHint": "Craft uses the TTS provider below.",
-
   "craftScreenTitle": "Craft",
   "craftOverline": "Practice audio from your own words",
-  "@craftOverline": {"description": "Overline above the Craft page title."},
+  "@craftOverline": {
+    "description": "Overline above the Craft page title."
+  },
   "craftTranslateTool": "Translate",
   "craftSynthesizeTool": "Synthesize",
   "craftStyleLabel": "Style",
@@ -1864,13 +2053,17 @@
   "subscriptionAutoRenewPriceMonth": "{amount} USD/month",
   "@subscriptionAutoRenewPriceMonth": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "subscriptionAutoRenewPriceYear": "{amount} USD/year",
   "@subscriptionAutoRenewPriceYear": {
     "placeholders": {
-      "amount": {"type": "String"}
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "subscriptionAutoRenewSubscribe": "Subscribe with auto-renew",
@@ -1881,7 +2074,9 @@
   "subscriptionAutoRenewProvider": "Billed via {provider}",
   "@subscriptionAutoRenewProvider": {
     "placeholders": {
-      "provider": {"type": "String"}
+      "provider": {
+        "type": "String"
+      }
     }
   },
   "subscriptionAutoRenewCancel": "Cancel auto-renew",
@@ -1889,7 +2084,9 @@
   "subscriptionAutoRenewCancelConfirmMessage": "You keep Pro until {date}. You will not be charged again for this subscription.",
   "@subscriptionAutoRenewCancelConfirmMessage": {
     "placeholders": {
-      "date": {"type": "String"}
+      "date": {
+        "type": "String"
+      }
     }
   },
   "subscriptionAutoRenewCancelConfirmAction": "Cancel auto-renew",
@@ -1897,7 +2094,9 @@
   "subscriptionAutoRenewCancelSuccess": "Auto-renew canceled. Pro remains until {date}.",
   "@subscriptionAutoRenewCancelSuccess": {
     "placeholders": {
-      "date": {"type": "String"}
+      "date": {
+        "type": "String"
+      }
     }
   },
   "subscriptionAutoRenewCancelFailed": "Could not cancel auto-renew. Try again.",
@@ -1907,13 +2106,17 @@
   "subscriptionRenewsOn": "Renews on {date}",
   "@subscriptionRenewsOn": {
     "placeholders": {
-      "date": {"type": "String"}
+      "date": {
+        "type": "String"
+      }
     }
   },
   "subscriptionAccessUntil": "Access until {date}",
   "@subscriptionAccessUntil": {
     "placeholders": {
-      "date": {"type": "String"}
+      "date": {
+        "type": "String"
+      }
     }
   },
   "subscriptionAutoRenewEndingSoon": "Auto-renew is off — Pro continues until the date above",
@@ -1925,8 +2128,12 @@
   "creditsPackagePriceCredits": "{price} USD · {credits} permanent credits",
   "@creditsPackagePriceCredits": {
     "placeholders": {
-      "price": {"type": "String"},
-      "credits": {"type": "String"}
+      "price": {
+        "type": "String"
+      },
+      "credits": {
+        "type": "String"
+      }
     }
   },
   "creditsPackageBuy": "Buy credits",
@@ -1934,8 +2141,12 @@
   "creditsPackageConfirmMessage": "Pay {price} USD for {credits} permanent credits. This does not change your subscription.",
   "@creditsPackageConfirmMessage": {
     "placeholders": {
-      "price": {"type": "String"},
-      "credits": {"type": "String"}
+      "price": {
+        "type": "String"
+      },
+      "credits": {
+        "type": "String"
+      }
     }
   },
   "creditsPackageConfirmAction": "Continue to payment",
@@ -1946,7 +2157,9 @@
   "creditsPermanentAvailable": "{count} permanent credits available",
   "@creditsPermanentAvailable": {
     "placeholders": {
-      "count": {"type": "String"}
+      "count": {
+        "type": "String"
+      }
     }
   },
   "subscriptionCreditsLimitMessageWithPackages": "AI credits limit reached. Upgrade to Pro or buy a credits package to continue.",
@@ -1954,14 +2167,20 @@
   "creditsExhaustedDetailed": "This action needs {required} credits, but only {remaining} are left today.",
   "@creditsExhaustedDetailed": {
     "placeholders": {
-      "required": {"type": "int"},
-      "remaining": {"type": "int"}
+      "required": {
+        "type": "int"
+      },
+      "remaining": {
+        "type": "int"
+      }
     }
   },
   "creditsExhaustedResets": "Credits reset at {time}.",
   "@creditsExhaustedResets": {
     "placeholders": {
-      "time": {"type": "String"}
+      "time": {
+        "type": "String"
+      }
     }
   },
   "byokProviderBillingMessage": "Your AI provider declined this request. Please check your provider's billing or plan.",
@@ -1997,7 +2216,6 @@
   "@assessmentClipUnavailable": {
     "description": "Tooltip when word timing is missing, omitted, or zero duration."
   },
-
   "subscriptionTierCatalogTitle": "Choose your plan",
   "subscriptionTierCatalogDescription": "All tiers include the same AI features. Choose a credit allowance and billing cycle, then pick how you pay.",
   "subscriptionTierCatalogRecommended": "Recommended",
@@ -2010,24 +2228,33 @@
   "subscriptionTierCatalogSelectedInterval": "{amount} / {unit} — billed via Stripe",
   "@subscriptionTierCatalogSelectedInterval": {
     "placeholders": {
-      "amount": {"type": "String"},
-      "unit": {"type": "String"}
+      "amount": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
     }
   },
   "subscriptionTierCatalogIntervalYearSavings": "Save {percent}%",
   "@subscriptionTierCatalogIntervalYearSavings": {
     "placeholders": {
-      "percent": {"type": "String"}
+      "percent": {
+        "type": "String"
+      }
     }
   },
   "subscriptionTierCatalogPerMonth": "month",
   "subscriptionTierCatalogPerYear": "year",
-
   "subscriptionPurchaseModalUnifiedTitle": "Choose how to pay for {tier} · {interval}",
   "@subscriptionPurchaseModalUnifiedTitle": {
     "placeholders": {
-      "tier": {"type": "String"},
-      "interval": {"type": "String"}
+      "tier": {
+        "type": "String"
+      },
+      "interval": {
+        "type": "String"
+      }
     }
   },
   "subscriptionPurchaseModalUnifiedDescription": "Auto-renew keeps Pro access continuous and renews automatically. Pay once buys a fixed prepaid period with no auto-renew.",
@@ -2039,13 +2266,16 @@
   "subscriptionPurchaseModalOptionPrepaidSubtitle": "No auto-renew. Pay for a fixed period up front.",
   "subscriptionPurchaseModalOptionPrepaidFootnote": "One-time payment",
   "subscriptionPurchaseModalSubscribeAutoRenewCta": "Subscribe with auto-renew",
-
   "subscriptionBalanceToCreditsTitle": "Convert balance to permanent credits",
   "subscriptionBalanceToCreditsDescriptionWithPreview": "Move your {usd} legacy balance to ~{credits} permanent credits on the credits page.",
   "@subscriptionBalanceToCreditsDescriptionWithPreview": {
     "placeholders": {
-      "usd": {"type": "String"},
-      "credits": {"type": "String"}
+      "usd": {
+        "type": "String"
+      },
+      "credits": {
+        "type": "String"
+      }
     }
   },
   "subscriptionBalanceToCreditsDescriptionEmpty": "Once you have a balance from prior deposits, convert it to permanent credits here.",
@@ -2054,10 +2284,11 @@
   "subscriptionBalanceToCreditsComingSoonMessage": "You have {usd} in legacy balance. The transfer-to-credits flow is rolling out to the desktop app in a future update. Until then, manage your balance on the web app.",
   "@subscriptionBalanceToCreditsComingSoonMessage": {
     "placeholders": {
-      "usd": {"type": "String"}
+      "usd": {
+        "type": "String"
+      }
     }
   },
-
   "onboardingTipSkip": "Skip",
   "onboardingTipHomeImportTitle": "Import media",
   "onboardingTipHomeImportBody": "Bring in a local file or YouTube video to practice with.",
@@ -2083,293 +2314,759 @@
   "settingsAnalyticsCaptureSubtitle": "Share anonymous usage data to help improve Enjoy. Never includes your media, transcripts, or notes.",
   "transcriptEmptyFetchYoutube": "Fetch transcript",
   "homeGoalOfMinutes": "of {minutes} min",
-  "@homeGoalOfMinutes": {"description": "Caption under the minutes practiced inside the Home goal ring.", "placeholders": {"minutes": {"type": "int"}}},
+  "@homeGoalOfMinutes": {
+    "description": "Caption under the minutes practiced inside the Home goal ring.",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "homeGoalProgressRemaining": "{done} / {goal} min · {left} min to go",
-  "@homeGoalProgressRemaining": {"description": "Home goal card summary while the goal is not met.", "placeholders": {"done": {"type": "int"}, "goal": {"type": "int"}, "left": {"type": "int"}}},
+  "@homeGoalProgressRemaining": {
+    "description": "Home goal card summary while the goal is not met.",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "goal": {
+        "type": "int"
+      },
+      "left": {
+        "type": "int"
+      }
+    }
+  },
   "homeGoalProgressDone": "{done} / {goal} min",
-  "@homeGoalProgressDone": {"description": "Home goal card summary once the goal is met.", "placeholders": {"done": {"type": "int"}, "goal": {"type": "int"}}},
+  "@homeGoalProgressDone": {
+    "description": "Home goal card summary once the goal is met.",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "goal": {
+        "type": "int"
+      }
+    }
+  },
   "homeContinueAction": "Continue",
-  "@homeContinueAction": {"description": "Button on the Home Continue practicing card."},
+  "@homeContinueAction": {
+    "description": "Button on the Home Continue practicing card."
+  },
   "homeOpenLibrary": "Open library",
-  "@homeOpenLibrary": {"description": "Link beside the Home Recent media heading."},
+  "@homeOpenLibrary": {
+    "description": "Link beside the Home Recent media heading."
+  },
   "homeContinueLine": "line {line} of {total}",
-  "@homeContinueLine": {"description": "Continue practicing meta: the transcript line to resume at.", "placeholders": {"line": {"type": "int"}, "total": {"type": "int"}}},
+  "@homeContinueLine": {
+    "description": "Continue practicing meta: the transcript line to resume at.",
+    "placeholders": {
+      "line": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "homeContinueEchoOn": "Echo on",
-  "@homeContinueEchoOn": {"description": "Continue practicing meta when the session was in Echo."},
+  "@homeContinueEchoOn": {
+    "description": "Continue practicing meta when the session was in Echo."
+  },
   "mediaRelativeToday": "today",
-  "@mediaRelativeToday": {"description": "Media tile meta: added or opened today."},
+  "@mediaRelativeToday": {
+    "description": "Media tile meta: added or opened today."
+  },
   "mediaRelativeYesterday": "yesterday",
-  "@mediaRelativeYesterday": {"description": "Media tile meta: added or opened yesterday."},
+  "@mediaRelativeYesterday": {
+    "description": "Media tile meta: added or opened yesterday."
+  },
   "libraryTileAdded": "Added {date}",
-  "@libraryTileAdded": {"description": "Library tile meta: when the item was added (date is today / yesterday / a short date).", "placeholders": {"date": {"type": "String"}}},
+  "@libraryTileAdded": {
+    "description": "Library tile meta: when the item was added (date is today / yesterday / a short date).",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "vocabularyOverline": "Your word book",
-  "@vocabularyOverline": {"description": "Overline above the Vocabulary page title."},
+  "@vocabularyOverline": {
+    "description": "Overline above the Vocabulary page title."
+  },
   "vocabularyReviewDueAction": "Review {count} due",
-  "@vocabularyReviewDueAction": {"description": "Vocabulary header action that starts a due-items review.", "placeholders": {"count": {"type": "int"}}},
+  "@vocabularyReviewDueAction": {
+    "description": "Vocabulary header action that starts a due-items review.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "vocabularyDueToday": "due today",
-  "@vocabularyDueToday": {"description": "Unit after the due count on the Vocabulary due card."},
+  "@vocabularyDueToday": {
+    "description": "Unit after the due count on the Vocabulary due card."
+  },
   "vocabularyDueEstimate": "Words scheduled for today or earlier · about {minutes} min",
-  "@vocabularyDueEstimate": {"description": "Vocabulary due card caption with the estimated review time.", "placeholders": {"minutes": {"type": "int"}}},
+  "@vocabularyDueEstimate": {
+    "description": "Vocabulary due card caption with the estimated review time.",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "vocabularyByStatus": "by status",
-  "@vocabularyByStatus": {"description": "Caption on the Vocabulary status breakdown card."},
+  "@vocabularyByStatus": {
+    "description": "Caption on the Vocabulary status breakdown card."
+  },
   "vocabularyDueWaiting": "{count, plural, one{{count} word is waiting} other{{count} words are waiting}}",
-  "@vocabularyDueWaiting": {"description": "Headline of the Vocabulary Review tab due card.", "placeholders": {"count": {"type": "int"}}},
+  "@vocabularyDueWaiting": {
+    "description": "Headline of the Vocabulary Review tab due card.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "vocabularyDueReviewBody": "Words scheduled for today or earlier. Space flips a card; 1, 2 and 3 rate it.",
-  "@vocabularyDueReviewBody": {"description": "Body of the Vocabulary Review tab due card."},
+  "@vocabularyDueReviewBody": {
+    "description": "Body of the Vocabulary Review tab due card."
+  },
   "vocabularyFilterValue": "{label}: {value}",
-  "@vocabularyFilterValue": {"description": "Vocabulary filter button: the filter name and its current value.", "placeholders": {"label": {"type": "String"}, "value": {"type": "String"}}},
+  "@vocabularyFilterValue": {
+    "description": "Vocabulary filter button: the filter name and its current value.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "vocabularyFewer": "Fewer",
-  "@vocabularyFewer": {"description": "Stepper button: fewer words."},
+  "@vocabularyFewer": {
+    "description": "Stepper button: fewer words."
+  },
   "vocabularyMore": "More",
-  "@vocabularyMore": {"description": "Stepper button: more words."},
+  "@vocabularyMore": {
+    "description": "Stepper button: more words."
+  },
   "vocabularyProBadge": "Pro",
-  "@vocabularyProBadge": {"description": "Pro badge on the Export to Anki button."},
+  "@vocabularyProBadge": {
+    "description": "Pro badge on the Export to Anki button."
+  },
   "libraryOverlineLocal": "On this device",
-  "@libraryOverlineLocal": {"description": "Overline above the Library title for local media."},
+  "@libraryOverlineLocal": {
+    "description": "Overline above the Library title for local media."
+  },
   "libraryOverlineCloud": "Saved to your Enjoy account",
-  "@libraryOverlineCloud": {"description": "Overline above the Library title for cloud media."},
+  "@libraryOverlineCloud": {
+    "description": "Overline above the Library title for cloud media."
+  },
   "librarySearchResults": "{count, plural, one{1 match for “{query}”} other{{count} matches for “{query}”}}",
-  "@librarySearchResults": {"description": "Line above library results while a search is active.", "placeholders": {"count": {"type": "int"}, "query": {"type": "String"}}},
+  "@librarySearchResults": {
+    "description": "Line above library results while a search is active.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "query": {
+        "type": "String"
+      }
+    }
+  },
   "profileSyncedFromAccount": "Synced from your account",
-  "@profileSyncedFromAccount": {"description": "Caption on the Profile practice card."},
+  "@profileSyncedFromAccount": {
+    "description": "Caption on the Profile practice card."
+  },
   "profileCreditsToday": "Credits today",
-  "@profileCreditsToday": {"description": "Overline of the Profile credits card."},
+  "@profileCreditsToday": {
+    "description": "Overline of the Profile credits card."
+  },
   "profileCreditsUsageLink": "Usage",
-  "@profileCreditsUsageLink": {"description": "Link from the Profile credits card to the credits log."},
+  "@profileCreditsUsageLink": {
+    "description": "Link from the Profile credits card to the credits log."
+  },
   "profileCreditsResetsDaily": "Resets daily",
-  "@profileCreditsResetsDaily": {"description": "Profile credits card caption."},
+  "@profileCreditsResetsDaily": {
+    "description": "Profile credits card caption."
+  },
   "profileCreditsResetsWithPermanent": "Resets daily · plus {count} permanent credits",
-  "@profileCreditsResetsWithPermanent": {"description": "Profile credits card caption when permanent credits exist (count is formatted).", "placeholders": {"count": {"type": "String"}}},
+  "@profileCreditsResetsWithPermanent": {
+    "description": "Profile credits card caption when permanent credits exist (count is formatted).",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "profileCreditsRunningLow": "Today's credits are almost used up",
-  "@profileCreditsRunningLow": {"description": "Profile credits card caption once usage passes the low threshold."},
+  "@profileCreditsRunningLow": {
+    "description": "Profile credits card caption once usage passes the low threshold."
+  },
   "profilePracticeEmptyHint": "Start your first echo session to fill these in",
-  "@profilePracticeEmptyHint": {"description": "Profile practice card hint while every stat is zero."},
+  "@profilePracticeEmptyHint": {
+    "description": "Profile practice card hint while every stat is zero."
+  },
   "profileMinutesUnit": "min",
-  "@profileMinutesUnit": {"description": "Unit after a minute figure on the Profile practice card."},
+  "@profileMinutesUnit": {
+    "description": "Unit after a minute figure on the Profile practice card."
+  },
   "profileSettingsHint": "Appearance, AI providers, recording, shortcuts",
-  "@profileSettingsHint": {"description": "Profile list: Settings row hint."},
+  "@profileSettingsHint": {
+    "description": "Profile list: Settings row hint."
+  },
   "vocabularyReviewDueValue": "{count} due",
-  "@vocabularyReviewDueValue": {"description": "Profile list: due words value beside Vocabulary.", "placeholders": {"count": {"type": "int"}}},
+  "@vocabularyReviewDueValue": {
+    "description": "Profile list: due words value beside Vocabulary.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "settingsSectionAccount": "Account",
-  "@settingsSectionAccount": {"description": "Settings rail/section: the account section."},
+  "@settingsSectionAccount": {
+    "description": "Settings rail/section: the account section."
+  },
   "settingsSectionAccountHint": "Your Enjoy identity and sign-out",
   "settingsAccountCreditsTodayValue": "{used} / {limit} today",
-  "@settingsAccountCreditsTodayValue": {"description": "Settings → Account: credits used today out of the daily limit, beside Credits usage.", "placeholders": {"used": {"type": "String"}, "limit": {"type": "String"}}},
-  "@settingsSectionAccountHint": {"description": "Settings account section hint."},
+  "@settingsAccountCreditsTodayValue": {
+    "description": "Settings → Account: credits used today out of the daily limit, beside Credits usage.",
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "@settingsSectionAccountHint": {
+    "description": "Settings account section hint."
+  },
   "discoverOverline": "YouTube channels you follow",
-  "@discoverOverline": {"description": "Overline above the Discover title."},
+  "@discoverOverline": {
+    "description": "Overline above the Discover title."
+  },
   "discoverRecentUploads": "Recent uploads",
-  "@discoverRecentUploads": {"description": "Heading above the Discover feed."},
+  "@discoverRecentUploads": {
+    "description": "Heading above the Discover feed."
+  },
   "discoverUpdatedAgo": "Updated {age}",
-  "@discoverUpdatedAgo": {"description": "Caption beside Recent uploads: how fresh the feed is.", "placeholders": {"age": {"type": "String"}}},
+  "@discoverUpdatedAgo": {
+    "description": "Caption beside Recent uploads: how fresh the feed is.",
+    "placeholders": {
+      "age": {
+        "type": "String"
+      }
+    }
+  },
   "discoverHoursAgo": "{count}h ago",
-  "@discoverHoursAgo": {"description": "Compact age of a feed entry or refresh.", "placeholders": {"count": {"type": "int"}}},
+  "@discoverHoursAgo": {
+    "description": "Compact age of a feed entry or refresh.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "discoverDaysAgo": "{count}d ago",
-  "@discoverDaysAgo": {"description": "Compact age of a feed entry or refresh.", "placeholders": {"count": {"type": "int"}}},
+  "@discoverDaysAgo": {
+    "description": "Compact age of a feed entry or refresh.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "discoverMinutesAgo": "{count}m ago",
-  "@discoverMinutesAgo": {"description": "Compact age of a feed entry or refresh.", "placeholders": {"count": {"type": "int"}}},
+  "@discoverMinutesAgo": {
+    "description": "Compact age of a feed entry or refresh.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "discoverJustNow": "just now",
-  "@discoverJustNow": {"description": "Age of a feed entry or refresh under a minute old."},
+  "@discoverJustNow": {
+    "description": "Age of a feed entry or refresh under a minute old."
+  },
   "discoverAddToLibraryAction": "Add to library",
-  "@discoverAddToLibraryAction": {"description": "Discover feed tile action button."},
+  "@discoverAddToLibraryAction": {
+    "description": "Discover feed tile action button."
+  },
   "discoverStripSubscribe": "Subscribe",
-  "@discoverStripSubscribe": {"description": "Trailing tile in the Discover channel strip; opens manage / subscribe."},
+  "@discoverStripSubscribe": {
+    "description": "Trailing tile in the Discover channel strip; opens manage / subscribe."
+  },
   "subscriptionSummaryCurrentPlan": "Current plan",
-  "@subscriptionSummaryCurrentPlan": {"description": "Subscription summary strip cell."},
+  "@subscriptionSummaryCurrentPlan": {
+    "description": "Subscription summary strip cell."
+  },
   "subscriptionSummaryStatus": "Status",
-  "@subscriptionSummaryStatus": {"description": "Subscription summary strip cell."},
+  "@subscriptionSummaryStatus": {
+    "description": "Subscription summary strip cell."
+  },
   "subscriptionSummaryExpiration": "Expiration",
-  "@subscriptionSummaryExpiration": {"description": "Subscription summary strip cell."},
+  "@subscriptionSummaryExpiration": {
+    "description": "Subscription summary strip cell."
+  },
   "subscriptionSummaryDailyCredits": "Daily credits limit",
-  "@subscriptionSummaryDailyCredits": {"description": "Subscription summary strip cell."},
+  "@subscriptionSummaryDailyCredits": {
+    "description": "Subscription summary strip cell."
+  },
   "subscriptionChoosePlan": "Choose your plan",
-  "@subscriptionChoosePlan": {"description": "Heading above the plan catalog."},
+  "@subscriptionChoosePlan": {
+    "description": "Heading above the plan catalog."
+  },
   "creditsUsageUtcDates": "UTC dates",
-  "@creditsUsageUtcDates": {"description": "Caption at the trailing edge of the credits filter row."},
+  "@creditsUsageUtcDates": {
+    "description": "Caption at the trailing edge of the credits filter row."
+  },
   "subscriptionPackagesLink": "Credits packages",
-  "@subscriptionPackagesLink": {"description": "Subscription link card to the Credits screen."},
+  "@subscriptionPackagesLink": {
+    "description": "Subscription link card to the Credits screen."
+  },
   "playerEchoShort": "Echo",
-  "@playerEchoShort": {"description": "Short label for the Echo mode segment in the player top bar."},
+  "@playerEchoShort": {
+    "description": "Short label for the Echo mode segment in the player top bar."
+  },
   "playerLineOfTotal": "Line {line} of {total}",
   "syncLastSyncToday": "Today, {time}",
-  "@syncLastSyncToday": {"placeholders": {"time": {"type": "String"}}},
+  "@syncLastSyncToday": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "syncRowWaiting": "Waiting",
-  "@syncRowWaiting": {"placeholders": {}},
+  "@syncRowWaiting": {
+    "placeholders": {}
+  },
   "syncRowFailed": "Failed",
-  "@syncRowFailed": {"placeholders": {}},
+  "@syncRowFailed": {
+    "placeholders": {}
+  },
   "syncRowRetries": "{count} attempts",
-  "@syncRowRetries": {"placeholders": {"count": {"type": "int"}}},
+  "@syncRowRetries": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "syncEntityRecording": "Recording",
-  "@syncEntityRecording": {"placeholders": {}},
+  "@syncEntityRecording": {
+    "placeholders": {}
+  },
   "syncEntityVocabulary": "Vocabulary item",
-  "@syncEntityVocabulary": {"placeholders": {}},
+  "@syncEntityVocabulary": {
+    "placeholders": {}
+  },
   "assessmentWordsSection": "Words",
   "@assessmentWordsSection": {},
   "assessmentMarginOverline": "Pronunciation",
   "assessmentLevelExcellent": "Excellent",
-  "@assessmentLevelExcellent": {"description": "Assessment score level (91–100)."},
+  "@assessmentLevelExcellent": {
+    "description": "Assessment score level (91–100)."
+  },
   "assessmentLevelGood": "Good",
-  "@assessmentLevelGood": {"description": "Assessment score level (81–90)."},
+  "@assessmentLevelGood": {
+    "description": "Assessment score level (81–90)."
+  },
   "assessmentLevelFair": "Fair",
-  "@assessmentLevelFair": {"description": "Assessment score level (61–80)."},
+  "@assessmentLevelFair": {
+    "description": "Assessment score level (61–80)."
+  },
   "assessmentLevelPoor": "Needs work",
-  "@assessmentLevelPoor": {"description": "Assessment score level (below 61)."},
+  "@assessmentLevelPoor": {
+    "description": "Assessment score level (below 61)."
+  },
   "@assessmentMarginOverline": {},
   "playerMore": "More",
-  "@playerMore": {"description": "Top-bar button that opens the player's More menu."},
+  "@playerMore": {
+    "description": "Top-bar button that opens the player's More menu."
+  },
   "playerMoreTranscriptSection": "Transcript",
-  "@playerMoreTranscriptSection": {"description": "Section heading in the player's More menu and the phone Subtitles sheet."},
+  "@playerMoreTranscriptSection": {
+    "description": "Section heading in the player's More menu and the phone Subtitles sheet."
+  },
   "playerMoreAddSubtitleFile": "Add a subtitle file…",
-  "@playerMoreAddSubtitleFile": {"description": "More menu: import a subtitle file for this media."},
+  "@playerMoreAddSubtitleFile": {
+    "description": "More menu: import a subtitle file for this media."
+  },
   "playerMoreUseEmbeddedSubtitles": "Use embedded subtitles…",
-  "@playerMoreUseEmbeddedSubtitles": {"description": "More menu: extract subtitle tracks embedded in the video file."},
+  "@playerMoreUseEmbeddedSubtitles": {
+    "description": "More menu: extract subtitle tracks embedded in the video file."
+  },
   "playerMoreCreateAiTranscript": "Create an AI transcript…",
-  "@playerMoreCreateAiTranscript": {"description": "More menu: start AI transcription when no AI track exists."},
+  "@playerMoreCreateAiTranscript": {
+    "description": "More menu: start AI transcription when no AI track exists."
+  },
   "playerMoreTranscribeAgain": "Transcribe again…",
-  "@playerMoreTranscribeAgain": {"description": "More menu: run AI transcription again."},
+  "@playerMoreTranscribeAgain": {
+    "description": "More menu: run AI transcription again."
+  },
   "playerMoreAddWordTimings": "Add word timings & IPA",
-  "@playerMoreAddWordTimings": {"description": "More menu: generate word timings and pronunciation for a local file."},
+  "@playerMoreAddWordTimings": {
+    "description": "More menu: generate word timings and pronunciation for a local file."
+  },
   "playerMoreAddIpa": "Add pronunciation (IPA)",
-  "@playerMoreAddIpa": {"description": "More menu: generate pronunciation for a streamed item (no word timings)."},
+  "@playerMoreAddIpa": {
+    "description": "More menu: generate pronunciation for a streamed item (no word timings)."
+  },
   "playerMoreRefreshFromCloud": "Refresh from cloud",
-  "@playerMoreRefreshFromCloud": {"description": "More menu: fetch transcripts from the cloud again."},
+  "@playerMoreRefreshFromCloud": {
+    "description": "More menu: fetch transcripts from the cloud again."
+  },
   "playerMoreEditTranscript": "Edit transcript",
-  "@playerMoreEditTranscript": {"description": "More menu: open the transcript editor for the active transcript."},
+  "@playerMoreEditTranscript": {
+    "description": "More menu: open the transcript editor for the active transcript."
+  },
   "transcriptEditorTitle": "Edit transcript",
-  "@transcriptEditorTitle": {"description": "Title of the transcript editor page."},
+  "@transcriptEditorTitle": {
+    "description": "Title of the transcript editor page."
+  },
   "transcriptEditorSave": "Save",
-  "@transcriptEditorSave": {"description": "Transcript editor: save the edited lines."},
+  "@transcriptEditorSave": {
+    "description": "Transcript editor: save the edited lines."
+  },
   "transcriptEditorSaved": "Transcript updated",
-  "@transcriptEditorSaved": {"description": "Notice after the transcript editor saved."},
+  "@transcriptEditorSaved": {
+    "description": "Notice after the transcript editor saved."
+  },
   "transcriptEditorSaveFailed": "Couldn't save the transcript. Please try again.",
-  "@transcriptEditorSaveFailed": {"description": "Notice when the transcript editor could not save."},
+  "@transcriptEditorSaveFailed": {
+    "description": "Notice when the transcript editor could not save."
+  },
   "transcriptEditorInvalidTiming": "Start and duration must be times in seconds, like 1.25.",
-  "@transcriptEditorInvalidTiming": {"description": "Transcript editor: a timing field is not a valid seconds value."},
+  "@transcriptEditorInvalidTiming": {
+    "description": "Transcript editor: a timing field is not a valid seconds value."
+  },
   "transcriptEditorEmpty": "This media has no transcript to edit.",
-  "@transcriptEditorEmpty": {"description": "Transcript editor: shown when the media has no transcript row."},
+  "@transcriptEditorEmpty": {
+    "description": "Transcript editor: shown when the media has no transcript row."
+  },
   "transcriptEditorNoCues": "This transcript has no lines to edit.",
-  "@transcriptEditorNoCues": {"description": "Transcript editor: shown when the transcript row exists but has no cue lines."},
+  "@transcriptEditorNoCues": {
+    "description": "Transcript editor: shown when the transcript row exists but has no cue lines."
+  },
   "transcriptEditorDiscardTitle": "Discard unsaved edits?",
-  "@transcriptEditorDiscardTitle": {"description": "Transcript editor: title of the confirm dialog when leaving with unsaved edits."},
+  "@transcriptEditorDiscardTitle": {
+    "description": "Transcript editor: title of the confirm dialog when leaving with unsaved edits."
+  },
   "transcriptEditorDiscardMessage": "Your edits to this transcript have not been saved.",
-  "@transcriptEditorDiscardMessage": {"description": "Transcript editor: body of the confirm dialog when leaving with unsaved edits."},
+  "@transcriptEditorDiscardMessage": {
+    "description": "Transcript editor: body of the confirm dialog when leaving with unsaved edits."
+  },
   "transcriptEditorDiscardConfirm": "Discard",
-  "@transcriptEditorDiscardConfirm": {"description": "Transcript editor: confirm button of the discard dialog."},
+  "@transcriptEditorDiscardConfirm": {
+    "description": "Transcript editor: confirm button of the discard dialog."
+  },
   "transcriptEditorLineLabel": "Line {index}",
-  "@transcriptEditorLineLabel": {"description": "Transcript editor: per-line heading with the cue number.", "placeholders": {"index": {"type": "int"}}},
+  "@transcriptEditorLineLabel": {
+    "description": "Transcript editor: per-line heading with the cue number.",
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
   "transcriptEditorFieldStart": "Start (seconds)",
-  "@transcriptEditorFieldStart": {"description": "Transcript editor: line start time field."},
+  "@transcriptEditorFieldStart": {
+    "description": "Transcript editor: line start time field."
+  },
   "transcriptEditorFieldDuration": "Duration (seconds)",
-  "@transcriptEditorFieldDuration": {"description": "Transcript editor: line duration field."},
+  "@transcriptEditorFieldDuration": {
+    "description": "Transcript editor: line duration field."
+  },
   "playerMoreDownloadTranscript": "Download transcript…",
-  "@playerMoreDownloadTranscript": {"description": "More menu: save the active transcript as an SRT or VTT subtitle file."},
+  "@playerMoreDownloadTranscript": {
+    "description": "More menu: save the active transcript as an SRT or VTT subtitle file."
+  },
   "playerMoreMediaSection": "Media",
-  "@playerMoreMediaSection": {"description": "Media section heading in the player's More menu."},
+  "@playerMoreMediaSection": {
+    "description": "Media section heading in the player's More menu."
+  },
   "playerMoreEditDetails": "Edit details",
-  "@playerMoreEditDetails": {"description": "More menu Media: open the Edit details dialog."},
+  "@playerMoreEditDetails": {
+    "description": "More menu Media: open the Edit details dialog."
+  },
   "playerMoreExportLoopClip": "Export the loop as a clip…",
-  "@playerMoreExportLoopClip": {"description": "More menu: save the active Echo loop's audio/video range as a media file."},
+  "@playerMoreExportLoopClip": {
+    "description": "More menu: save the active Echo loop's audio/video range as a media file."
+  },
   "playerMoreExportLoopClipSuccess": "Loop clip exported",
-  "@playerMoreExportLoopClipSuccess": {"description": "Notice after the Echo loop clip was saved or shared."},
+  "@playerMoreExportLoopClipSuccess": {
+    "description": "Notice after the Echo loop clip was saved or shared."
+  },
   "playerMoreExportLoopClipFailed": "Couldn't export the loop clip",
-  "@playerMoreExportLoopClipFailed": {"description": "Notice when the Echo loop clip export failed."},
+  "@playerMoreExportLoopClipFailed": {
+    "description": "Notice when the Echo loop clip export failed."
+  },
   "playerMoreExportLoopClipFfmpegMissing": "FFmpeg isn't available on this device",
-  "@playerMoreExportLoopClipFfmpegMissing": {"description": "Notice when clip export cannot run because no FFmpeg runtime was found."},
+  "@playerMoreExportLoopClipFfmpegMissing": {
+    "description": "Notice when clip export cannot run because no FFmpeg runtime was found."
+  },
   "playerMoreKeyboardShortcuts": "Keyboard shortcuts",
-  "@playerMoreKeyboardShortcuts": {"description": "More menu: open the keyboard shortcuts cheatsheet."},
-  
+  "@playerMoreKeyboardShortcuts": {
+    "description": "More menu: open the keyboard shortcuts cheatsheet."
+  },
   "subtitlesPanelTitle": "Subtitles & display",
-  "@subtitlesPanelTitle": {"description": "Title of the Subtitles & display panel."},
+  "@subtitlesPanelTitle": {
+    "description": "Title of the Subtitles & display panel."
+  },
   "subtitlesSectionSubtitles": "Subtitles",
-  "@subtitlesSectionSubtitles": {"description": "Section heading for the track rows in the Subtitles & display panel."},
+  "@subtitlesSectionSubtitles": {
+    "description": "Section heading for the track rows in the Subtitles & display panel."
+  },
   "subtitlesSectionDisplay": "Display",
-  "@subtitlesSectionDisplay": {"description": "Section heading for the display options in the Subtitles & display panel."},
+  "@subtitlesSectionDisplay": {
+    "description": "Section heading for the display options in the Subtitles & display panel."
+  },
   "transcriptTypefaceLabel": "Transcript type",
-  "@transcriptTypefaceLabel": {"description": "Accessible label for the Book / Clean typeface choice."},
+  "@transcriptTypefaceLabel": {
+    "description": "Accessible label for the Book / Clean typeface choice."
+  },
   "transcriptTypefaceBook": "Book",
-  "@transcriptTypefaceBook": {"description": "Serif transcript typeface option."},
+  "@transcriptTypefaceBook": {
+    "description": "Serif transcript typeface option."
+  },
   "transcriptTypefaceClean": "Clean",
-  "@transcriptTypefaceClean": {"description": "Sans-serif transcript typeface option."},
+  "@transcriptTypefaceClean": {
+    "description": "Sans-serif transcript typeface option."
+  },
   "subtitlesHighlightSpokenWord": "Highlight the spoken word",
-  "@subtitlesHighlightSpokenWord": {"description": "Display switch: underline the word being spoken."},
+  "@subtitlesHighlightSpokenWord": {
+    "description": "Display switch: underline the word being spoken."
+  },
   "subtitlesHighlightSpokenWordHint": "Underline each word as it is said.",
-  "@subtitlesHighlightSpokenWordHint": {"description": "Hint under the highlight switch when available."},
+  "@subtitlesHighlightSpokenWordHint": {
+    "description": "Hint under the highlight switch when available."
+  },
   "subtitlesIpaUnderWords": "IPA under words",
-  "@subtitlesIpaUnderWords": {"description": "Display switch: show IPA under each word."},
+  "@subtitlesIpaUnderWords": {
+    "description": "Display switch: show IPA under each word."
+  },
   "subtitlesCaptionOverlay": "Caption below video",
-  "@subtitlesCaptionOverlay": {"description": "Label for the on-video caption overlay display-mode picker."},
+  "@subtitlesCaptionOverlay": {
+    "description": "Label for the on-video caption overlay display-mode picker."
+  },
   "subtitlesCaptionOverlayHint": "Show the active line over the bottom of the video, transparent background.",
-  "@subtitlesCaptionOverlayHint": {"description": "Explanation of the on-video caption overlay."},
+  "@subtitlesCaptionOverlayHint": {
+    "description": "Explanation of the on-video caption overlay."
+  },
   "subtitlesCaptionModeOff": "Off",
-  "@subtitlesCaptionModeOff": {"description": "Caption overlay mode: hidden."},
+  "@subtitlesCaptionModeOff": {
+    "description": "Caption overlay mode: hidden."
+  },
   "subtitlesCaptionModeOriginal": "Original",
-  "@subtitlesCaptionModeOriginal": {"description": "Caption overlay mode: original text only."},
+  "@subtitlesCaptionModeOriginal": {
+    "description": "Caption overlay mode: original text only."
+  },
   "subtitlesCaptionModeTranslation": "Translation",
-  "@subtitlesCaptionModeTranslation": {"description": "Caption overlay mode: translation only."},
+  "@subtitlesCaptionModeTranslation": {
+    "description": "Caption overlay mode: translation only."
+  },
   "subtitlesCaptionModeBoth": "Bilingual",
-  "@subtitlesCaptionModeBoth": {"description": "Caption overlay mode: original + translation."},
+  "@subtitlesCaptionModeBoth": {
+    "description": "Caption overlay mode: original + translation."
+  },
   "subtitlesIpaUnderWordsHint": "Tap a word to hear it.",
-  "@subtitlesIpaUnderWordsHint": {"description": "Hint under the IPA switch when available."},
+  "@subtitlesIpaUnderWordsHint": {
+    "description": "Hint under the IPA switch when available."
+  },
   "subtitlesNeedsWordTimingsMore": "Add word timings & IPA first (··· More).",
-  "@subtitlesNeedsWordTimingsMore": {"description": "Hint under a disabled display switch on desktop."},
+  "@subtitlesNeedsWordTimingsMore": {
+    "description": "Hint under a disabled display switch on desktop."
+  },
   "subtitlesNeedsWordTimingsBelow": "Add word timings & IPA first (below).",
-  "@subtitlesNeedsWordTimingsBelow": {"description": "Hint under a disabled display switch in the phone sheet."},
+  "@subtitlesNeedsWordTimingsBelow": {
+    "description": "Hint under a disabled display switch in the phone sheet."
+  },
   "subtitlesManageFromMore": "Add or replace the transcript from ··· More.",
-  "@subtitlesManageFromMore": {"description": "Footer of the desktop Subtitles & display panel."},
+  "@subtitlesManageFromMore": {
+    "description": "Footer of the desktop Subtitles & display panel."
+  },
   "transcriptEnrichRunningOwned": "Generating word timings and pronunciation",
-  "@transcriptEnrichRunningOwned": {"description": "Progress card title while word timings generate."},
+  "@transcriptEnrichRunningOwned": {
+    "description": "Progress card title while word timings generate."
+  },
   "transcriptEnrichRunningYoutube": "Generating pronunciation",
-  "@transcriptEnrichRunningYoutube": {"description": "Progress card title while pronunciation generates for a streamed item."},
+  "@transcriptEnrichRunningYoutube": {
+    "description": "Progress card title while pronunciation generates for a streamed item."
+  },
   "playerDictateShort": "Dictate",
-  "@playerDictateShort": {"description": "Top-bar lens segment: listen with the transcript hidden (H)."},
+  "@playerDictateShort": {
+    "description": "Top-bar lens segment: listen with the transcript hidden (H)."
+  },
   "playerDictateHintHover": "Dictate · listen, then hover a line to peek",
-  "@playerDictateHintHover": {"description": "Hint pill over the transcript in the Dictate lens (pointer devices)."},
+  "@playerDictateHintHover": {
+    "description": "Hint pill over the transcript in the Dictate lens (pointer devices)."
+  },
   "playerDictateHintHold": "Press and hold to show",
-  "@playerDictateHintHold": {"description": "Hint pill over the transcript in the Dictate lens (touch)."},
+  "@playerDictateHintHold": {
+    "description": "Hint pill over the transcript in the Dictate lens (touch)."
+  },
   "playerDockPractisedLines": "{count, plural, =0{No lines practised yet} =1{1 line practised} other{{count} lines practised}}",
-  "@playerDockPractisedLines": {"description": "Dock readout under the line position in Listen.", "placeholders": {"count": {"type": "int"}}},
+  "@playerDockPractisedLines": {
+    "description": "Dock readout under the line position in Listen.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "playerDockLoopingLine": "Looping line {line}",
-  "@playerDockLoopingLine": {"description": "Dock readout in Echo with a one-line loop.", "placeholders": {"line": {"type": "int"}}},
+  "@playerDockLoopingLine": {
+    "description": "Dock readout in Echo with a one-line loop.",
+    "placeholders": {
+      "line": {
+        "type": "int"
+      }
+    }
+  },
   "playerDockLoopingLines": "Looping lines {start}–{end}",
-  "@playerDockLoopingLines": {"description": "Dock readout in Echo with a multi-line loop.", "placeholders": {"start": {"type": "int"}, "end": {"type": "int"}}},
+  "@playerDockLoopingLines": {
+    "description": "Dock readout in Echo with a multi-line loop.",
+    "placeholders": {
+      "start": {
+        "type": "int"
+      },
+      "end": {
+        "type": "int"
+      }
+    }
+  },
   "playerDockLoopHint": "{seconds}s · + adds a line, − drops one",
-  "@playerDockLoopHint": {"description": "Dock hint under the Echo readout; seconds is the loop length.", "placeholders": {"seconds": {"type": "String"}}},
+  "@playerDockLoopHint": {
+    "description": "Dock hint under the Echo readout; seconds is the loop length.",
+    "placeholders": {
+      "seconds": {
+        "type": "String"
+      }
+    }
+  },
   "playerDockRecordingProgress": "Recording · {elapsed}s of {total}s",
-  "@playerDockRecordingProgress": {"description": "Dock hint while a take records.", "placeholders": {"elapsed": {"type": "String"}, "total": {"type": "String"}}},
+  "@playerDockRecordingProgress": {
+    "description": "Dock hint while a take records.",
+    "placeholders": {
+      "elapsed": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
   "playerDockDictatingLine": "Dictating line {line}",
-  "@playerDockDictatingLine": {"description": "Dock readout in the Dictate lens.", "placeholders": {"line": {"type": "int"}}},
+  "@playerDockDictatingLine": {
+    "description": "Dock readout in the Dictate lens.",
+    "placeholders": {
+      "line": {
+        "type": "int"
+      }
+    }
+  },
   "playerDockDictateHover": "Hover a line to peek",
-  "@playerDockDictateHover": {"description": "Dock hint in the Dictate lens (pointer devices)."},
+  "@playerDockDictateHover": {
+    "description": "Dock hint in the Dictate lens (pointer devices)."
+  },
   "playerDockDictateHold": "Hold to show",
-  "@playerDockDictateHold": {"description": "Dock hint in the Dictate lens (touch)."},
+  "@playerDockDictateHold": {
+    "description": "Dock hint in the Dictate lens (touch)."
+  },
   "playerRepeatOff": "Repeat: off",
-  "@playerRepeatOff": {"description": "Repeat button tooltip when repeat is off."},
+  "@playerRepeatOff": {
+    "description": "Repeat button tooltip when repeat is off."
+  },
   "playerRepeatItem": "Repeat this item",
-  "@playerRepeatItem": {"description": "Repeat button tooltip when the whole item repeats."},
+  "@playerRepeatItem": {
+    "description": "Repeat button tooltip when the whole item repeats."
+  },
   "playerRepeatLoop": "Repeat the echo loop",
-  "@playerRepeatLoop": {"description": "Repeat button tooltip when the echo segment repeats."},
+  "@playerRepeatLoop": {
+    "description": "Repeat button tooltip when the echo segment repeats."
+  },
   "playerMarginCloseTooltip": "{close} · Esc",
-  "@playerMarginCloseTooltip": {"description": "Tooltip on the player margin's close button.", "placeholders": {"close": {"type": "String"}}},
+  "@playerMarginCloseTooltip": {
+    "description": "Tooltip on the player margin's close button.",
+    "placeholders": {
+      "close": {
+        "type": "String"
+      }
+    }
+  },
   "takeNumbered": "Take {number}",
-  "@takeNumbered": {"description": "A take's name in the takes row and list.", "placeholders": {"number": {"type": "int"}}},
+  "@takeNumbered": {
+    "description": "A take's name in the takes row and list.",
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "takesCount": "{count, plural, =1{1 take} other{{count} takes}}",
-  "@takesCount": {"description": "Opens the list of takes for the loop.", "placeholders": {"count": {"type": "int"}}},
+  "@takesCount": {
+    "description": "Opens the list of takes for the loop.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "takeNotScoredClick": "Not scored yet · click to score",
-  "@takeNotScoredClick": {"description": "Under an unscored take (pointer devices)."},
+  "@takeNotScoredClick": {
+    "description": "Under an unscored take (pointer devices)."
+  },
   "takeNotScoredTap": "Not scored yet · tap to score",
-  "@takeNotScoredTap": {"description": "Under an unscored take (touch)."},
+  "@takeNotScoredTap": {
+    "description": "Under an unscored take (touch)."
+  },
   "takesMarginTitleClick": "Your takes · click to play",
-  "@takesMarginTitleClick": {"description": "Heading of the takes list (pointer devices)."},
+  "@takesMarginTitleClick": {
+    "description": "Heading of the takes list (pointer devices)."
+  },
   "takesMarginTitleTap": "Your takes · tap to play",
-  "@takesMarginTitleTap": {"description": "Heading of the takes list (touch)."},
+  "@takesMarginTitleTap": {
+    "description": "Heading of the takes list (touch)."
+  },
   "takesPitchOnLoop": "Pitch contour on the loop",
-  "@takesPitchOnLoop": {"description": "Takes list toggle for the pitch contour (P)."},
+  "@takesPitchOnLoop": {
+    "description": "Takes list toggle for the pitch contour (P)."
+  },
   "lookupInThisAudio": "In this audio · {time}",
-  "@lookupInThisAudio": {"description": "Context block in the lookup sheet: the line the word came from (audio).", "placeholders": {"time": {"type": "String"}}},
+  "@lookupInThisAudio": {
+    "description": "Context block in the lookup sheet: the line the word came from (audio).",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "lookupInThisVideo": "In this video · {time}",
-  "@lookupInThisVideo": {"description": "Context block in the lookup sheet: the line the word came from (video).", "placeholders": {"time": {"type": "String"}}},
+  "@lookupInThisVideo": {
+    "description": "Context block in the lookup sheet: the line the word came from (video).",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "takeAssessmentTitle": "Take {number} · Assessment",
-  "@takeAssessmentTitle": {"description": "Assessment margin heading for a numbered take.", "placeholders": {"number": {"type": "int"}}},
+  "@takeAssessmentTitle": {
+    "description": "Assessment margin heading for a numbered take.",
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "settingsSectionNetwork": "Network",
   "settingsSectionNetworkHint": "Proxy and VPN routing",
   "settingsNetworkProxyModeTitle": "Proxy mode",
@@ -2385,24 +3082,70 @@
   "settingsNetworkEffectiveTitle": "Effective proxy",
   "settingsNetworkEffectiveDirect": "Direct (no proxy)",
   "settingsNetworkEffectiveProxy": "{endpoint} ({source})",
-  "@settingsNetworkEffectiveProxy": {"placeholders": {"endpoint": {"type": "String"}, "source": {"type": "String"}}},
+  "@settingsNetworkEffectiveProxy": {
+    "placeholders": {
+      "endpoint": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
   "settingsNetworkTestButton": "Test connection",
   "settingsNetworkTestRunning": "Testing...",
   "settingsNetworkTestApi": "Enjoy API",
   "settingsNetworkTestYoutube": "YouTube",
   "settingsNetworkTestOk": "{label}: reachable in {ms} ms via {route}",
-  "@settingsNetworkTestOk": {"placeholders": {"label": {"type": "String"}, "ms": {"type": "int"}, "route": {"type": "String"}}},
+  "@settingsNetworkTestOk": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "ms": {
+        "type": "int"
+      },
+      "route": {
+        "type": "String"
+      }
+    }
+  },
   "settingsNetworkTestFail": "{label}: failed via {route} ({error})",
-  "@settingsNetworkTestFail": {"placeholders": {"label": {"type": "String"}, "route": {"type": "String"}, "error": {"type": "String"}}},
+  "@settingsNetworkTestFail": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "route": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "playerDictationVoiceMode": "Voice",
   "playerDictationTextMode": "Text",
   "playerDictationVoiceHint": "Listen and retell by voice. Tap Record when ready.",
-  "@playerDictationVoiceHint": {"description": "Voice-mode hint in the Dictation panel (touch platforms have no keyboard shortcuts)."},
+  "@playerDictationVoiceHint": {
+    "description": "Voice-mode hint in the Dictation panel (touch platforms have no keyboard shortcuts)."
+  },
   "playerDictationVoiceHintHotkey": "Listen and retell by voice. Tap Record or press R when ready.",
-  "@playerDictationVoiceHintHotkey": {"description": "Voice-mode hint in the Dictation panel on desktop, where the R hotkey works."},
+  "@playerDictationVoiceHintHotkey": {
+    "description": "Voice-mode hint in the Dictation panel on desktop, where the R hotkey works."
+  },
   "playerDictationTextPlaceholder": "Type what you hear...",
   "playerDictationWordCountProgress": "{typed} of about {total} words",
-  "@playerDictationWordCountProgress": {"placeholders": {"typed": {"type": "int"}, "total": {"type": "int"}}},
+  "@playerDictationWordCountProgress": {
+    "placeholders": {
+      "typed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "playerDictationCheckAnswer": "Check answer",
   "playerDictationCheckingVoice": "Transcribing speech...",
   "playerDictationTryAgain": "Try again",
@@ -2412,21 +3155,57 @@
   "playerDictationLegendMissed": "Missed",
   "playerDictationLegendExtra": "Extra",
   "playerDictationStatsCorrect": "{count} correct",
-  "@playerDictationStatsCorrect": {"placeholders": {"count": {"type": "int"}}},
+  "@playerDictationStatsCorrect": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "playerDictationStatsMissed": "{count} missed",
-  "@playerDictationStatsMissed": {"placeholders": {"count": {"type": "int"}}},
+  "@playerDictationStatsMissed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "playerDictationStatsExtra": "{count} extra",
-  "@playerDictationStatsExtra": {"placeholders": {"count": {"type": "int"}}},
+  "@playerDictationStatsExtra": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "playerDictationPreviousAttempts": "Previous dictations ({count})",
-  "@playerDictationPreviousAttempts": {"placeholders": {"count": {"type": "int"}}},
+  "@playerDictationPreviousAttempts": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "playerDictationAttemptAccuracy": "{accuracy}% accuracy",
-  "@playerDictationAttemptAccuracy": {"placeholders": {"accuracy": {"type": "int"}}},
+  "@playerDictationAttemptAccuracy": {
+    "placeholders": {
+      "accuracy": {
+        "type": "int"
+      }
+    }
+  },
   "playerDictationRecordAgain": "Record again",
   "playerDictationRecordRetelling": "Record retelling",
-  "@playerDictationRecordRetelling": {"description": "Voice-mode CTA in the Dictation panel (touch platforms have no keyboard shortcuts)."},
+  "@playerDictationRecordRetelling": {
+    "description": "Voice-mode CTA in the Dictation panel (touch platforms have no keyboard shortcuts)."
+  },
   "playerDictationRecordRetellingHotkey": "Record retelling (R)",
-  "@playerDictationRecordRetellingHotkey": {"description": "Voice-mode CTA in the Dictation panel on desktop, where the R hotkey works."},
+  "@playerDictationRecordRetellingHotkey": {
+    "description": "Voice-mode CTA in the Dictation panel on desktop, where the R hotkey works."
+  },
   "playerDictationHeaderListen": "DICTATION — LISTEN & RETELL",
   "playerDictationHeaderChecked": "DICTATION — CHECKED",
-  "playerDictationNoSpeechDetected": "No speech detected"
+  "playerDictationNoSpeechDetected": "No speech detected",
+  "settingsSectionLocalComponents": "Local components",
+  "settingsSectionLocalComponentsHint": "Manage offline transcription / translation model components."
 }

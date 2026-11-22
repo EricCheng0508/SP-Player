@@ -84,6 +84,7 @@ class _MediaKitStageGateState extends State<MediaKitVideoStage> {
         controller: engine.videoController,
         positionStream: engine.position,
         playingStream: engine.playing,
+        durationStream: engine.duration,
         nudgeMpvRender: engine.nudgeVideoRender,
         maxWidth: widget.maxWidth,
         maxHeight: widget.maxHeight,
@@ -103,6 +104,7 @@ class _MediaKitVideoStage extends StatefulWidget {
     required this.controller,
     required this.positionStream,
     required this.playingStream,
+    required this.durationStream,
     required this.nudgeMpvRender,
     required this.maxWidth,
     required this.maxHeight,
@@ -119,6 +121,10 @@ class _MediaKitVideoStage extends StatefulWidget {
   /// can trigger from elsewhere (mode-tab switches pause, echo loops seek);
   /// each transition is another chance to un-black a stale texture.
   final Stream<bool> playingStream;
+
+  /// Duration stream: a change signals a different file loaded into the same
+  /// persistent stage (the stage is not remounted per open).
+  final Stream<Duration> durationStream;
 
   /// Forces mpv to re-render the current frame (1 ms seek). The hard-kick
   /// escalation pairs this with a [Video] remount: remounting alone only
@@ -139,8 +145,11 @@ class _MediaKitVideoStageState extends State<_MediaKitVideoStage> {
   var _kicked = false;
   var _hardKickEpoch = 0;
   StreamSubscription<Duration>? _positionSub;
+  StreamSubscription<Duration>? _durationSub;
   StreamSubscription<bool>? _playingSub;
   Duration? _lastPosition;
+  Duration? _lastDuration;
+  var _lastSequenceAt = DateTime.fromMillisecondsSinceEpoch(0);
 
   @override
   void initState() {
@@ -150,7 +159,24 @@ class _MediaKitVideoStageState extends State<_MediaKitVideoStage> {
     _onTexture();
     unawaited(_kickAfterFirstFrame());
     _positionSub = widget.positionStream.listen(_onPositionTick);
+    _durationSub = widget.durationStream.listen(_onDurationChanged);
     _playingSub = widget.playingStream.listen(_onPlayingFlip);
+    _runKickSequence();
+  }
+
+  /// The full soft-burst + hard-kick sequence.
+  ///
+  /// Runs at stage mount AND on every new media load: [PlayerSurfaceHost]
+  /// keeps the stage mounted across `open()` calls (same engine is reused),
+  /// so a second import — the reported "delete, re-import, black again" case
+  /// — mounts no new stage, the mount-time sequence never re-runs, and mpv
+  /// sits silent on a black texture until the user switches tabs (which
+  /// seeks and forces a repaint).
+  void _runKickSequence() {
+    if (!mounted) return;
+    final now = DateTime.now();
+    if (now.difference(_lastSequenceAt).inMilliseconds < 2500) return;
+    _lastSequenceAt = now;
     // Burst kicks over the first few seconds: a single kick can land while
     // mpv has not yet presented into the texture (or during the loading →
     // chrome viewport swap) and the frame stays black. The user-visible
@@ -164,10 +190,13 @@ class _MediaKitVideoStageState extends State<_MediaKitVideoStage> {
       }));
     }
     // Escalation: soft 1px pulses can fail to revive a stale compositor
-    // texture (the freshly-imported first open stayed black until a mode-tab
-    // switch). A hard kick remounts the [Video] element, which re-registers
-    // the texture with the compositor — strictly stronger than relayout.
-    for (final delayMs in const [800, 1800, 3200, 5000, 7500]) {
+    // texture. A hard kick remounts the [Video] element, which re-registers
+    // the texture with the compositor, and pairs it with the engine's nudge
+    // (1 ms seek) so mpv actually paints. A few late kicks cover slow
+    // disks / network sources that are still loading.
+    for (final delayMs in const [
+      800, 1800, 3200, 5000, 7500, 10500, 14000,
+    ]) {
       unawaited(Future<void>.delayed(Duration(milliseconds: delayMs)).then((_) {
         if (mounted) _scheduleKick(hard: true);
       }));
@@ -192,6 +221,7 @@ class _MediaKitVideoStageState extends State<_MediaKitVideoStage> {
     widget.controller.id.removeListener(_onTexture);
     widget.controller.rect.removeListener(_onTexture);
     unawaited(_positionSub?.cancel());
+    unawaited(_durationSub?.cancel());
     unawaited(_playingSub?.cancel());
     super.dispose();
   }
@@ -206,7 +236,10 @@ class _MediaKitVideoStageState extends State<_MediaKitVideoStage> {
   /// Kicks on seek jumps. Natural playback ticks advance monotonically in
   /// small steps; a backwards jump or a forward leap over ~1s means the user
   /// (or the app) seeked, and the texture may need a relayout pulse to
-  /// present the new frame.
+  /// present the new frame. A reset from well into the file back to the very
+  /// start is a new media load into the same engine — rerun the whole
+  /// sequence (same-id re-imports reopen the identical file, so the duration
+  /// signal below never fires for them).
   void _onPositionTick(Duration position) {
     final last = _lastPosition;
     _lastPosition = position;
@@ -214,6 +247,20 @@ class _MediaKitVideoStageState extends State<_MediaKitVideoStage> {
     final deltaMs = position.inMilliseconds - last.inMilliseconds;
     if (deltaMs < 0 || deltaMs > 1000) {
       _scheduleKick();
+    }
+    if (last.inMilliseconds > 5000 && position.inMilliseconds < 1000) {
+      _runKickSequence();
+    }
+  }
+
+  /// Reruns the sequence when the media duration changes — a different file
+  /// loaded into the same persistent stage.
+  void _onDurationChanged(Duration duration) {
+    final last = _lastDuration;
+    _lastDuration = duration;
+    if (last == null) return;
+    if ((duration - last).abs() > const Duration(milliseconds: 500)) {
+      _runKickSequence();
     }
   }
 

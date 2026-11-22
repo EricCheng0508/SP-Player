@@ -1,11 +1,15 @@
-/// Auto-lifecycle for the bundled local ASR service (subgen).
+/// Auto-lifecycle for the local ASR service (subgen).
 ///
-/// The local build bundles faster-whisper `large-v3` as an OpenAI-compatible
-/// HTTP service (`D:\Tool\subgen\serve.py`, port 8000, started via
-/// `start-asr-server.bat`). Instead of asking the user to run that script,
-/// the app probes `GET /health` and silently spawns the server in the
-/// background (`pythonw`, no console window) whenever it is not running —
-/// both eagerly at app startup and lazily before the first transcription.
+/// Resolution order:
+/// 1. Probe `GET /health` on 127.0.0.1:8000 — an already-running service wins
+///    (dev setups, a previous app session, etc.).
+/// 2. Managed component install: spawn the frozen `sp-asr-server.exe` from
+///    the component store (installed by the first-run wizard) with the model
+///    directory managed alongside it.
+/// 3. Legacy dev fallback: the old `D:\Tool\subgen` venv, kept for developer
+///    machines so existing checkouts keep working.
+///
+/// The service exposes an OpenAI-compatible `/v1/audio/transcriptions`.
 library;
 
 import 'dart:async';
@@ -13,13 +17,16 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
-/// Root of the bundled transcription service. Local-build constant.
-const kSubgenDir = r'D:\Tool\subgen';
+import 'package:enjoy_player/features/local_components/data/component_store.dart';
+import 'package:enjoy_player/features/local_components/domain/component_catalog.dart';
 
 const _healthUrl = 'http://127.0.0.1:8000/health';
 
-/// Wait for model load: large-v3 on CUDA takes tens of seconds on cold start.
-const _kReadyTimeout = Duration(seconds: 120);
+/// Legacy dev checkout (kept as last-resort fallback).
+const kSubgenDir = r'D:\Tool\subgen';
+
+/// Wait for model load: large-v3-turbo on CUDA takes tens of seconds on cold start.
+const _kReadyTimeout = Duration(seconds: 180);
 
 http.Client? _probeClient;
 
@@ -42,9 +49,8 @@ Future<void>? _ensureFuture;
 /// Idempotent, single-flight: probes the service, spawns it if down, then
 /// waits until `/health` answers (or the ready timeout elapses).
 ///
-/// Throws [TimeoutException] when the service never became ready; spawn
-/// failures are folded into the same path so callers can fall back to the
-/// actionable "service not started" message.
+/// Throws [StateError] when no install was found, [TimeoutException] when the
+/// service never became ready.
 Future<void> ensureLocalAsrService() {
   return _ensureFuture ??= _ensure().whenComplete(() => _ensureFuture = null);
 }
@@ -52,26 +58,18 @@ Future<void> ensureLocalAsrService() {
 Future<void> _ensure() async {
   if (await isLocalAsrUp()) return;
 
-  final pythonw = File('$kSubgenDir\\.venv\\Scripts\\pythonw.exe');
+  var spawned = false;
   try {
-    if (pythonw.existsSync()) {
-      await Process.start(
-        pythonw.path,
-        [r'serve.py', '--port', '8000'],
-        workingDirectory: kSubgenDir,
-        mode: ProcessStartMode.detached,
-      );
-    } else {
-      // Fallback: run the bundled launcher minimized (shows a console).
-      await Process.start(
-        'cmd.exe',
-        ['/c', 'start', '/min', '', r'start-asr-server.bat'],
-        workingDirectory: kSubgenDir,
-        mode: ProcessStartMode.detached,
-      );
-    }
+    spawned = await _spawnManaged();
+    if (!spawned) spawned = await _spawnLegacyDev();
   } on Object {
-    throw StateError('Failed to spawn local ASR service in $kSubgenDir');
+    spawned = false;
+  }
+  if (!spawned) {
+    throw StateError(
+      'Local ASR service not installed (run the setup wizard or install the '
+      'transcription component in Settings).',
+    );
   }
 
   final deadline = DateTime.now().add(_kReadyTimeout);
@@ -84,6 +82,52 @@ Future<void> _ensure() async {
   throw TimeoutException(
     'Local ASR service did not become ready within ${_kReadyTimeout.inSeconds}s',
   );
+}
+
+/// Spawns the managed frozen service when the component store has it.
+Future<bool> _spawnManaged() async {
+  final store = ComponentStore(rootOverride: null);
+  final runtimeSpec = specOf(ComponentKind.asrRuntime);
+  final exe = store.installedEntryPath(runtimeSpec);
+  if (exe == null || !File(exe).existsSync()) return false;
+
+  // Model dir next to the runtime root: components/asr-models/large-v3-turbo.
+  final modelDir = Directory(
+    '${store.root}\\${specOf(ComponentKind.asrModel).installDirName}',
+  );
+  final args = <String>['--port', '8000'];
+  if (modelDir.existsSync()) {
+    args..add('--model')..add(modelDir.path);
+  }
+
+  try {
+    await Process.start(
+      exe,
+      args,
+      workingDirectory: File(exe).parent.path,
+      mode: ProcessStartMode.detached,
+    );
+    return true;
+  } on Object {
+    return false;
+  }
+}
+
+/// Developer-machine fallback: venv pythonw in the old checkout.
+Future<bool> _spawnLegacyDev() async {
+  final pythonw = File('$kSubgenDir\\.venv\\Scripts\\pythonw.exe');
+  try {
+    if (!pythonw.existsSync()) return false;
+    await Process.start(
+      pythonw.path,
+      [r'serve.py', '--port', '8000'],
+      workingDirectory: kSubgenDir,
+      mode: ProcessStartMode.detached,
+    );
+    return true;
+  } on Object {
+    return false;
+  }
 }
 
 /// Fire-and-forget warm-up used at app startup: kicks the service off early

@@ -12,10 +12,11 @@ library;
 
 /// Stable section identifiers, in Settings hub display order.
 abstract final class SettingsSectionIds {
-  static const account = 'account';
+  // 本地版：账号分区已下线，id 一并移除。
   static const cloudSync = 'cloudSync';
   static const appearanceLanguage = 'appearanceLanguage';
   static const aiProviders = 'aiProviders';
+  static const localComponents = 'localComponents';
   static const network = 'network';
   static const recording = 'recording';
   static const keyboardShortcuts = 'keyboardShortcuts';
@@ -96,7 +97,7 @@ List<SettingsSearchEntry> filterSettingsEntries(
 /// and [SettingsSectionIds.developer] is hidden on release builds by the
 /// presentation layer (FR-005/FR-006), not by this registry.
 const List<SettingsEntryDescriptor> kSettingsRegistry = [
-  SettingsEntryDescriptor(sectionId: SettingsSectionIds.account),
+  // 本地版：账号分区已整体下线，不再注册。
   SettingsEntryDescriptor(
     sectionId: SettingsSectionIds.cloudSync,
     collapsedByDefault: true,
@@ -128,6 +129,14 @@ const List<SettingsEntryDescriptor> kSettingsRegistry = [
   SettingsEntryDescriptor(
     sectionId: SettingsSectionIds.aiProviders,
     rowId: 'aiProviders',
+  ),
+  SettingsEntryDescriptor(
+    sectionId: SettingsSectionIds.localComponents,
+    collapsedByDefault: true,
+  ),
+  SettingsEntryDescriptor(
+    sectionId: SettingsSectionIds.localComponents,
+    rowId: 'componentList',
   ),
   SettingsEntryDescriptor(
     sectionId: SettingsSectionIds.network,

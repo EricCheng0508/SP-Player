@@ -68,8 +68,11 @@ class AsrGenerationController extends _$AsrGenerationController {
   bool get isInFlight => _inFlight != null;
 
   /// Starts (or supersedes) a generation pass. Returns a [Future] that
-  /// completes when the pass is done (success, error, or cancellation).
-  Future<void> generateTranscript({
+  /// completes when the pass is done (success, error, or cancellation) with
+  /// the terminal [AsrGenerationJob] — so callers that outlive the widget
+  /// subtree that started them (menu sheets) can surface the outcome without
+  /// touching protected notifier state.
+  Future<AsrGenerationJob?> generateTranscript({
     String? language,
     bool autoDetect = false,
     String? mediaSourceUri,
@@ -95,7 +98,7 @@ class AsrGenerationController extends _$AsrGenerationController {
     final fallbackLanguage = await _resolveLanguage(null, mediaId);
     if (fallbackLanguage == null) {
       _setError('asrErrorGeneric');
-      return;
+      return state.valueOrNull;
     }
     final effectiveLanguage = autoDetect
         ? null
@@ -128,6 +131,7 @@ class AsrGenerationController extends _$AsrGenerationController {
         _inFlight = null;
       }
     }
+    return state.valueOrNull;
   }
 
   /// Cancels the in-flight job (if any) for [mediaId]. The job's future

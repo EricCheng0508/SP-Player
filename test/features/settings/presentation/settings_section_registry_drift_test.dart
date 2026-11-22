@@ -96,10 +96,10 @@ void main() {
 
     test('every SettingsSectionIds constant is a registered section', () {
       const declaredIds = <String>{
-        SettingsSectionIds.account,
         SettingsSectionIds.cloudSync,
         SettingsSectionIds.appearanceLanguage,
         SettingsSectionIds.aiProviders,
+        SettingsSectionIds.localComponents,
         SettingsSectionIds.network,
         SettingsSectionIds.recording,
         SettingsSectionIds.keyboardShortcuts,

@@ -3,10 +3,8 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import 'package:enjoy_player/core/notices/app_notice.dart';
-import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/data/db/media_registry_provider.dart';
 import 'package:enjoy_player/data/db/media_target_resolver.dart';
@@ -23,23 +21,34 @@ import 'package:enjoy_player/features/transcript/presentation/import_subtitle_la
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 /// Starts ASR only for a local library file and surfaces the terminal outcome.
+///
+/// Unmount safety: the menu sheet that calls this closes while the language /
+/// long-media dialogs are up, and by the time generation finishes the sheet's
+/// widget is long gone. Everything derived from [ref] is therefore captured
+/// **before the first await** — providers, the generation controller notifier,
+/// and the [AppLocalizations] instance — and terminal notices go through the
+/// global messenger ([AppNotice.successGlobal] etc.). Using `ref` after
+/// unmount used to throw "Bad state: Using ref when a widget is about to or
+/// has been unmounted" and the whole generation died silently before starting.
 Future<void> launchAsrGeneration(
   BuildContext context,
   WidgetRef ref, {
   required String mediaId,
 }) async {
+  final l10n = AppLocalizations.of(context)!;
   final db = ref.read(appDatabaseProvider);
-  final media = await ref.read(mediaRegistryProvider).getById(mediaId);
+  final registry = ref.read(mediaRegistryProvider);
+  final controller = ref.read(
+    asrGenerationControllerProvider(mediaId).notifier,
+  );
+
+  final media = await registry.getById(mediaId);
   final source = await resolvePlayableSource(db, mediaId);
   if (media == null || source is! LocalFilePlayableSource) {
     if (context.mounted) {
-      AppNotice.error(
-        context,
-        asrMessageForKey(
-          AppLocalizations.of(context)!,
-          'asrErrorUnsupportedSource',
-        ),
-      );
+      AppNotice.error(context, l10n.asrErrorUnsupportedSource);
+    } else {
+      AppNotice.errorGlobal(l10n.asrErrorUnsupportedSource);
     }
     return;
   }
@@ -55,17 +64,9 @@ Future<void> launchAsrGeneration(
   );
   if (language == null) return;
   if (!context.mounted) return;
-  final refreshed = await ref.read(mediaRegistryProvider).getById(mediaId);
+  final refreshed = await registry.getById(mediaId);
   if (refreshed == null) {
-    if (context.mounted) {
-      AppNotice.error(
-        context,
-        asrMessageForKey(
-          AppLocalizations.of(context)!,
-          'asrErrorUnsupportedSource',
-        ),
-      );
-    }
+    AppNotice.errorGlobal(l10n.asrErrorUnsupportedSource);
     return;
   }
   final durationSeconds = refreshed.durationMs ~/ 1000;
@@ -76,32 +77,23 @@ Future<void> launchAsrGeneration(
   );
   if (confirmed != true) return;
 
-  await ref
-      .read(asrGenerationControllerProvider(mediaId).notifier)
-      .generateTranscript(
-        mediaSourceUri: source.uri,
-        kind: kind,
-        language: language.language,
-        autoDetect: language.language == null,
-      );
-  if (!context.mounted) return;
+  // Terminal outcome: returned by the controller above — no `ref` access
+  // needed, the sheet that started this is unmounted by now.
+  final job = await controller.generateTranscript(
+    mediaSourceUri: source.uri,
+    kind: kind,
+    language: language.language,
+    autoDetect: language.language == null,
+  );
 
-  final job = ref.read(asrGenerationControllerProvider(mediaId)).valueOrNull;
   if (job?.phase == AsrGenerationPhase.success) {
-    AppNotice.success(
-      context,
-      asrMessageForKey(AppLocalizations.of(context)!, 'asrStatusSuccess'),
-    );
+    AppNotice.successGlobal(l10n.asrStatusSuccess);
   } else if (job?.phase == AsrGenerationPhase.error) {
-    final l10n = AppLocalizations.of(context)!;
     final failure = job!.creditsFailure;
-    final router = GoRouter.of(context);
-    AppNotice.error(
-      context,
+    AppNotice.errorGlobal(
       failure != null && failure.requiredCredits != null
           ? creditsFailureMessage(failure, l10n)
           : asrMessageForKey(l10n, job.errorMessage),
-      action: failure == null ? null : creditsCtaAction(router, l10n),
     );
   }
 }

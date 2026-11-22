@@ -66,7 +66,35 @@ abstract final class AppNotice {
     AppNoticeAction? action,
   }) => _show(context, _AppNoticeKind.warning, message, action: action);
 
-  static void _show(
+  /// Terminal notices for work that outlives the originating context —
+  /// e.g. an ASR generation that runs for minutes while the menu sheet
+  /// that started it closed long ago. Rendered through the root
+  /// [appScaffoldMessengerKey] so no live [BuildContext] is required.
+  static void successGlobal(String message) =>
+      _showGlobal(_AppNoticeKind.success, message);
+
+  static void errorGlobal(String message) =>
+      _showGlobal(_AppNoticeKind.error, message);
+
+  static void infoGlobal(String message) =>
+      _showGlobal(_AppNoticeKind.info, message);
+
+  static void warningGlobal(String message) =>
+      _showGlobal(_AppNoticeKind.warning, message);
+
+  static void _showGlobal(_AppNoticeKind kind, String message) {
+    final m = appScaffoldMessengerKey.currentState;
+    if (m == null) {
+      _log.warning('AppNotice global skipped: messenger key unset');
+      return;
+    }
+    final ctx = m.context;
+    if (!ctx.mounted) {
+      _log.warning('AppNotice global skipped: messenger context unmounted');
+      return;
+    }
+    _show(ctx, kind, message);
+  }  static void _show(
     BuildContext context,
     _AppNoticeKind kind,
     String message, {

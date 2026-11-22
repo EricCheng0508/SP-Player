@@ -10,6 +10,7 @@ import 'package:enjoy_player/features/ai/domain/capabilities/llm_capability.dart
 import 'package:enjoy_player/features/ai/domain/chat_message.dart';
 import 'package:enjoy_player/features/ai/domain/modality_byok_config.dart';
 import 'package:enjoy_player/features/ai/domain/modality_kind.dart';
+import 'package:enjoy_player/features/local_components/data/managed_llama_server.dart';
 
 typedef ByokGenerateTextRunner =
     Future<ai_sdk.GenerateTextResult<String>> Function({
@@ -56,9 +57,27 @@ final class ByokLlmCapability implements LlmCapability {
     double? temperature,
     int? maxTokens,
   }) async {
-    final apiKey = await _secrets.readApiKey(ModalityKind.llm);
+    final localEndpoint = isLocalLlmEndpoint(_config.baseUrl);
+    final apiKey = localEndpoint
+        ? 'local'
+        : await _secrets.readApiKey(ModalityKind.llm);
     if (apiKey == null || apiKey.trim().isEmpty) {
       throw const ByokNotConfiguredFailure(ModalityKind.llm);
+    }
+
+    // Managed local server: bring llama-server up before the first call
+    // (OpenAI-compatible; same client path as remote endpoints).
+    if (localEndpoint) {
+      try {
+        await ensureLocalLlmServer();
+      } on Object catch (e) {
+        _log.warning('ensureLocalLlmServer failed: $e');
+        throw const ApiException(
+          message:
+              '本地翻译服务未能启动:请到「设置 → 本地组件」确认翻译组件已下载安装。',
+          statusCode: 503,
+        );
+      }
     }
 
     final model = createByokLanguageModel(

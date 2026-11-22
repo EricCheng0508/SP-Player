@@ -8753,6 +8753,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No speech detected'**
   String get playerDictationNoSpeechDetected;
+
+  /// No description provided for @settingsSectionLocalComponents.
+  ///
+  /// In en, this message translates to:
+  /// **'Local components'**
+  String get settingsSectionLocalComponents;
+
+  /// No description provided for @settingsSectionLocalComponentsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage offline transcription / translation model components.'**
+  String get settingsSectionLocalComponentsHint;
 }
 
 class _AppLocalizationsDelegate

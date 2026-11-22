@@ -27,6 +27,7 @@ import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/library/application/continue_practice_provider.dart';
 import 'package:enjoy_player/features/library/presentation/continue_practice_card.dart';
 import 'package:enjoy_player/features/library/presentation/todays_goal_card.dart';
+import 'package:enjoy_player/features/local_components/presentation/setup_wizard.dart';
 import 'package:enjoy_player/features/onboarding/application/onboarding_controller.dart';
 import 'package:enjoy_player/features/onboarding/application/practice_tip_trigger.dart';
 import 'package:enjoy_player/features/onboarding/domain/onboarding_tip_id.dart';
@@ -51,6 +52,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      // 首次配置向导:组件缺失且未完成过时弹出(每会话一次)。
+      maybeShowSetupWizard(context, ref);
       ref
           .read(practiceTipTriggerProvider)
           .startHomeEntries(routePath: GoRouterState.of(context).uri.path);

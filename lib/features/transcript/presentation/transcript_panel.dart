@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:enjoy_player/features/asr/presentation/asr_generation_launcher.dart';
+import 'package:enjoy_player/features/asr/presentation/asr_generation_progress_banner.dart';
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
@@ -93,7 +94,13 @@ class _TranscriptPanelState extends ConsumerState<TranscriptPanel> {
       }
     });
 
-    return linesAsync.when(
+    // Live ASR feedback: the controller streams phase updates but nothing
+    // used to render them — transcription ran silently for minutes.
+    return Column(
+      children: [
+        AsrGenerationProgressBanner(mediaId: mediaId),
+        Expanded(
+          child: linesAsync.when(
       data: (lines) {
         if (lines.isEmpty) {
           if (fetchState.status == TranscriptFetchStatus.loading) {
@@ -211,6 +218,9 @@ class _TranscriptPanelState extends ConsumerState<TranscriptPanel> {
           ),
         ),
       ),
+        ),
+      ),
+    ],
     );
   }
 }

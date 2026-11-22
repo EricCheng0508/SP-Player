@@ -19,13 +19,17 @@
   "homeContinueProgressSemantics": "已完成 {percent}%",
   "@homeContinueProgressSemantics": {
     "placeholders": {
-      "percent": {"type": "int"}
+      "percent": {
+        "type": "int"
+      }
     }
   },
   "homeContinueOpenSemantics": "继续练习，{title}",
   "@homeContinueOpenSemantics": {
     "placeholders": {
-      "title": {"type": "String"}
+      "title": {
+        "type": "String"
+      }
     }
   },
   "homeEmptyHint": "导入媒体或将文件拖放到此处开始。",
@@ -44,8 +48,12 @@
   "transcriptAccessibilityCue": "{time}。{snippet}",
   "@transcriptAccessibilityCue": {
     "placeholders": {
-      "time": {"type": "String"},
-      "snippet": {"type": "String"}
+      "time": {
+        "type": "String"
+      },
+      "snippet": {
+        "type": "String"
+      }
     }
   },
   "transcriptAccessibilityCurrentLine": "当前播放行。",
@@ -95,14 +103,20 @@
   "discoverRefreshPartialFailedDetail": "无法刷新 {count} 个频道：{names}",
   "@discoverRefreshPartialFailedDetail": {
     "placeholders": {
-      "count": { "type": "int" },
-      "names": { "type": "String" }
+      "count": {
+        "type": "int"
+      },
+      "names": {
+        "type": "String"
+      }
     }
   },
   "discoverRefreshSingleFailed": "无法刷新 {name}。",
   "@discoverRefreshSingleFailed": {
     "placeholders": {
-      "name": { "type": "Object" }
+      "name": {
+        "type": "Object"
+      }
     }
   },
   "discoverRecommendedLoadFailed": "无法加载推荐频道。",
@@ -230,7 +244,7 @@
   },
   "subtitlesAutoTranslateRetranslateLine": "重新翻译此行",
   "subtitlesAutoTranslateBlockedStalePrimary": "主字幕已更改，自动翻译将根据新的主字幕重建。",
-  "byokNotConfiguredMessage": "「{modality}」選擇了自帶密鑰（BYOK），但本機尚未保存 API Key。",
+  "byokNotConfiguredMessage": "已为 {modality} 选择 BYOK，但本设备未保存 API 密钥。",
   "@byokNotConfiguredMessage": {
     "description": "Runtime error when BYOK modality has no secure key",
     "placeholders": {
@@ -239,7 +253,7 @@
       }
     }
   },
-  "byokNotConfiguredOpenSettings": "請先在 設置 → AI 服務商 中添加你的 API Key。",
+  "byokNotConfiguredOpenSettings": "请打开 设置 → AI 提供商 添加密钥。",
   "@byokNotConfiguredOpenSettings": {
     "description": "Hint to open AI provider settings after BYOK misconfiguration"
   },
@@ -423,8 +437,6 @@
   "settingsAiProvidersSpeechTtsModelHint": "tts-1",
   "settingsAiProvidersApiKeySavedMask": "••••••••••••",
   "settingsAiProvidersApiKeyEdit": "编辑密钥",
-  "byokNotConfiguredMessage": "已为 {modality} 选择 BYOK，但本设备未保存 API 密钥。",
-  "byokNotConfiguredOpenSettings": "请打开 设置 → AI 提供商 添加密钥。",
   "byokValidationApiKeyRequired": "需要 API 密钥。",
   "byokValidationBaseUrlRequired": "需要 Base URL。",
   "byokValidationBaseUrlInvalid": "Base URL 必须是公网 HTTPS 地址。",
@@ -517,8 +529,14 @@
   "@transcriptEnrichProgress": {
     "description": "Busy enrich tile subtitle while aligning cues on a long transcript.",
     "placeholders": {
-      "completed": { "type": "int", "example": "12" },
-      "total": { "type": "int", "example": "240" }
+      "completed": {
+        "type": "int",
+        "example": "12"
+      },
+      "total": {
+        "type": "int",
+        "example": "240"
+      }
     }
   },
   "settingsRecordingMicTitle": "麦克风",
@@ -846,13 +864,17 @@
   "creditsUsagePageInfo": "第 {page} 页",
   "@creditsUsagePageInfo": {
     "placeholders": {
-      "page": {"type": "int"}
+      "page": {
+        "type": "int"
+      }
     }
   },
   "creditsUsageTotalRecords": "共 {count} 条",
   "@creditsUsageTotalRecords": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "creditsUsagePrevious": "上一页",
@@ -877,8 +899,12 @@
   "@syncSettingsTileSubtitleCounts": {
     "description": "Subtitle on Settings → Sync status when there are queue items.",
     "placeholders": {
-      "retryable": {"type": "int"},
-      "failed": {"type": "int"}
+      "retryable": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
     }
   },
   "syncScreenTitle": "同步状态",
@@ -911,8 +937,12 @@
   "syncSnackIssues": "同步结束：{synced} 项成功，{failed} 项失败。",
   "@syncSnackIssues": {
     "placeholders": {
-      "synced": {"type": "int"},
-      "failed": {"type": "int"}
+      "synced": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
     }
   },
   "syncQueueDetails": "队列详情",
@@ -1054,7 +1084,6 @@
   "mediaDetailsUpdated": "详情已更新。",
   "mediaDetailsUpdateFailed": "无法更新详情。",
   "mediaDetailsMissing": "该项目已不在资料库中。",
-
   "assessmentUnavailableLanguage": "该语言暂不支持发音评估。",
   "discoverLanguageFilterAll": "全部语言",
   "discoverLanguageFilterLabel": "语言",
@@ -1094,7 +1123,9 @@
   "settingsAboutVersion": "v{version}",
   "@settingsAboutVersion": {
     "placeholders": {
-      "version": {"type": "String"}
+      "version": {
+        "type": "String"
+      }
     }
   },
   "settingsAboutOpenSourceTitle": "开源项目",
@@ -1122,8 +1153,12 @@
   "updateVersionLine": "已安装 {current} → {latest}",
   "@updateVersionLine": {
     "placeholders": {
-      "current": {"type": "String"},
-      "latest": {"type": "String"}
+      "current": {
+        "type": "String"
+      },
+      "latest": {
+        "type": "String"
+      }
     }
   },
   "updateNow": "立即更新",
@@ -1135,7 +1170,9 @@
   "updateDownloading": "正在下载更新… {percent}%",
   "@updateDownloading": {
     "placeholders": {
-      "percent": {"type": "int"}
+      "percent": {
+        "type": "int"
+      }
     }
   },
   "updateVerifying": "正在校验下载…",
@@ -1230,7 +1267,9 @@
   "vocabularyQueueCount": "{count} 个单词",
   "@vocabularyQueueCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "vocabularyStartReview": "开始复习",
@@ -1245,14 +1284,20 @@
   "vocabularyProgress": "{current} / {total}",
   "@vocabularyProgress": {
     "placeholders": {
-      "current": { "type": "int" },
-      "total": { "type": "int" }
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "vocabularyRemaining": "剩余 {count}",
   "@vocabularyRemaining": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "vocabularyFlipBack": "翻回正面",
@@ -1276,20 +1321,26 @@
   "vocabularyInDays": "{days} 天后",
   "@vocabularyInDays": {
     "placeholders": {
-      "days": { "type": "int" }
+      "days": {
+        "type": "int"
+      }
     }
   },
   "vocabularyKeyboardShortcuts": "快捷键：空格翻转/翻回 · 1/2/3 评分 · ← 上一张 · → 跳过 · Esc 退出",
   "vocabularyContextsCount": "{count} 个语境",
   "@vocabularyContextsCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "vocabularyReviewsCount": "{count} 次复习",
   "@vocabularyReviewsCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "vocabularyFlipHint": "点击翻转",
@@ -1310,8 +1361,12 @@
   "vocabularyContextOfTotal": "第 {current} / {total} 个",
   "@vocabularyContextOfTotal": {
     "placeholders": {
-      "current": { "type": "int" },
-      "total": { "type": "int" }
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "vocabularyContextualTranslation": "语境翻译",
@@ -1329,8 +1384,12 @@
   "vocabularyLocatorLabel": "{start}秒 · {duration}秒",
   "@vocabularyLocatorLabel": {
     "placeholders": {
-      "start": { "type": "String" },
-      "duration": { "type": "String" }
+      "start": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
     }
   },
   "vocabularyExportToAnki": "导出到 Anki",
@@ -1385,7 +1444,6 @@
   "settingsSectionExpandSemantics": "展开分组",
   "settingsSectionCollapseSemantics": "收起分组",
   "settingsSectionNeedsAttention": "需要注意",
-
   "importCraftFromText": "Craft…",
   "homeCraftAction": "Craft",
   "craftHistoryTooltip": "历史",
@@ -1425,7 +1483,6 @@
   "craftLengthCapNotice": "仅合成了前 5000 个字符，其余部分未合成。",
   "libraryProviderCraftBadge": "Craft",
   "craftTtsSettingsHint": "合成使用下方的 TTS 提供商。",
-
   "craftScreenTitle": "Craft",
   "craftOverline": "用你自己的话生成练习音频",
   "craftTranslateTool": "翻译",
@@ -1534,14 +1591,20 @@
   "creditsExhaustedDetailed": "本次操作需要 {required} 积分，但今日仅剩 {remaining} 积分。",
   "@creditsExhaustedDetailed": {
     "placeholders": {
-      "required": {"type": "int"},
-      "remaining": {"type": "int"}
+      "required": {
+        "type": "int"
+      },
+      "remaining": {
+        "type": "int"
+      }
     }
   },
   "creditsExhaustedResets": "积分将于 {time} 重置。",
   "@creditsExhaustedResets": {
     "placeholders": {
-      "time": {"type": "String"}
+      "time": {
+        "type": "String"
+      }
     }
   },
   "byokProviderBillingMessage": "你的 AI 服务商拒绝了本次请求。请检查该服务商的账单或套餐。",
@@ -1559,7 +1622,6 @@
   "assessmentPlayMyClip": "播放该词的录音片段",
   "assessmentStopMyClip": "停止该词的录音片段",
   "assessmentClipUnavailable": "该词没有可用的录音片段",
-
   "subscriptionTierCatalogTitle": "选择你的方案",
   "subscriptionTierCatalogDescription": "所有方案均包含相同的 AI 功能。选择积分额度与计费周期，下一步选择支付方式。",
   "subscriptionTierCatalogRecommended": "推荐",
@@ -1572,24 +1634,33 @@
   "subscriptionTierCatalogSelectedInterval": "{amount} / {unit} — 通过 Stripe 计费",
   "@subscriptionTierCatalogSelectedInterval": {
     "placeholders": {
-      "amount": {"type": "String"},
-      "unit": {"type": "String"}
+      "amount": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
     }
   },
   "subscriptionTierCatalogIntervalYearSavings": "节省 {percent}%",
   "@subscriptionTierCatalogIntervalYearSavings": {
     "placeholders": {
-      "percent": {"type": "String"}
+      "percent": {
+        "type": "String"
+      }
     }
   },
   "subscriptionTierCatalogPerMonth": "月",
   "subscriptionTierCatalogPerYear": "年",
-
   "subscriptionPurchaseModalUnifiedTitle": "选择 {tier} · {interval} 的支付方式",
   "@subscriptionPurchaseModalUnifiedTitle": {
     "placeholders": {
-      "tier": {"type": "String"},
-      "interval": {"type": "String"}
+      "tier": {
+        "type": "String"
+      },
+      "interval": {
+        "type": "String"
+      }
     }
   },
   "subscriptionPurchaseModalUnifiedDescription": "自动续订可持续使用 Pro 权益并自动续费；一次性购买则按固定时长预付，到期后不再续订。",
@@ -1601,13 +1672,16 @@
   "subscriptionPurchaseModalOptionPrepaidSubtitle": "不自动续订，按固定时长预付。",
   "subscriptionPurchaseModalOptionPrepaidFootnote": "一次性支付",
   "subscriptionPurchaseModalSubscribeAutoRenewCta": "开通自动续订",
-
   "subscriptionBalanceToCreditsTitle": "将余额转换为永久积分",
   "subscriptionBalanceToCreditsDescriptionWithPreview": "前往积分页面，将你的 {usd} 历史余额转换为约 {credits} 永久积分。",
   "@subscriptionBalanceToCreditsDescriptionWithPreview": {
     "placeholders": {
-      "usd": {"type": "String"},
-      "credits": {"type": "String"}
+      "usd": {
+        "type": "String"
+      },
+      "credits": {
+        "type": "String"
+      }
     }
   },
   "subscriptionBalanceToCreditsDescriptionEmpty": "当你拥有来自历史充值的余额时，可在此转换为永久积分。",
@@ -1616,10 +1690,11 @@
   "subscriptionBalanceToCreditsComingSoonMessage": "你有 {usd} 的历史余额。余额转积分功能将在后续桌面端更新中上线。在此之前，请先在网页端管理你的余额。",
   "@subscriptionBalanceToCreditsComingSoonMessage": {
     "placeholders": {
-      "usd": {"type": "String"}
+      "usd": {
+        "type": "String"
+      }
     }
   },
-
   "onboardingTipSkip": "跳过",
   "onboardingTipHomeImportTitle": "导入媒体",
   "onboardingTipHomeImportBody": "导入本地文件或 YouTube 视频，开始跟读练习。",
@@ -1742,7 +1817,6 @@
   "playerMoreExportLoopClipFailed": "无法导出循环片段",
   "playerMoreExportLoopClipFfmpegMissing": "此设备上没有可用的 FFmpeg",
   "playerMoreKeyboardShortcuts": "键盘快捷键",
-  
   "subtitlesPanelTitle": "字幕与显示",
   "subtitlesSectionSubtitles": "字幕",
   "subtitlesSectionDisplay": "显示",
@@ -1804,22 +1878,64 @@
   "settingsNetworkEffectiveTitle": "当前生效的代理",
   "settingsNetworkEffectiveDirect": "直连（无代理）",
   "settingsNetworkEffectiveProxy": "{endpoint}（{source}）",
-  "@settingsNetworkEffectiveProxy": {"placeholders": {"endpoint": {"type": "String"}, "source": {"type": "String"}}},
+  "@settingsNetworkEffectiveProxy": {
+    "placeholders": {
+      "endpoint": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
   "settingsNetworkTestButton": "测试连接",
   "settingsNetworkTestRunning": "正在测试…",
   "settingsNetworkTestApi": "Enjoy API",
   "settingsNetworkTestYoutube": "YouTube",
   "settingsNetworkTestOk": "{label}：可访问，耗时 {ms} 毫秒，路由 {route}",
-  "@settingsNetworkTestOk": {"placeholders": {"label": {"type": "String"}, "ms": {"type": "int"}, "route": {"type": "String"}}},
+  "@settingsNetworkTestOk": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "ms": {
+        "type": "int"
+      },
+      "route": {
+        "type": "String"
+      }
+    }
+  },
   "settingsNetworkTestFail": "{label}：失败，路由 {route}（{error}）",
-  "@settingsNetworkTestFail": {"placeholders": {"label": {"type": "String"}, "route": {"type": "String"}, "error": {"type": "String"}}},
+  "@settingsNetworkTestFail": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "route": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "playerDictationVoiceMode": "语音复述",
   "playerDictationTextMode": "文字输入",
   "playerDictationVoiceHint": "仔细聆听并用语音复述。准备好后点录音。",
   "playerDictationVoiceHintHotkey": "仔细聆听并用语音复述。准备好后点录音或按 R。",
   "playerDictationTextPlaceholder": "输入你听到的内容…",
   "playerDictationWordCountProgress": "已输入 {typed} / 约 {total} 词",
-  "@playerDictationWordCountProgress": {"placeholders": {"typed": {"type": "int"}, "total": {"type": "int"}}},
+  "@playerDictationWordCountProgress": {
+    "placeholders": {
+      "typed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "playerDictationCheckAnswer": "核对答案",
   "playerDictationCheckingVoice": "正在识别语音…",
   "playerDictationTryAgain": "再试一次",
@@ -1829,19 +1945,51 @@
   "playerDictationLegendMissed": "遗漏",
   "playerDictationLegendExtra": "多余",
   "playerDictationStatsCorrect": "{count} 个正确",
-  "@playerDictationStatsCorrect": {"placeholders": {"count": {"type": "int"}}},
+  "@playerDictationStatsCorrect": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "playerDictationStatsMissed": "{count} 个遗漏",
-  "@playerDictationStatsMissed": {"placeholders": {"count": {"type": "int"}}},
+  "@playerDictationStatsMissed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "playerDictationStatsExtra": "{count} 个多余",
-  "@playerDictationStatsExtra": {"placeholders": {"count": {"type": "int"}}},
+  "@playerDictationStatsExtra": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "playerDictationPreviousAttempts": "历史听写记录（{count}）",
-  "@playerDictationPreviousAttempts": {"placeholders": {"count": {"type": "int"}}},
+  "@playerDictationPreviousAttempts": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "playerDictationAttemptAccuracy": "{accuracy}% 正确率",
-  "@playerDictationAttemptAccuracy": {"placeholders": {"accuracy": {"type": "int"}}},
+  "@playerDictationAttemptAccuracy": {
+    "placeholders": {
+      "accuracy": {
+        "type": "int"
+      }
+    }
+  },
   "playerDictationRecordAgain": "重新录音",
   "playerDictationRecordRetelling": "录音复述",
   "playerDictationRecordRetellingHotkey": "录音复述 (R)",
   "playerDictationHeaderListen": "听写 — 聆听并复述",
   "playerDictationHeaderChecked": "听写 — 已核对",
-  "playerDictationNoSpeechDetected": "未检测到语音"
+  "playerDictationNoSpeechDetected": "未检测到语音",
+  "settingsSectionLocalComponents": "本地组件",
+  "settingsSectionLocalComponentsHint": "管理离线识别 / 翻译的模型组件（下载、删除）。"
 }

@@ -16,6 +16,12 @@ import 'package:enjoy_player/features/transcript/application/transcript_reposito
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 /// Demuxes embedded subtitle streams via ffmpeg / media_kit metadata.
+///
+/// Unmount safety: the sheet that triggers extraction can close mid-run
+/// (extraction takes seconds), so providers and [AppLocalizations] are
+/// captured before the first await and terminal notices go through the
+/// global messenger. Using `ref` after unmount throws and the extract
+/// result is never surfaced.
 Future<void> runEmbeddedSubtitleExtract({
   required BuildContext context,
   required WidgetRef ref,
@@ -23,15 +29,18 @@ Future<void> runEmbeddedSubtitleExtract({
 }) async {
   final l10n = AppLocalizations.of(context)!;
   final db = ref.read(appDatabaseProvider);
+  final repo = ref.read(transcriptRepositoryProvider);
+  final engine = ref.read(playerEngineProvider);
   final uri = await resolvePlayableSourceUri(db, mediaId);
   if (uri == null) {
     if (context.mounted) {
       AppNotice.error(context, l10n.subtitlesNoPlayableUri);
+    } else {
+      AppNotice.errorGlobal(l10n.subtitlesNoPlayableUri);
     }
     return;
   }
 
-  final engine = ref.read(playerEngineProvider);
   final SubtitleTrackControl? subtitles = switch (engine) {
     SubtitleTrackControl control => control,
     _ => null,
@@ -47,18 +56,15 @@ Future<void> runEmbeddedSubtitleExtract({
     } on TimeoutException {} // ignore: empty_catches
   }
 
-  final count = await ref
-      .read(transcriptRepositoryProvider)
-      .extractEmbeddedTracks(
-        mediaId: mediaId,
-        sourceUri: uri,
-        playerSubtitleTracks: playerSubs,
-      );
+  final count = await repo.extractEmbeddedTracks(
+    mediaId: mediaId,
+    sourceUri: uri,
+    playerSubtitleTracks: playerSubs,
+  );
 
-  if (!context.mounted) return;
   if (count == 0) {
-    AppNotice.warning(context, l10n.subtitlesExtractNoTracks);
+    AppNotice.warningGlobal(l10n.subtitlesExtractNoTracks);
   } else {
-    AppNotice.success(context, l10n.subtitlesExtractedCount(count));
+    AppNotice.successGlobal(l10n.subtitlesExtractedCount(count));
   }
 }

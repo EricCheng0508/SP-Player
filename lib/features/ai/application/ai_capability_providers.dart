@@ -34,7 +34,7 @@ AsrCapability resolveAsrCapability(Ref ref, AIServiceConfig config) {
       final speechByok = config.speechByok;
       if (speechByok == null) {
         // 本地版:语音识别未配置时默认绑定 subgen 本地识别服务
-        // (D:\Tool\subgen\start-asr-server.bat → 127.0.0.1:8000,large-v3),
+        // (D:\Tool\subgen\start-asr-server.bat → 127.0.0.1:8000,large-v3-turbo),
         // 零配置可用;设置里显式配置过的用户仍以配置为准。
         return LocalSubgenAsrCapability(
           httpClient: ref.read(httpClientProvider),

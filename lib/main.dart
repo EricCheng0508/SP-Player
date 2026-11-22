@@ -52,7 +52,7 @@ Future<void> _bootstrap() async {
   if (defaultTargetPlatform == TargetPlatform.linux) {
     unawaited(ensureEnjoyplayerSchemeHandler());
   }
-  // 本地版:启动时后台拉起内置语音识别服务(subgen, large-v3),
+  // 本地版:启动时后台拉起内置语音识别服务(subgen, large-v3-turbo),
   // 让首次听写/生成字幕无需等待冷启动;失败静默,懒加载路径兜底。
   if (defaultTargetPlatform == TargetPlatform.windows) {
     unawaited(warmUpLocalAsrService());

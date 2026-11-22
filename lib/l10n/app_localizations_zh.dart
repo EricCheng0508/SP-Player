@@ -4648,6 +4648,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get playerDictationNoSpeechDetected => '未检测到语音';
+
+  @override
+  String get settingsSectionLocalComponents => '本地组件';
+
+  @override
+  String get settingsSectionLocalComponentsHint => '管理离线识别 / 翻译的模型组件（下载、删除）。';
 }
 
 /// The translations for Chinese, as used in China (`zh_CN`).
@@ -8540,4 +8546,10 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String settingsNetworkTestFail(String label, String route, String error) {
     return '$label：失败，路由 $route（$error）';
   }
+
+  @override
+  String get settingsSectionLocalComponents => '本地组件';
+
+  @override
+  String get settingsSectionLocalComponentsHint => '管理离线识别 / 翻译的模型组件（下载、删除）。';
 }

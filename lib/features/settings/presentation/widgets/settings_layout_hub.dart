@@ -47,9 +47,7 @@ class SettingsLayoutHub extends ConsumerWidget {
     final t = EnjoyThemeTokens.of(context);
     final l10n = AppLocalizations.of(context)!;
     final sections = visibleSettingsSections(l10n, '');
-    final hubSections = sections
-        .where((spec) => spec.sectionId != SettingsSectionIds.account)
-        .toList();
+    final hubSections = sections.toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -17,6 +17,7 @@ import '../../../core/logging/log.dart';
 import '../../../core/riverpod/async_value_x.dart';
 import '../../../data/subtitle/subtitle_markup_parser.dart';
 import '../../../data/subtitle/transcript_line.dart';
+import '../../ai/application/ai_modality_config_controller.dart';
 import '../../ai/application/ai_services.dart';
 import '../../ai/domain/byok_not_configured_failure.dart';
 import '../../auth/application/auth_controller.dart';
@@ -117,6 +118,20 @@ class AutoTranslateCtrl extends _$AutoTranslateCtrl {
         _queue.reprioritize(anchor: next);
       },
     );
+
+    ref.listen(aiModalityConfigCtrlProvider, (prev, next) {
+      if (identical(prev, next)) return;
+      // The config controller returns defaults synchronously and hydrates
+      // async; a line translated in that window blocked with byokNotConfigured
+      // (red "add your API key" that only a manual re-click cleared). When
+      // hydration (or a settings edit) lands, self-heal instead of waiting
+      // for the user: re-run hydration — it flips status back to active iff
+      // the AI track is still the secondary selection.
+      if (state.status == AutoTranslateStatus.blocked &&
+          state.blockReason == AutoTranslateBlockReason.byokNotConfigured) {
+        unawaited(_hydrateIfAiSecondaryActive());
+      }
+    });
 
     unawaited(_hydrateIfAiSecondaryActive());
     return const AutoTranslateUiState();
@@ -338,6 +353,10 @@ class AutoTranslateCtrl extends _$AutoTranslateCtrl {
     final targetLang = state.targetLanguage;
     if (aiId == null || primaryId == null || targetLang == null) return;
 
+    // One-shot: the AI config controller hydrates lazily after app start, so
+    // the first translation can hit a not-yet-configured stub. Await hydration
+    // and retry once before treating the key as genuinely missing.
+    var waitedForConfigHydration = false;
     _queue.markInFlight(lineIndex);
     try {
       for (
@@ -463,6 +482,20 @@ class AutoTranslateCtrl extends _$AutoTranslateCtrl {
           return;
         } on ByokNotConfiguredFailure {
           if (!ref.mounted) return;
+          if (!waitedForConfigHydration) {
+            waitedForConfigHydration = true;
+            try {
+              await ref
+                  .read(aiModalityConfigCtrlProvider.notifier)
+                  .hydrated
+                  .timeout(const Duration(seconds: 5));
+              // Hydration landed — the capability provider re-resolved with
+              // the real config; retry this line instead of blocking.
+              continue;
+            } on TimeoutException {
+              // Hydration never completed; fall through and block.
+            }
+          }
           // No BYOK key on this device: tell the user immediately instead of
           // silently marking every line as failed.
           _block(AutoTranslateBlockReason.byokNotConfigured);

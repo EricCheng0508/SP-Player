@@ -128,6 +128,7 @@ class _MediaKitVideoStage extends StatefulWidget {
 class _MediaKitVideoStageState extends State<_MediaKitVideoStage> {
   var _nudge = false;
   var _kicked = false;
+  var _hardKickEpoch = 0;
   StreamSubscription<Duration>? _positionSub;
   StreamSubscription<bool>? _playingSub;
   Duration? _lastPosition;
@@ -151,6 +152,15 @@ class _MediaKitVideoStageState extends State<_MediaKitVideoStage> {
     ]) {
       unawaited(Future<void>.delayed(Duration(milliseconds: delayMs)).then((_) {
         if (mounted) _scheduleKick();
+      }));
+    }
+    // Escalation: soft 1px pulses can fail to revive a stale compositor
+    // texture (the freshly-imported first open stayed black until a mode-tab
+    // switch). A hard kick remounts the [Video] element, which re-registers
+    // the texture with the compositor — strictly stronger than relayout.
+    for (final delayMs in const [1200, 2600, 4500, 7000, 10000]) {
+      unawaited(Future<void>.delayed(Duration(milliseconds: delayMs)).then((_) {
+        if (mounted) _scheduleKick(hard: true);
       }));
     }
   }
@@ -223,7 +233,16 @@ class _MediaKitVideoStageState extends State<_MediaKitVideoStage> {
     _scheduleKick();
   }
 
-  void _scheduleKick() {
+  void _scheduleKick({bool hard = false}) {
+    if (hard) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        // Remount: a new element re-registers the texture with the
+        // compositor even when the id/rect did not change.
+        setState(() => _hardKickEpoch++);
+      });
+      return;
+    }
     if (_kicked) return;
     WidgetsBinding.instance.addPostFrameCallback((_) => _kick());
   }
@@ -253,6 +272,9 @@ class _MediaKitVideoStageState extends State<_MediaKitVideoStage> {
         : widget.maxHeight;
     return ExcludeSemantics(
       child: Video(
+        // Keyed so a hard kick (epoch bump) remounts the element and forces
+        // the compositor to re-register the texture.
+        key: ValueKey('media-kit-video-$_hardKickEpoch'),
         controller: widget.controller,
         controls: null,
         width: w,

@@ -23,15 +23,35 @@ AiModalityConfigRepository aiModalityConfigRepository(Ref ref) {
 
 @Riverpod(keepAlive: true)
 class AiModalityConfigCtrl extends _$AiModalityConfigCtrl {
+  Completer<void>? _hydrateCompleter;
+
+  /// Completes once [_hydrate] has finished loading the persisted config.
+  ///
+  /// [build] returns [AiModalityConfigs.defaults] synchronously and loads the
+  /// real config from the database in a microtask — the provider is lazy, so
+  /// the very first AI call of a session can resolve a "not configured" stub
+  /// while hydration is still in flight. Callers that observe BYOK as
+  /// unconfigured should await this before concluding the key is truly
+  /// missing (auto-translate was permanently blocked by exactly this race).
+  Future<void> get hydrated =>
+      (_hydrateCompleter ??= Completer<void>()).future;
+
   @override
   AiModalityConfigs build() {
+    _hydrateCompleter = Completer<void>();
     unawaited(Future<void>.microtask(_hydrate));
     return AiModalityConfigs.defaults;
   }
 
   Future<void> _hydrate() async {
-    final repo = ref.read(aiModalityConfigRepositoryProvider);
-    state = await repo.load();
+    final completer = _hydrateCompleter;
+    try {
+      final repo = ref.read(aiModalityConfigRepositoryProvider);
+      final loaded = await repo.load();
+      if (ref.mounted) state = loaded;
+    } finally {
+      completer?.complete();
+    }
   }
 
   Future<ByokValidationResult> saveModality({

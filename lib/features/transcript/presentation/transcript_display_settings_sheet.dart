@@ -13,6 +13,7 @@ import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/editorial_header.dart';
 import 'package:enjoy_player/core/theme/typography.dart';
 import 'package:enjoy_player/data/subtitle/transcript_display_readiness.dart';
+import 'package:enjoy_player/features/player/application/caption_overlay_settings.dart';
 import 'package:enjoy_player/features/settings/application/ipa_overlay_settings.dart';
 import 'package:enjoy_player/features/settings/application/karaoke_highlight_settings.dart';
 import 'package:enjoy_player/features/settings/application/transcript_typeface_settings.dart';
@@ -88,6 +89,7 @@ class TranscriptDisplaySettingsSection extends ConsumerWidget {
                 )
               : null,
         ),
+        const CaptionOverlayModePicker(),
         if (readiness.showEnrich && (enrich.isRunning || enrich.isFailed))
           TranscriptEnrichmentCard(
             mediaId: mediaId,
@@ -200,6 +202,117 @@ class _TypefaceTile extends StatelessWidget {
                 ).textTheme.labelSmall?.copyWith(fontSize: 12, color: t.ink2),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// On-video caption overlay display-mode picker (off / original /
+/// translation / bilingual). Persisted via [CaptionOverlaySettings].
+class CaptionOverlayModePicker extends ConsumerWidget {
+  const CaptionOverlayModePicker({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final t = EnjoyThemeTokens.of(context);
+    final selected =
+        ref.watch(captionOverlaySettingsProvider).valueOrNull ??
+        CaptionOverlayMode.off;
+    void select(CaptionOverlayMode mode) => unawaited(
+      ref.read(captionOverlaySettingsProvider.notifier).setMode(mode),
+    );
+
+    final choices = <(CaptionOverlayMode, String)>[
+      (CaptionOverlayMode.off, l10n.subtitlesCaptionModeOff),
+      (CaptionOverlayMode.original, l10n.subtitlesCaptionModeOriginal),
+      (CaptionOverlayMode.translation, l10n.subtitlesCaptionModeTranslation),
+      (CaptionOverlayMode.both, l10n.subtitlesCaptionModeBoth),
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 2, 12, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            l10n.subtitlesCaptionOverlay,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              fontSize: 13.5,
+              fontWeight: FontWeight.w600,
+              color: t.ink,
+            ),
+          ),
+          const SizedBox(height: 3),
+          Text(
+            l10n.subtitlesCaptionOverlayHint,
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(fontSize: 12, color: t.ink2),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              for (var i = 0; i < choices.length; i++) ...[
+                if (i > 0) const SizedBox(width: 6),
+                Expanded(
+                  child: _CaptionModeTile(
+                    label: choices[i].$2,
+                    selected: selected == choices[i].$1,
+                    onTap: () => select(choices[i].$1),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CaptionModeTile extends StatelessWidget {
+  const _CaptionModeTile({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = EnjoyThemeTokens.of(context);
+    final shape = RoundedSuperellipseBorder(
+      borderRadius: BorderRadius.circular(10),
+      side: BorderSide(color: selected ? t.original : t.line, width: 1.5),
+    );
+    return Semantics(
+      inMutuallyExclusiveGroup: true,
+      checked: selected,
+      button: true,
+      child: EnjoyPressable(
+        onTap: onTap,
+        shape: shape,
+        pressedScale: 0.97,
+        washColor: t.sunk,
+        selected: selected,
+        semanticsLabel: label,
+        child: Container(
+          height: 40,
+          alignment: Alignment.center,
+          decoration: ShapeDecoration(shape: shape),
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              fontSize: 12.5,
+              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+              color: selected ? t.originalInk : t.ink2,
+            ),
           ),
         ),
       ),

@@ -17,6 +17,7 @@ import 'package:enjoy_player/features/player/application/player_state_providers.
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
 import 'package:enjoy_player/features/player/application/player_surface_registry.dart';
 import 'package:enjoy_player/features/player/presentation/widgets/player_surface_target.dart';
+import 'package:enjoy_player/features/player/presentation/widgets/video_caption_overlay.dart';
 import 'package:enjoy_player/features/player/presentation/widgets/video_line_info_chip.dart';
 import 'package:enjoy_player/features/player/presentation/widgets/video_paused_gate.dart';
 import 'package:enjoy_player/features/player/presentation/widgets/youtube_login_video_frame_button.dart';
@@ -325,6 +326,7 @@ class _VideoStageWithChromeState extends ConsumerState<_VideoStageWithChrome> {
               ),
             ),
           const _VideoPausedTitleOverlay(),
+          const VideoCaptionOverlay(),
           if (isYoutube) ...[
             const Positioned(left: 12, bottom: 12, child: VideoLineInfoChip()),
             const Positioned(

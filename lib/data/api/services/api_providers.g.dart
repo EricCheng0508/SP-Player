@@ -132,7 +132,6 @@ final class TranscriptApiProvider
 
 String _$transcriptApiHash() => r'5c8a8aeafad31ac0eb988aed22346d0abd8994b3';
 
-
 @ProviderFor(directUploadsApi)
 final directUploadsApiProvider = DirectUploadsApiProvider._();
 

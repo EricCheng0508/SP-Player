@@ -91,7 +91,7 @@ final class AiModalityConfigCtrlProvider
 }
 
 String _$aiModalityConfigCtrlHash() =>
-    r'6683c27e48b8ccdf96cd08870ce0c7493c236bbf';
+    r'f5206cf64020dbbe25f301144186264291aafa22';
 
 abstract class _$AiModalityConfigCtrl extends $Notifier<AiModalityConfigs> {
   AiModalityConfigs build();

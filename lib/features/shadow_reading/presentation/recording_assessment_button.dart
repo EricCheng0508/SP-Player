@@ -16,6 +16,8 @@ import 'package:enjoy_player/core/application/app_preferences_provider.dart';
 import 'package:enjoy_player/core/presentation/loading_icon.dart';
 import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
+import 'package:enjoy_player/features/ai/application/ai_capability_providers.dart';
+import 'package:enjoy_player/features/ai/data/stub_ai_capabilities.dart';
 import 'package:enjoy_player/features/hotkeys/presentation/hotkey_tooltip_label.dart';
 import 'package:enjoy_player/features/onboarding/domain/onboarding_tip_id.dart';
 import 'package:enjoy_player/features/onboarding/presentation/onboarding_target.dart';
@@ -80,6 +82,16 @@ class RecordingAssessmentButton extends ConsumerWidget {
     final score = pronunciationScoreFromRecording(row);
     final hasStored =
         row.assessmentJson != null && row.assessmentJson!.trim().isNotEmpty;
+
+    // Pronunciation assessment only has an Azure implementation; hide the
+    // trigger entirely when no Azure speech config is saved (keep the button
+    // visible when a stored score exists so results stay viewable).
+    final assessmentConfigured =
+        ref.watch(assessmentCapabilityProvider)
+            is! ByokNotConfiguredAssessmentCapability;
+    if (!assessmentConfigured && !hasStored) {
+      return const SizedBox.shrink();
+    }
 
     final tooltip = !assessmentSupported
         ? l10n.assessmentUnavailableLanguage

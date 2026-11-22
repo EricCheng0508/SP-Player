@@ -184,7 +184,7 @@ final class TranslationCapabilityProvider
 }
 
 String _$translationCapabilityHash() =>
-    r'36fb8d126959a92f10098f2b37bc3456b2dc2a84';
+    r'3eb9b5d15a412389f117fa4f9719144ce8474fff';
 
 @ProviderFor(dictionaryCapability)
 final dictionaryCapabilityProvider = DictionaryCapabilityProvider._();
@@ -232,7 +232,7 @@ final class DictionaryCapabilityProvider
 }
 
 String _$dictionaryCapabilityHash() =>
-    r'abab887c2098a8cec4fb1285e39cde54c961e77d';
+    r'96e0b89573504da1585082eb573758a2066b6c78';
 
 @ProviderFor(contextualTranslationCapability)
 final contextualTranslationCapabilityProvider =

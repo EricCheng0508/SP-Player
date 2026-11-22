@@ -98,6 +98,15 @@ class _SpeechByokFormState extends State<SpeechByokForm> {
               ),
             ),
           ),
+          SizedBox(height: t.space8),
+          Text(
+            widget.kind == SpeechByokKind.azureSpeech
+                ? l10n.settingsAiProvidersSpeechKindHintAzure
+                : l10n.settingsAiProvidersSpeechKindHintOpenAi,
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(fontSize: 12, color: t.ink2),
+          ),
           SizedBox(height: t.space16),
         ],
         if (!widget._isAzure && widget.baseUrlController != null) ...[

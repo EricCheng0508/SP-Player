@@ -58,6 +58,16 @@ abstract final class SettingsKeys {
     whenMissing: true,
   );
 
+  /// How the on-video caption overlay shows the active transcript line.
+  /// Stored value is one of `off` / `original` / `translation` / `both`.
+  /// Missing value ≡ off.
+  static final playerCaptionOverlay = SettingKey<String>(
+    name: 'player.captionOverlay',
+    scope: SettingsScope.device,
+    codec: StringSettingCodec(),
+    defaultValue: 'off',
+  );
+
   /// When `true`, the transcript panel highlights the current word if the cue
   /// already has stored word timings. Missing value ≡ off.
   static final transcriptKaraokeHighlight = SettingKey.flag(

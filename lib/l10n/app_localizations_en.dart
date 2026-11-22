@@ -1070,6 +1070,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAiProvidersSpeechKindAzure => 'Azure Speech';
 
   @override
+  String get settingsAiProvidersSpeechKindHintOpenAi =>
+      'OpenAI-compatible: speech-to-text (generate subtitles, dictation, echo transcription).';
+
+  @override
+  String get settingsAiProvidersSpeechKindHintAzure =>
+      'Azure Speech: required for pronunciation scoring. Also supports speech-to-text.';
+
+  @override
   String get settingsAiProvidersSpeechWhisperModelLabel => 'Whisper model';
 
   @override
@@ -4541,6 +4549,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subtitlesIpaUnderWords => 'IPA under words';
+
+  @override
+  String get subtitlesCaptionOverlay => 'Caption below video';
+
+  @override
+  String get subtitlesCaptionOverlayHint =>
+      'Show the active line over the bottom of the video, transparent background.';
+
+  @override
+  String get subtitlesCaptionModeOff => 'Off';
+
+  @override
+  String get subtitlesCaptionModeOriginal => 'Original';
+
+  @override
+  String get subtitlesCaptionModeTranslation => 'Translation';
+
+  @override
+  String get subtitlesCaptionModeBoth => 'Bilingual';
 
   @override
   String get subtitlesIpaUnderWordsHint => 'Tap a word to hear it.';

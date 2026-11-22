@@ -1995,6 +1995,18 @@ abstract class AppLocalizations {
   /// **'Azure Speech'**
   String get settingsAiProvidersSpeechKindAzure;
 
+  /// Hint under the speech provider segmented button, OpenAI option.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenAI-compatible: speech-to-text (generate subtitles, dictation, echo transcription).'**
+  String get settingsAiProvidersSpeechKindHintOpenAi;
+
+  /// Hint under the speech provider segmented button, Azure option.
+  ///
+  /// In en, this message translates to:
+  /// **'Azure Speech: required for pronunciation scoring. Also supports speech-to-text.'**
+  String get settingsAiProvidersSpeechKindHintAzure;
+
   /// Label for Whisper model field in ASR BYOK form
   ///
   /// In en, this message translates to:
@@ -8243,6 +8255,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'IPA under words'**
   String get subtitlesIpaUnderWords;
+
+  /// Label for the on-video caption overlay display-mode picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Caption below video'**
+  String get subtitlesCaptionOverlay;
+
+  /// Explanation of the on-video caption overlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Show the active line over the bottom of the video, transparent background.'**
+  String get subtitlesCaptionOverlayHint;
+
+  /// Caption overlay mode: hidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get subtitlesCaptionModeOff;
+
+  /// Caption overlay mode: original text only.
+  ///
+  /// In en, this message translates to:
+  /// **'Original'**
+  String get subtitlesCaptionModeOriginal;
+
+  /// Caption overlay mode: translation only.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation'**
+  String get subtitlesCaptionModeTranslation;
+
+  /// Caption overlay mode: original + translation.
+  ///
+  /// In en, this message translates to:
+  /// **'Bilingual'**
+  String get subtitlesCaptionModeBoth;
 
   /// Hint under the IPA switch when available.
   ///

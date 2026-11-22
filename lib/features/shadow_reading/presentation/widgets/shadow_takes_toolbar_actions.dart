@@ -9,6 +9,8 @@ import 'package:enjoy_player/core/audio/recording_preview_player_provider.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_modal.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
+import 'package:enjoy_player/features/ai/application/ai_capability_providers.dart';
+import 'package:enjoy_player/features/ai/data/stub_ai_capabilities.dart';
 import 'package:enjoy_player/features/shadow_reading/presentation/recording_assessment_button.dart';
 import 'package:enjoy_player/features/shadow_reading/presentation/recording_assessment_flow.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
@@ -78,6 +80,12 @@ class ShadowTakesToolbarActions extends ConsumerWidget {
     final preview = ref.watch(recordingPreviewPlayerProvider);
     final lp = row.localPath;
     final canPlay = echoActive && lp != null && lp.isNotEmpty;
+
+    // Re-assessment requires a configured Azure speech provider; without one
+    // the menu entry stays hidden (viewing a stored score still works).
+    final assessmentConfigured =
+        ref.watch(assessmentCapabilityProvider)
+            is! ByokNotConfiguredAssessmentCapability;
 
     final takeSummary =
         '${l10n.shadowRecordingTake} ${_takeNumber(row)} · '
@@ -208,26 +216,27 @@ class ShadowTakesToolbarActions extends ConsumerWidget {
                     },
                   ),
                 ),
-              PopupMenuItem<String>(
-                value: kShadowReassessTakeToken,
-                enabled:
-                    echoActive &&
-                    row.assessmentJson != null &&
-                    row.assessmentJson!.trim().isNotEmpty,
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: 28,
-                      child: Icon(
-                        EnjoyIcons.refresh,
-                        size: 20,
-                        color: scheme.primary,
+              if (assessmentConfigured)
+                PopupMenuItem<String>(
+                  value: kShadowReassessTakeToken,
+                  enabled:
+                      echoActive &&
+                      row.assessmentJson != null &&
+                      row.assessmentJson!.trim().isNotEmpty,
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 28,
+                        child: Icon(
+                          EnjoyIcons.refresh,
+                          size: 20,
+                          color: scheme.primary,
+                        ),
                       ),
-                    ),
-                    Expanded(child: Text(l10n.assessmentReassess)),
-                  ],
+                      Expanded(child: Text(l10n.assessmentReassess)),
+                    ],
+                  ),
                 ),
-              ),
               const PopupMenuDivider(),
               PopupMenuItem<String>(
                 value: kShadowDeleteTakeToken,

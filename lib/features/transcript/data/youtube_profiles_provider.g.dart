@@ -8,9 +8,18 @@ part of 'youtube_profiles_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// 内置字幕抓取 profile 阶梯（按 [kPreferredCaptionClientOrder] 排好）。
+///
+/// 保留 `Future` 形状只是因为调用方按 `AsyncValue` 取用；这里不发起任何
+/// 网络请求，直接完成。
 
 @ProviderFor(youtubeProfiles)
 final youtubeProfilesProvider = YoutubeProfilesProvider._();
+
+/// 内置字幕抓取 profile 阶梯（按 [kPreferredCaptionClientOrder] 排好）。
+///
+/// 保留 `Future` 形状只是因为调用方按 `AsyncValue` 取用；这里不发起任何
+/// 网络请求，直接完成。
 
 final class YoutubeProfilesProvider
     extends
@@ -22,6 +31,10 @@ final class YoutubeProfilesProvider
     with
         $FutureModifier<List<ClientProfile>>,
         $FutureProvider<List<ClientProfile>> {
+  /// 内置字幕抓取 profile 阶梯（按 [kPreferredCaptionClientOrder] 排好）。
+  ///
+  /// 保留 `Future` 形状只是因为调用方按 `AsyncValue` 取用；这里不发起任何
+  /// 网络请求，直接完成。
   YoutubeProfilesProvider._()
     : super(
         from: null,
@@ -48,4 +61,4 @@ final class YoutubeProfilesProvider
   }
 }
 
-String _$youtubeProfilesHash() => r'23dea2b485a34b3c86b22e2ed3c18a530565d539';
+String _$youtubeProfilesHash() => r'89b94d3122125d4aa572153a16848f666dffb59b';

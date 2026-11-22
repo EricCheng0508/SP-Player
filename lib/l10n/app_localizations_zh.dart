@@ -1022,6 +1022,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsAiProvidersSpeechKindAzure => 'Azure Speech';
 
   @override
+  String get settingsAiProvidersSpeechKindHintOpenAi =>
+      'OpenAI 兼容：用于语音转文字（生成字幕、听写、跟读复述）。';
+
+  @override
+  String get settingsAiProvidersSpeechKindHintAzure =>
+      'Azure 语音：发音评分（跟读打分）必须使用此项；也支持语音转文字。';
+
+  @override
   String get settingsAiProvidersSpeechWhisperModelLabel => 'Whisper 模型';
 
   @override
@@ -4338,6 +4346,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String get subtitlesIpaUnderWords => '在词下显示音标';
 
   @override
+  String get subtitlesCaptionOverlay => '视频下方字幕';
+
+  @override
+  String get subtitlesCaptionOverlayHint => '在视频画面下方显示当前句，背景透明。';
+
+  @override
+  String get subtitlesCaptionModeOff => '关闭';
+
+  @override
+  String get subtitlesCaptionModeOriginal => '原文';
+
+  @override
+  String get subtitlesCaptionModeTranslation => '译文';
+
+  @override
+  String get subtitlesCaptionModeBoth => '双语';
+
+  @override
   String get subtitlesIpaUnderWordsHint => '点按单词即可试听。';
 
   @override
@@ -5465,6 +5491,14 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get settingsAiProvidersTileTitle => 'AI 提供商';
+
+  @override
+  String get settingsAiProvidersSpeechKindHintOpenAi =>
+      'OpenAI 兼容：用于语音转文字（生成字幕、听写、跟读复述）。';
+
+  @override
+  String get settingsAiProvidersSpeechKindHintAzure =>
+      'Azure 语音：发音评分（跟读打分）必须使用此项；也支持语音转文字。';
 
   @override
   String byokNotConfiguredMessage(String modality) {
@@ -8289,6 +8323,24 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get subtitlesIpaUnderWords => '在词下显示音标';
+
+  @override
+  String get subtitlesCaptionOverlay => '视频下方字幕';
+
+  @override
+  String get subtitlesCaptionOverlayHint => '在视频画面下方显示当前句，背景透明。';
+
+  @override
+  String get subtitlesCaptionModeOff => '关闭';
+
+  @override
+  String get subtitlesCaptionModeOriginal => '原文';
+
+  @override
+  String get subtitlesCaptionModeTranslation => '译文';
+
+  @override
+  String get subtitlesCaptionModeBoth => '双语';
 
   @override
   String get subtitlesIpaUnderWordsHint => '点按单词即可试听。';

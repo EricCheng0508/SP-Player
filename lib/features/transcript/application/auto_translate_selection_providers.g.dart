@@ -147,7 +147,7 @@ final class AutoTranslateSelectionIdProvider
 }
 
 String _$autoTranslateSelectionIdHash() =>
-    r'02d72757d828d04a8b4d9e234e384e115765f169';
+    r'2b97b311763d3dd2e0a762cb6a29981a9359e75c';
 
 /// Predicted AI track id for picker radio value (may not exist in DB yet).
 

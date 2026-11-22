@@ -44,7 +44,7 @@ final class PronouncePlaybackControllerProvider
 }
 
 String _$pronouncePlaybackControllerHash() =>
-    r'd3afdd768cd3af9567b55ff0073a05fe3a4beaff';
+    r'bed5b37e291e8ea31c3336a26d1eeff94236d686';
 
 abstract class _$PronouncePlaybackController
     extends $Notifier<PronouncePlaybackState> {

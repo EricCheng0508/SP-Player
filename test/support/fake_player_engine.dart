@@ -133,6 +133,9 @@ class FakePlayerEngine
   bool get keepSurfaceWhenParked => true;
 
   @override
+  bool get overlaysNeedSurfaceParking => true;
+
+  @override
   ({bool playing, bool buffering}) get transportSnapshot =>
       (playing: false, buffering: false);
 

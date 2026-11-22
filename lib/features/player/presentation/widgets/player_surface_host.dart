@@ -58,14 +58,17 @@ class PlayerSurfaceHost extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(playerEngineRevProvider);
-    final parkForOverlay = ref.watch(playerSurfaceShouldParkForOverlayProvider);
-    final registry = ref.watch(playerSurfaceRegistryProvider);
-    final attachment = (forcePark || parkForOverlay) ? null : registry;
-
     final engine = ref
         .read(playerControllerProvider.notifier)
         .engineIdentity
         .resolveOrNull();
+    final parkForOverlay = ref.watch(playerSurfaceShouldParkForOverlayProvider) &&
+        // Texture-based stages (MediaKit desktop) composite in-scene and are
+        // correctly covered by overlays; parking them blanks the video for
+        // the lifetime of every popup (ADR-0066 scope note on the engine).
+        (engine?.overlaysNeedSurfaceParking ?? true);
+    final registry = ref.watch(playerSurfaceRegistryProvider);
+    final attachment = (forcePark || parkForOverlay) ? null : registry;
     if (engine == null) {
       return const SizedBox.shrink();
     }

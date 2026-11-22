@@ -83,6 +83,7 @@ class _MediaKitStageGateState extends State<MediaKitVideoStage> {
       child: _MediaKitVideoStage(
         controller: engine.videoController,
         positionStream: engine.position,
+        playingStream: engine.playing,
         maxWidth: widget.maxWidth,
         maxHeight: widget.maxHeight,
       ),
@@ -100,6 +101,7 @@ class _MediaKitVideoStage extends StatefulWidget {
   const _MediaKitVideoStage({
     required this.controller,
     required this.positionStream,
+    required this.playingStream,
     required this.maxWidth,
     required this.maxHeight,
   });
@@ -110,6 +112,11 @@ class _MediaKitVideoStage extends StatefulWidget {
   /// viewport or the texture id, yet the compositor may still serve the stale
   /// black frame until the next relayout.
   final Stream<Duration> positionStream;
+
+  /// Play/pause transitions also relayout-adjacent state changes the user
+  /// can trigger from elsewhere (mode-tab switches pause, echo loops seek);
+  /// each transition is another chance to un-black a stale texture.
+  final Stream<bool> playingStream;
 
   final double maxWidth;
   final double maxHeight;
@@ -122,6 +129,7 @@ class _MediaKitVideoStageState extends State<_MediaKitVideoStage> {
   var _nudge = false;
   var _kicked = false;
   StreamSubscription<Duration>? _positionSub;
+  StreamSubscription<bool>? _playingSub;
   Duration? _lastPosition;
 
   @override
@@ -132,12 +140,15 @@ class _MediaKitVideoStageState extends State<_MediaKitVideoStage> {
     _onTexture();
     unawaited(_kickAfterFirstFrame());
     _positionSub = widget.positionStream.listen(_onPositionTick);
-    // Burst kicks over the first two seconds: a single kick can land while
+    _playingSub = widget.playingStream.listen(_onPlayingFlip);
+    // Burst kicks over the first few seconds: a single kick can land while
     // mpv has not yet presented into the texture (or during the loading →
     // chrome viewport swap) and the frame stays black. The user-visible
     // symptom of missing one is a black stage that only recovers after a
     // mode-tab switch relayouts the column.
-    for (final delayMs in const [150, 350, 600, 900, 1300, 1800]) {
+    for (final delayMs in const [
+      150, 350, 600, 900, 1300, 1800, 2400, 3000, 3800, 4600,
+    ]) {
       unawaited(Future<void>.delayed(Duration(milliseconds: delayMs)).then((_) {
         if (mounted) _scheduleKick();
       }));
@@ -162,7 +173,15 @@ class _MediaKitVideoStageState extends State<_MediaKitVideoStage> {
     widget.controller.id.removeListener(_onTexture);
     widget.controller.rect.removeListener(_onTexture);
     unawaited(_positionSub?.cancel());
+    unawaited(_playingSub?.cancel());
     super.dispose();
+  }
+
+  /// Kicks on every play/pause transition. Pausing recomposites the scene
+  /// (the paused gate chrome appears) and resuming re-presents mpv frames;
+  /// either can revive a texture the compositor went black on.
+  void _onPlayingFlip(bool playing) {
+    _scheduleKick();
   }
 
   /// Kicks on seek jumps. Natural playback ticks advance monotonically in

@@ -93,6 +93,17 @@ abstract class PlayerEngine {
   /// first laid out off-screen; YouTube's WebView must stay mounted.
   bool get keepSurfaceWhenParked;
 
+  /// Whether transient overlays (dialogs / sheets / menus — ADR-0066) must
+  /// park this engine's surface off-screen while they are open.
+  ///
+  /// Only true for engines whose surface can genuinely paint above Flutter
+  /// UI (WebView2 / platform views). Texture-based stages (MediaKit desktop,
+  /// `enableHardwareAcceleration: false`) composite inside the Flutter scene
+  /// graph and are correctly covered by overlays; parking them moves the
+  /// whole video off-screen, so every popup opens over a black stage — the
+  /// reported "menu opens → video goes black" symptom.
+  bool get overlaysNeedSurfaceParking => true;
+
   Future<void> open(PlayableSource source);
 
   Future<void> seek(Duration target);

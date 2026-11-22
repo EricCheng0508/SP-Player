@@ -113,6 +113,9 @@ class YoutubePlayerEngine
   bool get keepSurfaceWhenParked => true;
 
   @override
+  bool get overlaysNeedSurfaceParking => true;
+
+  @override
   ({bool playing, bool buffering}) get transportSnapshot =>
       _session.transportSnapshot;
 

@@ -164,6 +164,13 @@ class MediaKitPlayerEngine
   bool get keepSurfaceWhenParked => false;
 
   @override
+  bool get overlaysNeedSurfaceParking =>
+      // Desktop renders into a Flutter Texture (enableHardwareAcceleration:
+      // false) — in-scene compositing, overlays cover it correctly. Parking
+      // moved the video off-screen on every popup open (black stage).
+      !(Platform.isWindows || Platform.isLinux || Platform.isMacOS);
+
+  @override
   Future<void> open(PlayableSource source) async {
     final uri = switch (source) {
       LocalFilePlayableSource(:final uri) => uri,

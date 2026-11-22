@@ -1,63 +1,52 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
-import 'package:http/testing.dart';
 
-import 'package:enjoy_player/data/api/api_client.dart';
-import 'package:enjoy_player/data/api/services/ai/ai_api_providers.dart';
-import 'package:enjoy_player/data/api/services/ai/pronounce_api.dart';
 import 'package:enjoy_player/features/pronounce/application/pronounce_audio_engine.dart';
 import 'package:enjoy_player/features/pronounce/application/pronounce_playback_controller.dart';
+import 'package:enjoy_player/features/pronounce/application/pronounce_service.dart';
 import 'package:enjoy_player/features/pronounce/domain/pronounce_target.dart';
-
-PronounceApi _stubApi({
-  required String audioUrl,
-  Duration delay = Duration.zero,
-  int? statusCode,
-}) {
-  final client = ApiClient(
-    httpClient: MockClient((request) async {
-      if (delay > Duration.zero) await Future<void>.delayed(delay);
-      if (statusCode != null && statusCode != 200) {
-        return http.Response('{"error":"fail"}', statusCode);
-      }
-      return http.Response(
-        '{"audio_url":"$audioUrl","cached":false,"locale":"en-US",'
-        '"voice":"en-US-JennyNeural","format":"mp3","text":"hello",'
-        '"provider":"azure"}',
-        200,
-        headers: {'content-type': 'application/json'},
-      );
-    }),
-    getBaseUrl: () async => 'https://worker.example.com',
-    getAccessToken: () async => 'tok',
-  );
-  return PronounceApi(client);
-}
 
 void main() {
   late FakePronounceAudioEngine engine;
   late ProviderContainer container;
+  late Directory tempDir;
+  late int getCount;
 
-  setUp(() {
+  setUp(() async {
     engine = FakePronounceAudioEngine();
     PronouncePlaybackController.debugEngineFactory = () => engine;
+    tempDir = await Directory.systemTemp.createTemp('pronounce_test');
+    getCount = 0;
   });
 
-  tearDown(() {
+  tearDown(() async {
     PronouncePlaybackController.debugEngineFactory = null;
     container.dispose();
+    if (tempDir.existsSync()) await tempDir.delete(recursive: true);
   });
 
-  ProviderContainer makeContainer({PronounceApi? api}) {
-    return ProviderContainer(
-      overrides: [
-        pronounceApiProvider.overrideWithValue(
-          api ?? _stubApi(audioUrl: 'https://worker.example/a.mp3'),
-        ),
-      ],
-    );
-  }
+  /// 有道的音频下载替身：走 [PronounceService] 的真实磁盘缓存逻辑，
+  /// 只把 HTTP 换成可控的假响应。
+  PronounceService service({
+    Duration delay = Duration.zero,
+    int statusCode = 200,
+  }) => PronounceService(
+    cacheDir: () async => tempDir,
+    httpGet: (uri) async {
+      getCount++;
+      if (delay > Duration.zero) await Future<void>.delayed(delay);
+      if (statusCode != 200) return http.Response('nope', statusCode);
+      return http.Response.bytes(Uint8List.fromList([1, 2, 3, 4]), 200);
+    },
+  );
+
+  ProviderContainer makeContainer({PronounceService? svc}) => ProviderContainer(
+    overrides: [pronounceServiceProvider.overrideWithValue(svc ?? service())],
+  );
 
   PronounceTarget target([String text = 'hello']) => PronounceTarget.tryCreate(
     text: text,
@@ -67,10 +56,7 @@ void main() {
 
   test('play → loading → playing; stop returns idle', () async {
     container = makeContainer(
-      api: _stubApi(
-        audioUrl: 'https://worker.example/a.mp3',
-        delay: const Duration(milliseconds: 40),
-      ),
+      svc: service(delay: const Duration(milliseconds: 40)),
     );
     final ctrl = container.read(pronouncePlaybackControllerProvider.notifier);
 
@@ -85,7 +71,9 @@ void main() {
       container.read(pronouncePlaybackControllerProvider).isPlaying,
       isTrue,
     );
-    expect(engine.playedUrls, ['https://worker.example/a.mp3']);
+    // 缓存命中后交给播放引擎的是本地文件，不再是远程 URL。
+    expect(engine.playedUrls, hasLength(1));
+    expect(engine.playedUrls.single, isNot(startsWith('http')));
 
     await ctrl.stop();
     expect(container.read(pronouncePlaybackControllerProvider).isIdle, isTrue);
@@ -108,10 +96,7 @@ void main() {
 
   test('stale generation is ignored when stop races fetch', () async {
     container = makeContainer(
-      api: _stubApi(
-        audioUrl: 'https://worker.example/slow.mp3',
-        delay: const Duration(milliseconds: 80),
-      ),
+      svc: service(delay: const Duration(milliseconds: 80)),
     );
     final ctrl = container.read(pronouncePlaybackControllerProvider.notifier);
 
@@ -123,34 +108,42 @@ void main() {
     expect(engine.playedUrls, isEmpty);
   });
 
-  test(
-    'caches URL so second distinct session reuses without second POST',
-    () async {
-      var posts = 0;
-      final client = ApiClient(
-        httpClient: MockClient((request) async {
-          posts++;
-          return http.Response(
-            '{"audio_url":"https://worker.example/cached.mp3","cached":true,'
-            '"locale":"en-US","voice":"v","format":"mp3","text":"hello",'
-            '"provider":"azure"}',
-            200,
-            headers: {'content-type': 'application/json'},
-          );
-        }),
-        getBaseUrl: () async => 'https://worker.example.com',
-        getAccessToken: () async => 'tok',
-      );
-      container = makeContainer(api: PronounceApi(client));
-      final ctrl = container.read(pronouncePlaybackControllerProvider.notifier);
-      final t = target();
+  test('same target is served from the in-memory URL cache', () async {
+    container = makeContainer();
+    final ctrl = container.read(pronouncePlaybackControllerProvider.notifier);
+    final t = target();
 
-      await ctrl.play(t);
-      await ctrl.stop();
-      await ctrl.play(t);
+    await ctrl.play(t);
+    await ctrl.stop();
+    await ctrl.play(t);
 
-      expect(posts, 1);
-      expect(engine.playedUrls.length, 2);
-    },
-  );
+    expect(getCount, 1);
+    expect(engine.playedUrls, hasLength(2));
+  });
+
+  test('a fresh session hits the on-disk cache without downloading again',
+      () async {
+    final svc = service();
+
+    final first = makeContainer(svc: svc);
+    await first.read(pronouncePlaybackControllerProvider.notifier).play(target());
+    first.dispose();
+
+    // 新容器 = 空的内存缓存，只能靠磁盘缓存命中。
+    container = makeContainer(svc: svc);
+    await container
+        .read(pronouncePlaybackControllerProvider.notifier)
+        .play(target());
+
+    expect(getCount, 1);
+    expect(engine.playedUrls, hasLength(2));
+  });
+
+  test('non-200 download surfaces as a failure, nothing is played', () async {
+    container = makeContainer(svc: service(statusCode: 500));
+    final ctrl = container.read(pronouncePlaybackControllerProvider.notifier);
+
+    await expectLater(ctrl.play(target()), throwsA(anything));
+    expect(engine.playedUrls, isEmpty);
+  });
 }

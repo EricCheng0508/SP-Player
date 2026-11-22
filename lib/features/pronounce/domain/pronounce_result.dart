@@ -1,35 +1,13 @@
-/// Worker `POST /pronounce` success body.
+/// 发音音频的解析结果（本地文件路径，或尚未缓存时的远程地址）。
 library;
 
 final class PronounceResult {
-  const PronounceResult({
-    required this.audioUrl,
-    required this.cached,
-    required this.locale,
-    required this.voice,
-    required this.format,
-    required this.text,
-    required this.provider,
-  });
+  const PronounceResult({required this.audioSource, required this.fromCache});
 
-  factory PronounceResult.fromJson(Map<String, dynamic> json) {
-    final audioUrl = (json['audio_url'] ?? json['audioUrl']) as String? ?? '';
-    return PronounceResult(
-      audioUrl: audioUrl,
-      cached: json['cached'] as bool? ?? false,
-      locale: (json['locale'] as String?) ?? '',
-      voice: (json['voice'] as String?) ?? '',
-      format: (json['format'] as String?) ?? '',
-      text: (json['text'] as String?) ?? '',
-      provider: (json['provider'] as String?) ?? '',
-    );
-  }
+  /// 可直接交给播放引擎的地址：缓存命中时是本地文件绝对路径，
+  /// 未命中且写盘失败时是远程 http(s) URL。
+  final String audioSource;
 
-  final String audioUrl;
-  final bool cached;
-  final String locale;
-  final String voice;
-  final String format;
-  final String text;
-  final String provider;
+  /// 音频是否来自本地磁盘缓存（已落盘、以后离线可听）。
+  final bool fromCache;
 }

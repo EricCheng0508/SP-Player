@@ -106,9 +106,9 @@ class PronouncePlaybackController extends _$PronouncePlaybackController {
             .read(pronounceServiceProvider)
             .pronounce(text: target.text, locale: target.resolvedLocale);
         if (gen != _generation || !ref.mounted) return;
-        url = result.audioUrl;
+        url = result.audioSource;
         if (url.isEmpty) {
-          throw const NetworkFailure('Empty pronunciation audio URL');
+          throw const NetworkFailure('Empty pronunciation audio source');
         }
         _putCache(target.cacheKey, url);
       }

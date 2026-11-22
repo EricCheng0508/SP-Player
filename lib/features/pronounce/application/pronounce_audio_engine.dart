@@ -2,7 +2,7 @@
 library;
 
 import 'dart:async';
-import 'dart:io' show Platform;
+import 'dart:io' show File, Platform;
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:http/http.dart' as http;
@@ -55,6 +55,14 @@ final class AudioplayersPronounceEngine implements PronounceAudioEngine {
   Future<void> playUrl(String url) async {
     _ensureWired();
     await _player.stop();
+
+    // 本地缓存文件（发音音频落盘后的常见路径）：直接读字节播放，
+    // 既省一次 HTTP，也让听过的词完全离线可用。
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      await _playFromFile(url);
+      return;
+    }
+
     if (Platform.isWindows) {
       await _playFromBytes(url);
       return;
@@ -65,6 +73,14 @@ final class AudioplayersPronounceEngine implements PronounceAudioEngine {
       _log.info('UrlSource failed; falling back to BytesSource', e, st);
       await _playFromBytes(url);
     }
+  }
+
+  Future<void> _playFromFile(String path) async {
+    final bytes = await File(path).readAsBytes();
+    if (bytes.isEmpty) {
+      throw StateError('Pronounce audio file is empty: $path');
+    }
+    await _player.play(BytesSource(bytes));
   }
 
   Future<void> _playFromBytes(String url) async {

@@ -231,7 +231,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String asrLongMediaConfirmBody(int minutes) {
-    return 'Generating a transcript for $minutes minutes of audio may take several minutes and consume significant credits. Continue?';
+    return 'Generating a transcript for $minutes minutes of audio may take several minutes. Recognition runs on your own machine, so nothing is billed. Continue?';
   }
 
   @override
@@ -2117,7 +2117,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsAiApiBaseUrl => 'AI API 基础地址';
 
   @override
-  String get settingsAiApiBaseUrlHint => '示例：https://worker.enjoy.bot';
+  String get settingsAiApiBaseUrlHint => '示例：http://127.0.0.1:3425/v1';
 
   @override
   String get settingsAiApiBaseUrlSave => '保存 AI API 地址';
@@ -4841,7 +4841,7 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String asrLongMediaConfirmBody(int minutes) {
-    return '为 $minutes 分钟的音频生成字幕可能需要数分钟，并会消耗较多积分。是否继续？';
+    return '为 $minutes 分钟的音频生成字幕可能需要数分钟（本机模型识别，不产生任何费用）。是否继续？';
   }
 
   @override
@@ -6269,7 +6269,7 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String get settingsAiApiBaseUrl => 'AI API 基础地址';
 
   @override
-  String get settingsAiApiBaseUrlHint => '示例：https://worker.enjoy.bot';
+  String get settingsAiApiBaseUrlHint => '示例：http://127.0.0.1:3425/v1';
 
   @override
   String get settingsAiApiBaseUrlSave => '保存 AI API 地址';

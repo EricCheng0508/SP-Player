@@ -235,7 +235,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String asrLongMediaConfirmBody(int minutes) {
-    return 'Generating a transcript for $minutes minutes of audio may take several minutes and consume significant credits. Continue?';
+    return 'Generating a transcript for $minutes minutes of audio may take several minutes. Recognition runs on your own machine, so nothing is billed. Continue?';
   }
 
   @override
@@ -2214,7 +2214,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAiApiBaseUrl => 'AI API base URL';
 
   @override
-  String get settingsAiApiBaseUrlHint => 'Example: https://worker.enjoy.bot';
+  String get settingsAiApiBaseUrlHint => 'Example: http://127.0.0.1:3425/v1';
 
   @override
   String get settingsAiApiBaseUrlSave => 'Save AI API URL';

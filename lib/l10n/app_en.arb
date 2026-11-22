@@ -95,7 +95,7 @@
   "asrErrorNetwork": "Network error. Please check your connection and retry.",
   "asrErrorNoSpeech": "No speech detected in this audio",
   "asrLongMediaConfirmTitle": "This may take a while",
-  "asrLongMediaConfirmBody": "Generating a transcript for {minutes} minutes of audio may take several minutes and consume significant credits. Continue?",
+  "asrLongMediaConfirmBody": "Generating a transcript for {minutes} minutes of audio may take several minutes. Recognition runs on your own machine, so nothing is billed. Continue?",
   "@asrLongMediaConfirmBody": {
     "placeholders": {
       "minutes": { "type": "int" }
@@ -1202,7 +1202,7 @@
   "settingsApiBaseUrlHint": "Example: https://enjoy.bot",
   "settingsApiBaseUrlSave": "Save API URL",
   "settingsAiApiBaseUrl": "AI API base URL",
-  "settingsAiApiBaseUrlHint": "Example: https://worker.enjoy.bot",
+  "settingsAiApiBaseUrlHint": "Example: http://127.0.0.1:3425/v1",
   "settingsAiApiBaseUrlSave": "Save AI API URL",
   "settingsAiApiBaseUrlUseDefault": "Use API URL",
   "settingsAiApiBaseUrlCleared": "AI API now follows the main API URL.",

@@ -492,7 +492,7 @@ abstract class AppLocalizations {
   /// No description provided for @asrLongMediaConfirmBody.
   ///
   /// In en, this message translates to:
-  /// **'Generating a transcript for {minutes} minutes of audio may take several minutes and consume significant credits. Continue?'**
+  /// **'Generating a transcript for {minutes} minutes of audio may take several minutes. Recognition runs on your own machine, so nothing is billed. Continue?'**
   String asrLongMediaConfirmBody(int minutes);
 
   /// No description provided for @asrLongMediaConfirmContinue.
@@ -4104,7 +4104,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsAiApiBaseUrlHint.
   ///
   /// In en, this message translates to:
-  /// **'Example: https://worker.enjoy.bot'**
+  /// **'Example: http://127.0.0.1:3425/v1'**
   String get settingsAiApiBaseUrlHint;
 
   /// No description provided for @settingsAiApiBaseUrlSave.

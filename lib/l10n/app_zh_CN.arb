@@ -88,7 +88,7 @@
   "asrErrorNetwork": "网络错误，请检查连接后重试。",
   "asrErrorNoSpeech": "未检测到语音",
   "asrLongMediaConfirmTitle": "这可能需要一些时间",
-  "asrLongMediaConfirmBody": "为 {minutes} 分钟的音频生成字幕可能需要数分钟，并会消耗较多积分。是否继续？",
+  "asrLongMediaConfirmBody": "为 {minutes} 分钟的音频生成字幕可能需要数分钟（本机模型识别，不产生任何费用）。是否继续？",
   "@asrLongMediaConfirmBody": {
     "placeholders": {
       "minutes": { "type": "int" }
@@ -762,7 +762,7 @@
   "settingsApiBaseUrlHint": "示例：https://enjoy.bot",
   "settingsApiBaseUrlSave": "保存 API 地址",
   "settingsAiApiBaseUrl": "AI API 基础地址",
-  "settingsAiApiBaseUrlHint": "示例：https://worker.enjoy.bot",
+  "settingsAiApiBaseUrlHint": "示例：http://127.0.0.1:3425/v1",
   "settingsAiApiBaseUrlSave": "保存 AI API 地址",
   "settingsAiApiBaseUrlUseDefault": "使用主 API 地址",
   "settingsAiApiBaseUrlCleared": "AI API 现已跟随主 API 地址。",

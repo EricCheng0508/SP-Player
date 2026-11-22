@@ -1,35 +1,32 @@
-/// Map app language tags → Worker `/pronounce` locales.
+/// Map app language tags → pronounce locales.
+///
+/// 本地版：发音音频由 `buildYoudaoAudioUri` 直接指向有道词典，不再有远端
+/// worker 的语种白名单。这里的集合只决定「哪些语种的喇叭按钮可用」。
 library;
 
 import 'package:enjoy_player/core/application/app_language_catalog.dart';
 import 'package:enjoy_player/core/application/language_descriptor.dart';
 
-/// Worker allowlist — descriptor rows with `pronounce: true`.
+/// 可发音语种 —— 描述表里 `pronounce: true` 的行。
 ///
-/// Mirrors Enjoy worker's `/pronounce` `DEFAULT_VOICES` / `ALLOWED_VOICES`
-/// (baizhiheizi/enjoy#1313 added `nb-NO`). The **worker must ship first** —
-/// a player release ahead of it would send `nb-NO` and get a 400. Today the
-/// set is set-identical to [kSupportedLookupLanguageTags] (worker parity
-/// policy, pinned by the derivation tests); a deliberate divergence while
-/// the worker catches up means flipping a row's `pronounce` flag and that
-/// pin together.
+/// 与 [kYoudaoLeByPrimary] 的覆盖范围一致（英语走 `type=1/2`，其余走 `le`）。
+/// 描述表新增发音语种时，需同时确认有道有对应的 `le`，否则按钮亮了却拿不到
+/// 音频。
 final Set<String> kPronounceSupportedLocales = <String>{
   for (final row in kLanguageDescriptorRows)
     if (row.pronounce) row.tag,
 };
 
-/// Bare / unknown-region primary → default regional Worker locale.
+/// 裸语种 / 未知地区 → 该主语言的默认地区变体。
 ///
-/// Vocabulary items and recordings often store ISO 639-1 primaries (`ja`,
-/// `zh`). Never cross into a different primary language. Derived: the first
-/// pronounce descriptor row of each primary ([firstTagPerPrimary]).
+/// 生词与录音常只存 ISO 639-1 主体码（`ja`、`zh`）。绝不跨主语言回退。
 final Map<String, String> kPronounceDefaultLocaleByPrimary = firstTagPerPrimary(
   kLanguageDescriptorRows.where((row) => row.pronounce),
 );
 
 const int kPronounceMaxChars = 200;
 
-/// Resolves [tag] to a Worker pronounce locale, or `null` if unsupported.
+/// 把 [tag] 解析为可发音语种，不支持时返回 `null`。
 ///
 /// - `en-UK` → `en-GB`
 /// - bare / other `en*` (not GB/UK) → `en-US`

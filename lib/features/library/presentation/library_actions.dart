@@ -13,6 +13,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:enjoy_player/core/application/app_language_catalog.dart';
 import 'package:enjoy_player/core/errors/app_failure.dart';
+import 'package:enjoy_player/core/logging/log.dart';
 import 'package:enjoy_player/core/notices/app_notice.dart';
 import 'package:enjoy_player/data/files/media_resolver.dart';
 import 'package:enjoy_player/core/routing/player_navigation.dart';
@@ -30,63 +31,90 @@ import 'package:enjoy_player/features/library/domain/media.dart';
 import 'package:enjoy_player/features/player/application/player_controller.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
-/// After native pickers / activity resume, the navigator can still be locked.
-/// Dismiss the blocking dialog on the next frame, then run [then] one frame later
-/// so [Navigator.pop] and follow-up navigation (e.g. [openPlayerRoute]) do not hit
-/// `!_debugLocked` or pop the wrong route when the dialog was not shown on the same
-/// navigator as the dismiss call.
-void _dismissBlockingImportDialogThen(BuildContext context, VoidCallback then) {
-  if (!context.mounted) return;
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    if (!context.mounted) return;
-    final nav = Navigator.of(context, rootNavigator: true);
-    if (nav.canPop()) {
-      nav.pop();
-    }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!context.mounted) return;
-      then();
-    });
-  });
-}
+final _importUiLog = logNamed('library.importUi');
 
 /// Blocking progress dialog shown on the root navigator while a file or YouTube
 /// import is in flight. [label] resolves to the localized status string from
 /// the [AppLocalizations] exposed inside the dialog's own [BuildContext], so
 /// callers pass `(l10n) => l10n.importingMedia` (file) or
-/// `(l10n) => l10n.youtubeImporting` (YouTube). Paired with
-/// [_dismissBlockingImportDialogThen] in the success / failure branches so the
-/// dialog always tears down before navigation.
-void _showImportProgressDialog(
+/// `(l10n) => l10n.youtubeImporting` (YouTube).
+///
+/// The dialog's own [BuildContext] is captured into [dialogContextCompleter]
+/// so [_dismissImportDialog] can pop the route from the dialog side — the
+/// dismissal must not depend on the *caller's* context (which may unmount
+/// during a long import, e.g. the home page rebuilding after the library
+/// provider refreshes, which previously left the spinner stuck forever).
+Future<void> _showImportProgressDialog(
   BuildContext context,
-  String Function(AppLocalizations) label,
-) {
-  unawaited(
-    showEnjoyDialog<void>(
-      context: context,
-      useRootNavigator: true,
-      barrierDismissible: false,
-      builder: (dialogContext) {
-        final l10n = AppLocalizations.of(dialogContext)!;
-        return PopScope(
-          canPop: false,
-          child: AlertDialog(
-            content: Row(
-              children: [
-                const SizedBox(
-                  width: 32,
-                  height: 32,
-                  child: CircularProgressIndicator(strokeWidth: 3),
-                ),
-                const SizedBox(width: 24),
-                Expanded(child: Text(label(l10n))),
-              ],
-            ),
+  String Function(AppLocalizations) label, {
+  required Completer<BuildContext> dialogContextCompleter,
+}) {
+  return showEnjoyDialog<void>(
+    context: context,
+    useRootNavigator: true,
+    barrierDismissible: false,
+    builder: (dialogContext) {
+      if (!dialogContextCompleter.isCompleted) {
+        dialogContextCompleter.complete(dialogContext);
+      }
+      final l10n = AppLocalizations.of(dialogContext)!;
+      return PopScope(
+        canPop: false,
+        child: AlertDialog(
+          content: Row(
+            children: [
+              const SizedBox(
+                width: 32,
+                height: 32,
+                child: CircularProgressIndicator(strokeWidth: 3),
+              ),
+              const SizedBox(width: 24),
+              Expanded(child: Text(label(l10n))),
+            ],
           ),
-        );
-      },
-    ),
+        ),
+      );
+    },
   );
+}
+
+/// Pops the blocking import dialog and waits until its route has fully left
+/// the navigator so follow-up navigation (e.g. [openPlayerRoute]) cannot hit
+/// `!_debugLocked`.
+///
+/// Pops from the dialog's own captured [BuildContext] instead of the caller's:
+/// the dialog lives on the root navigator, so its own context is the most
+/// reliable handle and works even when the caller's context has unmounted.
+/// [dialogFuture] is the future returned by [showEnjoyDialog]; it completes
+/// when the route is removed. A 2s timeout keeps navigation moving even if
+/// the future never settles (logged for diagnosis).
+Future<void> _dismissImportDialog({
+  required Future<void> dialogFuture,
+  required Completer<BuildContext> dialogContextCompleter,
+  required String phase,
+}) async {
+  if (!dialogContextCompleter.isCompleted) {
+    _importUiLog.warning(
+      'import dialog[$phase]: dialog context never captured; cannot pop',
+    );
+    return;
+  }
+  final dialogContext = await dialogContextCompleter.future;
+  if (!dialogContext.mounted) {
+    _importUiLog.warning('import dialog[$phase]: dialog route already gone');
+    return;
+  }
+  _importUiLog.info('import dialog[$phase]: popping dialog route');
+  Navigator.of(dialogContext).pop();
+  try {
+    await dialogFuture.timeout(const Duration(seconds: 2));
+  } on Object catch (e) {
+    _importUiLog.warning(
+      'import dialog[$phase]: dialog future did not settle: $e',
+    );
+    return;
+  }
+  _importUiLog.info('import dialog[$phase]: dialog route removed');
 }
 
 /// Runs [import] behind the shared blocking-progress scaffold: shows the
@@ -102,32 +130,55 @@ Future<void> _runBlockingImport(
 }) async {
   final l10n = AppLocalizations.of(context)!;
   final auth = ref.read(authCtrlProvider).valueOrNull;
-  _showImportProgressDialog(context, progressLabel);
+  final dialogContextCompleter = Completer<BuildContext>();
+  _importUiLog.info('blocking import: showing dialog');
+  final dialogFuture = _showImportProgressDialog(
+    context,
+    progressLabel,
+    dialogContextCompleter: dialogContextCompleter,
+  );
   await WidgetsBinding.instance.endOfFrame;
 
+  Future<void> dismiss(String phase) => _dismissImportDialog(
+    dialogFuture: dialogFuture,
+    dialogContextCompleter: dialogContextCompleter,
+    phase: phase,
+  );
+
   try {
-    if (auth is! AuthSignedIn) return;
+    if (auth is! AuthSignedIn) {
+      _importUiLog.warning('blocking import: not signed in, dismissing dialog');
+      await dismiss('not-signed-in');
+      return;
+    }
     final id = await import(auth.profile.id);
-    if (!context.mounted) return;
-    _dismissBlockingImportDialogThen(
-      context,
-      () => openPlayerRoute(context, id),
+    _importUiLog.info(
+      'blocking import: import finished id=$id, dismissing dialog',
     );
+    await dismiss('success');
+    if (!context.mounted) {
+      _importUiLog.warning(
+        'blocking import: caller context unmounted, skip navigation',
+      );
+      return;
+    }
+    _importUiLog.info('blocking import: opening player $id');
+    openPlayerRoute(context, id);
   } on AppFailure catch (e) {
-    if (!context.mounted) return;
-    _dismissBlockingImportDialogThen(
-      context,
-      () => AppNotice.error(
-        context,
-        e is UnsupportedImportFileFailure ? unsupportedFileLabel : e.message,
-      ),
+    _importUiLog.warning(
+      'blocking import failed[${e.runtimeType}]: ${e.message}',
     );
-  } catch (_) {
+    await dismiss('failure');
     if (!context.mounted) return;
-    _dismissBlockingImportDialogThen(
+    AppNotice.error(
       context,
-      () => AppNotice.error(context, importFailureLabel(l10n)),
+      e is UnsupportedImportFileFailure ? unsupportedFileLabel : e.message,
     );
+  } catch (e, st) {
+    _importUiLog.warning('blocking import crashed: $e', e, st);
+    await dismiss('crash');
+    if (!context.mounted) return;
+    AppNotice.error(context, importFailureLabel(l10n));
   }
 }
 

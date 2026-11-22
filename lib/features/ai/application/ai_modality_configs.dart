@@ -15,13 +15,14 @@ final class AiModalityConfigs {
     required this.assessment,
   });
 
+  // 本地版：所有模态只走用户自备端点，Enjoy 云端已删除。
   static const AiModalityConfigs defaults = AiModalityConfigs(
-    asr: AIServiceConfig(provider: AIProvider.enjoy),
-    tts: AIServiceConfig(provider: AIProvider.enjoy),
-    llm: AIServiceConfig(provider: AIProvider.enjoy),
-    translation: AIServiceConfig(provider: AIProvider.enjoy),
-    dictionary: AIServiceConfig(provider: AIProvider.enjoy),
-    assessment: AIServiceConfig(provider: AIProvider.enjoy),
+    asr: AIServiceConfig(provider: AIProvider.byok),
+    tts: AIServiceConfig(provider: AIProvider.byok),
+    llm: AIServiceConfig(provider: AIProvider.byok),
+    translation: AIServiceConfig(provider: AIProvider.byok),
+    dictionary: AIServiceConfig(provider: AIProvider.byok),
+    assessment: AIServiceConfig(provider: AIProvider.byok),
   );
 
   final AIServiceConfig asr;

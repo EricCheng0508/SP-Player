@@ -1,6 +1,7 @@
 /// Pure auth-gate redirect rules for [GoRouter] (login-only app access).
 library;
 
+import 'package:enjoy_player/core/config/local_mode.dart';
 import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -122,6 +123,9 @@ String? resolveAuthRedirect({
   required String matchedLocation,
   required AsyncValue<AuthState> auth,
 }) {
+  // 本地离线模式：账号体系整体摘除，任何路由都不再被重定向到 /sign-in。
+  if (kLocalOfflineMode) return null;
+
   if (isSignInAllowlisted(matchedLocation)) {
     if (auth.isLoading || auth.hasError) return null;
     if (isAuthenticated(auth.valueOrNull)) return '/';

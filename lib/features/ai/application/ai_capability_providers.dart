@@ -2,24 +2,17 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:enjoy_player/data/api/api_client_provider.dart';
 import 'package:enjoy_player/data/api/byok_secret_store.dart';
-import 'package:enjoy_player/data/api/services/ai/ai_api_providers.dart';
 import 'package:enjoy_player/features/ai/application/ai_modality_config_controller.dart';
 import 'package:enjoy_player/features/ai/application/ai_modality_configs.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_asr_azure_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_asr_openai_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_assessment_azure_capability.dart';
+import 'package:enjoy_player/features/ai/data/byok/byok_contextual_translation_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_dictionary_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_llm_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_tts_azure_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_tts_openai_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_translation_capability.dart';
-import 'package:enjoy_player/features/ai/data/enjoy/enjoy_asr_capability.dart';
-import 'package:enjoy_player/features/ai/data/enjoy/enjoy_assessment_capability.dart';
-import 'package:enjoy_player/features/ai/data/enjoy/enjoy_contextual_translation_capability.dart';
-import 'package:enjoy_player/features/ai/data/enjoy/enjoy_dictionary_capability.dart';
-import 'package:enjoy_player/features/ai/data/enjoy/enjoy_llm_capability.dart';
-import 'package:enjoy_player/features/ai/data/enjoy/enjoy_translation_capability.dart';
-import 'package:enjoy_player/features/ai/data/enjoy/enjoy_tts_capability.dart';
 import 'package:enjoy_player/features/ai/data/stub_ai_capabilities.dart';
 import 'package:enjoy_player/features/ai/domain/ai_provider.dart';
 import 'package:enjoy_player/features/ai/domain/ai_service_config.dart';
@@ -36,11 +29,6 @@ part 'ai_capability_providers.g.dart';
 
 AsrCapability resolveAsrCapability(Ref ref, AIServiceConfig config) {
   switch (config.provider) {
-    case AIProvider.enjoy:
-      return EnjoyAsrCapability(
-        ref.read(asrApiProvider),
-        uploadApi: ref.read(asrMediaUploadApiProvider),
-      );
     case AIProvider.byok:
       final speechByok = config.speechByok;
       if (speechByok == null) return const ByokNotConfiguredAsrCapability();
@@ -60,8 +48,6 @@ AsrCapability resolveAsrCapability(Ref ref, AIServiceConfig config) {
 
 LlmCapability resolveLlmCapability(Ref ref, AIServiceConfig config) {
   switch (config.provider) {
-    case AIProvider.enjoy:
-      return EnjoyLlmCapability(ref.read(chatApiProvider));
     case AIProvider.byok:
       final llmByok = config.llmByok;
       if (llmByok == null) return const ByokNotConfiguredLlmCapability();
@@ -74,8 +60,6 @@ TranslationCapability resolveTranslationCapability(
   AIServiceConfig config,
 ) {
   switch (config.provider) {
-    case AIProvider.enjoy:
-      return EnjoyTranslationCapability(ref.read(translationApiProvider));
     case AIProvider.byok:
       return ByokTranslationCapability(resolveLlmCapability(ref, config));
   }
@@ -86,8 +70,6 @@ DictionaryCapability resolveDictionaryCapability(
   AIServiceConfig config,
 ) {
   switch (config.provider) {
-    case AIProvider.enjoy:
-      return EnjoyDictionaryCapability(ref.read(dictionaryApiProvider));
     case AIProvider.byok:
       return ByokDictionaryCapability(resolveLlmCapability(ref, config));
   }
@@ -98,12 +80,8 @@ ContextualTranslationCapability resolveContextualTranslationCapability(
   AIServiceConfig config,
 ) {
   switch (config.provider) {
-    case AIProvider.enjoy:
-      return EnjoyContextualTranslationCapability(
-        ref.read(llmCapabilityProvider),
-      );
     case AIProvider.byok:
-      return EnjoyContextualTranslationCapability(
+      return ByokContextualTranslationCapability(
         resolveLlmCapability(ref, config),
       );
   }
@@ -111,8 +89,6 @@ ContextualTranslationCapability resolveContextualTranslationCapability(
 
 TtsCapability resolveTtsCapability(Ref ref, AIServiceConfig config) {
   switch (config.provider) {
-    case AIProvider.enjoy:
-      return EnjoyTtsCapability(tokenCache: ref.read(azureTokenCacheProvider));
     case AIProvider.byok:
       final speechByok = config.speechByok;
       if (speechByok == null) return const ByokNotConfiguredTtsCapability();
@@ -135,10 +111,6 @@ AssessmentCapability resolveAssessmentCapability(
   AIServiceConfig config,
 ) {
   switch (config.provider) {
-    case AIProvider.enjoy:
-      return EnjoyAssessmentCapability(
-        tokenCache: ref.read(azureTokenCacheProvider),
-      );
     case AIProvider.byok:
       final speechByok = config.speechByok;
       if (speechByok == null) {
@@ -171,13 +143,21 @@ LlmCapability llmCapability(Ref ref) {
 @Riverpod(keepAlive: true)
 TranslationCapability translationCapability(Ref ref) {
   final c = ref.watch(aiModalityConfigsProvider);
-  return resolveTranslationCapability(ref, c.translation);
+  // 本地版：翻译没单独配置时，直接复用「语言模型」的配置，
+  // 设置里填一次端点就够，不必分别配三处。
+  final config = c.translation.llmByok == null && c.llm.llmByok != null
+      ? c.llm
+      : c.translation;
+  return resolveTranslationCapability(ref, config);
 }
 
 @Riverpod(keepAlive: true)
 DictionaryCapability dictionaryCapability(Ref ref) {
   final c = ref.watch(aiModalityConfigsProvider);
-  return resolveDictionaryCapability(ref, c.dictionary);
+  final config = c.dictionary.llmByok == null && c.llm.llmByok != null
+      ? c.llm
+      : c.dictionary;
+  return resolveDictionaryCapability(ref, config);
 }
 
 @Riverpod(keepAlive: true)

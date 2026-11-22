@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:enjoy_player/core/interaction/enjoy_pressable.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/typography.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_avatar.dart';
@@ -16,12 +15,9 @@ import 'package:enjoy_player/core/theme/widgets/enjoy_chrome_icon.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_logo.dart';
 import 'package:enjoy_player/core/theme/widgets/nav_item_pill.dart';
 import 'package:enjoy_player/core/window/desktop_window.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/presentation/widgets/sidebar_account_chip.dart';
 import 'package:enjoy_player/features/hotkeys/application/hotkeys_ctrl.dart';
 import 'package:enjoy_player/features/hotkeys/presentation/hotkey_format.dart';
 import 'package:enjoy_player/features/hotkeys/presentation/hotkey_tooltip_label.dart';
-import 'package:enjoy_player/features/sync/application/sync_providers.dart';
 import 'package:enjoy_player/features/vocabulary/application/vocabulary_providers.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
@@ -292,7 +288,6 @@ class _AppSidebarState extends ConsumerState<AppSidebar> {
 
                 const Spacer(),
 
-                const _SyncStatusLine(),
                 NavItemPill(
                   icon: EnjoyIcons.gear,
                   iconWidget: const EnjoyChromeIcon(EnjoyChromeGlyph.gear),
@@ -303,7 +298,6 @@ class _AppSidebarState extends ConsumerState<AppSidebar> {
                   selected: path.startsWith('/settings'),
                   onTap: () => context.go('/settings'),
                 ),
-                SidebarAccountChip(selected: path.startsWith('/profile')),
               ],
             ),
           ),
@@ -351,66 +345,6 @@ class _DueBadge extends StatelessWidget {
           height: 1,
         ),
         maxLines: 1,
-      ),
-    );
-  }
-}
-
-class _SyncStatusLine extends ConsumerWidget {
-  const _SyncStatusLine();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final t = EnjoyThemeTokens.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    final signedIn = ref.watch(authIsSignedInProvider);
-    if (!signedIn) return const SizedBox.shrink();
-
-    final (pending, failed) = ref.watch(
-      syncQueueSnapshotProvider.select(
-        (s) => (
-          s.asData?.value.retryablePending ?? 0,
-          s.asData?.value.permanentlyFailed ?? 0,
-        ),
-      ),
-    );
-    final upToDate = pending == 0 && failed == 0;
-    final label = upToDate
-        ? l10n.syncSettingsTileSubtitleUpToDate
-        : l10n.syncSettingsTileSubtitleCounts(pending, failed);
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: EnjoyPressable(
-        onTap: () => context.go('/settings/sync'),
-        borderRadius: BorderRadius.circular(t.radiusControl - 1),
-        child: SizedBox(
-          height: 32,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Row(
-              children: [
-                Icon(
-                  EnjoyIcons.check,
-                  size: 14,
-                  color: upToDate ? t.originalInk : t.ink3,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      fontSize: 12.5,
-                      color: t.ink3,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

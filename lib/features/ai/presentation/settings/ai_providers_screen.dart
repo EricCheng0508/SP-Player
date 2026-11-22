@@ -49,20 +49,6 @@ class AiProvidersScreen extends ConsumerWidget {
             subtitle: l10n.settingsAiProvidersModalityAsrHint,
             config: configs.asr,
           ),
-          SizedBox(height: t.space12),
-          ModalityProviderCard(
-            modality: ModalityKind.tts,
-            title: l10n.settingsAiProvidersModalityTts,
-            subtitle: l10n.settingsAiProvidersModalityTtsHint,
-            config: configs.tts,
-          ),
-          SizedBox(height: t.space12),
-          ModalityProviderCard(
-            modality: ModalityKind.assessment,
-            title: l10n.settingsAiProvidersModalityAssessment,
-            subtitle: l10n.settingsAiProvidersModalityAssessmentHint,
-            config: configs.assessment,
-          ),
         ],
       ),
     );

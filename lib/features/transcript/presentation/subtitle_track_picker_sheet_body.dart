@@ -13,7 +13,6 @@ import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/editorial_header.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_button.dart';
 import 'package:enjoy_player/core/theme/widgets/skeleton.dart';
-import 'package:enjoy_player/features/auth/presentation/widgets/auth_required_callout.dart';
 import 'package:enjoy_player/features/subscription/presentation/credits_failure_actions.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 import '../application/all_transcripts_provider.dart';
@@ -210,24 +209,6 @@ List<Widget> buildTrackListBody({
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.error,
                     ),
-                  ),
-                ),
-              if (autoTranslateState.blockReason ==
-                  AutoTranslateBlockReason.credits)
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(12, 0, 12, 8),
-                  child: Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: CreditsCtaButton(),
-                  ),
-                ),
-              if (!signedIn &&
-                  autoTranslateState.blockReason ==
-                      AutoTranslateBlockReason.signedOut)
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  child: AuthRequiredCallout(
-                    surface: AuthRequiredSurface.lookupTranslation,
                   ),
                 ),
               ...translationTracks.map(

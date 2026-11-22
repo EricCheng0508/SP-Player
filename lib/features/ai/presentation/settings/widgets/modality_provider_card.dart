@@ -9,7 +9,6 @@ import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/presentation/loading_icon.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_button.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_icon_tile.dart';
-import 'package:enjoy_player/core/theme/widgets/enjoy_segmented_control.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_modal.dart';
 import 'package:enjoy_player/core/validation/byok_secret_mask.dart';
 import 'package:enjoy_player/data/api/byok_secret_store.dart';
@@ -45,7 +44,6 @@ class ModalityProviderCard extends ConsumerStatefulWidget {
 }
 
 class _ModalityProviderCardState extends ConsumerState<ModalityProviderCard> {
-  late AIProvider _provider;
   late LlmApiSpec _apiSpec;
   late SpeechByokKind _speechKind;
   String? _presetId;
@@ -93,7 +91,7 @@ class _ModalityProviderCardState extends ConsumerState<ModalityProviderCard> {
   }
 
   void _applyConfig(AIServiceConfig config) {
-    _provider = config.provider;
+    // 本地版：只保留「自备密钥」，Enjoy AI 云端已移除。
     final llm = config.llmByok;
     _apiSpec = llm?.apiSpec ?? LlmApiSpec.openAiCompatible;
     _presetId = llm?.presetId;
@@ -146,23 +144,6 @@ class _ModalityProviderCardState extends ConsumerState<ModalityProviderCard> {
     final tt = Theme.of(context).textTheme;
     final speechMode = _speechFormMode;
 
-    final byok = _provider == AIProvider.byok;
-    final showFooter = byok || _provider != widget.config.provider;
-    final toggle = EnjoySegmentedControl<AIProvider>(
-      compact: true,
-      segments: [
-        EnjoySegment(
-          value: AIProvider.enjoy,
-          label: l10n.settingsAiProvidersEnjoyAi,
-        ),
-        EnjoySegment(
-          value: AIProvider.byok,
-          label: l10n.settingsAiProvidersByok,
-        ),
-      ],
-      value: _provider,
-      onChanged: _saving ? null : (next) => setState(() => _provider = next),
-    );
 
     return AnimatedContainer(
       duration: t.motionFast,
@@ -170,7 +151,7 @@ class _ModalityProviderCardState extends ConsumerState<ModalityProviderCard> {
         color: t.paper,
         shape: RoundedSuperellipseBorder(
           borderRadius: BorderRadius.circular(t.radiusCard),
-          side: BorderSide(color: byok ? t.brandInk : t.line),
+          side: BorderSide(color: t.brandInk),
         ),
       ),
       child: Padding(
@@ -178,56 +159,40 @@ class _ModalityProviderCardState extends ConsumerState<ModalityProviderCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final stacked = constraints.maxWidth < _kToggleInlineMinWidth;
-                final heading = Row(
-                  children: [
-                    EnjoyIconTile(icon: _modalityIcon, size: 36),
-                    SizedBox(width: t.space12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.title,
-                            style: tt.titleSmall?.copyWith(
-                              fontSize: 14.5,
-                              fontWeight: FontWeight.w600,
-                              color: t.ink,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            widget.subtitle,
-                            style: tt.bodySmall?.copyWith(
-                              color: t.ink3,
-                              height: 1.35,
-                            ),
-                          ),
-                        ],
+            Row(
+              children: [
+                EnjoyIconTile(icon: _modalityIcon, size: 36),
+                SizedBox(width: t.space12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.title,
+                        style: tt.titleSmall?.copyWith(
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.w600,
+                          color: t.ink,
+                        ),
                       ),
-                    ),
-                    if (!stacked) ...[SizedBox(width: t.space12), toggle],
-                  ],
-                );
-                if (!stacked) return heading;
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    heading,
-                    SizedBox(height: t.space12),
-                    toggle,
-                  ],
-                );
-              },
+                      const SizedBox(height: 2),
+                      Text(
+                        widget.subtitle,
+                        style: tt.bodySmall?.copyWith(
+                          color: t.ink3,
+                          height: 1.35,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
             AnimatedSwitcher(
               duration: t.motionFast,
               switchInCurve: Curves.easeOutCubic,
               switchOutCurve: Curves.easeInCubic,
-              child: byok
-                  ? Padding(
+              child: Padding(
                       key: const ValueKey('byok-form'),
                       padding: EdgeInsets.only(top: t.space16),
                       child: Column(
@@ -280,20 +245,15 @@ class _ModalityProviderCardState extends ConsumerState<ModalityProviderCard> {
                             ),
                         ],
                       ),
-                    )
-                  : const SizedBox.shrink(key: ValueKey('enjoy-empty')),
+                    ),
             ),
-            if (showFooter) ...[
-              SizedBox(height: t.space16),
-              Row(
+            SizedBox(height: t.space16),
+            Row(
                 children: [
-                  if (byok) ...[
-                    Icon(EnjoyIcons.lock, size: 16, color: t.ink3),
-                    SizedBox(width: t.space8),
-                  ],
+                  Icon(EnjoyIcons.lock, size: 16, color: t.ink3),
+                  SizedBox(width: t.space8),
                   Expanded(
-                    child: byok
-                        ? Text(
+                    child: Text(
                             l10n.settingsAiProvidersPrivacyNotice,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -301,8 +261,7 @@ class _ModalityProviderCardState extends ConsumerState<ModalityProviderCard> {
                               color: t.ink3,
                               height: 1.3,
                             ),
-                          )
-                        : const SizedBox.shrink(),
+                          ),
                   ),
                   if (widget.config.provider == AIProvider.byok) ...[
                     SizedBox(width: t.space12),
@@ -320,7 +279,6 @@ class _ModalityProviderCardState extends ConsumerState<ModalityProviderCard> {
                   ),
                 ],
               ),
-            ],
           ],
         ),
       ),
@@ -378,9 +336,7 @@ class _ModalityProviderCardState extends ConsumerState<ModalityProviderCard> {
     final l10n = AppLocalizations.of(context)!;
     setState(() => _saving = true);
     try {
-      final config = _provider == AIProvider.enjoy
-          ? const AIServiceConfig(provider: AIProvider.enjoy)
-          : _buildByokConfig();
+      final config = _buildByokConfig();
 
       final apiKey = _apiKeyController.text.trim();
       final result = await ref
@@ -428,7 +384,8 @@ class _ModalityProviderCardState extends ConsumerState<ModalityProviderCard> {
           .removeByok(widget.modality);
       if (!mounted) return;
       setState(() {
-        _provider = AIProvider.enjoy;
+        _baseUrlController.clear();
+        _modelController.clear();
         _apiKeyController.clear();
         _regionController.clear();
         _hasExistingKey = false;
@@ -440,5 +397,3 @@ class _ModalityProviderCardState extends ConsumerState<ModalityProviderCard> {
     }
   }
 }
-
-const double _kToggleInlineMinWidth = 520;

@@ -58,15 +58,15 @@ class AiModalityConfigRepository {
   Future<void> removeByok(ModalityKind modality) async {
     await _secrets.deleteApiKey(modality);
     final current = await load();
-    final enjoyOnly = _enjoyConfigFor(modality);
-    final updated = _withModality(current, modality, enjoyOnly);
+    final cleared = _clearedConfigFor(modality);
+    final updated = _withModality(current, modality, cleared);
     await _persist(updated);
   }
 
   Future<bool> hasApiKey(ModalityKind modality) => _secrets.hasApiKey(modality);
 
-  AIServiceConfig _enjoyConfigFor(ModalityKind modality) =>
-      const AIServiceConfig(provider: AIProvider.enjoy);
+  AIServiceConfig _clearedConfigFor(ModalityKind modality) =>
+      const AIServiceConfig(provider: AIProvider.byok);
 
   AiModalityConfigs _withModality(
     AiModalityConfigs configs,
@@ -144,14 +144,11 @@ class AiModalityConfigRepository {
 
   AIServiceConfig _decodeModality(Object? raw) {
     if (raw is! Map<String, dynamic>) {
-      return const AIServiceConfig(provider: AIProvider.enjoy);
+      return const AIServiceConfig(provider: AIProvider.byok);
     }
 
-    final providerName = raw['provider'] as String?;
-    final provider = AIProvider.values.firstWhere(
-      (p) => p.name == providerName,
-      orElse: () => AIProvider.enjoy,
-    );
+    // 本地版只有 byok：历史数据里存的 'enjoy' 一律按 byok 读回。
+    final provider = AIProvider.byok;
 
     LlmByokConfig? llmByok;
     final llmRaw = raw['llmByok'];

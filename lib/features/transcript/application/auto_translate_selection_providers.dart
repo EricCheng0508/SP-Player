@@ -7,8 +7,6 @@ import '../../../core/application/app_preferences_provider.dart';
 import '../../../core/riverpod/async_value_x.dart';
 import '../../../data/db/app_database_provider.dart';
 import '../../../data/db/media_target_resolver.dart';
-import '../../auth/application/auth_controller.dart';
-import '../../auth/domain/auth_state.dart';
 import '../domain/auto_translate.dart';
 import 'transcript_repository_provider.dart';
 
@@ -31,8 +29,7 @@ Future<bool> isAutoTranslateSecondary(
 /// Predicted AI track id for picker radio value (may not exist in DB yet).
 @riverpod
 Future<String?> autoTranslateSelectionId(Ref ref, String mediaId) async {
-  final auth = ref.watch(authCtrlProvider).valueOrNull;
-  if (auth is! AuthSignedIn) return null;
+  // 本地版：不依赖 Enjoy 账号，翻译走用户自备模型。
   final native = ref
       .watch(appPreferencesCtrlProvider)
       .valueOrNull

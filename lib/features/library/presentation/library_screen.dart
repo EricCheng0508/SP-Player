@@ -65,12 +65,6 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
     }
   }
 
-  void _setSource(BuildContext context, LibrarySource next) {
-    final current = librarySourceFromUri(GoRouterState.of(context).uri);
-    if (current == next) return;
-    context.go(libraryRouteForSource(next));
-  }
-
   Widget _kindSegment(AppLocalizations l10n, LibrarySource source) {
     final controller = _kindControllerFor(source);
     final counts = source == LibrarySource.local
@@ -101,24 +95,9 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
     );
   }
 
-  Widget _sourceSegment(AppLocalizations l10n, LibrarySource source) {
-    return EnjoySegmentedControl<LibrarySource>(
-      value: source,
-      segments: [
-        EnjoySegment(
-          value: LibrarySource.local,
-          icon: EnjoyIcons.monitor,
-          label: l10n.librarySourceLocal,
-        ),
-        EnjoySegment(
-          value: LibrarySource.cloud,
-          icon: EnjoyIcons.cloud,
-          label: l10n.librarySourceCloud,
-        ),
-      ],
-      onChanged: (next) => _setSource(context, next),
-    );
-  }
+  // 本地版：只保留本地媒体库，Enjoy 云端书库入口已下线。
+  Widget _sourceSegment(AppLocalizations l10n, LibrarySource source) =>
+      const SizedBox.shrink();
 
   Widget _sourceBody({
     required LibrarySource source,

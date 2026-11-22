@@ -11,6 +11,7 @@ import '../../../core/analytics/analytics_events.dart';
 import '../../../core/analytics/analytics_provider.dart';
 import '../../../core/application/app_language_catalog.dart';
 import '../../../core/application/app_preferences_provider.dart';
+import '../../../core/config/local_mode.dart';
 import '../../../core/errors/app_failure.dart';
 import '../../../core/logging/log.dart';
 import '../../../core/riverpod/async_value_x.dart';
@@ -155,10 +156,13 @@ class AutoTranslateCtrl extends _$AutoTranslateCtrl {
   /// Ensures the AI track exists and sets it as secondary. Does not translate
   /// lines — the transcript list requests each line when it enters the viewport.
   Future<void> selectAutoTranslate() async {
-    final auth = ref.read(authCtrlProvider).valueOrNull;
-    if (auth is! AuthSignedIn) {
-      _block(AutoTranslateBlockReason.signedOut);
-      return;
+    // 本地离线模式：自动翻译不再要求 Enjoy 账号，翻译能力由 BYOK 提供。
+    if (!kLocalOfflineMode) {
+      final auth = ref.read(authCtrlProvider).valueOrNull;
+      if (auth is! AuthSignedIn) {
+        _block(AutoTranslateBlockReason.signedOut);
+        return;
+      }
     }
 
     final native = ref

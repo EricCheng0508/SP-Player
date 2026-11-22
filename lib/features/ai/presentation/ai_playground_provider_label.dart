@@ -10,7 +10,6 @@ String formatPlaygroundProviderLabel(
   AIServiceConfig config,
 ) {
   return switch (config.provider) {
-    AIProvider.enjoy => l10n.settingsAiProvidersEnjoyAi,
     AIProvider.byok => _byokLabel(l10n, config),
   };
 }

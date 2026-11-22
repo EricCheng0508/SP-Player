@@ -58,10 +58,4 @@ class AiModalityConfigCtrl extends _$AiModalityConfigCtrl {
     state = await repo.load();
   }
 
-  Future<void> setEnjoy(ModalityKind modality) async {
-    await saveModality(
-      modality: modality,
-      config: const AIServiceConfig(provider: AIProvider.enjoy),
-    );
-  }
 }

@@ -62,16 +62,16 @@ class VideoCaptionOverlay extends ConsumerWidget {
 
     final List<Shadow> outline = [
       for (final offsets in const [
-        Offset(-1.5, -1.5),
-        Offset(1.5, -1.5),
-        Offset(-1.5, 1.5),
-        Offset(1.5, 1.5),
-        Offset(-1.5, 0),
-        Offset(1.5, 0),
-        Offset(0, -1.5),
-        Offset(0, 1.5),
+        Offset(-2.5, -2.5),
+        Offset(2.5, -2.5),
+        Offset(-2.5, 2.5),
+        Offset(2.5, 2.5),
+        Offset(-2.5, 0),
+        Offset(2.5, 0),
+        Offset(0, -2.5),
+        Offset(0, 2.5),
       ])
-        Shadow(color: Colors.black, offset: offsets, blurRadius: 1),
+        Shadow(color: Colors.black, offset: offsets, blurRadius: 2),
     ];
 
     Widget captionText(String text, double size, Color color) => Text(
@@ -80,10 +80,12 @@ class VideoCaptionOverlay extends ConsumerWidget {
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
       style: TextStyle(
+        inherit: false,
         fontSize: size,
         height: 1.25,
         fontWeight: FontWeight.w600,
         color: color,
+        decoration: TextDecoration.none,
         shadows: outline,
       ),
     );
@@ -97,11 +99,15 @@ class VideoCaptionOverlay extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (showOriginal && originalText.isNotEmpty)
-                captionText(originalText, 24, Colors.white),
+                captionText(originalText, 30, Colors.white),
               if (showTranslation && hasTranslation) ...[
                 if (showOriginal && originalText.isNotEmpty)
-                  const SizedBox(height: 4),
-                captionText(translationText, 18, Colors.white.withValues(alpha: 0.92)),
+                  const SizedBox(height: 6),
+                captionText(
+                  translationText,
+                  23,
+                  Colors.white.withValues(alpha: 0.94),
+                ),
               ],
             ],
           ),

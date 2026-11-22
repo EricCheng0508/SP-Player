@@ -303,11 +303,25 @@ final class ComponentStore {
 
   final List<HttpClient> _liveClients = [];
 
-  HttpClient _newClient() {
+  /// Hosts reachable directly (and fast) from mainland networks — routing
+  /// them through a local VPN proxy adds a slow hop (measured 76 MB/s direct
+  /// vs 1 MB/s via proxy). Only origin hosts need the system proxy.
+  static const _kDirectOkHosts = <String>{
+    'gh-proxy.com',
+    'ghfast.top',
+    'mirror.ghproxy.com',
+    'hf-mirror.com',
+  };
+
+  static String? _cachedSystemProxy;
+
+  HttpClient _newClient(String url) {
     final client = HttpClient();
-    // Dart ignores the Windows system proxy; route through it when present.
-    final proxy = _windowsSystemProxy();
-    if (proxy != null) client.findProxy = (uri) => proxy;
+    final host = Uri.tryParse(url)?.host.toLowerCase() ?? '';
+    if (!_kDirectOkHosts.contains(host)) {
+      final proxy = _cachedSystemProxy ??= _windowsSystemProxy();
+      if (proxy != null) client.findProxy = (uri) => proxy;
+    }
     client.connectionTimeout = const Duration(seconds: 15);
     client.idleTimeout = const Duration(seconds: 45);
     _liveClients.add(client);
@@ -398,7 +412,7 @@ final class ComponentStore {
     required String fileLabel,
     required void Function(ComponentProgress) onProgress,
   }) async {
-    final client = _newClient();
+    final client = _newClient(url);
     try {
       // Range capability probe: 206 + content length → parallel path.
       final probe = await client
@@ -420,7 +434,15 @@ final class ComponentStore {
         throw HttpException('HTTP $status for $url');
       }
       final probeLength = probeResponse.contentLength;
-      await probeResponse.drain<void>().timeout(const Duration(seconds: 10));
+      // Abort the probe body — it is the FULL remaining file for a 206, and
+      // draining it would silently re-download everything single-threaded
+      // with no progress events (the exact "stuck forever" bug).
+      final sub = probeResponse.listen(null);
+      try {
+        await sub.cancel();
+      } on Object {
+        // Cancel is best-effort; the force close below finishes the job.
+      }
 
       if (status == 206 &&
           probeLength > 0 &&
@@ -473,7 +495,7 @@ final class ComponentStore {
         var offset = 0;
         if (target.existsSync()) offset = target.lengthSync();
         if (offset >= end - start) return;
-        final client = _newClient();
+        final client = _newClient(url);
         try {
           final request = await client
               .getUrl(Uri.parse(url))
@@ -518,6 +540,7 @@ final class ComponentStore {
 
     var lastTick = DateTime.now();
     var lastBytes = base;
+    var lastSpeed = 0;
     final reporter = Timer.periodic(const Duration(milliseconds: 500), (_) {
       try {
         var received = dest.existsSync() ? dest.lengthSync() : 0;
@@ -528,9 +551,8 @@ final class ComponentStore {
         received = received.clamp(0, total);
         final now = DateTime.now();
         final elapsed = now.difference(lastTick).inMilliseconds;
-        var speed = 0;
         if (elapsed > 0) {
-          speed = ((received - lastBytes) * 1000) ~/ elapsed;
+          lastSpeed = ((received - lastBytes) * 1000) ~/ elapsed;
           lastTick = now;
           lastBytes = received;
         }
@@ -540,7 +562,9 @@ final class ComponentStore {
             receivedBytes: received,
             totalBytes: total,
             fileLabel: fileLabel,
-            speedBps: speed > 0 ? speed : null,
+            // Always report; UI decides how to render (never leave the user
+            // guessing whether the download is alive).
+            speedBps: lastSpeed < 0 ? 0 : lastSpeed,
           ),
         );
       } on Object {
@@ -591,7 +615,7 @@ final class ComponentStore {
     required String fileLabel,
     required void Function(ComponentProgress) onProgress,
   }) async {
-    final client = _newClient();
+    final client = _newClient(url);
     try {
       var received = resumeFrom;
       while (true) {

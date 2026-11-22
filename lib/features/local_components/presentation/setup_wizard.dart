@@ -402,7 +402,7 @@ class _SetupWizardDialogState extends ConsumerState<SetupWizardDialog> {
         parts.add(_fmtBytes(row.received));
       }
       final speed = row.speedBps;
-      if (speed != null && speed > 0) parts.add('${_fmtBytes(speed)}/s');
+      if (speed != null) parts.add('${_fmtBytes(speed)}/s');
       detail = '下载中 ${parts.join(' · ')}';
     } else if (row.state == _InstallRowState.extracting) {
       detail = '正在解压…';

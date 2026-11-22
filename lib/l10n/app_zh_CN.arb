@@ -264,6 +264,19 @@
   },
   "subtitlesAutoTranslateRetranslateLine": "重新翻译此行",
   "subtitlesAutoTranslateBlockedStalePrimary": "主字幕已更改，自动翻译将根据新的主字幕重建。",
+  "byokNotConfiguredMessage": "「{modality}」选择了自带密钥（BYOK），但本机尚未保存 API Key。",
+  "@byokNotConfiguredMessage": {
+    "description": "Runtime error when BYOK modality has no secure key",
+    "placeholders": {
+      "modality": {
+        "type": "String"
+      }
+    }
+  },
+  "byokNotConfiguredOpenSettings": "请先在 设置 → AI 服务商 中添加你的 API Key。",
+  "@byokNotConfiguredOpenSettings": {
+    "description": "Hint to open AI provider settings after BYOK misconfiguration"
+  },
   "subtitlesAutoTranslateLineFailed": "此行未能翻译",
   "subtitlesAutoTranslatePendingLine": "翻译中…",
   "subtitlesAutoTranslateBlockedSignedOut": "请登录后使用自动翻译。",

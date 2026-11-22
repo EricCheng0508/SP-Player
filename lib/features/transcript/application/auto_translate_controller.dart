@@ -18,6 +18,7 @@ import '../../../core/riverpod/async_value_x.dart';
 import '../../../data/subtitle/subtitle_markup_parser.dart';
 import '../../../data/subtitle/transcript_line.dart';
 import '../../ai/application/ai_services.dart';
+import '../../ai/domain/byok_not_configured_failure.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../auth/domain/auth_state.dart';
 import '../domain/auto_translate.dart';
@@ -459,6 +460,12 @@ class AutoTranslateCtrl extends _$AutoTranslateCtrl {
         } on CreditsFailure catch (failure) {
           if (!ref.mounted) return;
           _block(AutoTranslateBlockReason.credits, creditsFailure: failure);
+          return;
+        } on ByokNotConfiguredFailure {
+          if (!ref.mounted) return;
+          // No BYOK key on this device: tell the user immediately instead of
+          // silently marking every line as failed.
+          _block(AutoTranslateBlockReason.byokNotConfigured);
           return;
         } catch (e, st) {
           if (attempt >= kAutoTranslateMaxLineAttempts) {

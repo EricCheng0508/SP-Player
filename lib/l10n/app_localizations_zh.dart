@@ -5467,6 +5467,14 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String get settingsAiProvidersTileTitle => 'AI 提供商';
 
   @override
+  String byokNotConfiguredMessage(String modality) {
+    return '「$modality」选择了自带密钥（BYOK），但本机尚未保存 API Key。';
+  }
+
+  @override
+  String get byokNotConfiguredOpenSettings => '请先在 设置 → AI 服务商 中添加你的 API Key。';
+
+  @override
   String get settingsSectionRecording => '录音';
 
   @override

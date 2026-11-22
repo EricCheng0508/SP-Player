@@ -48,6 +48,8 @@ String? _autoTranslateBlockedMessage(
       l10n.subtitlesAutoTranslateBlockedSignedOut,
     AutoTranslateBlockReason.stalePrimary =>
       l10n.subtitlesAutoTranslateBlockedStalePrimary,
+    AutoTranslateBlockReason.byokNotConfigured =>
+      l10n.byokNotConfiguredOpenSettings,
     null => null,
   };
 }

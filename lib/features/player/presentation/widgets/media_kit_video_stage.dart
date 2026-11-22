@@ -128,9 +128,10 @@ class _MediaKitVideoStageState extends State<_MediaKitVideoStage> {
     super.didUpdateWidget(oldWidget);
     final dw = (oldWidget.maxWidth - widget.maxWidth).abs();
     final dh = (oldWidget.maxHeight - widget.maxHeight).abs();
-    if (dw > kVideoTextureKickMinViewportDelta ||
-        dh > kVideoTextureKickMinViewportDelta) {
-      _kicked = false;
+    // Any viewport change must re-kick: the loading (16:9) stage and the
+    // chrome layout can differ by less than a big threshold while the
+    // texture still hasn't presented, leaving a black frame.
+    if (dw > 0 || dh > 0) {
       _scheduleKick();
     }
   }
@@ -148,6 +149,12 @@ class _MediaKitVideoStageState extends State<_MediaKitVideoStage> {
     } on Object {
       return;
     }
+    if (!mounted) return;
+    _scheduleKick();
+    // Cover the race where the first frame is decoded while the stage is
+    // still in the loading (16:9) layout: the chrome viewport swap that
+    // follows needs its own kick a moment later.
+    await Future<void>.delayed(const Duration(milliseconds: 400));
     if (!mounted) return;
     _scheduleKick();
   }
@@ -173,6 +180,10 @@ class _MediaKitVideoStageState extends State<_MediaKitVideoStage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       setState(() => _nudge = false);
+      // Re-arm so later texture/viewport events can kick again. A one-shot
+      // latch leaves the texture black when the first frame lands in the
+      // loading layout and the chrome viewport swap follows immediately.
+      _kicked = false;
     });
   }
 

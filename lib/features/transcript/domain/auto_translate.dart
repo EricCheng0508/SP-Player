@@ -32,6 +32,7 @@ enum AutoTranslateBlockReason {
   credits,
   auth,
   stalePrimary,
+  byokNotConfigured,
 }
 
 /// UI-facing state for a media item's Auto translate secondary track.

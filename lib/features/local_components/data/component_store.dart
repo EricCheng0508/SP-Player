@@ -187,12 +187,26 @@ final class ComponentStore {
           _inFlight.remove(spec.kind);
           throw e;
         })
-        .whenComplete(() => _inFlight.remove(spec.kind));
+        // Block body on purpose: `whenComplete` waits for a returned Future,
+        // and `Map.remove` returns the entry it just removed — which is this
+        // very future, so the arrow form deadlocks (`install` never completes
+        // and the caller's `await` hangs forever).
+        .whenComplete(() {
+          _inFlight.remove(spec.kind);
+        });
     _inFlight[spec.kind] = future;
     return future;
   }
 
   final Map<ComponentKind, Future<void>> _inFlight = {};
+
+  /// Drops the single-flight record for [kind] and force-closes live sockets,
+  /// so a stalled install can be retried from scratch instead of awaiting the
+  /// same stuck future. Partial downloads are kept and resumed.
+  void cancel(ComponentKind kind) {
+    _inFlight.remove(kind);
+    _closeStrayClients();
+  }
 
   Future<void> _installImpl(
     ComponentSpec spec,
@@ -210,6 +224,10 @@ final class ComponentStore {
       await dir.create(recursive: true);
       final downloads = Directory('$root\\_downloads');
       await downloads.create(recursive: true);
+
+      // Bounded (3 s) and asynchronous: resolves the system proxy off the
+      // isolate's critical path before any HTTP work starts.
+      await ComponentStore.warmUpSystemProxy();
 
       final endpoint = hfEndpoint;
       for (final f in spec.files) {
@@ -312,15 +330,86 @@ final class ComponentStore {
     'ghfast.top',
     'mirror.ghproxy.com',
     'hf-mirror.com',
+    'www.modelscope.cn',
+    'modelscope.cn',
   };
 
   static String? _cachedSystemProxy;
+  static bool _proxyProbed = false;
+  static Future<void>? _proxyProbe;
+
+  /// Resolves the Windows system proxy once, asynchronously and with a hard
+  /// deadline.
+  ///
+  /// MUST be awaited before a download starts. [HttpClient.findProxy] is
+  /// invoked *synchronously* by the HTTP stack for every redirect hop, so it
+  /// may only ever read the cached value: spawning `reg` from inside that
+  /// callback freezes the whole UI isolate (a blocked/sandboxed child process
+  /// never returns, and no `.timeout` can fire because timers need the event
+  /// loop that is already blocked).
+  static Future<void> warmUpSystemProxy() {
+    if (_proxyProbed) return Future<void>.value();
+    return _proxyProbe ??= _resolveSystemProxy();
+  }
+
+  static Future<void> _resolveSystemProxy() async {
+    try {
+      final query = await Process.run(
+        'reg',
+        [
+          'query',
+          r'HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings',
+          '/v',
+          'ProxyServer',
+        ],
+        stdoutEncoding: systemEncoding,
+        stderrEncoding: systemEncoding,
+      ).timeout(const Duration(seconds: 3));
+      _cachedSystemProxy = query.exitCode == 0
+          ? _parseProxyServer(query.stdout.toString())
+          : null;
+    } on Object {
+      // No proxy, or `reg` unavailable/blocked — direct connections only.
+      _cachedSystemProxy = null;
+    }
+    _proxyProbed = true;
+  }
+
+  static String? _parseProxyServer(String stdout) {
+    final match = RegExp(r'ProxyServer\s+REG_SZ\s+(\S+)').firstMatch(stdout);
+    if (match == null) return null;
+    final raw = match.group(1)!;
+    // "http=...;https=...;ftp=..." per-protocol form → take https/http.
+    String hostPort = raw;
+    if (raw.contains(';') || raw.contains('=')) {
+      final parts = Map.fromEntries(
+        raw.split(';').map((p) {
+          final i = p.indexOf('=');
+          return i < 0
+              ? MapEntry(p, p)
+              : MapEntry(p.substring(0, i), p.substring(i + 1));
+        }),
+      );
+      hostPort = parts['https'] ?? parts['http'] ?? '';
+    }
+    if (!hostPort.contains(':')) return null;
+    return 'PROXY $hostPort';
+  }
+
+  /// Whether [host] should bypass the system proxy entirely — including the
+  /// domestic CDN hosts those mirrors redirect to (e.g.
+  /// `cdn-lfs-cn-1.modelscope.cn`).
+  static bool _isDirectHost(String host) {
+    if (_kDirectOkHosts.contains(host)) return true;
+    return host.endsWith('.modelscope.cn') || host.endsWith('.hf-mirror.com');
+  }
 
   HttpClient _newClient(String url) {
     final client = HttpClient();
     final host = Uri.tryParse(url)?.host.toLowerCase() ?? '';
-    if (!_kDirectOkHosts.contains(host)) {
-      final proxy = _cachedSystemProxy ??= _windowsSystemProxy();
+    if (!_isDirectHost(host)) {
+      // Read-only: must never spawn a process here (see warmUpSystemProxy).
+      final proxy = _cachedSystemProxy;
       if (proxy != null) client.findProxy = (uri) => proxy;
     }
     client.connectionTimeout = const Duration(seconds: 15);
@@ -336,27 +425,50 @@ final class ComponentStore {
     _liveClients.clear();
   }
 
-  /// Mirrors/accelerator proxies for [url]: HuggingFace alternates official ↔
-  /// hf-mirror.com; GitHub release assets gain gh-proxy prefixes. Accelerator
-  /// proxies come FIRST — direct github.com is unreachable on many mainland
-  /// networks, and a hanging direct attempt must never block the ladder.
+  /// Mirrors/accelerator proxies for [url], best-first.
+  ///
+  /// Hugging Face resolves to a blob CDN that is unreachable on many mainland
+  /// networks (Xet `cas-bridge` returns headers, then stalls with zero bytes),
+  /// so a ModelScope mirror of the same repo comes FIRST when it exists;
+  /// hf-mirror.com and the official host follow as fallbacks. GitHub release
+  /// assets gain gh-proxy prefixes, direct last.
   static List<String> _candidateUrls(String url) {
+    final seen = <String>{};
     final candidates = <String>[];
+    void add(String candidate) {
+      if (seen.add(candidate)) candidates.add(candidate);
+    }
+
     final lower = url.toLowerCase();
-    if (lower.startsWith(kHfOfficial)) {
-      candidates
-        ..add(url.replaceFirst(kHfOfficial, kHfChinaMirror))
-        ..add(url);
+    final isHf =
+        lower.startsWith(kHfOfficial) || lower.startsWith(kHfChinaMirror);
+    if (isHf) {
+      final modelScope = _modelScopeUrl(url);
+      if (modelScope != null) add(modelScope);
+      add(url.replaceFirst(kHfChinaMirror, kHfOfficial));
+      add(url.replaceFirst(kHfOfficial, kHfChinaMirror));
     } else if (lower.contains('github.com') &&
         lower.contains('/releases/download/')) {
       for (final prefix in _kGitHubProxyPrefixes) {
-        candidates.add('$prefix$url');
+        add('$prefix$url');
       }
-      candidates.add(url);
+      add(url);
     } else {
-      candidates.add(url);
+      add(url);
     }
     return candidates;
+  }
+
+  /// ModelScope equivalent of a Hugging Face resolve link, or `null` when the
+  /// URL is not one. `owner/repo/resolve/main/file` → the same repo/revision
+  /// on `modelscope.cn`, which serves from domestic CDN nodes.
+  static String? _modelScopeUrl(String url) {
+    final match = RegExp(
+      r'^https?://(?:huggingface\.co|hf-mirror\.com)/([^/]+)/([^/]+)/resolve/(?:main|master)/(.+)$',
+    ).firstMatch(url);
+    if (match == null) return null;
+    return 'https://www.modelscope.cn/models/${match.group(1)}/'
+        '${match.group(2)}/resolve/master/${match.group(3)}';
   }
 
   static const _kGitHubProxyPrefixes = <String>[
@@ -364,42 +476,6 @@ final class ComponentStore {
     'https://ghfast.top/',
     'https://mirror.ghproxy.com/',
   ];
-
-  /// Windows system HTTP proxy ("host:port") from the registry, or `null`
-  /// when disabled/unavailable. Dart's HttpClient does NOT read the Windows
-  /// system proxy — without this, users behind Clash/v2ray等本地代理 cannot
-  /// reach github.com at all.
-  static String? _windowsSystemProxy() {
-    if (!Platform.isWindows) return null;
-    try {
-      final query = Process.runSync('reg', [
-        'query',
-        r'HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings',
-        '/v', 'ProxyServer',
-      ]);
-      if (query.exitCode != 0) return null;
-      final match = RegExp(
-        r'ProxyServer\s+REG_SZ\s+(\S+)',
-      ).firstMatch(query.stdout.toString());
-      if (match == null) return null;
-      final raw = match.group(1)!;
-      // "http=...;https=...;ftp=..." per-protocol form → take https/http.
-      String hostPort = raw;
-      if (raw.contains(';') || raw.contains('=')) {
-        final parts = Map.fromEntries(
-          raw.split(';').map((p) {
-            final i = p.indexOf('=');
-            return i < 0 ? MapEntry(p, p) : MapEntry(p.substring(0, i), p.substring(i + 1));
-          }),
-        );
-        hostPort = parts['https'] ?? parts['http'] ?? '';
-      }
-      if (!hostPort.contains(':')) return null;
-      return 'PROXY $hostPort';
-    } on Object {
-      return null;
-    }
-  }
 
   /// One attempt at [url]; returns received bytes. Large files go through
   /// parallel range chunks (accelerator mirrors throttle per connection —

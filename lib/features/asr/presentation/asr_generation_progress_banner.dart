@@ -1,11 +1,13 @@
 /// Live progress banner for an in-flight ASR generation pass.
 ///
 /// The controller streams phase updates; this banner renders the active
-/// phase with a progress bar, an elapsed-time readout and a cancel action,
-/// pinned above the transcript panel body. The elapsed readout matters for
-/// the local subgen pipeline: a 22-minute episode transcribes in ~2–3
-/// minutes as ONE long `recognizing` step with no incremental progress, and
-/// without a ticking clock it looks hung.
+/// phase with a progress bar, a percentage when one is available, an
+/// elapsed-time readout and a cancel action, pinned above the transcript
+/// panel body. Extraction has a real fraction; the local recognition step
+/// has none from the service, so the controller hands us a wall-clock
+/// estimate (`AsrRecognitionProgress`) rather than leaving the bar
+/// indeterminate — a 22-minute episode transcribing in ~2–3 minutes used to
+/// look hung behind a spinner and a ticking clock alone.
 library;
 
 import 'dart:async';
@@ -77,17 +79,25 @@ class _AsrGenerationProgressBannerState
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final progress = job!.progress;
-    // Numeric progress is only meaningful during audio extraction; every
-    // other phase is a single long-running step → indeterminate, with the
-    // elapsed readout standing in for missing granularity.
-    final determinate = phase == AsrGenerationPhase.extracting &&
+    // Extraction reports its own fraction; recognition rides a wall-clock
+    // estimate (the local service has no incremental progress). Both are
+    // worth a determinate bar; upload/poll/persist are single steps with no
+    // fraction and stay indeterminate.
+    final determinate =
         progress != null &&
-        progress > 0;
+        (phase == AsrGenerationPhase.extracting ||
+            phase == AsrGenerationPhase.recognizing);
+    final percent = determinate ? '${(progress * 100).round()}%' : null;
     final startedAt = job.startedAt;
     final elapsed = startedAt == null
         ? null
         : DateTime.now().difference(startedAt);
     final phaseText = asrMessageForKey(l10n, asrPhaseMessageKey(phase));
+    final statusText = [
+      phaseText,
+      if (percent != null) percent,
+      if (elapsed != null) _formatElapsed(elapsed),
+    ].join('  ');
 
     return Material(
       color: theme.colorScheme.surfaceContainerHighest,
@@ -107,9 +117,7 @@ class _AsrGenerationProgressBannerState
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    elapsed == null
-                        ? phaseText
-                        : '$phaseText  ${_formatElapsed(elapsed)}',
+                    statusText,
                     style: theme.textTheme.bodyMedium,
                   ),
                 ),

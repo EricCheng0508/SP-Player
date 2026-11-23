@@ -70,13 +70,33 @@ class MediaKitPlayerEngine
     return const VideoControllerConfiguration(
       width: kVideoControllerWidth,
       height: kVideoControllerHeight,
+      // Hardware decoding + hardware rendering is the pairing media_kit is
+      // actually tested against. The software pairing (hwdec 'no' +
+      // enableHardwareAcceleration false) renders into a pixel-buffer texture
+      // that never reaches the compositor on Windows, so it is not an option.
       hwdec: 'auto-safe',
-      enableHardwareAcceleration: false,
+      enableHardwareAcceleration: true,
     );
   }
 
   VideoController get videoController {
     return _videoController ??= VideoController(
+      _player,
+      configuration: _videoControllerConfiguration,
+    );
+  }
+
+  /// Allocates the [VideoController] *before* any media is opened.
+  ///
+  /// The controller is what installs the render API and the video output on
+  /// the mpv handle. When `open()` runs first, mpv resolves a video output
+  /// against a handle that has no render context yet and then keeps that empty
+  /// output — audio plays, the stage stays black, and only an event that
+  /// forces mpv to re-initialise the output (a mode-tab switch, a resize)
+  /// ever produced a picture. That was the long-standing "black until I switch
+  /// tabs" report.
+  void ensureVideoOutput() {
+    _videoController ??= VideoController(
       _player,
       configuration: _videoControllerConfiguration,
     );
@@ -187,6 +207,8 @@ class MediaKitPlayerEngine
     if (source is LocalFilePlayableSource) {
       _scopeToken = source.scopeToken;
     }
+    // Must precede `open()` — see [ensureVideoOutput].
+    ensureVideoOutput();
     await _player.open(mk.Media(uri));
   }
 
@@ -196,55 +218,6 @@ class MediaKitPlayerEngine
 
   @override
   Future<void> seek(Duration target) => _player.seek(target);
-
-  /// Forces mpv to re-render and re-present the current frame.
-  ///
-  /// Two reliable repaint triggers, because a *forward ±1 ms* seek is not
-  /// one: media_kit issues `seek <t> absolute` without `exact`, and a target
-  /// that lands inside the currently-decoded frame can be optimized away by
-  /// mpv — no frame presented, stage stays black. This is why the earlier
-  /// 1 ms nudge failed while the user's manual tab-switch workaround
-  /// (a *backward* seek to the line start) always worked:
-  ///
-  /// 1. Micro-toggle `video-zoom` — a video-chain property change forces the
-  ///    renderer to recompose and re-present a frame into the shared texture.
-  /// 2. A *backward* seek (≥ 600 ms of headroom) — lands on an earlier
-  ///    keyframe, guaranteeing a different frame is decoded and displayed.
-  Future<void> nudgeVideoRender() async {
-    try {
-      final platform = _player.platform;
-      final pos = _player.state.position;
-      final target = pos > Duration.zero
-          ? (pos >= const Duration(milliseconds: 600)
-                ? pos - const Duration(milliseconds: 500)
-                : Duration.zero)
-          : const Duration(milliseconds: 250);
-      final seconds = (target.inMilliseconds / 1000).toStringAsFixed(4);
-      if (platform is mk.NativePlayer) {
-        // Micro-toggle a video-chain property: forces the renderer to
-        // recompose and re-present a frame into the shared texture.
-        await platform.setProperty('video-zoom', '0.0001',
-            waitForInitialization: false);
-        await platform.setProperty('video-zoom', '0',
-            waitForInitialization: false);
-        // Backward seek with `absolute+exact`: mpv decodes and presents the
-        // exact target frame. The stock [Player.seek] issues plain
-        // `absolute` without `exact`, and a forward ±1 ms target can land
-        // inside the currently-decoded frame and be optimized away — which
-        // is why the earlier 1 ms nudge failed while the user's manual
-        // tab-switch workaround (a backward seek) always worked.
-        await platform.command(
-          ['seek', seconds, 'absolute+exact'],
-          waitForInitialization: false,
-        );
-      } else {
-        // Non-native fallback: best-effort plain seek.
-        await _player.seek(target);
-      }
-    } on Object {
-      // Stage teardown raced the player; nothing to salvage.
-    }
-  }
 
   @override
   Future<void> setRate(double rate) => _player.setRate(rate);

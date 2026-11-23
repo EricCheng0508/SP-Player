@@ -6,8 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:enjoy_player/core/interaction/enjoy_tappable.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/lookup_markdown_style.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/presentation/widgets/auth_required_callout.dart';
 import 'package:enjoy_player/features/vocabulary/application/vocabulary_review_media.dart';
 import 'package:enjoy_player/features/vocabulary/application/vocabulary_source_title.dart';
 import 'package:enjoy_player/features/vocabulary/domain/vocabulary_explanation_codec.dart';
@@ -50,7 +48,6 @@ class FlashcardContextTab extends ConsumerWidget {
     final translation = decodeContextualExplanation(ctx.explanation);
     final canMedia = vocabularyContextSupportsMediaActions(ctx);
     final locator = ctx.locator;
-    final signedIn = ref.watch(authIsSignedInProvider);
     final titleAsync = ref.watch(vocabularySourceTitleProvider(ctx.sourceId));
     final sourceTitle =
         titleAsync.asData?.value ??
@@ -175,11 +172,6 @@ class FlashcardContextTab extends ConsumerWidget {
         SizedBox(height: t.space8),
         if (translation != null)
           _StructuredContextualMarkdown(markdown: translation.translatedText)
-        else if (!signedIn)
-          const AuthRequiredCallout(
-            surface: AuthRequiredSurface.lookupContextual,
-            compact: true,
-          )
         else if (fetchState.contextualFetchInFlight)
           Padding(
             padding: EdgeInsets.symmetric(vertical: t.space8),

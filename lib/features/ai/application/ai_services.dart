@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:enjoy_player/features/ai/application/ai_api_failures.dart';
 import 'package:enjoy_player/features/ai/application/ai_capability_providers.dart';
+import 'package:enjoy_player/features/ai/domain/capabilities/asr_capability.dart';
 import 'package:enjoy_player/features/ai/domain/chat_message.dart';
 import 'package:enjoy_player/features/ai/domain/models/asr_request.dart';
 import 'package:enjoy_player/features/ai/domain/models/asr_result.dart';
@@ -22,6 +23,21 @@ final class AsrService {
 
   Future<AsrResult> transcribe(AsrRequest request) =>
       guardAiCall(() => _ref.read(asrCapabilityProvider).transcribe(request));
+
+  /// See `AsrThroughputHint` — a hint for the progress estimator, never a
+  /// correctness dependency. Null for any backend that cannot answer.
+  Future<double?> expectedRealtimeFactor() async {
+    // Declared as Object so the `is` test below can narrow to the unrelated
+    // [AsrThroughputHint] interface — promotion cannot jump between
+    // unrelated interfaces.
+    final Object capability = _ref.read(asrCapabilityProvider);
+    if (capability is! AsrThroughputHint) return null;
+    try {
+      return await capability.expectedRealtimeFactor();
+    } on Object {
+      return null;
+    }
+  }
 }
 
 final class ChatService {

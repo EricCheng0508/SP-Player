@@ -94,19 +94,13 @@ Future<void> closeAndClearAllAppDatabases() async {
 @visibleForTesting
 void Function()? debugOnShutdownDatabaseClose;
 
-/// Signed-in user's Drift file base name, or `null` when unauthenticated.
+/// Drift file base name for the active session, or `null` when no session can
+/// be opened (signed out on an account-enabled build).
 String? _signedInSessionDbBaseName(AsyncValue<AuthState> auth) {
-  return auth.when(
-    data: (state) {
-      if (state is AuthSignedIn && state.profile.id.isNotEmpty) {
-        final safe = _sanitizeUserIdForDbName(state.profile.id);
-        return '${AppDatabase.deviceGlobalDatabaseName}_$safe';
-      }
-      return null;
-    },
-    loading: () => null,
-    error: (Object? error, StackTrace stackTrace) => null,
-  );
+  final userId = sessionUserIdOf(auth);
+  if (userId == null) return null;
+  final safe = _sanitizeUserIdForDbName(userId);
+  return '${AppDatabase.deviceGlobalDatabaseName}_$safe';
 }
 
 /// Device-global Drift DB (`enjoy_player`) — API base URL, diagnostics, and
@@ -138,6 +132,10 @@ Future<T> withDeviceGlobalAppDatabaseForBootstrap<T>(
 /// Per-user library + prefs (`enjoy_player_<userId>`). Requires sign-in
 /// (ADR-0031 login-only access); use [deviceGlobalAppDatabaseProvider] for
 /// device-global settings.
+///
+/// The account-less build resolves this to the single local session
+/// (`enjoy_player_local`) without waiting for an auth state — see
+/// [sessionUserIdOf].
 @Riverpod(keepAlive: true)
 AppDatabase appDatabase(Ref ref) {
   final sessionName = ref.watch(

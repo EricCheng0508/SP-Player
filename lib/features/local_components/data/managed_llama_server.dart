@@ -12,6 +12,7 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
+import 'package:enjoy_player/core/platform/hidden_process.dart';
 import 'package:enjoy_player/features/local_components/data/component_store.dart';
 import 'package:enjoy_player/features/local_components/domain/component_catalog.dart';
 
@@ -101,7 +102,9 @@ Future<void> _ensure() async {
 }
 
 Future<void> _spawn(String exe, String modelPath) async {
-  await Process.start(
+  // Windowless: llama-server is a console binary, and the detached dart:io
+  // path would give it a visible console window.
+  await spawnHidden(
     exe,
     [
       '-m',
@@ -114,7 +117,6 @@ Future<void> _spawn(String exe, String modelPath) async {
       '99',
     ],
     workingDirectory: File(exe).parent.path,
-    mode: ProcessStartMode.detached,
   );
 }
 

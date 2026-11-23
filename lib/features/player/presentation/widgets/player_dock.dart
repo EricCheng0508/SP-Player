@@ -26,6 +26,14 @@ import 'package:enjoy_player/features/player/presentation/widgets/player_dock_re
 import 'package:enjoy_player/features/player/presentation/widgets/transport/sentence_ruler.dart';
 import 'package:enjoy_player/features/player/presentation/widgets/transport/transport_playback_rate_sheet.dart';
 
+/// Height reserved for the dock's control row on wide layouts.
+///
+/// The listen row is 60 px and the echo / recording rows are 76 px. The video
+/// stage absorbs whatever height is left, so a dock that grows by 16 px under
+/// the picture shrinks it by ~28 px once `BoxFit.contain` letterboxes. Holding
+/// the slot at the tallest row keeps the picture size stable across modes.
+const double kDockControlsHeight = 76;
+
 /// The Duet dock. Mounted by [RootShell] on `/player/:id` while a session is
 /// active.
 class PlayerDock extends ConsumerStatefulWidget {
@@ -105,64 +113,82 @@ class _PlayerDockState extends ConsumerState<PlayerDock> {
                   padding: phone
                       ? const EdgeInsets.fromLTRB(12, 4, 12, 8)
                       : const EdgeInsets.fromLTRB(20, 4, 20, 12),
-                  child: AnimatedSwitcher(
-                    duration: MediaQuery.disableAnimationsOf(context)
-                        ? Duration.zero
-                        : t.motionMedium,
-                    child: recording
-                        ? DockRecordingControls(
-                            key: ValueKey<bool>(recording),
-                            mediaId: chrome.mediaId,
-                            phone: phone,
-                            showLineMeta: showLineMeta,
-                            playbackRate: playbackRate,
-                            onSpeed: _openPlaybackRatePicker,
-                            onCancel: () => ref
-                                .read(shadowReadingHotkeyBusProvider.notifier)
-                                .pulseRecordingCancel(),
-                            onStop: () => ref
-                                .read(shadowReadingHotkeyBusProvider.notifier)
-                                .pulseRecording(),
-                          )
-                        : echoActive
-                        ? DockEchoControls(
-                            key: ValueKey<bool>(echoActive),
-                            mediaId: chrome.mediaId,
-                            phone: phone,
-                            recording: recording,
-                            showLineMeta: showLineMeta,
-                            playbackRate: playbackRate,
-                            playing: playing,
-                            onPrev: interactions.prevLine,
-                            onNext: interactions.nextLine,
-                            onReplay: interactions.replayLine,
-                            onTogglePlay: () => ref
-                                .read(playerControllerProvider.notifier)
-                                .togglePlay(),
-                            onRecord: () => ref
-                                .read(shadowReadingHotkeyBusProvider.notifier)
-                                .pulseRecording(),
-                            onSpeed: _openPlaybackRatePicker,
-                          )
-                        : DockListenControls(
-                            key: ValueKey<bool>(echoActive),
-                            mediaId: chrome.mediaId,
-                            phone: phone,
-                            recording: recording,
-                            showLineMeta: showLineMeta,
-                            echoAvailable: hasLines || echoActive,
-                            playing: playing,
-                            buffering: buffering,
-                            playbackRate: playbackRate,
-                            showFullscreen: showFullscreen,
-                            onPrev: interactions.prevLine,
-                            onNext: interactions.nextLine,
-                            onReplay: interactions.replayLine,
-                            onTogglePlay: () => ref
-                                .read(playerControllerProvider.notifier)
-                                .togglePlay(),
-                            onSpeed: _openPlaybackRatePicker,
-                          ),
+                  // The three control rows are 60 px (listen) and 76 px
+                  // (echo, recording). The video stage takes whatever height
+                  // the dock leaves, and `BoxFit.contain` turns a 16 px taller
+                  // dock into a ~28 px narrower picture — that resize is the
+                  // "video width jumps when I switch modes" report. Hold the
+                  // slot at the tallest row so the picture keeps its size; the
+                  // shorter row simply centres inside it.
+                  child: SizedBox(
+                    height: phone ? null : kDockControlsHeight,
+                    child: Center(
+                      child: AnimatedSwitcher(
+                        duration: MediaQuery.disableAnimationsOf(context)
+                            ? Duration.zero
+                            : t.motionMedium,
+                        child: recording
+                            ? DockRecordingControls(
+                                key: ValueKey<bool>(recording),
+                                mediaId: chrome.mediaId,
+                                phone: phone,
+                                showLineMeta: showLineMeta,
+                                playbackRate: playbackRate,
+                                onSpeed: _openPlaybackRatePicker,
+                                onCancel: () => ref
+                                    .read(
+                                      shadowReadingHotkeyBusProvider.notifier,
+                                    )
+                                    .pulseRecordingCancel(),
+                                onStop: () => ref
+                                    .read(
+                                      shadowReadingHotkeyBusProvider.notifier,
+                                    )
+                                    .pulseRecording(),
+                              )
+                            : echoActive
+                            ? DockEchoControls(
+                                key: ValueKey<bool>(echoActive),
+                                mediaId: chrome.mediaId,
+                                phone: phone,
+                                recording: recording,
+                                showLineMeta: showLineMeta,
+                                playbackRate: playbackRate,
+                                playing: playing,
+                                onPrev: interactions.prevLine,
+                                onNext: interactions.nextLine,
+                                onReplay: interactions.replayLine,
+                                onTogglePlay: () => ref
+                                    .read(playerControllerProvider.notifier)
+                                    .togglePlay(),
+                                onRecord: () => ref
+                                    .read(
+                                      shadowReadingHotkeyBusProvider.notifier,
+                                    )
+                                    .pulseRecording(),
+                                onSpeed: _openPlaybackRatePicker,
+                              )
+                            : DockListenControls(
+                                key: ValueKey<bool>(echoActive),
+                                mediaId: chrome.mediaId,
+                                phone: phone,
+                                recording: recording,
+                                showLineMeta: showLineMeta,
+                                echoAvailable: hasLines || echoActive,
+                                playing: playing,
+                                buffering: buffering,
+                                playbackRate: playbackRate,
+                                showFullscreen: showFullscreen,
+                                onPrev: interactions.prevLine,
+                                onNext: interactions.nextLine,
+                                onReplay: interactions.replayLine,
+                                onTogglePlay: () => ref
+                                    .read(playerControllerProvider.notifier)
+                                    .togglePlay(),
+                                onSpeed: _openPlaybackRatePicker,
+                              ),
+                      ),
+                    ),
                   ),
                 ),
               ],

@@ -96,13 +96,16 @@ class AsrGenerationJob {
     DateTime? completedAt,
     String? trackId,
     int? creditsCharged,
+    /// Drops [progress] back to `null` — phase changes carry no fraction, and
+    /// a stale 1.0 from extraction would otherwise pin the next bar at full.
+    bool clearProgress = false,
   }) {
     return AsrGenerationJob(
       mediaId: mediaId,
       language: language,
       phase: phase ?? this.phase,
       detectedLanguage: detectedLanguage ?? this.detectedLanguage,
-      progress: progress ?? this.progress,
+      progress: clearProgress ? null : (progress ?? this.progress),
       errorMessage: errorMessage ?? this.errorMessage,
       creditsFailure: creditsFailure ?? this.creditsFailure,
       startedAt: startedAt ?? this.startedAt,

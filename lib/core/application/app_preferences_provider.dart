@@ -115,15 +115,10 @@ class AppPreferencesCtrl extends _$AppPreferencesCtrl {
     final sw = Stopwatch()..start();
     _prefsLog.info('prefs: build start');
 
-    final signedInUserId = ref.watch(
-      authCtrlProvider.select((a) {
-        final v = a.valueOrNull;
-        return v is AuthSignedIn ? v.profile.id : null;
-      }),
-    );
-    if (signedInUserId == null) {
+    final sessionUserId = ref.watch(authCtrlProvider.select(sessionUserIdOf));
+    if (sessionUserId == null) {
       _prefsLog.info(
-        'prefs: unsigned — defaults only (${sw.elapsedMilliseconds}ms)',
+        'prefs: no session — defaults only (${sw.elapsedMilliseconds}ms)',
       );
       return AppPreferencesState.initial;
     }
@@ -274,8 +269,7 @@ class AppPreferencesCtrl extends _$AppPreferencesCtrl {
   Future<void> setThemeMode(ThemeMode mode) async {
     final next = (await future).copyWith(themeMode: mode);
     state = AsyncData(next);
-    final auth = ref.read(authCtrlProvider).valueOrNull;
-    if (auth is! AuthSignedIn) return;
+    if (sessionUserIdOf(ref.read(authCtrlProvider)) == null) return;
     await ref
         .read(appDatabaseProvider)
         .settingsDao

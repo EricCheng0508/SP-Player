@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:enjoy_player/core/application/app_preferences_provider.dart';
+import 'package:enjoy_player/core/config/local_mode.dart';
 import 'package:enjoy_player/core/errors/app_failure.dart';
 import 'package:enjoy_player/data/api/api_exception.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
@@ -709,16 +710,14 @@ void main() {
       expect(stateOf(c).failure, isNull);
     });
 
-    test('requires sign-in', () async {
+    test('synthesizes without an auth session on the local build', () async {
       final c = container(profile: null);
       addTearDown(c.dispose);
       await c.read(authCtrlProvider.future);
       final n = notifierOf(c);
       n.setSynthText('long enough text');
       await n.synthesize();
-      expect(synthesizer.callCount, 0);
-      expect(stateOf(c).failure, isA<CraftSignInRequiredFailure>());
-      expect(stateOf(c).failure!.action, CraftFailureAction.signIn);
+      expect(synthesizer.callCount, 1);
     });
 
     test(
@@ -819,7 +818,7 @@ void main() {
       expect(stateOf(c).failure, isNull);
     });
 
-    test('requires sign-in at save time', () async {
+    test('saves on the local session after the auth session drops', () async {
       final auth = _TogglableAuthCtrl(_profile);
       final c = ProviderContainer(
         overrides: [
@@ -842,9 +841,9 @@ void main() {
 
       auth.forceSignedOut();
       final result = await n.saveToLibrary();
-      expect(result, isNull);
-      expect(stateOf(c).failure, isA<CraftSignInRequiredFailure>());
-      expect(repo.importCalls, 0);
+      expect(result?.mediaId, 'media-new');
+      expect(repo.importCalls, 1);
+      expect(repo.lastImportSignedInUserId, kLocalSessionId);
     });
 
     test('returns existing id and skips import on dedupe hit', () async {

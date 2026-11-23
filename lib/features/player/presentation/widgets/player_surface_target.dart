@@ -98,7 +98,12 @@ class _PlayerSurfaceTargetState extends ConsumerState<PlayerSurfaceTarget> {
     _lastSize = size;
 
     final cur = ref.read(playerSurfaceRegistryProvider);
-    if (cur?.id != widget.id) {
+    // Same id but a different owner is a hand-off (loading portal → chrome
+    // viewport), not an update. `update()` keeps the stored owner, so an
+    // update here would leave the *old* owner attached; its scheduled
+    // `detach()` then nulls the registry a frame later, the host parks, and
+    // the media_kit stage unmounts — the "black stage with audio" report.
+    if (cur?.id != widget.id || !identical(cur?.owner, _owner)) {
       _registry.attach(
         PlayerSurfaceAttachment(
           id: widget.id,

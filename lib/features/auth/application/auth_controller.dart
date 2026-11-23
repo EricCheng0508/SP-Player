@@ -11,6 +11,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:enjoy_player/core/config/local_mode.dart';
 import 'package:enjoy_player/core/errors/app_failure.dart';
 import 'package:enjoy_player/core/logging/log.dart';
 import 'package:enjoy_player/core/platform/linux_url_scheme_handler.dart';
@@ -333,3 +334,21 @@ class AuthCtrl extends _$AuthCtrl {
 @Riverpod(keepAlive: true)
 bool authIsSignedIn(Ref ref) =>
     ref.watch(authCtrlProvider).valueOrNull is AuthSignedIn;
+
+/// Session id owning per-user data (SQLite file, preferences, library rows),
+/// or `null` when no session exists — signed out on an account-enabled build.
+///
+/// The account-less build ([kLocalOfflineMode]) has no auth state to wait for:
+/// every install runs as the single [kLocalSessionId] session, so gates that
+/// used to require [AuthSignedIn] work there without a sign-in flow.
+String? sessionUserIdOf(AsyncValue<AuthState> auth) {
+  final userId = auth.when(
+    data: (state) => state is AuthSignedIn && state.profile.id.isNotEmpty
+        ? state.profile.id
+        : null,
+    loading: () => null,
+    error: (Object? error, StackTrace stackTrace) => null,
+  );
+  if (userId != null) return userId;
+  return kLocalOfflineMode ? kLocalSessionId : null;
+}

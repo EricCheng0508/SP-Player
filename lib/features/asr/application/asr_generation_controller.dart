@@ -32,6 +32,7 @@ import 'package:enjoy_player/features/ai/domain/models/asr_request.dart';
 import 'package:enjoy_player/features/ai/domain/models/asr_result.dart';
 import 'package:enjoy_player/features/asr/application/asr_failure_messages.dart';
 import 'package:enjoy_player/features/asr/application/asr_generation_job.dart';
+import 'package:enjoy_player/features/asr/application/asr_recognition_progress.dart';
 import 'package:enjoy_player/features/asr/data/asr_audio_extractor.dart';
 import 'package:enjoy_player/features/asr/data/asr_long_form_attempt_store.dart';
 import 'package:enjoy_player/core/analytics/analytics_events.dart';
@@ -53,6 +54,8 @@ const _uuid = Uuid();
 class AsrGenerationController extends _$AsrGenerationController {
   Completer<void>? _cancelToken;
   Future<void>? _inFlight;
+  Timer? _progressTicker;
+  AsrRecognitionProgress? _recognition;
 
   @override
   AsyncValue<AsrGenerationJob?> build(String mediaId) {
@@ -229,7 +232,7 @@ class AsrGenerationController extends _$AsrGenerationController {
       }
 
       if (!isLongForm) {
-        _setPhase(AsrGenerationPhase.recognizing);
+        _beginRecognizingProgress(durationSeconds);
       }
       final asrService = ref.read(asrServiceProvider);
       final req = AsrRequest(
@@ -316,6 +319,8 @@ class AsrGenerationController extends _$AsrGenerationController {
         return;
       }
 
+      _stopRecognizingProgress(recordSample: true);
+
       final lines = buildAsrTranscriptLines(
         result: result,
         mediaDurationMs: mediaDurationMs,
@@ -381,6 +386,7 @@ class AsrGenerationController extends _$AsrGenerationController {
             ),
           );
     } finally {
+      _stopRecognizingProgress(recordSample: false);
       await extracted?.cleanup();
       extracted = null;
     }
@@ -417,9 +423,56 @@ class AsrGenerationController extends _$AsrGenerationController {
         _ => AnalyticsFailureReason.unknown,
       };
 
-  void _setPhase(AsrGenerationPhase phase) {
+  void _setPhase(AsrGenerationPhase phase, {bool clearProgress = false}) {
     if (_cancelToken?.isCompleted ?? false) return;
-    _updateJob((j) => j.copyWith(phase: phase));
+    _updateJob(
+      (j) => j.copyWith(phase: phase, clearProgress: clearProgress),
+    );
+  }
+
+  /// Enters [AsrGenerationPhase.recognizing] and, when the audio length is
+  /// known, starts a determinate estimate.
+  ///
+  /// The bundled local service reports nothing until the whole file comes
+  /// back, so without this the panel shows a spinner plus a stopwatch and an
+  /// indeterminate bar underneath it — indistinguishable from a hang.
+  void _beginRecognizingProgress(double? durationSeconds) {
+    _stopRecognizingProgress(recordSample: false);
+    _setPhase(AsrGenerationPhase.recognizing, clearProgress: true);
+    unawaited(_armRecognitionEstimate(durationSeconds));
+  }
+
+  /// Seeds the estimate from the device the local service actually loaded on
+  /// (CPU vs CUDA is a 15× difference), then starts the ticking bar.
+  Future<void> _armRecognitionEstimate(double? durationSeconds) async {
+    final seconds = durationSeconds;
+    if (seconds == null || seconds <= 0) return;
+    try {
+      final hint = await ref.read(asrServiceProvider).expectedRealtimeFactor();
+      if (hint != null) AsrRecognitionProgress.seedFromDevice(hint);
+    } on Object {
+      // A hint, not a dependency — fall back to the calibrated/seed rate.
+    }
+    // The pass may have finished (or been cancelled) while we asked.
+    if (_cancelToken?.isCompleted ?? false) return;
+    if (state.valueOrNull?.phase != AsrGenerationPhase.recognizing) return;
+
+    final estimate = AsrRecognitionProgress(audioSeconds: seconds);
+    _recognition = estimate;
+    _progressTicker = Timer.periodic(const Duration(milliseconds: 400), (_) {
+      if (state.valueOrNull?.phase != AsrGenerationPhase.recognizing) return;
+      _updateJob((j) => j.copyWith(progress: estimate.progress));
+    });
+  }
+
+  /// Stops the estimate ticker; [recordSample] feeds the measured wall-clock
+  /// cost back into the shared rate so the next pass is closer.
+  void _stopRecognizingProgress({required bool recordSample}) {
+    _progressTicker?.cancel();
+    _progressTicker = null;
+    final estimate = _recognition;
+    _recognition = null;
+    if (recordSample) estimate?.recordCompletion();
   }
 
   void _setError(

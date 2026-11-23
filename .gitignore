@@ -97,3 +97,6 @@ tmp/*
 
 worktrees/
 .mimosa
+
+# Local smoke-test media & screenshots (large binaries)
+test_media/

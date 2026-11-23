@@ -4,10 +4,18 @@ library;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
 import 'package:enjoy_player/features/player/application/engines/media_kit/media_kit_player_engine.dart';
-import 'package:enjoy_player/features/player/application/player_engine_constants.dart';
+
+/// Stage diagnostics.
+///
+/// These records land in the always-on release log sink (ADR-0026) and carry
+/// the facts that separate the possible native failure modes: whether the
+/// gate let [Video] mount, whether the controller got a texture id, what rect
+/// the native side reports, and whether mpv decoded anything.
+final Logger _log = Logger('player.video');
 
 /// Video stage mounted for a [MediaKitPlayerEngine].
 ///
@@ -68,11 +76,22 @@ class _MediaKitStageGateState extends State<MediaKitVideoStage> {
     setState(() {});
   }
 
+  String? _lastGateLog;
+
   @override
   Widget build(BuildContext context) {
     final engine = widget.engine;
     if (widget.maxWidth <= 0 || widget.maxHeight <= 0) {
       return const SizedBox.shrink();
+    }
+    final viewport =
+        '${widget.maxWidth.toStringAsFixed(0)}x'
+        '${widget.maxHeight.toStringAsFixed(0)}';
+    final line =
+        'stage: gate=${engine.nativeBackendAllowed} viewport=$viewport';
+    if (line != _lastGateLog) {
+      _lastGateLog = line;
+      _log.info(line);
     }
     if (!engine.nativeBackendAllowed) {
       return const ColoredBox(color: Colors.black);
@@ -82,10 +101,6 @@ class _MediaKitStageGateState extends State<MediaKitVideoStage> {
       color: Colors.black,
       child: _MediaKitVideoStage(
         controller: engine.videoController,
-        positionStream: engine.position,
-        playingStream: engine.playing,
-        durationStream: engine.duration,
-        nudgeMpvRender: engine.nudgeVideoRender,
         maxWidth: widget.maxWidth,
         maxHeight: widget.maxHeight,
       ),
@@ -93,46 +108,22 @@ class _MediaKitStageGateState extends State<MediaKitVideoStage> {
   }
 }
 
-/// Mounts media_kit [Video] and relayouts it once the native texture exists.
+/// Mounts media_kit [Video] for the current engine.
 ///
-/// A kick on the first Flutter frame is too early — [Texture] is still a
-/// 1×1 placeholder, so the layout is a no-op. Dragging the transcript splitter
-/// works because it changes the viewport *after* frames are flowing. Listen
-/// for texture id/rect (and first-frame) and then pulse [Video] width/height.
+/// No repaint tricks. The historical "black stage until a tab switch" was a
+/// surface-registry ownership race that unmounted this whole subtree
+/// (`player_surface_target.dart`); once the stage actually stays mounted,
+/// media_kit's own first-frame handshake and the texture id/rect notifiers
+/// present the picture without any relayout pulsing — and the pulsing itself
+/// was visible as a double flash plus a backward-seek stutter on every open.
 class _MediaKitVideoStage extends StatefulWidget {
   const _MediaKitVideoStage({
     required this.controller,
-    required this.positionStream,
-    required this.playingStream,
-    required this.durationStream,
-    required this.nudgeMpvRender,
     required this.maxWidth,
     required this.maxHeight,
   });
 
   final VideoController controller;
-
-  /// Player position stream used to detect seeks: seeking does not change the
-  /// viewport or the texture id, yet the compositor may still serve the stale
-  /// black frame until the next relayout.
-  final Stream<Duration> positionStream;
-
-  /// Play/pause transitions also relayout-adjacent state changes the user
-  /// can trigger from elsewhere (mode-tab switches pause, echo loops seek);
-  /// each transition is another chance to un-black a stale texture.
-  final Stream<bool> playingStream;
-
-  /// Duration stream: a change signals a different file loaded into the same
-  /// persistent stage (the stage is not remounted per open).
-  final Stream<Duration> durationStream;
-
-  /// Forces mpv to re-render the current frame (1 ms seek). The hard-kick
-  /// escalation pairs this with a [Video] remount: remounting alone only
-  /// re-presents whatever is in the texture — if mpv never painted (fresh
-  /// open, audio playing, black stage), the seek is what actually produces
-  /// a frame. Same effect as the user's tab-switch-to-dictate workaround.
-  final Future<void> Function() nudgeMpvRender;
-
   final double maxWidth;
   final double maxHeight;
 
@@ -141,206 +132,89 @@ class _MediaKitVideoStage extends StatefulWidget {
 }
 
 class _MediaKitVideoStageState extends State<_MediaKitVideoStage> {
-  var _nudge = false;
-  var _kicked = false;
-  var _hardKickEpoch = 0;
-  StreamSubscription<Duration>? _positionSub;
-  StreamSubscription<Duration>? _durationSub;
-  StreamSubscription<bool>? _playingSub;
-  Duration? _lastPosition;
-  Duration? _lastDuration;
-  var _lastSequenceAt = DateTime.fromMillisecondsSinceEpoch(0);
+  /// Outcome tracking for the mount diagnostics below.
+  Timer? _probe;
+  var _probeTicks = 0;
+  var _firstFrame = false;
 
   @override
   void initState() {
     super.initState();
-    widget.controller.id.addListener(_onTexture);
-    widget.controller.rect.addListener(_onTexture);
-    _onTexture();
-    unawaited(_kickAfterFirstFrame());
-    _positionSub = widget.positionStream.listen(_onPositionTick);
-    _durationSub = widget.durationStream.listen(_onDurationChanged);
-    _playingSub = widget.playingStream.listen(_onPlayingFlip);
-    _runKickSequence();
+    _probeVideoState();
+    unawaited(_awaitFirstFrame());
   }
 
-  /// The full soft-burst + hard-kick sequence.
+  /// One line per second for the first ten seconds of a stage's life.
   ///
-  /// Runs at stage mount AND on every new media load: [PlayerSurfaceHost]
-  /// keeps the stage mounted across `open()` calls (same engine is reused),
-  /// so a second import — the reported "delete, re-import, black again" case
-  /// — mounts no new stage, the mount-time sequence never re-runs, and mpv
-  /// sits silent on a black texture until the user switches tabs (which
-  /// seeks and forces a repaint).
-  void _runKickSequence() {
-    if (!mounted) return;
-    final now = DateTime.now();
-    if (now.difference(_lastSequenceAt).inMilliseconds < 2500) return;
-    _lastSequenceAt = now;
-    // Burst kicks over the first few seconds: a single kick can land while
-    // mpv has not yet presented into the texture (or during the loading →
-    // chrome viewport swap) and the frame stays black. The user-visible
-    // symptom of missing one is a black stage that only recovers after a
-    // mode-tab switch relayouts the column.
-    for (final delayMs in const [
-      150, 350, 600, 900, 1300, 1800, 2400, 3000, 3800, 4600,
-    ]) {
-      unawaited(Future<void>.delayed(Duration(milliseconds: delayMs)).then((_) {
-        if (mounted) _scheduleKick();
-      }));
-    }
-    // Escalation: soft 1px pulses can fail to revive a stale compositor
-    // texture. A hard kick remounts the [Video] element, which re-registers
-    // the texture with the compositor, and pairs it with the engine's nudge
-    // (1 ms seek) so mpv actually paints. A few late kicks cover slow
-    // disks / network sources that are still loading.
-    for (final delayMs in const [
-      800, 1800, 3200, 5000, 7500, 10500, 14000,
-    ]) {
-      unawaited(Future<void>.delayed(Duration(milliseconds: delayMs)).then((_) {
-        if (mounted) _scheduleKick(hard: true);
-      }));
-    }
+  /// The fields together identify the failure: `id=null` means the native
+  /// texture was never registered; a `rect` stuck at 1×1 means mpv never
+  /// sized its video output; `source=null` means no video track decoded.
+  void _probeVideoState() {
+    final player = widget.controller.player;
+    _log.info(
+      'video: mount id=${widget.controller.id.value} '
+      'rect=${widget.controller.rect.value} '
+      'source=${player.state.width}x${player.state.height} '
+      'playing=${player.state.playing}',
+    );
+    _probe = Timer.periodic(const Duration(seconds: 1), (_) {
+      _probeTicks++;
+      if (!mounted) {
+        _probe?.cancel();
+        return;
+      }
+      _log.info(
+        'video: t=${_probeTicks}s id=${widget.controller.id.value} '
+        'rect=${widget.controller.rect.value} '
+        'source=${player.state.width}x${player.state.height} '
+        'playing=${player.state.playing} frame=$_firstFrame',
+      );
+      if (_probeTicks == 3) {
+        final rect = widget.controller.rect.value;
+        final hasOutput = rect != null && rect.width > 1 && rect.height > 1;
+        _log.info(
+          hasOutput
+              ? 'video: output live rect=$rect (texture path engaged)'
+              : 'video: no video output after ${_probeTicks}s',
+        );
+      }
+      if (_probeTicks >= 10) _probe?.cancel();
+    });
   }
 
-  @override
-  void didUpdateWidget(covariant _MediaKitVideoStage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    final dw = (oldWidget.maxWidth - widget.maxWidth).abs();
-    final dh = (oldWidget.maxHeight - widget.maxHeight).abs();
-    // Any viewport change must re-kick: the loading (16:9) stage and the
-    // chrome layout can differ by less than a big threshold while the
-    // texture still hasn't presented, leaving a black frame.
-    if (dw > 0 || dh > 0) {
-      _scheduleKick();
-    }
-  }
-
-  @override
-  void dispose() {
-    widget.controller.id.removeListener(_onTexture);
-    widget.controller.rect.removeListener(_onTexture);
-    unawaited(_positionSub?.cancel());
-    unawaited(_durationSub?.cancel());
-    unawaited(_playingSub?.cancel());
-    super.dispose();
-  }
-
-  /// Kicks on every play/pause transition. Pausing recomposites the scene
-  /// (the paused gate chrome appears) and resuming re-presents mpv frames;
-  /// either can revive a texture the compositor went black on.
-  void _onPlayingFlip(bool playing) {
-    _scheduleKick();
-  }
-
-  /// Kicks on seek jumps. Natural playback ticks advance monotonically in
-  /// small steps; a backwards jump or a forward leap over ~1s means the user
-  /// (or the app) seeked, and the texture may need a relayout pulse to
-  /// present the new frame. A reset from well into the file back to the very
-  /// start is a new media load into the same engine — rerun the whole
-  /// sequence (same-id re-imports reopen the identical file, so the duration
-  /// signal below never fires for them).
-  void _onPositionTick(Duration position) {
-    final last = _lastPosition;
-    _lastPosition = position;
-    if (last == null) return;
-    final deltaMs = position.inMilliseconds - last.inMilliseconds;
-    if (deltaMs < 0 || deltaMs > 1000) {
-      _scheduleKick();
-    }
-    if (last.inMilliseconds > 5000 && position.inMilliseconds < 1000) {
-      _runKickSequence();
-    }
-  }
-
-  /// Reruns the sequence when the media duration changes — a different file
-  /// loaded into the same persistent stage.
-  void _onDurationChanged(Duration duration) {
-    final last = _lastDuration;
-    _lastDuration = duration;
-    if (last == null) return;
-    if ((duration - last).abs() > const Duration(milliseconds: 500)) {
-      _runKickSequence();
-    }
-  }
-
-  Future<void> _kickAfterFirstFrame() async {
+  Future<void> _awaitFirstFrame() async {
     try {
       await widget.controller.waitUntilFirstFrameRendered;
     } on Object {
       return;
     }
     if (!mounted) return;
-    _scheduleKick();
-    // Cover the race where the first frame is decoded while the stage is
-    // still in the loading (16:9) layout: the chrome viewport swap that
-    // follows needs its own kick a moment later.
-    await Future<void>.delayed(const Duration(milliseconds: 400));
-    if (!mounted) return;
-    _scheduleKick();
+    _firstFrame = true;
+    _log.info('video: first frame rendered at t=${_probeTicks}s');
   }
 
-  void _onTexture() {
-    final id = widget.controller.id.value;
-    final rect = widget.controller.rect.value;
-    if (id == null || rect == null || rect.width <= 1 || rect.height <= 1) {
-      return;
-    }
-    _scheduleKick();
-  }
-
-  void _scheduleKick({bool hard = false}) {
-    if (hard) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        // Remount re-registers the texture with the compositor; the paired
-        // mpv nudge (1 ms seek) is what actually makes mpv paint a frame
-        // into it when it has been sitting silent since a fresh open.
-        setState(() => _hardKickEpoch++);
-        unawaited(widget.nudgeMpvRender());
-      });
-      return;
-    }
-    if (_kicked) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) => _kick());
-  }
-
-  void _kick() {
-    if (!mounted || _kicked) return;
-    _kicked = true;
-    setState(() => _nudge = true);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      setState(() => _nudge = false);
-      // Re-arm so later texture/viewport events can kick again. A one-shot
-      // latch leaves the texture black when the first frame lands in the
-      // loading layout and the chrome viewport swap follows immediately.
-      _kicked = false;
-    });
+  @override
+  void dispose() {
+    _probe?.cancel();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final inset = _nudge ? kVideoTextureKickInset : 0.0;
-    final w = widget.maxWidth > inset
-        ? widget.maxWidth - inset
-        : widget.maxWidth;
-    final h = widget.maxHeight > inset
-        ? widget.maxHeight - inset
-        : widget.maxHeight;
     return ExcludeSemantics(
-      child: Video(
-        // Keyed so a hard kick (epoch bump) remounts the element and forces
-        // the compositor to re-register the texture.
-        key: ValueKey('media-kit-video-$_hardKickEpoch'),
-        controller: widget.controller,
-        controls: null,
-        width: w,
-        height: h,
-        fit: BoxFit.contain,
-        fill: Colors.black,
-        subtitleViewConfiguration: const SubtitleViewConfiguration(
-          visible: false,
+      child: SizedBox(
+        width: widget.maxWidth,
+        height: widget.maxHeight,
+        child: Video(
+          controller: widget.controller,
+          controls: null,
+          width: widget.maxWidth,
+          height: widget.maxHeight,
+          fit: BoxFit.contain,
+          fill: Colors.black,
+          subtitleViewConfiguration: const SubtitleViewConfiguration(
+            visible: false,
+          ),
         ),
       ),
     );

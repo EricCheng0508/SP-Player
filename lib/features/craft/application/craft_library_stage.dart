@@ -4,10 +4,9 @@ library;
 
 import 'package:enjoy_player/core/analytics/analytics_events.dart';
 import 'package:enjoy_player/core/analytics/analytics_provider.dart';
+import 'package:enjoy_player/core/config/local_mode.dart';
 import 'package:enjoy_player/core/logging/log.dart';
-import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/craft/application/craft_controller_core.dart';
 import 'package:enjoy_player/features/craft/application/craft_library_repository_provider.dart';
 import 'package:enjoy_player/features/craft/application/craft_timeline_enricher.dart';
@@ -25,11 +24,8 @@ mixin CraftLibraryMixin on CraftControllerCore {
   Future<CraftSaveResult?> saveToLibrary() async {
     if (state.previewAudioBytes == null) return null;
 
-    final auth = ref.read(authCtrlProvider).valueOrNull;
-    if (auth is! AuthSignedIn) {
-      state = state.copyWith(failure: const CraftSignInRequiredFailure());
-      return null;
-    }
+    final sessionUserId =
+        sessionUserIdOf(ref.read(authCtrlProvider)) ?? kLocalSessionId;
 
     state = state.copyWith(isSaving: true, clearFailure: true);
 
@@ -104,7 +100,7 @@ mixin CraftLibraryMixin on CraftControllerCore {
         text: sourceTextForImport,
         normalizedText: truncated,
         sourceFlag: sourceFlag,
-        signedInUserId: auth.profile.id,
+        signedInUserId: sessionUserId,
         primaryTimelineJson: timelineJson,
         voice: state.selectedVoice,
       );

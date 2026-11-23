@@ -104,6 +104,47 @@ class _SetupWizardDialogState extends ConsumerState<SetupWizardDialog> {
   String? _installError;
   final Map<ComponentKind, _RowState> _rows = {};
 
+  /// Stall watchdog: a download that emits no progress for this long is
+  /// declared dead so the dialog can never sit on a greyed-out button forever.
+  static const _kStallTimeout = Duration(seconds: 120);
+  Timer? _stallWatch;
+  DateTime _lastProgressAt = DateTime.now();
+  bool _abandoned = false;
+  int _installGeneration = 0;
+
+  void _startStallWatch() {
+    _stallWatch?.cancel();
+    _lastProgressAt = DateTime.now();
+    _abandoned = false;
+    _stallWatch = Timer.periodic(const Duration(seconds: 2), (_) {
+      if (!mounted || !_installing) return;
+      if (DateTime.now().difference(_lastProgressAt) < _kStallTimeout) return;
+      _stallWatch?.cancel();
+      _abandoned = true;
+      final store = ref.read(componentStoreProvider);
+      for (final spec in _targets) {
+        store.cancel(spec.kind);
+      }
+      setState(() {
+        _installing = false;
+        _installError =
+            '下载 ${_kStallTimeout.inMinutes} 分钟没有任何进度，已中止。可能是网络/代理问题，'
+            '可点「开始安装」重试（会接着已下载的部分继续）。';
+      });
+    });
+  }
+
+  void _stopStallWatch() {
+    _stallWatch?.cancel();
+    _stallWatch = null;
+  }
+
+  @override
+  void dispose() {
+    _stopStallWatch();
+    super.dispose();
+  }
+
   List<ComponentSpec> get _targets {
     final local = _choice == _TranslationChoice.localNow;
     return [
@@ -154,9 +195,15 @@ class _SetupWizardDialogState extends ConsumerState<SetupWizardDialog> {
       }
     });
     final store = ref.read(componentStoreProvider);
+    _startStallWatch();
+    final generation = ++_installGeneration;
     for (final spec in _targets) {
       try {
         await store.install(spec, (progress) {
+          // A retry bumps the generation; stale callbacks from an abandoned
+          // run must not repaint rows or keep the watchdog alive.
+          if (generation != _installGeneration) return;
+          _lastProgressAt = DateTime.now();
           if (!mounted) return;
           setState(() {
             _rows[spec.kind] = _RowState(
@@ -175,7 +222,8 @@ class _SetupWizardDialogState extends ConsumerState<SetupWizardDialog> {
           });
         });
       } on Object catch (e) {
-        if (!mounted) return;
+        _stopStallWatch();
+        if (!mounted || _abandoned) return;
         setState(() {
           _installing = false;
           _installError = e.toString();
@@ -183,7 +231,8 @@ class _SetupWizardDialogState extends ConsumerState<SetupWizardDialog> {
         return;
       }
     }
-    if (!mounted) return;
+    _stopStallWatch();
+    if (!mounted || _abandoned) return;
     setState(() {
       _installing = false;
       _step = 2;

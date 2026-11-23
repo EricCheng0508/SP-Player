@@ -25,7 +25,10 @@ DisableProgramGroupPage=yes
 Name: "desktopicon"; Description: "Create a &desktop shortcut"; GroupDescription: "Additional:"
 
 [Files]
-Source: "D:\code\SP-Player\build\windows\x64\runner\Release\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs ignoreversion
+; App binary only. The local-component models (components\) are NOT bundled —
+; they are ~4.7 GB, past GitHub's 2 GiB per-asset limit; the first-run wizard
+; downloads them from the `components-v1` release instead.
+Source: "D:\code\SP-Player\build\windows\x64\runner\Release\*"; DestDir: "{app}"; Excludes: "components"; Flags: recursesubdirs createallsubdirs ignoreversion
 
 [Icons]
 Name: "{group}\SP Player"; Filename: "{app}\sp_player.exe"

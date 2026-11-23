@@ -347,8 +347,13 @@ List<int> orderPendingLineIndexes({
   return copy;
 }
 
-/// Max concurrent in-flight translation requests per media.
-const kAutoTranslateMaxConcurrency = 2;
+/// Max concurrent in-flight line requests per media.
+///
+/// Sized to the viewport window: when a screenful of cues requests at once,
+/// all of them run concurrently and the transport layer
+/// (`BatchingTranslationCapability`) coalesces them into a single LLM call,
+/// instead of serializing per-cue round trips.
+const kAutoTranslateMaxConcurrency = 24;
 
 /// Attempts per line (initial + one quiet retry) before marking failed.
 const kAutoTranslateMaxLineAttempts = 2;

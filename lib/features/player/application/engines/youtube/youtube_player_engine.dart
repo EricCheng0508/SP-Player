@@ -163,6 +163,12 @@ class YoutubePlayerEngine
   Future<void> awaitSurfaceDetached() => _session.awaitSurfaceDetached();
 
   @override
+  Future<bool> waitForMediaReady({required Duration timeout}) async =>
+      // The WebView engine has no demuxer load phase; seeks are safe as soon
+      // as the surface is mounted (handled by awaitSurfaceReady).
+      true;
+
+  @override
   void prepareNativeBackend() {}
 
   @override

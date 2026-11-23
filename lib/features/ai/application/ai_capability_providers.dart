@@ -4,9 +4,11 @@ import 'package:enjoy_player/data/api/api_client_provider.dart';
 import 'package:enjoy_player/data/api/byok_secret_store.dart';
 import 'package:enjoy_player/features/ai/application/ai_modality_config_controller.dart';
 import 'package:enjoy_player/features/ai/application/ai_modality_configs.dart';
+import 'package:enjoy_player/features/ai/data/batching/batching_translation_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_asr_azure_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_asr_openai_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_assessment_azure_capability.dart';
+import 'package:enjoy_player/features/ai/data/byok/byok_batch_translation_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_contextual_translation_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_dictionary_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_llm_capability.dart';
@@ -156,7 +158,12 @@ TranslationCapability translationCapability(Ref ref) {
   final config = c.translation.llmByok == null && c.llm.llmByok != null
       ? c.llm
       : c.translation;
-  return resolveTranslationCapability(ref, config);
+  // 传输层合批：把并发到达的逐句请求合并为一次编号列表 LLM 调用，
+  // system prompt 与往返开销按屏摊薄（逐句请求 xN → 整屏 1 次）。
+  return BatchingTranslationCapability(
+    resolveTranslationCapability(ref, config),
+    ByokBatchTranslationCapability(resolveLlmCapability(ref, config)),
+  );
 }
 
 @Riverpod(keepAlive: true)

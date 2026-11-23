@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:enjoy_player/features/transcript/application/auto_translate_line_queue.dart';
+import 'package:enjoy_player/features/transcript/domain/auto_translate.dart';
 
 void main() {
   late AutoTranslateLineQueue queue;
@@ -79,13 +80,14 @@ void main() {
     queue.enqueue(2);
     queue.enqueue(3);
 
-    queue.markInFlight(0);
-    queue.markInFlight(9);
+    for (var i = 0; i < kAutoTranslateMaxConcurrency; i++) {
+      queue.markInFlight(100 + i);
+    }
     queue.drain();
 
     expect(started, isEmpty);
 
-    queue.releaseInFlight(0);
+    queue.releaseInFlight(100);
     queue.drain();
 
     expect(started.map((e) => e.$1), [1]);

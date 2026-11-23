@@ -110,6 +110,9 @@ class FakePlayerEngine
   }
 
   @override
+  Future<bool> waitForMediaReady({required Duration timeout}) async => true;
+
+  @override
   void prepareNativeBackend() {}
 
   int resetCompletionFlagCallCount = 0;

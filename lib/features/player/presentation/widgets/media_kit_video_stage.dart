@@ -41,8 +41,10 @@ class MediaKitVideoStage extends StatefulWidget {
 
 /// Gates the [Video] subtree on [MediaKitPlayerEngine.nativeBackendAllowed].
 ///
-/// While the gate is closed the stage is a bare placeholder — mpv must not be
-/// allocated until the previous engine's WebView has detached. The swap arms
+/// While the gate is closed the stage paints nothing — mpv must not be
+/// allocated until the previous engine's WebView has detached, and the loading
+/// portal's thumbnail / skeleton behind the surface must stay visible (a black
+/// placeholder here was the "black flash" on open). The swap arms
 /// the gate with `prepareNativeBackend()` *after* that detach; this state
 /// listens to [MediaKitPlayerEngine.nativeBackendAllowedListenable] so an
 /// already-mounted placeholder rebuilds and mounts [Video] immediately — the
@@ -94,16 +96,19 @@ class _MediaKitStageGateState extends State<MediaKitVideoStage> {
       _log.info(line);
     }
     if (!engine.nativeBackendAllowed) {
-      return const ColoredBox(color: Colors.black);
+      // Paint nothing while the gate is closed: the loading portal behind the
+      // surface already shows the media's thumbnail + skeleton, and a black
+      // placeholder here would cover it (the "black flash" on open).
+      return const SizedBox.shrink();
     }
 
-    return ColoredBox(
-      color: Colors.black,
-      child: _MediaKitVideoStage(
-        controller: engine.videoController,
-        maxWidth: widget.maxWidth,
-        maxHeight: widget.maxHeight,
-      ),
+    // No outer black backdrop: [Video] letterboxes with `fill` once visible,
+    // and until the first frame renders the stage stays transparent so the
+    // thumbnail behind the surface keeps showing.
+    return _MediaKitVideoStage(
+      controller: engine.videoController,
+      maxWidth: widget.maxWidth,
+      maxHeight: widget.maxHeight,
     );
   }
 }
@@ -134,8 +139,16 @@ class _MediaKitVideoStage extends StatefulWidget {
 class _MediaKitVideoStageState extends State<_MediaKitVideoStage> {
   /// Outcome tracking for the mount diagnostics below.
   Timer? _probe;
+
+  /// Safety valve for [Timer] when the first-frame handshake never lands.
+  Timer? _firstFrameFallback;
   var _probeTicks = 0;
   var _firstFrame = false;
+
+  /// Safety valve: if the first-frame handshake never lands (broken media),
+  /// reveal the stage anyway after this long so the panel is not stuck on
+  /// the poster forever.
+  static const Duration _firstFrameFallbackDuration = Duration(seconds: 3);
 
   @override
   void initState() {
@@ -183,19 +196,31 @@ class _MediaKitVideoStageState extends State<_MediaKitVideoStage> {
   }
 
   Future<void> _awaitFirstFrame() async {
+    // Desktop handshake: completes on the native `VideoOutput.Resize` callback,
+    // which fires independently of this widget being painted — safe to keep the
+    // stage transparent (poster showing) until it lands.
+    _firstFrameFallback ??= Timer(_firstFrameFallbackDuration, _reveal);
     try {
       await widget.controller.waitUntilFirstFrameRendered;
     } on Object {
+      _firstFrameFallback?.cancel();
       return;
     }
+    _firstFrameFallback?.cancel();
     if (!mounted) return;
-    _firstFrame = true;
+    _reveal();
     _log.info('video: first frame rendered at t=${_probeTicks}s');
+  }
+
+  void _reveal() {
+    if (!mounted || _firstFrame) return;
+    setState(() => _firstFrame = true);
   }
 
   @override
   void dispose() {
     _probe?.cancel();
+    _firstFrameFallback?.cancel();
     super.dispose();
   }
 
@@ -205,15 +230,22 @@ class _MediaKitVideoStageState extends State<_MediaKitVideoStage> {
       child: SizedBox(
         width: widget.maxWidth,
         height: widget.maxHeight,
-        child: Video(
-          controller: widget.controller,
-          controls: null,
-          width: widget.maxWidth,
-          height: widget.maxHeight,
-          fit: BoxFit.contain,
-          fill: Colors.black,
-          subtitleViewConfiguration: const SubtitleViewConfiguration(
-            visible: false,
+        // Hidden until the first frame renders so the thumbnail behind the
+        // surface shows instead of a black flash, then fades in.
+        child: AnimatedOpacity(
+          opacity: _firstFrame ? 1.0 : 0.0,
+          duration: const Duration(milliseconds: 150),
+          curve: Curves.easeOut,
+          child: Video(
+            controller: widget.controller,
+            controls: null,
+            width: widget.maxWidth,
+            height: widget.maxHeight,
+            fit: BoxFit.contain,
+            fill: Colors.black,
+            subtitleViewConfiguration: const SubtitleViewConfiguration(
+              visible: false,
+            ),
           ),
         ),
       ),

@@ -39,11 +39,17 @@ class TranscriptAction {
     required this.icon,
     required this.label,
     required this.run,
+    this.description,
   });
 
   final TranscriptActionKind kind;
   final IconData icon;
   final String label;
+
+  /// Optional plain-language explanation shown on hover behind an info
+  /// (ⓘ) affordance in the More menu — menu labels alone are too terse to
+  /// guess what "Use embedded subtitles…" actually does.
+  final String? description;
 
   /// Runs the action against a mounted [BuildContext] (dialogs and notices
   /// open from it).
@@ -85,6 +91,7 @@ List<TranscriptAction> watchTranscriptActions(
         kind: TranscriptActionKind.edit,
         icon: EnjoyIcons.edit,
         label: l10n.playerMoreEditTranscript,
+        description: l10n.playerMoreDescEditTranscript,
         run: (context) => context.push(playerEditTranscriptRoutePath(mediaId)),
       ),
     if (!isYoutube)
@@ -92,6 +99,7 @@ List<TranscriptAction> watchTranscriptActions(
         kind: TranscriptActionKind.importFile,
         icon: EnjoyIcons.fileUpload,
         label: l10n.playerMoreAddSubtitleFile,
+        description: l10n.playerMoreDescAddSubtitleFile,
         run: (context) => pickAndImportSubtitleFile(context, ref, mediaId),
       ),
     if (isVideo && !isYoutube)
@@ -99,6 +107,7 @@ List<TranscriptAction> watchTranscriptActions(
         kind: TranscriptActionKind.embeddedSubtitles,
         icon: EnjoyIcons.subtitles,
         label: l10n.playerMoreUseEmbeddedSubtitles,
+        description: l10n.playerMoreDescEmbeddedSubtitles,
         run: (context) => runEmbeddedSubtitleExtract(
           context: context,
           ref: ref,
@@ -112,6 +121,7 @@ List<TranscriptAction> watchTranscriptActions(
         label: hasAiTrack
             ? l10n.playerMoreTranscribeAgain
             : l10n.playerMoreCreateAiTranscript,
+        description: l10n.playerMoreDescAiTranscript,
         run: (context) => launchAsrGeneration(context, ref, mediaId: mediaId),
       ),
     if (readiness.showEnrich && !enrich.isRunning)
@@ -121,6 +131,7 @@ List<TranscriptAction> watchTranscriptActions(
         label: readiness.canTrustWordTimes
             ? l10n.playerMoreAddWordTimings
             : l10n.playerMoreAddIpa,
+        description: l10n.playerMoreDescWordTimings,
         run: (_) => ref
             .read(transcriptEnrichmentControllerProvider(mediaId).notifier)
             .run(),
@@ -129,6 +140,7 @@ List<TranscriptAction> watchTranscriptActions(
       kind: TranscriptActionKind.refreshCloud,
       icon: EnjoyIcons.cloudDownload,
       label: l10n.playerMoreRefreshFromCloud,
+      description: l10n.playerMoreDescRefreshFromCloud,
       run: (context) => refreshCloudTranscripts(context, ref, mediaId),
     ),
     if (hasTranscript)
@@ -136,6 +148,7 @@ List<TranscriptAction> watchTranscriptActions(
         kind: TranscriptActionKind.downloadTranscript,
         icon: EnjoyIcons.download,
         label: l10n.playerMoreDownloadTranscript,
+        description: l10n.playerMoreDescDownloadTranscript,
         run: (context) => downloadActiveTranscript(context, ref, mediaId),
       ),
   ];

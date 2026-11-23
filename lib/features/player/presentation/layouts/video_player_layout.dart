@@ -47,10 +47,30 @@ class VideoPlayerLayout extends StatefulWidget {
   State<VideoPlayerLayout> createState() => _VideoPlayerLayoutState();
 }
 
-class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
-  /// Transcript may use at most this fraction of total width (video keeps >=50%).
-  static const double _kMaxTranscriptFraction = 0.5;
+/// Transcript may use at most this fraction of total width (video keeps >=50%).
+const double kMaxTranscriptFraction = 0.5;
 
+/// Transcript column width (px) for a [totalWidth]-px layout row, honoring a
+/// persisted [widthPx] (`null` uses the default share). Shared with the
+/// local-video loading body so the open-in-flight frame matches the chrome
+/// geometry exactly — the loading → chrome hand-off must not reflow.
+double transcriptColumnWidthFor(
+  BuildContext context,
+  double totalWidth,
+  double? widthPx,
+) {
+  final t = EnjoyThemeTokens.of(context);
+  final maxW = totalWidth * kMaxTranscriptFraction;
+  final minW = math.min(t.videoColumnMin, maxW);
+  final defaultW = (totalWidth * t.videoColumnShare).clamp(
+    t.videoColumnMin,
+    t.videoColumnMax,
+  );
+  final raw = widthPx ?? defaultW;
+  return raw.clamp(minW, maxW);
+}
+
+class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
   /// Hit target for the invisible resize strip.
   static const double _kSplitterHitWidth = 12;
 
@@ -85,19 +105,11 @@ class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
   }
 
   double _transcriptWidthForTotal(double totalWidth, double? widthPx) {
-    final t = EnjoyThemeTokens.of(context);
-    final maxW = totalWidth * _kMaxTranscriptFraction;
-    final minW = math.min(t.videoColumnMin, maxW);
-    final defaultW = (totalWidth * t.videoColumnShare).clamp(
-      t.videoColumnMin,
-      t.videoColumnMax,
-    );
-    final raw = widthPx ?? defaultW;
-    return raw.clamp(minW, maxW);
+    return transcriptColumnWidthFor(context, totalWidth, widthPx);
   }
 
   void _applyDragDelta(double totalWidth, double deltaDx) {
-    final maxW = totalWidth * _kMaxTranscriptFraction;
+    final maxW = totalWidth * kMaxTranscriptFraction;
     final minW = math.min(EnjoyThemeTokens.of(context).videoColumnMin, maxW);
     final current = _transcriptWidthForTotal(
       totalWidth,

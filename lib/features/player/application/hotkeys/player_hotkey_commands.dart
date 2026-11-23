@@ -16,6 +16,7 @@ import 'package:enjoy_player/features/player/application/hotkeys/playback_rate_c
 import 'package:enjoy_player/features/player/application/player_collapse.dart';
 import 'package:enjoy_player/features/player/application/player_controller.dart';
 import 'package:enjoy_player/features/player/application/player_interactions.dart';
+import 'package:enjoy_player/features/player/application/player_preferences_provider.dart';
 
 /// `player.togglePlay` — play / pause the live session.
 class TogglePlayHotkeyCommand extends HotkeyCommand {
@@ -98,6 +99,82 @@ class PlayerInteractionsHotkeyCommand extends HotkeyCommand {
   }
 }
 
+/// Relative seek (`player.seekBack` / `player.seekForward`) — nudges the
+/// playhead by [delta] seconds, clamped to the media duration. Playback
+/// state (playing/paused) is preserved.
+class SeekRelativeHotkeyCommand extends HotkeyCommand {
+  const SeekRelativeHotkeyCommand(this.actionId, this.delta);
+
+  @override
+  final String actionId;
+
+  final double delta;
+
+  @override
+  bool canExecute(HotkeyCtx ctx) => ctx.read(playerControllerProvider) != null;
+
+  @override
+  void execute(HotkeyCtx ctx) {
+    final session = ctx.read(playerControllerProvider);
+    if (session == null) return;
+    final duration = session.durationSeconds > 0
+        ? session.durationSeconds
+        : double.infinity;
+    final target = (session.currentTimeSeconds + delta).clamp(0.0, duration);
+    unawaited(ctx.read(playerControllerProvider.notifier).seekToSeconds(target));
+  }
+}
+
+/// Volume step (`player.volumeUp` / `player.volumeDown`) — ±5% persisted
+/// volume, clamped to `[0, 1]`. Uses [PlayerPreferences.setVolume] (not the
+/// transient variant) so the level survives restarts like slider changes do.
+class VolumeStepHotkeyCommand extends HotkeyCommand {
+  const VolumeStepHotkeyCommand(this.actionId, this.delta);
+
+  @override
+  final String actionId;
+
+  final double delta;
+
+  @override
+  bool canExecute(HotkeyCtx ctx) => ctx.read(playerControllerProvider) != null;
+
+  @override
+  void execute(HotkeyCtx ctx) {
+    final prefs = ctx.read(playerPreferencesCtrlProvider);
+    final target = (prefs.volume + delta).clamp(0.0, 1.0);
+    unawaited(ctx.read(playerPreferencesCtrlProvider.notifier).setVolume(target));
+  }
+}
+
+/// `player.toggleMute` — remembers the pre-mute level for restore.
+class ToggleMuteHotkeyCommand extends HotkeyCommand {
+  const ToggleMuteHotkeyCommand();
+
+  static double _lastNonZeroVolume = 1.0;
+
+  @override
+  String get actionId => 'player.toggleMute';
+
+  @override
+  bool canExecute(HotkeyCtx ctx) => ctx.read(playerControllerProvider) != null;
+
+  @override
+  void execute(HotkeyCtx ctx) {
+    final prefs = ctx.read(playerPreferencesCtrlProvider);
+    if (prefs.volume > 0.01) {
+      _lastNonZeroVolume = prefs.volume;
+      unawaited(ctx.read(playerPreferencesCtrlProvider.notifier).setVolume(0));
+    } else {
+      unawaited(
+        ctx.read(
+          playerPreferencesCtrlProvider.notifier,
+        ).setVolume(_lastNonZeroVolume),
+      );
+    }
+  }
+}
+
 /// Session-gated player commands in dispatch order — the exact order of the
 /// old listener chain's `session != null` block (rate commands included at
 /// their original position between the line hotkeys and the echo brackets).
@@ -105,6 +182,11 @@ final List<HotkeyCommand> playerHotkeyCommands = [
   const TogglePlayHotkeyCommand(),
   const ToggleExpandHotkeyCommand(),
   const ToggleFullscreenHotkeyCommand(),
+  const SeekRelativeHotkeyCommand('player.seekBack', -3),
+  const SeekRelativeHotkeyCommand('player.seekForward', 3),
+  const VolumeStepHotkeyCommand('player.volumeDown', -0.05),
+  const VolumeStepHotkeyCommand('player.volumeUp', 0.05),
+  const ToggleMuteHotkeyCommand(),
   PlayerInteractionsHotkeyCommand('player.prevLine', (i) => i.prevLine()),
   PlayerInteractionsHotkeyCommand('player.nextLine', (i) => i.nextLine()),
   PlayerInteractionsHotkeyCommand('player.replayLine', (i) => i.replayLine()),

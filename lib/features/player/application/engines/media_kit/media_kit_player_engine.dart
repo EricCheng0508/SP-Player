@@ -1,6 +1,7 @@
 /// media_kit playback engine for local files and generic HTTP(S) (ADR-0003).
 library;
 
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -218,6 +219,21 @@ class MediaKitPlayerEngine
 
   @override
   Future<void> seek(Duration target) => _player.seek(target);
+
+  @override
+  Future<bool> waitForMediaReady({required Duration timeout}) async {
+    // Fast path: the demuxer is already open (duration known) — e.g. the file
+    // loaded while other open steps ran.
+    if (_player.state.duration > Duration.zero) return true;
+    try {
+      await _player.stream.duration
+          .firstWhere((d) => d > Duration.zero)
+          .timeout(timeout);
+      return true;
+    } on TimeoutException {
+      return false;
+    }
+  }
 
   @override
   Future<void> setRate(double rate) => _player.setRate(rate);

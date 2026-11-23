@@ -32,14 +32,24 @@ class VideoCaptionOverlay extends ConsumerWidget {
     if (mediaId == null || mediaId.isEmpty) return const SizedBox.shrink();
 
     final cue = ref.watch(
-      transcriptPlaybackHighlightProvider(mediaId).select((h) => h.cueIndex),
+      transcriptPlaybackHighlightProvider(
+        mediaId,
+      ).select((h) => h.visibleCueIndex),
     );
-    if (cue < 0) return const SizedBox.shrink();
 
     final lines =
         ref.watch(transcriptLinesForMediaProvider(mediaId)).value ??
         const [];
-    if (cue >= lines.length) return const SizedBox.shrink();
+    final secondary =
+        ref.watch(secondaryTranscriptLinesForMediaProvider(mediaId)).value ??
+        const [];
+    final translationText = cue >= 0 && cue < secondary.length
+        ? secondary[cue].text.trim()
+        : '';
+    final originalText = cue >= 0 && cue < lines.length
+        ? lines[cue].text.trim()
+        : '';
+    final hasTranslation = translationText.isNotEmpty;
 
     final showOriginal =
         mode == CaptionOverlayMode.original || mode == CaptionOverlayMode.both;
@@ -47,18 +57,8 @@ class VideoCaptionOverlay extends ConsumerWidget {
         mode == CaptionOverlayMode.translation ||
         mode == CaptionOverlayMode.both;
 
-    final secondary =
-        ref.watch(secondaryTranscriptLinesForMediaProvider(mediaId)).value ??
-        const [];
-    final translationText = cue < secondary.length
-        ? secondary[cue].text.trim()
-        : '';
-    final hasTranslation = translationText.isNotEmpty;
-
-    final originalText = lines[cue].text.trim();
-    if (originalText.isEmpty && !hasTranslation) {
-      return const SizedBox.shrink();
-    }
+    final hasContent =
+        cue >= 0 && (originalText.isNotEmpty || hasTranslation);
 
     final List<Shadow> outline = [
       for (final offsets in const [
@@ -90,29 +90,43 @@ class VideoCaptionOverlay extends ConsumerWidget {
       ),
     );
 
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(32, 0, 32, 14),
-        child: IgnorePointer(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (showOriginal && originalText.isNotEmpty)
-                captionText(originalText, 30, Colors.white),
-              if (showTranslation && hasTranslation) ...[
-                if (showOriginal && originalText.isNotEmpty)
-                  const SizedBox(height: 6),
-                captionText(
-                  translationText,
-                  23,
-                  Colors.white.withValues(alpha: 0.94),
+    final content = hasContent
+        ? KeyedSubtree(
+            key: ValueKey('caption-$cue'),
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(32, 0, 32, 14),
+                child: IgnorePointer(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (showOriginal && originalText.isNotEmpty)
+                        captionText(originalText, 30, Colors.white),
+                      if (showTranslation && hasTranslation) ...[
+                        if (showOriginal && originalText.isNotEmpty)
+                          const SizedBox(height: 6),
+                        captionText(
+                          translationText,
+                          23,
+                          Colors.white.withValues(alpha: 0.94),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
-              ],
-            ],
-          ),
-        ),
-      ),
+              ),
+            ),
+          )
+        : const SizedBox.shrink(key: ValueKey('caption-hidden'));
+
+    // 150ms 淡入淡出：同一句显示期间 child 不变（完全稳定）；
+    // 句子说完或换句时才触发过渡——淡出只会发生在语音结束之后。
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 150),
+      switchInCurve: Curves.easeOut,
+      switchOutCurve: Curves.easeIn,
+      child: content,
     );
   }
 }

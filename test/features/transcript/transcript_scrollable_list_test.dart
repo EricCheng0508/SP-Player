@@ -84,7 +84,7 @@ List<Override> _scrollTestOverrides({
       ).overrideWithValue(recordingCounts ?? const {}),
     transcriptPlaybackHighlightProvider(
       _mediaId,
-    ).overrideWith((ref) => (cueIndex: highlightIndex, wordIndex: null)),
+    ).overrideWith((ref) => (cueIndex: highlightIndex, visibleCueIndex: highlightIndex, wordIndex: null)),
   ];
 }
 

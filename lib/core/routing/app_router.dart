@@ -89,8 +89,11 @@ GoRouter appRouter(Ref ref) {
     coordinator: coordinator,
   );
   final leavePlayerObserver = LeavePlayerRouteObserver(
-    onLeftPlayerRoute: () =>
-        scheduleMicrotask(() => unawaited(clearLivePlaybackSession(ref))),
+    onLeftPlayerRoute: () => scheduleMicrotask(
+      // Deferred: pause now, teardown after the exit fade — an immediate
+      // clear blanks the video stage mid-transition.
+      () => unawaited(clearLivePlaybackSessionDeferredWith(ref.read)),
+    ),
   );
   final rootScreenObserver = AnalyticsScreenObserver(
     ref.read(analyticsProvider),
@@ -201,8 +204,13 @@ GoRouter appRouter(Ref ref) {
                         child: child,
                       );
                     },
-                transitionDuration: const Duration(milliseconds: 220),
-                reverseTransitionDuration: const Duration(milliseconds: 180),
+                // Zero-duration in both directions: the split video+transcript
+                // stage must appear in a single frame. A 220 ms fade-in over
+                // the page's dark backdrop reads as a full-black flash before
+                // the layout settles; on pop the fade blanks the stage too.
+                // Audio keeps playing through the instant swap either way.
+                transitionDuration: Duration.zero,
+                reverseTransitionDuration: Duration.zero,
               );
             },
             routes: [

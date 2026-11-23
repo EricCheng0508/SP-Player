@@ -1322,6 +1322,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hotkeysDescToggleFullscreen => 'Toggle fullscreen';
 
   @override
+  String get hotkeysDescSeekBack => 'Seek back 3 seconds';
+
+  @override
+  String get hotkeysDescSeekForward => 'Seek forward 3 seconds';
+
+  @override
+  String get hotkeysDescVolumeUp => 'Volume up';
+
+  @override
+  String get hotkeysDescVolumeDown => 'Volume down';
+
+  @override
+  String get hotkeysDescToggleMute => 'Mute / unmute';
+
+  @override
   String get hotkeysDescPrevLine => 'Play previous line';
 
   @override
@@ -4425,6 +4440,42 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get playerMore => 'More';
+
+  @override
+  String get playerMoreDescEditTranscript =>
+      'Edit the text and timing of the current transcript in the editor';
+
+  @override
+  String get playerMoreDescAddSubtitleFile =>
+      'Pick a .srt / .vtt subtitle file from your computer and import it as a new track';
+
+  @override
+  String get playerMoreDescEmbeddedSubtitles =>
+      'Extract subtitle tracks embedded inside the video file (MKV/MP4) - no speech recognition needed';
+
+  @override
+  String get playerMoreDescAiTranscript =>
+      'Generate or regenerate subtitles with local speech recognition; old videos get the latest timing calibration by re-transcribing';
+
+  @override
+  String get playerMoreDescWordTimings =>
+      'Add word-by-word timing and phonetics, for karaoke-style highlighting and shadowing practice';
+
+  @override
+  String get playerMoreDescRefreshFromCloud =>
+      'Re-fetch transcripts from the cloud (YouTube official captions, or subtitles synced while signed in)';
+
+  @override
+  String get playerMoreDescDownloadTranscript =>
+      'Export the current transcript as a .srt subtitle file on your computer';
+
+  @override
+  String get playerMoreDescEditDetails =>
+      'Edit the title, cover and other details of this video';
+
+  @override
+  String get playerMoreDescExportLoopClip =>
+      'Save the active Echo loop as a separate video clip (enabled while a loop is active)';
 
   @override
   String get playerMoreTranscriptSection => 'Transcript';

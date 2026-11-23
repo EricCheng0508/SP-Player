@@ -60,6 +60,46 @@ final List<HotkeyDefinition> hotkeyDefinitions = [
     customizable: true,
   ),
   const HotkeyDefinition(
+    id: 'player.seekBack',
+    defaultKeys: 'arrowleft',
+
+    descriptionKey: 'seekBack',
+    scope: HotkeyScope.player,
+    customizable: true,
+  ),
+  const HotkeyDefinition(
+    id: 'player.seekForward',
+    defaultKeys: 'arrowright',
+
+    descriptionKey: 'seekForward',
+    scope: HotkeyScope.player,
+    customizable: true,
+  ),
+  const HotkeyDefinition(
+    id: 'player.volumeDown',
+    defaultKeys: 'arrowdown',
+
+    descriptionKey: 'volumeDown',
+    scope: HotkeyScope.player,
+    customizable: true,
+  ),
+  const HotkeyDefinition(
+    id: 'player.volumeUp',
+    defaultKeys: 'arrowup',
+
+    descriptionKey: 'volumeUp',
+    scope: HotkeyScope.player,
+    customizable: true,
+  ),
+  const HotkeyDefinition(
+    id: 'player.toggleMute',
+    defaultKeys: 'm',
+
+    descriptionKey: 'toggleMute',
+    scope: HotkeyScope.player,
+    customizable: true,
+  ),
+  const HotkeyDefinition(
     id: 'player.prevLine',
     defaultKeys: 'a',
 

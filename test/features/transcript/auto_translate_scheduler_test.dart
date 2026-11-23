@@ -41,8 +41,10 @@ void main() {
     expect(a, b);
   });
 
-  test('concurrency and attempt constants stay small', () {
-    expect(kAutoTranslateMaxConcurrency, 2);
+  test('concurrency and attempt constants stay bounded', () {
+    // Sized to one viewport window: a screenful of cues runs concurrently and
+    // the transport layer coalesces them into one LLM call.
+    expect(kAutoTranslateMaxConcurrency, kAutoTranslateViewportWindow);
     expect(kAutoTranslateMaxLineAttempts, 2);
   });
 

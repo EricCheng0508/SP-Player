@@ -29,6 +29,9 @@ Future<void> collapseExpandedPlayerWith(
   if (read(playerControllerProvider) == null) {
     read(playerControllerProvider.notifier).abandonPendingOpen();
   } else {
-    await clearLivePlaybackSessionWith(read);
+    // Deferred clear: the pop above starts the exit fade; tearing the engine
+    // down now would blank the stage mid-transition. Pause happens inside
+    // immediately, so audio stops right away.
+    await clearLivePlaybackSessionDeferredWith(read);
   }
 }

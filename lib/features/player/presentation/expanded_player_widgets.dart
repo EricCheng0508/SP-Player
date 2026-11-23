@@ -2,6 +2,8 @@
 library;
 
 import 'dart:async' show unawaited;
+import 'dart:io' show File;
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,8 +28,8 @@ import 'package:enjoy_player/l10n/app_localizations.dart';
 import 'package:enjoy_player/features/player/application/player_collapse.dart';
 import 'package:enjoy_player/features/player/application/player_surface_registry.dart';
 import 'package:enjoy_player/features/player/application/youtube_open_preview_provider.dart';
-import 'package:enjoy_player/features/player/presentation/widgets/player_loading_stage.dart';
 import 'package:enjoy_player/features/player/presentation/widgets/player_margin.dart';
+import 'package:enjoy_player/features/player/presentation/widgets/player_surface_target.dart';
 import 'package:enjoy_player/features/player/presentation/widgets/player_top_bar.dart';
 import 'package:enjoy_player/features/player/presentation/widgets/youtube_loading_video_stage.dart';
 
@@ -76,11 +78,8 @@ class ExpandedPlayerLoadingBody extends ConsumerWidget {
                     ),
                   )
                 else if (isLocalVideo)
-                  Align(
-                    alignment: Alignment.topCenter,
-                    child: _LocalLoadingVideoStage(
-                      thumbnailUrl: videoRow.value!.thumbnailUrl,
-                    ),
+                  _LocalLoadingSplitBody(
+                    thumbnailUrl: videoRow.value!.thumbnailUrl,
                   )
                 else
                   const Center(child: SkeletonAppBootstrap()),
@@ -120,24 +119,29 @@ class _LoadingTopBar extends ConsumerWidget {
   }
 }
 
-/// 16:9 portal target while local / URL [openMedia] is in flight.
-class _LocalLoadingVideoStage extends ConsumerWidget {
-  const _LocalLoadingVideoStage({this.thumbnailUrl});
+/// Local-video loading body that mirrors the chrome split geometry.
+///
+/// The surface target occupies the exact video-panel rect the chrome body will
+/// claim, so the loading → chrome hand-off never reflows (no layout jump — the
+/// historical "flash" on open). The media's thumbnail shows through until the
+/// native surface paints its first frame, then the video fades in over it.
+class _LocalLoadingSplitBody extends ConsumerWidget {
+  const _LocalLoadingSplitBody({this.thumbnailUrl});
 
-  /// Local artwork for the media being opened, shown under the skeleton so
-  /// the open window reads as "this video is loading" instead of a black
-  /// flash.
+  /// Local artwork for the media being opened.
   final String? thumbnailUrl;
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final thumbAsync = ref.watch(localThumbnailFileProvider(thumbnailUrl));
-    final thumb = thumbAsync.value;
-    return PlayerLoadingStage(
-      surfaceId: PlayerSurfaceIds.expandedPlayer,
+  /// Width of the invisible splitter strip — must match
+  /// `VideoPlayerLayout._kSplitterHitWidth`.
+  static const double _splitterHitWidth = 12;
+
+  Widget _stageChild(File? thumb, double fallbackWidth) {
+    return PlayerSurfaceTarget(
+      id: PlayerSurfaceIds.expandedPlayer,
       overlayBuilder: (_) => const SizedBox.shrink(),
       child: LayoutBuilder(
-        builder: (context, constraints) {
+        builder: (context, inner) {
+          final width = inner.maxWidth.isFinite ? inner.maxWidth : fallbackWidth;
           return ColoredBox(
             color: Colors.black,
             child: Stack(
@@ -148,7 +152,7 @@ class _LocalLoadingVideoStage extends ConsumerWidget {
                     thumb,
                     fit: BoxFit.cover,
                     gaplessPlayback: true,
-                    cacheWidth: thumbnailCacheWidthFor(constraints.maxWidth),
+                    cacheWidth: thumbnailCacheWidthFor(width),
                   ),
                 const Center(child: SkeletonAppBootstrap()),
               ],
@@ -156,6 +160,79 @@ class _LocalLoadingVideoStage extends ConsumerWidget {
           );
         },
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final splitPx = ref.watch(
+      playerPreferencesCtrlProvider.select(
+        (p) => p.videoTranscriptSplitWidthPx,
+      ),
+    );
+    final thumbAsync = ref.watch(localThumbnailFileProvider(thumbnailUrl));
+    final thumb = thumbAsync.value;
+    final t = EnjoyThemeTokens.of(context);
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final useSideBySide = constraints.maxWidth > constraints.maxHeight;
+        if (!useSideBySide) {
+          // Narrow: keep the historical 16:9 portal.
+          return Align(
+            alignment: Alignment.topCenter,
+            child: SafeArea(
+              top: true,
+              bottom: false,
+              left: false,
+              right: false,
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: _stageChild(thumb, constraints.maxWidth),
+              ),
+            ),
+          );
+        }
+
+        final total = constraints.maxWidth;
+        final tw = transcriptColumnWidthFor(context, total, splitPx);
+        final vw = math.max(0.0, total - tw - _splitterHitWidth);
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(
+              width: vw,
+              child: SafeArea(
+                top: true,
+                bottom: false,
+                left: false,
+                right: false,
+                child: ColoredBox(
+                  color: t.video,
+                  child: Padding(
+                    padding: EdgeInsets.only(bottom: bottomInset),
+                    child: _stageChild(thumb, vw),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: _splitterHitWidth),
+            SizedBox(
+              width: tw,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: t.ground,
+                  border: Border(
+                    left: BorderSide(color: t.line, width: 1),
+                  ),
+                ),
+                child: const Center(child: SkeletonAppBootstrap()),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

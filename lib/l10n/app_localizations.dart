@@ -2439,6 +2439,36 @@ abstract class AppLocalizations {
   /// **'Toggle fullscreen'**
   String get hotkeysDescToggleFullscreen;
 
+  /// No description provided for @hotkeysDescSeekBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Seek back 3 seconds'**
+  String get hotkeysDescSeekBack;
+
+  /// No description provided for @hotkeysDescSeekForward.
+  ///
+  /// In en, this message translates to:
+  /// **'Seek forward 3 seconds'**
+  String get hotkeysDescSeekForward;
+
+  /// No description provided for @hotkeysDescVolumeUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Volume up'**
+  String get hotkeysDescVolumeUp;
+
+  /// No description provided for @hotkeysDescVolumeDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Volume down'**
+  String get hotkeysDescVolumeDown;
+
+  /// No description provided for @hotkeysDescToggleMute.
+  ///
+  /// In en, this message translates to:
+  /// **'Mute / unmute'**
+  String get hotkeysDescToggleMute;
+
   /// No description provided for @hotkeysDescPrevLine.
   ///
   /// In en, this message translates to:
@@ -8021,6 +8051,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'More'**
   String get playerMore;
+
+  /// No description provided for @playerMoreDescEditTranscript.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit the text and timing of the current transcript in the editor'**
+  String get playerMoreDescEditTranscript;
+
+  /// No description provided for @playerMoreDescAddSubtitleFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a .srt / .vtt subtitle file from your computer and import it as a new track'**
+  String get playerMoreDescAddSubtitleFile;
+
+  /// No description provided for @playerMoreDescEmbeddedSubtitles.
+  ///
+  /// In en, this message translates to:
+  /// **'Extract subtitle tracks embedded inside the video file (MKV/MP4) - no speech recognition needed'**
+  String get playerMoreDescEmbeddedSubtitles;
+
+  /// No description provided for @playerMoreDescAiTranscript.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate or regenerate subtitles with local speech recognition; old videos get the latest timing calibration by re-transcribing'**
+  String get playerMoreDescAiTranscript;
+
+  /// No description provided for @playerMoreDescWordTimings.
+  ///
+  /// In en, this message translates to:
+  /// **'Add word-by-word timing and phonetics, for karaoke-style highlighting and shadowing practice'**
+  String get playerMoreDescWordTimings;
+
+  /// No description provided for @playerMoreDescRefreshFromCloud.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-fetch transcripts from the cloud (YouTube official captions, or subtitles synced while signed in)'**
+  String get playerMoreDescRefreshFromCloud;
+
+  /// No description provided for @playerMoreDescDownloadTranscript.
+  ///
+  /// In en, this message translates to:
+  /// **'Export the current transcript as a .srt subtitle file on your computer'**
+  String get playerMoreDescDownloadTranscript;
+
+  /// No description provided for @playerMoreDescEditDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit the title, cover and other details of this video'**
+  String get playerMoreDescEditDetails;
+
+  /// No description provided for @playerMoreDescExportLoopClip.
+  ///
+  /// In en, this message translates to:
+  /// **'Save the active Echo loop as a separate video clip (enabled while a loop is active)'**
+  String get playerMoreDescExportLoopClip;
 
   /// Section heading in the player's More menu and the phone Subtitles sheet.
   ///

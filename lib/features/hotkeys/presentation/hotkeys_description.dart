@@ -20,6 +20,16 @@ String hotkeyDescription(AppLocalizations l10n, HotkeyDefinition d) {
       return l10n.hotkeysDescToggleExpand;
     case 'toggleFullscreen':
       return l10n.hotkeysDescToggleFullscreen;
+    case 'seekBack':
+      return l10n.hotkeysDescSeekBack;
+    case 'seekForward':
+      return l10n.hotkeysDescSeekForward;
+    case 'volumeUp':
+      return l10n.hotkeysDescVolumeUp;
+    case 'volumeDown':
+      return l10n.hotkeysDescVolumeDown;
+    case 'toggleMute':
+      return l10n.hotkeysDescToggleMute;
     case 'prevLine':
       return l10n.hotkeysDescPrevLine;
     case 'nextLine':

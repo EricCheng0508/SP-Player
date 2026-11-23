@@ -1261,6 +1261,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get hotkeysDescToggleFullscreen => '切换全屏';
 
   @override
+  String get hotkeysDescSeekBack => '快退 3 秒';
+
+  @override
+  String get hotkeysDescSeekForward => '快进 3 秒';
+
+  @override
+  String get hotkeysDescVolumeUp => '增大音量';
+
+  @override
+  String get hotkeysDescVolumeDown => '减小音量';
+
+  @override
+  String get hotkeysDescToggleMute => '静音切换';
+
+  @override
   String get hotkeysDescPrevLine => '播放上一句';
 
   @override
@@ -4227,6 +4242,36 @@ class AppLocalizationsZh extends AppLocalizations {
   String get playerMore => '更多';
 
   @override
+  String get playerMoreDescEditTranscript => '在编辑器中修改当前字幕稿的文字与时间';
+
+  @override
+  String get playerMoreDescAddSubtitleFile => '从电脑选择 .srt / .vtt 等字幕文件，导入为新字幕轨';
+
+  @override
+  String get playerMoreDescEmbeddedSubtitles =>
+      '提取视频文件（MKV/MP4 等）内部自带的字幕轨，无需语音识别';
+
+  @override
+  String get playerMoreDescAiTranscript =>
+      '用本地语音识别生成或重新生成字幕；老视频重新转写后可享受最新的对轴校准';
+
+  @override
+  String get playerMoreDescWordTimings => '为每个词添加精确时间与音标，用于卡拉OK式逐词高亮和跟读练习';
+
+  @override
+  String get playerMoreDescRefreshFromCloud =>
+      '重新从云端拉取字幕稿（YouTube 官方字幕，或登录后云同步的字幕）';
+
+  @override
+  String get playerMoreDescDownloadTranscript => '把当前字幕稿导出为 .srt 字幕文件保存到电脑';
+
+  @override
+  String get playerMoreDescEditDetails => '修改这个视频的标题、封面等信息';
+
+  @override
+  String get playerMoreDescExportLoopClip => '把当前 Echo 循环片段单独导出为视频片段（有循环激活时可用）';
+
+  @override
   String get playerMoreTranscriptSection => '字幕文本';
 
   @override
@@ -5697,6 +5742,21 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get hotkeysDescToggleFullscreen => '切换全屏';
+
+  @override
+  String get hotkeysDescSeekBack => '快退 3 秒';
+
+  @override
+  String get hotkeysDescSeekForward => '快进 3 秒';
+
+  @override
+  String get hotkeysDescVolumeUp => '增大音量';
+
+  @override
+  String get hotkeysDescVolumeDown => '减小音量';
+
+  @override
+  String get hotkeysDescToggleMute => '静音切换';
 
   @override
   String get hotkeysDescPrevLine => '播放上一句';
@@ -8210,6 +8270,36 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get playerMore => '更多';
+
+  @override
+  String get playerMoreDescEditTranscript => '在编辑器中修改当前字幕稿的文字与时间';
+
+  @override
+  String get playerMoreDescAddSubtitleFile => '从电脑选择 .srt / .vtt 等字幕文件，导入为新字幕轨';
+
+  @override
+  String get playerMoreDescEmbeddedSubtitles =>
+      '提取视频文件（MKV/MP4 等）内部自带的字幕轨，无需语音识别';
+
+  @override
+  String get playerMoreDescAiTranscript =>
+      '用本地语音识别生成或重新生成字幕；老视频重新转写后可享受最新的对轴校准';
+
+  @override
+  String get playerMoreDescWordTimings => '为每个词添加精确时间与音标，用于卡拉OK式逐词高亮和跟读练习';
+
+  @override
+  String get playerMoreDescRefreshFromCloud =>
+      '重新从云端拉取字幕稿（YouTube 官方字幕，或登录后云同步的字幕）';
+
+  @override
+  String get playerMoreDescDownloadTranscript => '把当前字幕稿导出为 .srt 字幕文件保存到电脑';
+
+  @override
+  String get playerMoreDescEditDetails => '修改这个视频的标题、封面等信息';
+
+  @override
+  String get playerMoreDescExportLoopClip => '把当前 Echo 循环片段单独导出为视频片段（有循环激活时可用）';
 
   @override
   String get playerMoreTranscriptSection => '字幕文本';

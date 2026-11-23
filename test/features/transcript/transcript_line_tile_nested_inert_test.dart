@@ -144,7 +144,7 @@ void main() {
           transcriptBlurModeProvider.overrideWith(() => _BlurMode(false)),
           transcriptPlaybackHighlightProvider(
             'test',
-          ).overrideWithValue((cueIndex: 0, wordIndex: null)),
+          ).overrideWithValue((cueIndex: 0, visibleCueIndex: 0, wordIndex: null)),
           ...transcriptWordPracticeOffOverrides(),
         ],
         child: MaterialApp(

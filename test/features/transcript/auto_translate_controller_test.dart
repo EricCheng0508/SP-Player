@@ -1554,7 +1554,7 @@ void main() {
       await db.close();
     });
 
-    test('drops waiting lines far from playback highlight on seek', () async {
+    test('drops waiting lines beyond the viewport window', () async {
       container = ProviderContainer(
         overrides: [
           appDatabaseProvider.overrideWithValue(db),
@@ -1565,7 +1565,9 @@ void main() {
           appPreferencesCtrlProvider.overrideWith(_ZhNativePrefsCtrl.new),
           transcriptPlaybackHighlightProvider(
             mediaId,
-          ).overrideWithValue((cueIndex: 0, wordIndex: null)),
+          ).overrideWithValue(
+            (cueIndex: 0, visibleCueIndex: 0, wordIndex: null),
+          ),
         ],
       );
       await container.read(authCtrlProvider.future);
@@ -1575,38 +1577,22 @@ void main() {
       final ctrl = container.read(autoTranslateCtrlProvider(mediaId).notifier);
       await ctrl.selectAutoTranslate();
 
-      final gates = <Completer<void>>[];
-      for (var i = 0; i < 4; i++) {
-        gates.add(fake.delayNext());
+      // Fill every concurrency slot so further requests go to the waiting
+      // queue, where the viewport-window rule applies.
+      final gates = List.generate(kAutoTranslateMaxConcurrency, (_) {
+        return fake.delayNext();
+      });
+      for (var i = 0; i < kAutoTranslateMaxConcurrency; i++) {
+        ctrl.requestTranslateLine(i);
       }
-
-      ctrl.requestTranslateLine(0);
-      ctrl.requestTranslateLine(1);
       await Future<void>.delayed(Duration.zero);
-      expect(fake.calls.length, 2);
+      expect(fake.calls.length, kAutoTranslateMaxConcurrency);
 
-      ctrl.requestTranslateLine(2);
-      ctrl.requestTranslateLine(3);
+      // 24 / 30 stay (inside the window anchored at 0); 50 is dropped.
+      ctrl.requestTranslateLine(24);
+      ctrl.requestTranslateLine(30);
       ctrl.requestTranslateLine(50);
       await Future<void>.delayed(Duration.zero);
-
-      container.invalidate(transcriptPlaybackHighlightProvider(mediaId));
-      container = ProviderContainer(
-        overrides: [
-          appDatabaseProvider.overrideWithValue(db),
-          deviceGlobalAppDatabaseProvider.overrideWithValue(db),
-          transcriptRepositoryProvider.overrideWithValue(repo),
-          translationCapabilityProvider.overrideWithValue(fake),
-          authCtrlProvider.overrideWith(_SignedInAuthCtrl.new),
-          appPreferencesCtrlProvider.overrideWith(_ZhNativePrefsCtrl.new),
-          transcriptPlaybackHighlightProvider(
-            mediaId,
-          ).overrideWithValue((cueIndex: 50, wordIndex: null)),
-        ],
-      );
-      await container.read(authCtrlProvider.future);
-      await container.read(appPreferencesCtrlProvider.future);
-      container.listen(autoTranslateCtrlProvider(mediaId), (_, _) {});
 
       for (final g in gates) {
         g.complete();
@@ -1614,6 +1600,7 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 200));
 
       expect(fake.calls, isNot(contains('Line 50')));
+      expect(fake.calls, contains('Line 24'));
     });
   });
 
@@ -1995,7 +1982,7 @@ void main() {
       await db.close();
     });
 
-    test('drains all waiting lines as in-flight slots free up', () async {
+    test('starts every requested line while concurrency allows', () async {
       final ctrl = container.read(autoTranslateCtrlProvider(mediaId).notifier);
       final g0 = fake.delayNext();
       final g1 = fake.delayNext();
@@ -2008,16 +1995,11 @@ void main() {
       ctrl.requestTranslateLine(3);
       await Future<void>.delayed(Duration.zero);
 
-      expect(fake.calls.length, kAutoTranslateMaxConcurrency);
-
-      g0.complete();
-      await Future<void>.delayed(const Duration(milliseconds: 50));
-      expect(fake.calls.length, 3);
-
-      g1.complete();
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      // Four requests under the concurrency limit all start immediately.
       expect(fake.calls.length, 4);
 
+      g0.complete();
+      g1.complete();
       g2.complete();
       g3.complete();
       await Future<void>.delayed(const Duration(milliseconds: 100));

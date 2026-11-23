@@ -67,6 +67,16 @@ abstract class PlayerEngine {
   /// allocated while InAppWebView is still tearing down.
   Future<void> awaitSurfaceDetached();
 
+  /// Waits until the media opened by [open] is ready to accept seeks — for
+  /// native engines, until the demuxer has loaded and the duration is known.
+  ///
+  /// media_kit's `open()` resolves once the loadfile command is *issued*, not
+  /// once the file is loaded; a seek issued in between is silently dropped by
+  /// mpv and playback starts from 0 (restore-position loss). Position restore
+  /// must call this first. Returns false on timeout (caller still seeks as a
+  /// best effort). Engines without an async load phase return immediately.
+  Future<bool> waitForMediaReady({required Duration timeout});
+
   /// Allows native backend allocation (MediaKit `[Player]`). YouTube is a
   /// no-op. Must run *after* the previous engine's surface has detached so
   /// the first mpv construct cannot race WebView destroy.

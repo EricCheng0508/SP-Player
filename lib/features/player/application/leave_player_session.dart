@@ -80,3 +80,58 @@ Future<void> _clearLiveSession({
   }
   await clear();
 }
+
+/// Deferred leave-player teardown: pauses immediately (audio stops while the
+/// last video frame stays on screen), then clears after the player route's
+/// exit transition finishes.
+///
+/// Clearing synchronously at pop time tears the video texture down mid-fade,
+/// so the outgoing player page fades out as a full-black stage before the
+/// shell appears. Waiting out the ~180 ms reverse transition keeps the fade
+/// showing the frozen frame instead.
+Future<void> clearLivePlaybackSessionDeferred(
+  Ref ref, {
+  Duration delay = const Duration(milliseconds: 240),
+}) {
+  return _clearLiveSessionDeferred(ref.read, delay: delay);
+}
+
+/// [T Function<T>]-based variant of [clearLivePlaybackSessionDeferred] for
+/// callers outside the widget tree (router observers, hotkey interface).
+Future<void> clearLivePlaybackSessionDeferredWith(
+  T Function<T>(ProviderListenable<T> provider) read, {
+  Duration delay = const Duration(milliseconds: 240),
+}) {
+  return _clearLiveSessionDeferred(read, delay: delay);
+}
+
+Future<void> _clearLiveSessionDeferred(
+  T Function<T>(ProviderListenable<T> provider) read, {
+  required Duration delay,
+}) async {
+  final session = read(playerControllerProvider);
+  if (session == null) return;
+  final leavingMediaId = session.mediaId;
+
+  // Stop audio right away; the video stage keeps showing its last frame
+  // until the deferred teardown below.
+  try {
+    await read(playerControllerProvider.notifier).activeEngine.pause();
+  } catch (_) {}
+
+  await Future<void>.delayed(delay);
+
+  // Guard: if something else opened a different media during the delay
+  // (rapid navigation), do not tear down the new session.
+  final current = read(playerControllerProvider);
+  if (current == null || current.mediaId != leavingMediaId) return;
+
+  await _clearLiveSession(
+    onPlayerRoute: false,
+    hasLiveSession: true,
+    practiceOwnsVideoStage: read(
+      vocabularyReviewSessionProvider,
+    ).practiceOwnsVideoStage,
+    clear: () => read(playerControllerProvider.notifier).clear(),
+  );
+}

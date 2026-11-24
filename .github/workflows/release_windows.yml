@@ -32,6 +32,14 @@ jobs:
       - name: Flutter pub get
         run: flutter pub get
 
+      # flutter_secure_storage_windows compiles <atlstr.h>, which ships only
+      # with the "C++ ATL for latest v143 build tools" VS component — not
+      # guaranteed present on hosted images. Idempotent self-heal before
+      # every build (same step as build_windows.yml).
+      - name: Ensure VS C++ ATL
+        shell: pwsh
+        run: .github/scripts/ensure_vs_cpp_atl.ps1
+
       - name: Codegen (drift / build_runner)
         run: dart run build_runner build --delete-conflicting-outputs
 

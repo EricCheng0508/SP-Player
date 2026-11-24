@@ -2,7 +2,6 @@
 library;
 
 import 'dart:async' show unawaited;
-import 'dart:io' show File;
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -13,9 +12,6 @@ import 'package:enjoy_player/core/platform/linux_platform_availability.dart';
 import 'package:enjoy_player/core/theme/enjoy_icons.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/skeleton.dart';
-import 'package:enjoy_player/core/utils/local_thumbnail.dart'
-    show thumbnailCacheWidthFor;
-import 'package:enjoy_player/features/player/application/local_thumbnail_provider.dart';
 import 'package:enjoy_player/features/player/application/player_engine_provider.dart';
 import 'package:enjoy_player/features/player/application/player_preferences_provider.dart';
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
@@ -78,9 +74,7 @@ class ExpandedPlayerLoadingBody extends ConsumerWidget {
                     ),
                   )
                 else if (isLocalVideo)
-                  _LocalLoadingSplitBody(
-                    thumbnailUrl: videoRow.value!.thumbnailUrl,
-                  )
+                  const _LocalLoadingSplitBody()
                 else
                   const Center(child: SkeletonAppBootstrap()),
               ],
@@ -126,39 +120,23 @@ class _LoadingTopBar extends ConsumerWidget {
 /// historical "flash" on open). The media's thumbnail shows through until the
 /// native surface paints its first frame, then the video fades in over it.
 class _LocalLoadingSplitBody extends ConsumerWidget {
-  const _LocalLoadingSplitBody({this.thumbnailUrl});
-
-  /// Local artwork for the media being opened.
-  final String? thumbnailUrl;
+  const _LocalLoadingSplitBody();
 
   /// Width of the invisible splitter strip — must match
   /// `VideoPlayerLayout._kSplitterHitWidth`.
   static const double _splitterHitWidth = 12;
 
-  Widget _stageChild(File? thumb, double fallbackWidth) {
+  /// No poster here on purpose: a video still that later dissolves into the
+  /// live picture reads as a "fake frame flashing away" (user report). The
+  /// loading stage is a plain black panel + skeleton; the video surface fades
+  /// in over it when the first frame lands.
+  Widget _stageChild() {
     return PlayerSurfaceTarget(
       id: PlayerSurfaceIds.expandedPlayer,
       overlayBuilder: (_) => const SizedBox.shrink(),
-      child: LayoutBuilder(
-        builder: (context, inner) {
-          final width = inner.maxWidth.isFinite ? inner.maxWidth : fallbackWidth;
-          return ColoredBox(
-            color: Colors.black,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                if (thumb != null)
-                  Image.file(
-                    thumb,
-                    fit: BoxFit.cover,
-                    gaplessPlayback: true,
-                    cacheWidth: thumbnailCacheWidthFor(width),
-                  ),
-                const Center(child: SkeletonAppBootstrap()),
-              ],
-            ),
-          );
-        },
+      child: const ColoredBox(
+        color: Colors.black,
+        child: Center(child: SkeletonAppBootstrap()),
       ),
     );
   }
@@ -170,8 +148,6 @@ class _LocalLoadingSplitBody extends ConsumerWidget {
         (p) => p.videoTranscriptSplitWidthPx,
       ),
     );
-    final thumbAsync = ref.watch(localThumbnailFileProvider(thumbnailUrl));
-    final thumb = thumbAsync.value;
     final t = EnjoyThemeTokens.of(context);
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
@@ -189,7 +165,7 @@ class _LocalLoadingSplitBody extends ConsumerWidget {
               right: false,
               child: AspectRatio(
                 aspectRatio: 16 / 9,
-                child: _stageChild(thumb, constraints.maxWidth),
+                child: _stageChild(),
               ),
             ),
           );
@@ -212,7 +188,7 @@ class _LocalLoadingSplitBody extends ConsumerWidget {
                   color: t.video,
                   child: Padding(
                     padding: EdgeInsets.only(bottom: bottomInset),
-                    child: _stageChild(thumb, vw),
+                    child: _stageChild(),
                   ),
                 ),
               ),

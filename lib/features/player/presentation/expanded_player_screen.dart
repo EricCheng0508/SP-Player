@@ -34,11 +34,12 @@ class _ExpandedPlayerScreenState extends ConsumerState<ExpandedPlayerScreen> {
     final cs = Theme.of(context).colorScheme;
     final mediaId = widget.mediaId;
 
+    Widget body;
+    var isChrome = false;
     if (chrome != null && chrome.mediaId == mediaId) {
-      return ExpandedPlayerChromeBody(mediaId: mediaId, chrome: chrome);
-    }
-
-    if (open.hasError) {
+      isChrome = true;
+      body = ExpandedPlayerChromeBody(mediaId: mediaId, chrome: chrome);
+    } else if (open.hasError) {
       final err = open.error;
       if (err is MediaNeedsRelocateException) {
         return LocateMediaScreen(info: err);
@@ -51,8 +52,21 @@ class _ExpandedPlayerScreenState extends ConsumerState<ExpandedPlayerScreen> {
         );
       }
       return ExpandedPlayerGenericErrorBody(colorScheme: cs);
+    } else {
+      body = ExpandedPlayerLoadingBody(colorScheme: cs, mediaId: mediaId);
     }
 
-    return ExpandedPlayerLoadingBody(colorScheme: cs, mediaId: mediaId);
+    // Crossfade loading ↔ chrome instead of a hard swap. Both bodies share
+    // the same geometry (the loading split mirrors the chrome split and the
+    // dock slot is always reserved), so the dissolve reads as the skeleton
+    // and poster morphing into the live content — the hard swap was the
+    // "flash this frame on open" report.
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 180),
+      child: KeyedSubtree(
+        key: ValueKey('player-body-$isChrome'),
+        child: body,
+      ),
+    );
   }
 }

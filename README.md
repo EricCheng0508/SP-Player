@@ -1,10 +1,23 @@
 # SP Player
 
-本地优先的外语精听播放器（Windows）。无账号、无订阅、无云端依赖；
+**本地优先的外语精听播放器**（Windows）。无账号、无订阅、无云端依赖；
 AI 只连你自己填的端点，语音识别和翻译都可以完全跑在本机，音频不出机器。
 
-基于 [baizhiheizi/enjoy_player](https://github.com/baizhiheizi/enjoy_player)
-（AGPL-3.0）修改，沿用同一许可证，见 [LICENSE](LICENSE)。
+> 基于 [baizhiheizi/enjoy_player](https://github.com/baizhiheizi/enjoy_player)
+> （AGPL-3.0）深度重构：移除账号 / 积分 / 云端分发体系，替换为全本地实现。
+> 沿用 AGPL-3.0 许可，见 [LICENSE](LICENSE)。
+
+## 下载
+
+到 [Releases](https://github.com/EricCheng0508/SP-Player/releases/latest) 下载：
+
+| 文件 | 适合谁 |
+|---|---|
+| `SP-Player-x.y.z-portable-win64.zip` | **推荐**。解压即用，不写注册表 |
+| `SPPlayer-Setup-x.y.z.exe` | 安装包，带开始菜单 / 卸载项 |
+
+两个包都不含本地组件（faster-whisper / llama.cpp，单资产超 2GiB）——
+首次使用时在应用内一键安装，或手动放到 `components\` 目录。
 
 ## 它能做什么
 
@@ -40,17 +53,29 @@ flutter build windows --release
 识别模型与运行时通过 GitHub 的 `components-v1` release 分发
 （单资产超 2GiB，不随安装包走）。
 
+### 发版
+
+打 tag 即自动出包并发布 Release（GitHub Actions，Windows 托管运行器）：
+
+```bash
+git tag v0.10.5
+git push origin main v0.10.5
+```
+
+产出便携版 zip 与 Inno Setup 安装包，见
+[.github/workflows/release_windows.yml](.github/workflows/release_windows.yml)。
+
 ## 环境要求
 
-- Flutter 3.x（桌面 stable）
+- Flutter 3.x（桌面 stable，CI 固定 3.47.6）
 - Visual Studio 2022，含「使用 C++ 的桌面开发」负载
 - Python 3.10+（faster-whisper 依赖）
 - FFmpeg（essentials 构建）
 
-## 与原项目的差别
+## 与上游的差别
 
-删掉了账号、积分、云端分发等 133 个文件（约 −12700 行），
-替换为本地实现：faster-whisper 识别、llama.cpp 翻译、BYOK 端点直连。
+删掉账号、积分、云端分发等 133 个文件（约 −12700 行），替换为本地实现：
+faster-whisper 识别、llama.cpp 翻译、BYOK 端点直连。
 不建议与上游合并——改动面太大，冲突必然大面积出现。
 
 ## 许可

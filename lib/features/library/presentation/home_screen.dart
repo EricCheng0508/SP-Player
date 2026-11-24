@@ -26,7 +26,6 @@ import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/library/application/continue_practice_provider.dart';
 import 'package:enjoy_player/features/library/presentation/continue_practice_card.dart';
-import 'package:enjoy_player/features/library/presentation/todays_goal_card.dart';
 import 'package:enjoy_player/features/local_components/presentation/setup_wizard.dart';
 import 'package:enjoy_player/features/onboarding/application/onboarding_controller.dart';
 import 'package:enjoy_player/features/onboarding/application/practice_tip_trigger.dart';
@@ -350,9 +349,6 @@ class _HomeRecentGridSkeletonTile extends StatelessWidget {
 }
 
 const double _kRecentTileMinWidth = 210;
-const double _kOverviewSplitMinWidth = 856;
-const double _kSideColumnMinWidth = 300;
-const double _kSideCardsPairMinWidth = 560;
 const double _kHeroStackBelow = 600;
 
 /// Continue practicing (or the empty-library card) beside Today's goal and
@@ -366,9 +362,10 @@ class _HomeOverview extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isSignedIn = ref.watch(authIsSignedInProvider);
     final resume = ref.watch(continuePracticeResumeProvider);
 
+    // The "today's goal" side card was removed: with no local statistics
+    // report behind it, a bare 0/15-minute ring was noise, not motivation.
     final Widget? hero = resume != null
         ? ContinuePracticeCard(
             resume: resume,
@@ -377,54 +374,8 @@ class _HomeOverview extends ConsumerWidget {
         : hasRecents
         ? null
         : const _HomeEmptyCard();
-    const goal = TodaysGoalCard();
 
-    if (!isSignedIn) return hero ?? const SizedBox.shrink();
-
-    if (hero != null && width >= _kOverviewSplitMinWidth) {
-      return IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(flex: 165, child: hero),
-            const SizedBox(width: 20),
-            Expanded(
-              flex: 100,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  minWidth: _kSideColumnMinWidth,
-                ),
-                child: const Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [goal],
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    final side = width >= _kSideCardsPairMinWidth
-        ? const IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(child: goal),
-              ],
-            ),
-          )
-        : const Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [goal],
-          );
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (hero != null) ...[hero, const SizedBox(height: 20)],
-        side,
-      ],
-    );
+    return hero ?? const SizedBox.shrink();
   }
 }
 

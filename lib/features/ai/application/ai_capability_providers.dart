@@ -17,6 +17,7 @@ import 'package:enjoy_player/features/ai/data/byok/byok_tts_azure_capability.dar
 import 'package:enjoy_player/features/ai/data/byok/byok_tts_openai_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_translation_capability.dart';
 import 'package:enjoy_player/features/ai/data/local/local_assessment_capability.dart';
+import 'package:enjoy_player/features/ai/data/local/local_tts_capability.dart';
 import 'package:enjoy_player/features/ai/data/local_subgen_asr_capability.dart';
 import 'package:enjoy_player/features/ai/data/stub_ai_capabilities.dart';
 import 'package:enjoy_player/features/ai/domain/ai_provider.dart';
@@ -104,7 +105,11 @@ TtsCapability resolveTtsCapability(Ref ref, AIServiceConfig config) {
   switch (config.provider) {
     case AIProvider.byok:
       final speechByok = config.speechByok;
-      if (speechByok == null) return const ByokNotConfiguredTtsCapability();
+      if (speechByok == null) {
+        // 本地版：TTS 未配置时默认走 Windows SAPI 本地合成，零配置可用；
+        // 配置了 Azure / OpenAI 兼容语音的用户仍以配置为准。
+        return const LocalTtsCapability();
+      }
       return switch (speechByok.kind) {
         SpeechByokKind.openAiCompatible => ByokTtsOpenAiCapability(
           config: speechByok,

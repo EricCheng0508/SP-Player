@@ -11,14 +11,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:enjoy_player/core/routing/player_navigation.dart';
 import 'package:enjoy_player/core/theme/enjoy_icons.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
+import 'package:enjoy_player/core/theme/generative_media_cover.dart';
 import 'package:enjoy_player/core/theme/widgets/empty_state.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_button.dart';
 import 'package:enjoy_player/core/theme/widgets/error_state.dart';
+import 'package:enjoy_player/core/theme/widgets/media_card.dart';
+import 'package:enjoy_player/core/theme/widgets/media_card/helpers.dart';
+import 'package:enjoy_player/core/utils/remote_thumbnail_url.dart';
 import 'package:enjoy_player/core/utils/time_format.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/features/library/application/library_media_provider.dart';
 import 'package:enjoy_player/features/library/application/playlist_providers.dart';
 import 'package:enjoy_player/features/library/domain/media.dart';
+import 'package:enjoy_player/features/player/application/local_thumbnail_provider.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 /// Third local-library tab: playlists.
@@ -74,39 +79,110 @@ class _PlaylistList extends ConsumerWidget {
             actionLabel: l10n.playlistCreateButton,
           );
         }
-        return CustomScrollView(
-          slivers: [
-            SliverPadding(
-              padding: EdgeInsets.fromLTRB(0, t.space4, 0, t.space32),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate((context, index) {
-                  if (index == 0) {
-                    return Padding(
-                      padding: EdgeInsets.only(bottom: t.space12),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: EnjoyButton.tonal(
-                          icon: EnjoyIcons.add,
-                          onPressed: () => createOrRenamePlaylistDialog(
-                            context,
-                            ref,
-                          ),
-                          child: Text(l10n.playlistCreateButton),
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            return CustomScrollView(
+              slivers: [
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(0, t.space4, 0, t.space16),
+                  sliver: SliverToBoxAdapter(
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: EnjoyButton.tonal(
+                        icon: EnjoyIcons.add,
+                        onPressed: () => createOrRenamePlaylistDialog(
+                          context,
+                          ref,
                         ),
+                        child: Text(l10n.playlistCreateButton),
                       ),
-                    );
-                  }
-                  final withCount = playlists[index - 1];
-                  return _PlaylistListTile(
-                    withCount: withCount,
-                    onOpen: () => onOpen(withCount.playlist.id),
-                  );
-                }, childCount: playlists.length + 1),
-              ),
-            ),
-          ],
+                    ),
+                  ),
+                ),
+                SliverPadding(
+                  padding: EdgeInsets.only(bottom: t.space32),
+                  sliver: SliverGrid(
+                    gridDelegate:
+                        mediaCardTileGridDelegateForMinTileWidth(
+                          crossAxisExtent: constraints.maxWidth,
+                          minTileWidth: 210,
+                          mainAxisSpacing: 24,
+                          crossAxisSpacing: 20,
+                        ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final withCount = playlists[index];
+                      return _PlaylistCard(
+                        key: ValueKey('playlist-card-${withCount.playlist.id}'),
+                        withCount: withCount,
+                        onOpen: () => onOpen(withCount.playlist.id),
+                      );
+                    }, childCount: playlists.length),
+                  ),
+                ),
+              ],
+            );
+          },
         );
       },
+    );
+  }
+}
+
+/// Poster-wall card for one playlist: cover = first item's media artwork
+/// (generative cover when empty), title = playlist name, subtitle = item
+/// count. Corner delete mirrors the library media cards.
+class _PlaylistCard extends ConsumerWidget {
+  const _PlaylistCard({
+    required this.withCount,
+    required this.onOpen,
+    super.key,
+  });
+
+  final PlaylistWithCount withCount;
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final playlist = withCount.playlist;
+    final items =
+        ref.watch(playlistItemsProvider(playlist.id)).asData?.value ??
+        const <PlaylistItemRow>[];
+
+    Media? coverMedia;
+    for (final item in items) {
+      final media = ref.watch(
+        playlistMediaResolverProvider((item.targetType, item.targetId)),
+      );
+      if (media != null) {
+        coverMedia = media;
+        break;
+      }
+    }
+    final thumbnailFile = coverMedia == null
+        ? null
+        : ref
+              .watch(
+                localThumbnailFileProvider(
+                  localThumbnailPathForMedia(coverMedia),
+                ),
+              )
+              .value;
+
+    return MediaCardTile(
+      title: playlist.name,
+      subtitle: l10n.playlistItemCount(withCount.itemCount),
+      thumbnailFile: thumbnailFile,
+      thumbnailNetworkUrl: coverMedia == null
+          ? null
+          : networkThumbnailForMedia(coverMedia),
+      coverSeed: playlist.id,
+      isVideo: coverMedia?.kind == MediaKind.video,
+      accentColor: generativeAccentForSeed(playlist.id),
+      onTap: onOpen,
+      onDelete: () =>
+          ref.read(playlistDaoProvider).deletePlaylist(playlist.id),
+      deleteTooltip: l10n.playlistDelete,
     );
   }
 }
@@ -152,66 +228,6 @@ Future<void> createOrRenamePlaylistDialog(
     await dao.create(name);
   } else {
     await dao.rename(existing.id, name);
-  }
-}
-
-class _PlaylistListTile extends ConsumerWidget {
-  const _PlaylistListTile({required this.withCount, required this.onOpen});
-
-  final PlaylistWithCount withCount;
-  final VoidCallback onOpen;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final t = EnjoyThemeTokens.of(context);
-    final playlist = withCount.playlist;
-
-    return Padding(
-      padding: EdgeInsets.only(bottom: t.space8),
-      child: Material(
-        color: t.paper,
-        shape: RoundedSuperellipseBorder(
-          borderRadius: BorderRadius.circular(t.radiusCard),
-          side: BorderSide(color: t.line),
-        ),
-        child: ListTile(
-          leading: Icon(EnjoyIcons.list, color: t.ink3),
-          title: Text(
-            playlist.name,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          subtitle: Text(
-            l10n.playlistItemCount(withCount.itemCount),
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: t.ink3),
-          ),
-          onTap: onOpen,
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                tooltip: l10n.playlistRename,
-                icon: const Icon(EnjoyIcons.edit, size: 18),
-                onPressed: () => createOrRenamePlaylistDialog(
-                  context,
-                  ref,
-                  existing: playlist,
-                ),
-              ),
-              IconButton(
-                tooltip: l10n.playlistDelete,
-                icon: const Icon(EnjoyIcons.delete, size: 18),
-                onPressed: () =>
-                    ref.read(playlistDaoProvider).deletePlaylist(playlist.id),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }
 
@@ -268,12 +284,26 @@ class _PlaylistDetail extends ConsumerWidget {
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ),
-                  if (items.isNotEmpty)
+                  if (name != null)
+                    IconButton(
+                      tooltip: l10n.playlistRename,
+                      icon: const Icon(EnjoyIcons.edit, size: 18),
+                      onPressed: () => createOrRenamePlaylistDialog(
+                        context,
+                        ref,
+                        existing: playlists
+                            .firstWhere((p) => p.playlist.id == playlistId)
+                            .playlist,
+                      ),
+                    ),
+                  if (items.isNotEmpty) ...[
+                    const SizedBox(width: 4),
                     EnjoyButton.tonal(
                       icon: EnjoyIcons.play,
                       onPressed: () => openPlayerRoute(context, items.first.targetId),
                       child: Text(l10n.playlistPlayAll),
                     ),
+                  ],
                   const SizedBox(width: 8),
                   EnjoyButton.tonal(
                     icon: EnjoyIcons.add,

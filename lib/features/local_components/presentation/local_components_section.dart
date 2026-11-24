@@ -123,7 +123,9 @@ class _ComponentTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      // The settings card wraps this body with EdgeInsets.zero, so the tile
+      // owns its own horizontal insets (16 matches the card's usual padding).
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: Row(
         children: [
           Icon(
@@ -139,7 +141,10 @@ class _ComponentTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${spec.displayName}${spec.optional ? '' : '（必装）'}',
+                  // "离线用" rather than "必装": translate/ASR normally go
+                  // through the configured AI endpoint; these components are
+                  // only required for fully offline use.
+                  '${spec.displayName}${spec.optional ? '' : '（离线用）'}',
                   style: theme.textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 2),
@@ -150,6 +155,7 @@ class _ComponentTile extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(width: 8),
           if (installed)
             IconButton(
               tooltip: '删除',

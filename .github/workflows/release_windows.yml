@@ -88,12 +88,23 @@ jobs:
         shell: pwsh
         run: |
           $v = "${{ steps.version.outputs.version }}"
+          $src = Join-Path $env:GITHUB_WORKSPACE "build/windows/x64/runner/Release"
           $stage = Join-Path $env:GITHUB_WORKSPACE "build/portable/SP Player"
-          New-Item -ItemType Directory -Force -Path $stage | Out-Null
-          robocopy (Join-Path $env:GITHUB_WORKSPACE "build/windows/x64/runner/Release") $stage /E /XD components /NFL /NDL /NJH /NJS
-          if ($LASTEXITCODE -ge 8) { exit $LASTEXITCODE }
           $out = Join-Path $env:GITHUB_WORKSPACE "build/SP-Player-$v-portable-win64.zip"
-          Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $out -Force
+          if (-not (Test-Path $src)) { "::error::source missing: $src"; exit 1 }
+          New-Item -ItemType Directory -Force -Path $stage | Out-Null
+          robocopy $src $stage /E /XD components /NFL /NDL /NJH /NJS
+          $rc = $LASTEXITCODE
+          Write-Host "robocopy exit=$rc"
+          if ($rc -ge 8) { "::error::robocopy failed rc=$rc"; exit $rc }
+          try {
+            Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $out -Force
+          } catch {
+            "::error::Compress-Archive failed: $_"
+            exit 1
+          }
+          if (-not (Test-Path $out)) { "::error::zip missing: $out"; exit 1 }
+          Write-Host "zip ok: $out"
           "PORTABLE=$out" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Build installer (Inno Setup)

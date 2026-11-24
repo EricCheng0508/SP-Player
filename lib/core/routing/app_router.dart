@@ -58,19 +58,19 @@ CustomTransitionPage<void> _shellPage({
     key: key,
     child: child,
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      // Fade *through*: the covered route fades OUT (its secondaryAnimation)
-      // while the incoming one fades IN. The previous plain fade-in kept the
-      // old route fully visible under a semi-transparent new one, and since
-      // the pages have transparent scaffolds the two contents superimposed —
-      // the "ghosting" on tab switches. The opaque fill behind the child also
-      // guarantees the outgoing content can never bleed through.
+      // Staggered fade-through (mirrors Material's FadeThroughTransition):
+      // the covered route fades OUT during the FIRST half, the incoming one
+      // fades IN during the SECOND half — never simultaneously. A
+      // simultaneous crossfade superimposes both pages mid-transition and
+      // reads as ghosting (user report). The opaque fill behind the child
+      // also guarantees the outgoing content can never bleed through.
       final inCurve = CurvedAnimation(
         parent: animation,
-        curve: Curves.easeOutCubic,
+        curve: const Interval(0.5, 1.0, curve: Curves.easeOutCubic),
       );
       final outCurve = CurvedAnimation(
         parent: secondaryAnimation,
-        curve: Curves.easeIn,
+        curve: const Interval(0.0, 0.5, curve: Curves.easeIn),
       );
       return ColoredBox(
         color: EnjoyThemeTokens.of(context).canvas,
@@ -252,7 +252,10 @@ GoRouter appRouter(Ref ref) {
           GoRoute(
             name: 'settings',
             path: '/settings',
-            builder: (context, state) => const SettingsScreen(),
+            pageBuilder: (context, state) => _shellPage(
+              key: const ValueKey<String>('shell-settings'),
+              child: const SettingsScreen(),
+            ),
           ),
           GoRoute(
             name: 'settings-keyboard',
@@ -300,7 +303,10 @@ GoRouter appRouter(Ref ref) {
           GoRoute(
             name: 'vocabulary',
             path: '/vocabulary',
-            builder: (context, state) => const VocabularyScreen(),
+            pageBuilder: (context, state) => _shellPage(
+              key: const ValueKey<String>('shell-vocabulary'),
+              child: const VocabularyScreen(),
+            ),
           ),
           GoRoute(
             name: 'vocabulary-review',

@@ -68,12 +68,9 @@ class MediaKitPlayerEngine
     if (Platform.isAndroid || Platform.isIOS) {
       return const VideoControllerConfiguration();
     }
-    // No fixed width/height: a fixed 1920×1080 initial texture is *visible*
-    // (black letterbox) until the first frame forces a resize to the real
-    // video size — the texture swap reads as a content jump on open. Without
-    // it media_kit starts at a 1×1 placeholder that the [Video] widget hides
-    // (`rect <= 1`), so the only resize lands on an invisible texture.
     return const VideoControllerConfiguration(
+      width: kVideoControllerWidth,
+      height: kVideoControllerHeight,
       // Hardware decoding + hardware rendering is the pairing media_kit is
       // actually tested against. The software pairing (hwdec 'no' +
       // enableHardwareAcceleration false) renders into a pixel-buffer texture

@@ -118,21 +118,3 @@ PlaybackChrome? playbackChromeOf(PlaybackSession? session) {
     language: session.language,
   );
 }
-
-/// Placeholder chrome for the frames before a session exists.
-///
-/// The transport dock renders against this while the open is still in flight,
-/// so the bottom of the player page never flips between "empty reserved slot"
-/// and "real dock" — the dock is simply there from the first frame with
-/// zeroed content, and fills in when the session arrives. Safe since the
-/// engine-swap fast path arms a lazily-allocated engine (engine_swap_
-/// coordinator.dart).
-const PlaybackChrome emptyPlaybackChrome = (
-  mediaId: '',
-  dexieTargetType: '',
-  mediaType: '',
-  mediaTitle: '',
-  thumbnailUrl: null,
-  durationSeconds: 0,
-  language: '',
-);

@@ -476,7 +476,7 @@
   "@settingsSectionAi": {
     "description": "Header for the AI provider settings section."
   },
-  "settingsSectionAiHint": "Choose Enjoy AI or bring your own API keys.",
+  "settingsSectionAiHint": "Configure your own API keys per feature; speech recognition and translation use local components by default.",
   "@settingsSectionAiHint": {
     "description": "Subtitle under the AI settings section header."
   },
@@ -484,7 +484,7 @@
   "@settingsAiProvidersTileTitle": {
     "description": "Settings tile title for AI provider configuration."
   },
-  "settingsAiProvidersTileSubtitle": "Enjoy AI by default, or use your own keys per feature",
+  "settingsAiProvidersTileSubtitle": "Configure your own API keys per feature",
   "@settingsAiProvidersTileSubtitle": {
     "description": "Settings tile subtitle for AI provider configuration."
   },
@@ -496,11 +496,11 @@
   "@settingsAiProvidersSubtitle": {
     "description": "Screen subtitle for AI provider settings."
   },
-  "settingsAiProvidersPrivacyNotice": "API keys are stored securely on this device only and are never synced to Enjoy cloud.",
+  "settingsAiProvidersPrivacyNotice": "API keys are stored securely on this device only and are never uploaded to any cloud.",
   "@settingsAiProvidersPrivacyNotice": {
     "description": "Privacy notice on the AI providers settings screen."
   },
-  "settingsAiProvidersEnjoyAi": "Enjoy AI",
+  "settingsAiProvidersEnjoyAi": "Default",
   "@settingsAiProvidersEnjoyAi": {
     "description": "Label when a modality uses Enjoy cloud AI."
   },
@@ -612,19 +612,19 @@
   "@settingsAiProvidersSaveSuccess": {
     "description": "Success notice after saving BYOK settings."
   },
-  "settingsAiProvidersRemoveByok": "Remove BYOK",
+  "settingsAiProvidersRemoveByok": "Remove",
   "@settingsAiProvidersRemoveByok": {
     "description": "Remove BYOK credentials action."
   },
-  "settingsAiProvidersRemoveByokTitle": "Remove BYOK credentials?",
+  "settingsAiProvidersRemoveByokTitle": "Remove the saved key?",
   "@settingsAiProvidersRemoveByokTitle": {
     "description": "Confirm dialog title for removing BYOK."
   },
-  "settingsAiProvidersRemoveByokBody": "This deletes the saved API key on this device and reverts the feature to Enjoy AI.",
+  "settingsAiProvidersRemoveByokBody": "This deletes the API key saved on this device.",
   "@settingsAiProvidersRemoveByokBody": {
     "description": "Confirm dialog body for removing BYOK."
   },
-  "settingsAiProvidersRemoveByokSuccess": "BYOK credentials removed.",
+  "settingsAiProvidersRemoveByokSuccess": "Saved key removed.",
   "@settingsAiProvidersRemoveByokSuccess": {
     "description": "Success notice after removing BYOK."
   },

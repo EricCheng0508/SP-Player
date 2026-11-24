@@ -744,7 +744,7 @@
   "@settingsSectionAi": {
     "description": "Header for the AI provider settings section."
   },
-  "settingsSectionAiHint": "选择 Enjoy AI 或自备 API 密钥。",
+  "settingsSectionAiHint": "为各功能配置你自己的 API 密钥；识别与翻译默认使用本地组件。",
   "@settingsSectionAiHint": {
     "description": "Subtitle under the AI settings section header."
   },

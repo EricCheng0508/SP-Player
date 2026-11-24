@@ -1722,7 +1722,7 @@ abstract class AppLocalizations {
   /// Subtitle under the AI settings section header.
   ///
   /// In en, this message translates to:
-  /// **'Choose Enjoy AI or bring your own API keys.'**
+  /// **'Configure your own API keys per feature; speech recognition and translation use local components by default.'**
   String get settingsSectionAiHint;
 
   /// Settings tile title for AI provider configuration.
@@ -1734,7 +1734,7 @@ abstract class AppLocalizations {
   /// Settings tile subtitle for AI provider configuration.
   ///
   /// In en, this message translates to:
-  /// **'Enjoy AI by default, or use your own keys per feature'**
+  /// **'Configure your own API keys per feature'**
   String get settingsAiProvidersTileSubtitle;
 
   /// Screen title for AI provider settings.
@@ -1752,13 +1752,13 @@ abstract class AppLocalizations {
   /// Privacy notice on the AI providers settings screen.
   ///
   /// In en, this message translates to:
-  /// **'API keys are stored securely on this device only and are never synced to Enjoy cloud.'**
+  /// **'API keys are stored securely on this device only and are never uploaded to any cloud.'**
   String get settingsAiProvidersPrivacyNotice;
 
   /// Label when a modality uses Enjoy cloud AI.
   ///
   /// In en, this message translates to:
-  /// **'Enjoy AI'**
+  /// **'Default'**
   String get settingsAiProvidersEnjoyAi;
 
   /// Label when a modality uses BYOK credentials.
@@ -1926,25 +1926,25 @@ abstract class AppLocalizations {
   /// Remove BYOK credentials action.
   ///
   /// In en, this message translates to:
-  /// **'Remove BYOK'**
+  /// **'Remove'**
   String get settingsAiProvidersRemoveByok;
 
   /// Confirm dialog title for removing BYOK.
   ///
   /// In en, this message translates to:
-  /// **'Remove BYOK credentials?'**
+  /// **'Remove the saved key?'**
   String get settingsAiProvidersRemoveByokTitle;
 
   /// Confirm dialog body for removing BYOK.
   ///
   /// In en, this message translates to:
-  /// **'This deletes the saved API key on this device and reverts the feature to Enjoy AI.'**
+  /// **'This deletes the API key saved on this device.'**
   String get settingsAiProvidersRemoveByokBody;
 
   /// Success notice after removing BYOK.
   ///
   /// In en, this message translates to:
-  /// **'BYOK credentials removed.'**
+  /// **'Saved key removed.'**
   String get settingsAiProvidersRemoveByokSuccess;
 
   /// Cancel action in BYOK dialogs.

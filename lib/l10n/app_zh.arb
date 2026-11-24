@@ -335,7 +335,7 @@
   "@settingsSectionAi": {
     "description": "Header for the AI provider settings section."
   },
-  "settingsSectionAiHint": "选择 Enjoy AI 或自备 API 密钥。",
+  "settingsSectionAiHint": "为各功能配置你自己的 API 密钥；识别与翻译默认使用本地组件。",
   "@settingsSectionAiHint": {
     "description": "Subtitle under the AI settings section header."
   },
@@ -343,7 +343,7 @@
   "@settingsAiProvidersTileTitle": {
     "description": "Settings tile title for AI provider configuration."
   },
-  "settingsAiProvidersTileSubtitle": "默认使用 Enjoy AI，也可为各功能配置自己的密钥",
+  "settingsAiProvidersTileSubtitle": "为各功能配置自己的 API 密钥",
   "@settingsAiProvidersTileSubtitle": {
     "description": "Settings tile subtitle for AI provider configuration."
   },
@@ -355,11 +355,11 @@
   "@settingsAiProvidersSubtitle": {
     "description": "Screen subtitle for AI provider settings."
   },
-  "settingsAiProvidersPrivacyNotice": "API 密钥仅安全存储在本设备，不会同步到 Enjoy 云端。",
+  "settingsAiProvidersPrivacyNotice": "API 密钥仅安全存储在本设备，不会上传到任何云端。",
   "@settingsAiProvidersPrivacyNotice": {
     "description": "Privacy notice on the AI providers settings screen."
   },
-  "settingsAiProvidersEnjoyAi": "Enjoy AI",
+  "settingsAiProvidersEnjoyAi": "默认",
   "@settingsAiProvidersEnjoyAi": {
     "description": "Label when a modality uses Enjoy cloud AI."
   },
@@ -417,10 +417,10 @@
   "settingsAiProvidersFetchModelsEmpty": "此端点未返回任何模型。",
   "settingsAiProvidersSave": "保存",
   "settingsAiProvidersSaveSuccess": "AI 提供商设置已保存。",
-  "settingsAiProvidersRemoveByok": "移除 BYOK",
-  "settingsAiProvidersRemoveByokTitle": "移除 BYOK 凭据？",
-  "settingsAiProvidersRemoveByokBody": "将删除本设备上保存的 API 密钥，并将该功能恢复为 Enjoy AI。",
-  "settingsAiProvidersRemoveByokSuccess": "BYOK 凭据已移除。",
+  "settingsAiProvidersRemoveByok": "移除",
+  "settingsAiProvidersRemoveByokTitle": "移除已保存的密钥？",
+  "settingsAiProvidersRemoveByokBody": "将删除本设备上保存的 API 密钥。",
+  "settingsAiProvidersRemoveByokSuccess": "已移除保存的密钥。",
   "settingsAiProvidersCancel": "取消",
   "settingsAiProvidersComingSoon": "此功能的 BYOK 配置即将推出。",
   "settingsAiProvidersSpeechSubscriptionKeyLabel": "Azure 订阅密钥",

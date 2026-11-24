@@ -918,14 +918,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsSectionAiHint =>
-      'Choose Enjoy AI or bring your own API keys.';
+      'Configure your own API keys per feature; speech recognition and translation use local components by default.';
 
   @override
   String get settingsAiProvidersTileTitle => 'AI providers';
 
   @override
   String get settingsAiProvidersTileSubtitle =>
-      'Enjoy AI by default, or use your own keys per feature';
+      'Configure your own API keys per feature';
 
   @override
   String get settingsAiProvidersTitle => 'AI providers';
@@ -936,10 +936,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsAiProvidersPrivacyNotice =>
-      'API keys are stored securely on this device only and are never synced to Enjoy cloud.';
+      'API keys are stored securely on this device only and are never uploaded to any cloud.';
 
   @override
-  String get settingsAiProvidersEnjoyAi => 'Enjoy AI';
+  String get settingsAiProvidersEnjoyAi => 'Default';
 
   @override
   String get settingsAiProvidersByok => 'Your API key';
@@ -1030,18 +1030,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAiProvidersSaveSuccess => 'AI provider settings saved.';
 
   @override
-  String get settingsAiProvidersRemoveByok => 'Remove BYOK';
+  String get settingsAiProvidersRemoveByok => 'Remove';
 
   @override
-  String get settingsAiProvidersRemoveByokTitle => 'Remove BYOK credentials?';
+  String get settingsAiProvidersRemoveByokTitle => 'Remove the saved key?';
 
   @override
   String get settingsAiProvidersRemoveByokBody =>
-      'This deletes the saved API key on this device and reverts the feature to Enjoy AI.';
+      'This deletes the API key saved on this device.';
 
   @override
-  String get settingsAiProvidersRemoveByokSuccess =>
-      'BYOK credentials removed.';
+  String get settingsAiProvidersRemoveByokSuccess => 'Saved key removed.';
 
   @override
   String get settingsAiProvidersCancel => 'Cancel';

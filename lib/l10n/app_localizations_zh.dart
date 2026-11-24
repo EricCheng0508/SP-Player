@@ -880,13 +880,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsSectionAi => 'AI';
 
   @override
-  String get settingsSectionAiHint => '选择 Enjoy AI 或自备 API 密钥。';
+  String get settingsSectionAiHint => '为各功能配置你自己的 API 密钥；识别与翻译默认使用本地组件。';
 
   @override
   String get settingsAiProvidersTileTitle => 'AI 提供商';
 
   @override
-  String get settingsAiProvidersTileSubtitle => '默认使用 Enjoy AI，也可为各功能配置自己的密钥';
+  String get settingsAiProvidersTileSubtitle => '为各功能配置自己的 API 密钥';
 
   @override
   String get settingsAiProvidersTitle => 'AI 提供商';
@@ -895,11 +895,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsAiProvidersSubtitle => '配置 SP Player 各 AI 功能的调用方式。';
 
   @override
-  String get settingsAiProvidersPrivacyNotice =>
-      'API 密钥仅安全存储在本设备，不会同步到 Enjoy 云端。';
+  String get settingsAiProvidersPrivacyNotice => 'API 密钥仅安全存储在本设备，不会上传到任何云端。';
 
   @override
-  String get settingsAiProvidersEnjoyAi => 'Enjoy AI';
+  String get settingsAiProvidersEnjoyAi => '默认';
 
   @override
   String get settingsAiProvidersByok => '自备密钥';
@@ -985,17 +984,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsAiProvidersSaveSuccess => 'AI 提供商设置已保存。';
 
   @override
-  String get settingsAiProvidersRemoveByok => '移除 BYOK';
+  String get settingsAiProvidersRemoveByok => '移除';
 
   @override
-  String get settingsAiProvidersRemoveByokTitle => '移除 BYOK 凭据？';
+  String get settingsAiProvidersRemoveByokTitle => '移除已保存的密钥？';
 
   @override
-  String get settingsAiProvidersRemoveByokBody =>
-      '将删除本设备上保存的 API 密钥，并将该功能恢复为 Enjoy AI。';
+  String get settingsAiProvidersRemoveByokBody => '将删除本设备上保存的 API 密钥。';
 
   @override
-  String get settingsAiProvidersRemoveByokSuccess => 'BYOK 凭据已移除。';
+  String get settingsAiProvidersRemoveByokSuccess => '已移除保存的密钥。';
 
   @override
   String get settingsAiProvidersCancel => '取消';
@@ -5538,7 +5536,7 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String get settingsSectionAi => 'AI';
 
   @override
-  String get settingsSectionAiHint => '选择 Enjoy AI 或自备 API 密钥。';
+  String get settingsSectionAiHint => '为各功能配置你自己的 API 密钥；识别与翻译默认使用本地组件。';
 
   @override
   String get settingsAiProvidersTileTitle => 'AI 提供商';

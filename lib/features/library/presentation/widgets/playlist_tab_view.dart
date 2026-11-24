@@ -105,7 +105,7 @@ class _PlaylistList extends ConsumerWidget {
                   ),
                 ),
                 SliverPadding(
-                  padding: EdgeInsets.only(bottom: t.space32),
+                  padding: EdgeInsets.fromLTRB(inset, 0, inset, t.space32),
                   sliver: SliverGrid(
                     gridDelegate:
                         mediaCardTileGridDelegateForMinTileWidth(

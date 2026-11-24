@@ -79,14 +79,8 @@ class _RootShellState extends ConsumerState<RootShell> {
   Widget build(BuildContext context) {
     ref.watch(syncCtrlProvider);
     ref.watch(discoverFeedRefreshSchedulerProvider);
-    // The dock slot is held on the player route even before a session exists
-    // (`emptyPlaybackChrome`): a dock that appears a few frames late resizes
-    // the video stage mid-open — the "screen flashes on open" report.
-    final chrome =
-        ref.watch(
-          playerControllerProvider.select(playbackChromeOf),
-        ) ??
-        emptyPlaybackChrome;
+    final chrome = ref.watch(playerControllerProvider.select(playbackChromeOf));
+    final sessionActive = chrome != null;
     final updateBadge = ref.watch(updateAvailableBadgeProvider);
     final l10n = AppLocalizations.of(context)!;
     final path = GoRouterState.of(context).uri.path;
@@ -170,7 +164,7 @@ class _RootShellState extends ConsumerState<RootShell> {
               /// frames (nested scaffold / safe-area constraint propagation), which pins the
               /// bar under the status bar and hides video + transcript. [Scaffold] reserves
               /// space via [bottomNavigationBar] instead.
-              final playerWithTransport = onPlayer;
+              final playerWithTransport = sessionActive && onPlayer;
 
               final bottomClearance = !useSidebar && !onPlayer && !onReview
                   ? rootShellBottomNavClearance(context)

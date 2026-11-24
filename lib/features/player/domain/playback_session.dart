@@ -118,20 +118,3 @@ PlaybackChrome? playbackChromeOf(PlaybackSession? session) {
     language: session.language,
   );
 }
-
-/// Placeholder chrome for the frames before a session exists.
-///
-/// The transport dock must occupy its slot from the very first frame of the
-/// player route: if the dock only mounts once the session arrives, the video
-/// stage runs full-height for a moment and then shrinks — the "screen flashes
-/// on open" report. Rendering the dock against this empty chrome keeps the
-/// geometry identical while the real session loads.
-const PlaybackChrome emptyPlaybackChrome = (
-  mediaId: '',
-  dexieTargetType: '',
-  mediaType: '',
-  mediaTitle: '',
-  thumbnailUrl: null,
-  durationSeconds: 0,
-  language: '',
-);

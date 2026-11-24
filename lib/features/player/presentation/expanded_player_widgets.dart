@@ -126,18 +126,15 @@ class _LocalLoadingSplitBody extends ConsumerWidget {
   /// `VideoPlayerLayout._kSplitterHitWidth`.
   static const double _splitterHitWidth = 12;
 
-  /// No poster here on purpose: a video still that later dissolves into the
-  /// live picture reads as a "fake frame flashing away" (user report). The
-  /// loading stage is a plain black panel + skeleton; the video surface fades
-  /// in over it when the first frame lands.
+  /// No poster and no skeleton here on purpose: the poster read as a "fake
+  /// frame flashing away" and the big centered skeleton as a ghost (user
+  /// reports). The loading stage is a plain black panel; the video surface
+  /// takes over when the first frame lands.
   Widget _stageChild() {
     return PlayerSurfaceTarget(
       id: PlayerSurfaceIds.expandedPlayer,
       overlayBuilder: (_) => const SizedBox.shrink(),
-      child: const ColoredBox(
-        color: Colors.black,
-        child: Center(child: SkeletonAppBootstrap()),
-      ),
+      child: const ColoredBox(color: Colors.black),
     );
   }
 

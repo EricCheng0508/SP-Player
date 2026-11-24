@@ -192,7 +192,7 @@ class MediaKitPlayerEngine
       !(Platform.isWindows || Platform.isLinux || Platform.isMacOS);
 
   @override
-  Future<void> open(PlayableSource source) async {
+  Future<void> open(PlayableSource source, {Duration? startAt}) async {
     final uri = switch (source) {
       LocalFilePlayableSource(:final uri) => uri,
       RemoteUrlPlayableSource(:final uri) => uri,
@@ -210,7 +210,12 @@ class MediaKitPlayerEngine
     }
     // Must precede `open()` — see [ensureVideoOutput].
     ensureVideoOutput();
-    await _player.open(mk.Media(uri));
+    // [startAt] makes mpv decode from the resume position directly, so the
+    // first presented frame is already the right one — without it the player
+    // presents a 0:00 frame and then jumps to the restore position (the
+    // "video flashes from the beginning" report). The post-open restore seek
+    // in the open choreography stays as a fallback.
+    await _player.open(mk.Media(uri, start: startAt));
   }
 
   @override

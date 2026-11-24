@@ -211,6 +211,7 @@ abstract interface class PlayerOpenScope {
     required bool swappedAfterInstall,
     required Duration openTimeout,
     required Duration engineCommandTimeout,
+    Duration? startAt,
   });
 
   /// The single dependency channel: everything the choreography used to pull
@@ -315,6 +316,21 @@ Future<void> runPlayerOpen(
       mediaId,
     )..ignore();
 
+    // The persisted position is read *before* the engine opens so the resume
+    // position can ride `Media.start` — mpv then decodes from that position
+    // directly and the 0:00 → restore-position flash never exists. The
+    // post-open 'position restore seek' below remains as the fallback.
+    final persistedEarly = await steps.run(
+      'read persisted echo session',
+      () => persistedFuture,
+    );
+    final startAtMs = options.restorePosition
+        ? (persistedEarly?.currentTimeMs ?? 0)
+        : 0;
+    final startAt = startAtMs > 0
+        ? Duration(milliseconds: startAtMs)
+        : null;
+
     await steps.run(
       'open engine with retry',
       () => scope.openEngineWithRetry(
@@ -324,6 +340,7 @@ Future<void> runPlayerOpen(
         swappedAfterInstall: swapped,
         openTimeout: openTimeout,
         engineCommandTimeout: engineCommandTimeout,
+        startAt: startAt,
       ),
       onSuperseded: () async {
         try {

@@ -176,7 +176,7 @@ class YoutubePlayerEngine
       _webView.idleAfterClear(keepMounted: keepSurfaceMounted);
 
   @override
-  Future<void> open(PlayableSource source) async {
+  Future<void> open(PlayableSource source, {Duration? startAt}) async {
     final unavailable = switch (_availability) {
       final YouTubeUnavailable u => u,
       _ => null,

@@ -154,7 +154,7 @@ class FakePlayerEngine
   }
 
   @override
-  Future<void> open(PlayableSource source) async {
+  Future<void> open(PlayableSource source, {Duration? startAt}) async {
     _recordUriFromSource(source);
     if (!openEntered.isCompleted) openEntered.complete();
     final delay = openDelay;

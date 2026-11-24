@@ -189,7 +189,7 @@ class _RootShellState extends ConsumerState<RootShell> {
                       type: MaterialType.transparency,
                       child: sessionActive
                           ? PlayerDock(chrome: chrome)
-                          : const SizedBox(height: kDockPlaceholderHeight),
+                          : const PlayerDockSkeleton(),
                     ),
                   );
                 }

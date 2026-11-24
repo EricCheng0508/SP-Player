@@ -114,7 +114,7 @@ abstract class PlayerEngine {
   /// reported "menu opens → video goes black" symptom.
   bool get overlaysNeedSurfaceParking => true;
 
-  Future<void> open(PlayableSource source);
+  Future<void> open(PlayableSource source, {Duration? startAt});
 
   Future<void> seek(Duration target);
 

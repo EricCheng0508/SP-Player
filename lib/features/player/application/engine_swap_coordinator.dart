@@ -322,12 +322,13 @@ class EngineSwapCoordinator {
     required bool swappedAfterInstall,
     required Duration openTimeout,
     required Duration engineCommandTimeout,
+    Duration? startAt,
   }) async {
     final firstTimeout = swappedAfterInstall
         ? engineCommandTimeout
         : openTimeout;
     try {
-      await engine.open(playable).timeout(firstTimeout);
+      await engine.open(playable, startAt: startAt).timeout(firstTimeout);
     } on TimeoutException {
       _swapLog.warning(
         'engine.open timed out after $firstTimeout '
@@ -337,7 +338,7 @@ class EngineSwapCoordinator {
       if (_isStale(openGeneration)) return;
       final retryEngine = _getActiveEngine();
       try {
-        await retryEngine.open(playable).timeout(openTimeout);
+        await retryEngine.open(playable, startAt: startAt).timeout(openTimeout);
       } on TimeoutException {
         _swapLog.severe(
           'engine.open retry timed out after $openTimeout '

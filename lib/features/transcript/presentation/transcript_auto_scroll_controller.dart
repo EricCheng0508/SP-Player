@@ -64,6 +64,16 @@ final class TranscriptAutoScrollController {
 
   ScrollController get scrollController => _scrollController;
 
+  /// Whether the scroll position has laid-out dimensions. Slots build during
+  /// sliver layout, so a rebuild that recreates the scrollable (e.g. toggling
+  /// blur mode) exposes a position whose extents are still null — reading
+  /// [ScrollPosition.maxScrollExtent] there throws on its null check.
+  bool get _positionReady {
+    if (!_scrollController.hasClients) return false;
+    final pos = _scrollController.position;
+    return pos.hasContentDimensions && pos.hasViewportDimension;
+  }
+
   void dispose() {
     _scrollGeneration++;
     _scrollController.dispose();
@@ -105,7 +115,7 @@ final class TranscriptAutoScrollController {
   int scrollFocusLineIndex() {
     final lineCount = this.lineCount();
     if (lineCount <= 0) return 0;
-    if (!_scrollController.hasClients) return 0;
+    if (!_positionReady) return 0;
     final pos = _scrollController.position;
     if (pos.maxScrollExtent <= 0) return 0;
     final ratio = (pos.pixels / pos.maxScrollExtent).clamp(0.0, 1.0);
@@ -173,7 +183,7 @@ final class TranscriptAutoScrollController {
 
   /// Whether the active cue line is roughly within the visible viewport.
   bool _isActiveCueVisible(int activeLineIndex) {
-    if (!_scrollController.hasClients) return true;
+    if (!_positionReady) return true;
     final pos = _scrollController.position;
     if (_activeLineScrollKeyIndex == activeLineIndex) {
       final ro = _activeLineScrollKey?.currentContext?.findRenderObject();
@@ -196,11 +206,11 @@ final class TranscriptAutoScrollController {
   /// Uses raw line index (single-line tile height) so tall echo cards do not
   /// inflate the estimate and overshoot off-screen.
   void _jumpToLineIndexEstimate(int lineIndex, {required double alignment}) {
-    if (!_scrollController.hasClients || lineIndex < 0) return;
+    if (lineIndex < 0) return;
 
     final lineCount = this.lineCount();
     if (lineCount <= 0) return;
-
+    if (!_positionReady) return;
     final pos = _scrollController.position;
     final ratio = lineIndex / lineCount;
     final estimated = ratio * pos.maxScrollExtent;

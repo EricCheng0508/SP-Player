@@ -128,6 +128,31 @@ class MediaKitPlayerEngine
     });
   }
 
+  /// Buffered-ahead end position. Only meaningful for network streams — a
+  /// local file's mpv cache band tells the user nothing, so [open] rewires
+  /// this to the empty stream for local sources (the scrubber hides the band).
+  final StreamController<Duration> _bufferEndController =
+      StreamController<Duration>.broadcast();
+  StreamSubscription<Duration>? _bufferEndSub;
+
+  @override
+  Stream<Duration> get bufferEnd => _bufferEndController.stream;
+
+  void _rewireBufferEnd(PlayableSource source) {
+    _bufferEndSub?.cancel();
+    _bufferEndSub = null;
+    final player = __player;
+    if (source is! RemoteUrlPlayableSource || player == null) {
+      // Local file: report an explicit zero so a stale band cannot linger.
+      _bufferEndController.add(Duration.zero);
+      return;
+    }
+    _bufferEndSub = player.stream.buffer.listen(
+      _bufferEndController.add,
+      onError: _bufferEndController.addError,
+    );
+  }
+
   @override
   Stream<bool> get playing =>
       __player?.stream.playing ?? const Stream<bool>.empty();
@@ -135,10 +160,6 @@ class MediaKitPlayerEngine
   @override
   Stream<bool> get buffering =>
       __player?.stream.buffering ?? const Stream<bool>.empty();
-
-  @override
-  Stream<Duration> get bufferEnd =>
-      __player?.stream.buffer ?? const Stream<Duration>.empty();
 
   @override
   Stream<void> get completed =>
@@ -214,6 +235,7 @@ class MediaKitPlayerEngine
     }
     // Must precede `open()` — see [ensureVideoOutput].
     ensureVideoOutput();
+    _rewireBufferEnd(source);
     // [startAt] makes mpv decode from the resume position directly, so the
     // first presented frame is already the right one — without it the player
     // presents a 0:00 frame and then jumps to the restore position (the
@@ -279,6 +301,9 @@ class MediaKitPlayerEngine
     }
     await __player?.dispose();
     __player = null;
+    await _bufferEndSub?.cancel();
+    _bufferEndSub = null;
+    await _bufferEndController.close();
   }
 }
 

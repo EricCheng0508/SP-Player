@@ -1,11 +1,12 @@
-/// Sentence-explanation lookup section — manual trigger.
+/// Sentence-explanation lookup section — auto-runs on expand.
 ///
-/// Unlike the other lookup sections this one does NOT auto-fire on sheet
-/// open (a word lookup shouldn't spend an LLM call on a full sentence
-/// breakdown). It shows a run button; the result renders as markdown and is
-/// cached through the shared `AiResultCache` hierarchy (AiKind.explain),
-/// keyed on `(sentence, language pair, context)` — the same fingerprint the
-/// force-refresh path invalidates.
+/// The fetch state lives on the section widget (not the shell body), so
+/// collapsing and re-expanding keeps the previous result visible instead of
+/// resetting to a run button. The first expand auto-fires the request — the
+/// user tapped "讲解这句" deliberately, so a second confirmation click adds
+/// nothing. Results are cached through the shared `AiResultCache` hierarchy
+/// (AiKind.explain), keyed on `(sentence, language pair, context)` — the same
+/// fingerprint the force-refresh path invalidates.
 library;
 
 import 'package:enjoy_player/core/theme/enjoy_icons.dart';
@@ -16,7 +17,6 @@ import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
-import 'package:enjoy_player/core/theme/widgets/enjoy_button.dart';
 import 'package:enjoy_player/core/theme/lookup_markdown_style.dart';
 import 'package:enjoy_player/features/ai/application/ai_result_cache.dart';
 import 'package:enjoy_player/features/ai/application/ai_services.dart';
@@ -35,45 +35,17 @@ import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_refresh
 import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_section_shimmer.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
-class ExplainLookupSection extends ConsumerWidget {
+class ExplainLookupSection extends ConsumerStatefulWidget {
   const ExplainLookupSection({required this.request, super.key});
 
   final LookupRequest request;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final params = LookupExplainParams(
-      text: request.selectedText,
-      sourceLanguage: request.sourceLanguage,
-      targetLanguage: request.targetLanguage,
-      context: request.contextualContext,
-    );
-
-    return LookupSectionShell(
-      title: l10n.lookupSectionExplain,
-      initiallyExpanded: false,
-      leading: const Icon(EnjoyIcons.sparkle),
-      surface: AuthRequiredSurface.lookupContextual,
-      bodyBuilder: (_) => _ExplainFetchBody(params: params, l10n: l10n),
-    );
-  }
+  ConsumerState<ExplainLookupSection> createState() =>
+      _ExplainLookupSectionState();
 }
 
-/// Manual-trigger fetch body, modeled on the contextual-translation section:
-/// a single [Future] tied to [ConsumerState] (not an autoDispose provider),
-/// results stored in [AiResultCache<LineExplanation>].
-class _ExplainFetchBody extends ConsumerStatefulWidget {
-  const _ExplainFetchBody({required this.params, required this.l10n});
-
-  final LookupExplainParams params;
-  final AppLocalizations l10n;
-
-  @override
-  ConsumerState<_ExplainFetchBody> createState() => _ExplainFetchBodyState();
-}
-
-class _ExplainFetchBodyState extends ConsumerState<_ExplainFetchBody> {
+class _ExplainLookupSectionState extends ConsumerState<ExplainLookupSection> {
   static const Duration _timeout = Duration(seconds: 120);
 
   Future<LineExplanation>? _future;
@@ -85,6 +57,26 @@ class _ExplainFetchBodyState extends ConsumerState<_ExplainFetchBody> {
   Object? _lastError;
 
   bool _retryInFlight = false;
+
+  @override
+  void didUpdateWidget(ExplainLookupSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final old = oldWidget.request;
+    final now = widget.request;
+    final changed = old.selectedText != now.selectedText ||
+        old.sourceLanguage != now.sourceLanguage ||
+        old.targetLanguage != now.targetLanguage ||
+        old.contextualContext != now.contextualContext;
+    if (changed) _reset();
+  }
+
+  void _reset() {
+    _silenceDetachedFuture(_future);
+    _future = null;
+    _staleSuccess = null;
+    _lastError = null;
+    _retryInFlight = false;
+  }
 
   @override
   void dispose() {
@@ -105,7 +97,13 @@ class _ExplainFetchBodyState extends ConsumerState<_ExplainFetchBody> {
   }
 
   Future<LineExplanation> _load({required bool forceRefresh}) {
-    final p = widget.params;
+    final request = widget.request;
+    final p = LookupExplainParams(
+      text: request.selectedText,
+      sourceLanguage: request.sourceLanguage,
+      targetLanguage: request.targetLanguage,
+      context: request.contextualContext,
+    );
     final cache = ref.read(aiExplainCacheProvider);
     final key = lookupExplainCacheKey(p);
     return cache.lookup(
@@ -159,7 +157,7 @@ class _ExplainFetchBodyState extends ConsumerState<_ExplainFetchBody> {
           top: 0,
           end: 0,
           child: LookupRefreshIconButton(
-            l10n: widget.l10n,
+            l10n: l10n,
             isRetrying: isRefreshing,
             onRetry: onRefresh,
           ),
@@ -168,29 +166,17 @@ class _ExplainFetchBodyState extends ConsumerState<_ExplainFetchBody> {
     );
   }
 
-  Widget _markdownBody(LineExplanation d) {
-    final t = EnjoyThemeTokens.of(context);
-    final mdStyle = buildLookupMarkdownStyleSheet(context, t);
-    if (d.text.trim().isEmpty) {
-      return Text(
-        widget.l10n.lookupEmpty,
-        style: Theme.of(context).textTheme.bodyMedium,
-      );
-    }
-    return MarkdownBody(data: d.text, selectable: true, styleSheet: mdStyle);
-  }
+  AppLocalizations get l10n => AppLocalizations.of(context)!;
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildBody(BuildContext context) {
     final future = _future;
     if (future == null) {
-      // Manual trigger: the run button instead of the auto-fetch shimmer.
-      return Center(
-        child: EnjoyButton.tonal(
-          onPressed: () => _run(forceRefresh: false),
-          child: Text(widget.l10n.lookupExplainRun),
-        ),
-      );
+      // First expand: auto-fire so the explanation streams in without a
+      // second click. Shimmer covers the wait.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _future == null) _run(forceRefresh: false);
+      });
+      return const LookupSectionShimmer();
     }
     return FutureBuilder<LineExplanation>(
       future: future,
@@ -208,7 +194,7 @@ class _ExplainFetchBodyState extends ConsumerState<_ExplainFetchBody> {
             return lookupSectionErrorWidget(
               context: context,
               ref: ref,
-              l10n: widget.l10n,
+              l10n: l10n,
               section: LookupSectionId.explain,
               surface: AuthRequiredSurface.lookupContextual,
               error: _lastError!,
@@ -226,7 +212,7 @@ class _ExplainFetchBodyState extends ConsumerState<_ExplainFetchBody> {
           return lookupSectionErrorWidget(
             context: context,
             ref: ref,
-            l10n: widget.l10n,
+            l10n: l10n,
             section: LookupSectionId.explain,
             surface: AuthRequiredSurface.lookupContextual,
             error: e,
@@ -249,6 +235,29 @@ class _ExplainFetchBodyState extends ConsumerState<_ExplainFetchBody> {
           body: _markdownBody(d),
         );
       },
+    );
+  }
+
+  Widget _markdownBody(LineExplanation d) {
+    final t = EnjoyThemeTokens.of(context);
+    final mdStyle = buildLookupMarkdownStyleSheet(context, t);
+    if (d.text.trim().isEmpty) {
+      return Text(
+        l10n.lookupEmpty,
+        style: Theme.of(context).textTheme.bodyMedium,
+      );
+    }
+    return MarkdownBody(data: d.text, selectable: true, styleSheet: mdStyle);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LookupSectionShell(
+      title: l10n.lookupSectionExplain,
+      initiallyExpanded: false,
+      leading: const Icon(EnjoyIcons.sparkle),
+      surface: AuthRequiredSurface.lookupContextual,
+      bodyBuilder: _buildBody,
     );
   }
 }

@@ -176,23 +176,33 @@ class _RootShellState extends ConsumerState<RootShell> {
                   ? rootShellBottomNavClearance(context)
                   : 0.0;
 
+              // Notices must clear the player dock on the player route too —
+              // without this [AppNotice] floats at the window bottom and the
+              // dock covers it (unreadable dark-on-dark strip).
+              final noticeBottomClearance = onPlayer
+                  ? kRootShellTransportSnackClearance
+                  : bottomClearance;
+
               Widget mobileShellScaffold() {
                 if (playerWithTransport) {
-                  return Scaffold(
-                    backgroundColor: Colors.transparent,
-                    extendBody: true,
-                    body: SafeArea(
-                      bottom: false,
-                      child: SizedBox.expand(child: widget.child),
-                    ),
-                    bottomNavigationBar: Material(
-                      type: MaterialType.transparency,
-                      // Hard swap skeleton → real dock (same slot, same
-                      // height). A crossfade here superimposes skeleton
-                      // ghosts on the live controls for its duration.
-                      child: sessionActive
-                          ? PlayerDock(chrome: chrome)
-                          : const PlayerDockSkeleton(),
+                  return RootShellBottomInset(
+                    bottomClearance: noticeBottomClearance,
+                    child: Scaffold(
+                      backgroundColor: Colors.transparent,
+                      extendBody: true,
+                      body: SafeArea(
+                        bottom: false,
+                        child: SizedBox.expand(child: widget.child),
+                      ),
+                      bottomNavigationBar: Material(
+                        type: MaterialType.transparency,
+                        // Hard swap skeleton → real dock (same slot, same
+                        // height). A crossfade here superimposes skeleton
+                        // ghosts on the live controls for its duration.
+                        child: sessionActive
+                            ? PlayerDock(chrome: chrome)
+                            : const PlayerDockSkeleton(),
+                      ),
                     ),
                   );
                 }
@@ -218,7 +228,7 @@ class _RootShellState extends ConsumerState<RootShell> {
 
               final shell = useSidebar
                   ? RootShellBottomInset(
-                      bottomClearance: bottomClearance,
+                      bottomClearance: noticeBottomClearance,
                       child: ColoredBox(
                         color: tokens.canvas,
                         child: Scaffold(
@@ -240,7 +250,11 @@ class _RootShellState extends ConsumerState<RootShell> {
                       ),
                     )
                   : RootShellBottomInset(
-                      bottomClearance: bottomClearance,
+                      // mobileShellScaffold provides its own player-route
+                      // clearance; non-player routes use the nav clearance.
+                      bottomClearance: playerWithTransport
+                          ? 0.0
+                          : noticeBottomClearance,
                       child: AppBackground(child: mobileShellScaffold()),
                     );
 

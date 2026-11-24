@@ -25,6 +25,7 @@ import 'package:enjoy_player/features/lookup/domain/lookup_request.dart';
 import 'package:enjoy_player/features/transcript/presentation/transcript_markup.dart';
 import 'package:enjoy_player/features/lookup/presentation/sections/contextual_translation_lookup_section.dart';
 import 'package:enjoy_player/features/lookup/presentation/sections/dictionary_lookup_section.dart';
+import 'package:enjoy_player/features/lookup/presentation/sections/explain_lookup_section.dart';
 import 'package:enjoy_player/features/lookup/presentation/sections/translation_lookup_section.dart';
 import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_credits_banner.dart';
 import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_credits_chip.dart';
@@ -304,6 +305,8 @@ class _DictionaryLookupSheetState extends ConsumerState<DictionaryLookupSheet> {
                           ContextualTranslationLookupSection(
                             request: _effectiveRequest,
                           ),
+                          SizedBox(height: t.space8),
+                          ExplainLookupSection(request: _effectiveRequest),
                         ],
                       ),
                     ),

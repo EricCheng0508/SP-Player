@@ -146,6 +146,69 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transcriptFetchingSubtitles => 'Fetching subtitles…';
 
   @override
+  String get transcriptSearchHint => 'Search transcript';
+
+  @override
+  String get transcriptSearchNoMatches => 'No matching lines';
+
+  @override
+  String get lookupSectionExplain => 'Explain this sentence';
+
+  @override
+  String get lookupExplainRun => 'Explain';
+
+  @override
+  String get libraryTabPlaylists => 'Playlists';
+
+  @override
+  String get playlistCreateButton => 'New playlist';
+
+  @override
+  String get playlistRename => 'Rename playlist';
+
+  @override
+  String get playlistDelete => 'Delete playlist';
+
+  @override
+  String get playlistNameHint => 'Playlist name';
+
+  @override
+  String get playlistSave => 'Save';
+
+  @override
+  String get playlistEmptyTitle => 'No playlists yet';
+
+  @override
+  String get playlistEmptyHint =>
+      'Create a playlist to group media and play them in order.';
+
+  @override
+  String playlistItemCount(int count) {
+    return '$count items';
+  }
+
+  @override
+  String get playlistAddMedia => 'Add media';
+
+  @override
+  String get playlistPlayAll => 'Play all';
+
+  @override
+  String get playlistRemoveItem => 'Remove from playlist';
+
+  @override
+  String get playlistMoveUp => 'Move up';
+
+  @override
+  String get playlistMoveDown => 'Move down';
+
+  @override
+  String get playlistMissingMedia => 'Media no longer in library';
+
+  @override
+  String get playlistPickerNoMedia => 'Import media first, then add it here.';
+
+  @override
   String get asrStatusExtracting => 'Extracting audio…';
 
   @override
@@ -1319,6 +1382,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hotkeysDescToggleFullscreen => 'Toggle fullscreen';
+
+  @override
+  String get hotkeysDescSearchTranscript => 'Search transcript (Ctrl+F)';
 
   @override
   String get hotkeysDescSeekBack => 'Seek back 3 seconds';

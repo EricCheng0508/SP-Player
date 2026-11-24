@@ -10,6 +10,7 @@ import 'package:enjoy_player/features/ai/domain/models/assessment_request.dart';
 import 'package:enjoy_player/features/ai/domain/models/assessment_result.dart';
 import 'package:enjoy_player/features/ai/domain/models/contextual_translation_result.dart';
 import 'package:enjoy_player/features/ai/domain/models/dictionary_result.dart';
+import 'package:enjoy_player/features/ai/domain/models/line_explanation.dart';
 import 'package:enjoy_player/features/ai/domain/models/translation_result.dart';
 import 'package:enjoy_player/features/ai/domain/models/tts_request.dart';
 import 'package:enjoy_player/features/ai/domain/models/tts_result.dart';
@@ -126,6 +127,30 @@ final class DictionaryService {
   );
 }
 
+final class ExplainService {
+  ExplainService(this._ref);
+
+  final Ref _ref;
+
+  Future<LineExplanation> explain({
+    required String sentence,
+    required String sourceLanguage,
+    required String targetLanguage,
+    String? context,
+    bool? forceRefresh,
+  }) => guardAiCall(
+    () => _ref
+        .read(lineExplanationCapabilityProvider)
+        .explainSentence(
+          sentence: sentence,
+          sourceLanguage: sourceLanguage,
+          targetLanguage: targetLanguage,
+          context: context,
+          forceRefresh: forceRefresh,
+        ),
+  );
+}
+
 final class TtsService {
   TtsService(this._ref);
 
@@ -160,6 +185,9 @@ DictionaryService dictionaryService(Ref ref) => DictionaryService(ref);
 @Riverpod(keepAlive: true)
 ContextualTranslationService contextualTranslationService(Ref ref) =>
     ContextualTranslationService(ref);
+
+@Riverpod(keepAlive: true)
+ExplainService explainService(Ref ref) => ExplainService(ref);
 
 @Riverpod(keepAlive: true)
 TtsService ttsService(Ref ref) => TtsService(ref);

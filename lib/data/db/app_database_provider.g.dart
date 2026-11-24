@@ -70,6 +70,10 @@ String _$deviceGlobalAppDatabaseHash() =>
 /// Per-user library + prefs (`enjoy_player_<userId>`). Requires sign-in
 /// (ADR-0031 login-only access); use [deviceGlobalAppDatabaseProvider] for
 /// device-global settings.
+///
+/// The account-less build resolves this to the single local session
+/// (`enjoy_player_local`) without waiting for an auth state — see
+/// [sessionUserIdOf].
 
 @ProviderFor(appDatabase)
 final appDatabaseProvider = AppDatabaseProvider._();
@@ -77,6 +81,10 @@ final appDatabaseProvider = AppDatabaseProvider._();
 /// Per-user library + prefs (`enjoy_player_<userId>`). Requires sign-in
 /// (ADR-0031 login-only access); use [deviceGlobalAppDatabaseProvider] for
 /// device-global settings.
+///
+/// The account-less build resolves this to the single local session
+/// (`enjoy_player_local`) without waiting for an auth state — see
+/// [sessionUserIdOf].
 
 final class AppDatabaseProvider
     extends $FunctionalProvider<AppDatabase, AppDatabase, AppDatabase>
@@ -84,6 +92,10 @@ final class AppDatabaseProvider
   /// Per-user library + prefs (`enjoy_player_<userId>`). Requires sign-in
   /// (ADR-0031 login-only access); use [deviceGlobalAppDatabaseProvider] for
   /// device-global settings.
+  ///
+  /// The account-less build resolves this to the single local session
+  /// (`enjoy_player_local`) without waiting for an auth state — see
+  /// [sessionUserIdOf].
   AppDatabaseProvider._()
     : super(
         from: null,

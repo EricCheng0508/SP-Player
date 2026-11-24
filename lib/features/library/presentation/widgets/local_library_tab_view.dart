@@ -15,6 +15,7 @@ import 'package:enjoy_player/core/utils/sliver_key_index.dart';
 import 'package:enjoy_player/features/library/application/library_media_provider.dart';
 import 'package:enjoy_player/features/library/application/library_search_provider.dart';
 import 'package:enjoy_player/features/library/domain/media.dart';
+import 'package:enjoy_player/features/library/presentation/widgets/playlist_tab_view.dart';
 import 'package:enjoy_player/features/player/application/player_controller.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
@@ -48,12 +49,17 @@ class LocalLibraryTabView extends ConsumerWidget {
               searchQuery: query,
               totalInLibraryOfKind: counts?.audio ?? 0,
             ),
+            const PlaylistTabView(),
           ],
         );
       },
       loading: () => TabBarView(
         controller: tabController,
-        children: const [SkeletonMediaGrid(), SkeletonMediaList()],
+        children: const [
+          SkeletonMediaGrid(),
+          SkeletonMediaList(),
+          Center(child: CircularProgressIndicator()),
+        ],
       ),
       error: (e, _) => ErrorState(
         message: '${l10n.error}: $e',

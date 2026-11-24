@@ -21,3 +21,10 @@ final playerIsBufferingProvider = StreamProvider<bool>((ref) {
   final snap = engine.transportSnapshot;
   return _seedThenFollow(snap.buffering, engine.buffering).distinct();
 });
+
+/// Buffered-ahead end position for the scrubber's buffered band.
+/// Empty on engines without buffered-range data (YouTube) → renders as 0.
+final playerBufferEndProvider = StreamProvider<Duration>((ref) {
+  final engine = ref.watch(playerEngineProvider);
+  return engine.bufferEnd;
+});

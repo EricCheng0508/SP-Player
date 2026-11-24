@@ -17,6 +17,7 @@ import 'package:enjoy_player/features/player/application/player_collapse.dart';
 import 'package:enjoy_player/features/player/application/player_controller.dart';
 import 'package:enjoy_player/features/player/application/player_interactions.dart';
 import 'package:enjoy_player/features/player/application/player_preferences_provider.dart';
+import 'package:enjoy_player/features/transcript/application/transcript_search_controller.dart';
 
 /// `player.togglePlay` — play / pause the live session.
 class TogglePlayHotkeyCommand extends HotkeyCommand {
@@ -77,6 +78,23 @@ class ToggleFullscreenHotkeyCommand extends HotkeyCommand {
   @override
   void execute(HotkeyCtx ctx) {
     unawaited(ctx.read(windowFullscreenProvider.notifier).toggle());
+  }
+}
+
+/// `player.searchTranscript` — opens the transcript-panel search bar
+/// (Ctrl+F). Pure UI toggle; no-op without a live session.
+class SearchTranscriptHotkeyCommand extends HotkeyCommand {
+  const SearchTranscriptHotkeyCommand();
+
+  @override
+  String get actionId => 'player.searchTranscript';
+
+  @override
+  bool canExecute(HotkeyCtx ctx) => ctx.read(playerControllerProvider) != null;
+
+  @override
+  void execute(HotkeyCtx ctx) {
+    ctx.read(transcriptSearchOpenProvider.notifier).open();
   }
 }
 
@@ -182,6 +200,7 @@ final List<HotkeyCommand> playerHotkeyCommands = [
   const TogglePlayHotkeyCommand(),
   const ToggleExpandHotkeyCommand(),
   const ToggleFullscreenHotkeyCommand(),
+  const SearchTranscriptHotkeyCommand(),
   const SeekRelativeHotkeyCommand('player.seekBack', -3),
   const SeekRelativeHotkeyCommand('player.seekForward', 3),
   const VolumeStepHotkeyCommand('player.volumeDown', -0.05),

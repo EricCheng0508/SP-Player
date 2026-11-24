@@ -162,7 +162,7 @@ class _EnjoyPressableState extends State<EnjoyPressable> {
 
     core = AnimatedScale(
       scale: scale,
-      duration: _pressed ? const Duration(milliseconds: 90) : t.motionFast,
+      duration: _pressed ? t.motionPress : t.motionFast,
       curve: _pressed ? Curves.easeOut : EnjoyThemeTokens.ease,
       child: core,
     );

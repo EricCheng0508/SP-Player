@@ -60,6 +60,14 @@ final List<HotkeyDefinition> hotkeyDefinitions = [
     customizable: true,
   ),
   const HotkeyDefinition(
+    id: 'player.searchTranscript',
+    defaultKeys: 'ctrl+f',
+
+    descriptionKey: 'searchTranscript',
+    scope: HotkeyScope.player,
+    customizable: true,
+  ),
+  const HotkeyDefinition(
     id: 'player.seekBack',
     defaultKeys: 'arrowleft',
 

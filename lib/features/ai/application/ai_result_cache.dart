@@ -29,6 +29,7 @@ import 'package:enjoy_player/features/ai/application/ai_kind_policies.dart';
 import 'package:enjoy_player/features/ai/domain/ai_kind.dart';
 import 'package:enjoy_player/features/ai/domain/models/contextual_translation_result.dart';
 import 'package:enjoy_player/features/ai/domain/models/dictionary_result.dart';
+import 'package:enjoy_player/features/ai/domain/models/line_explanation.dart';
 import 'package:enjoy_player/features/ai/domain/models/translation_result.dart';
 
 part 'ai_result_cache.g.dart';
@@ -309,5 +310,13 @@ AiResultCache<ContextualTranslationResult> aiContextualTranslationCache(
 ) => _buildPerUserCache(
   ref,
   fromJson: ContextualTranslationResult.fromJson,
+  toJson: (value) => value.toJson(),
+);
+
+/// Per-user typed `LineExplanation` cache.
+@Riverpod(keepAlive: true)
+AiResultCache<LineExplanation> aiExplainCache(Ref ref) => _buildPerUserCache(
+  ref,
+  fromJson: LineExplanation.fromJson,
   toJson: (value) => value.toJson(),
 );

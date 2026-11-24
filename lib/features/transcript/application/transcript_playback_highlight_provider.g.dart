@@ -115,7 +115,7 @@ final class TranscriptPlaybackHighlightProvider
 }
 
 String _$transcriptPlaybackHighlightHash() =>
-    r'2a0d19784bd3e6aa60115c8b57ae0449d424e971';
+    r'111614cc7d3479e71ba2d9d6ef4b2ac643ae2170';
 
 /// Current cue index (echo-aware) and karaoke current-word index.
 ///

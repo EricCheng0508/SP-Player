@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
+import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/features/player/application/engines/media_kit/media_kit_player_engine.dart';
 
 /// Stage diagnostics.
@@ -234,7 +235,7 @@ class _MediaKitVideoStageState extends State<_MediaKitVideoStage> {
         // surface shows instead of a black flash, then fades in.
         child: AnimatedOpacity(
           opacity: _firstFrame ? 1.0 : 0.0,
-          duration: const Duration(milliseconds: 150),
+          duration: EnjoyThemeTokens.of(context).motionFast,
           curve: Curves.easeOut,
           child: Video(
             controller: widget.controller,

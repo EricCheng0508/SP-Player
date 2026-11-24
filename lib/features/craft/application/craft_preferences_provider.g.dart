@@ -42,7 +42,7 @@ final class CraftPreferencesCtrlProvider
 }
 
 String _$craftPreferencesCtrlHash() =>
-    r'2d9c596a5702bd182e4d74fea14bf52dddd7336f';
+    r'8fb600857acb9ed78079a68fd16d19f7a957a197';
 
 abstract class _$CraftPreferencesCtrl extends $Notifier<CraftPreferences> {
   CraftPreferences build();

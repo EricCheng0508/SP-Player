@@ -106,6 +106,11 @@ class YoutubePlayerEngine
   @override
   Stream<bool> get buffering => _session.bufferingStream;
 
+  // The HTML5 video's buffered TimeRanges are not piped through the WebView
+  // bridge; the scrubber draws no buffered band for YouTube.
+  @override
+  Stream<Duration> get bufferEnd => const Stream<Duration>.empty();
+
   @override
   Stream<void> get completed => _session.completed;
 

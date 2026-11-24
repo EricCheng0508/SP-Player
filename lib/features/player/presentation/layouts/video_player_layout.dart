@@ -254,6 +254,7 @@ class _VideoPausedTitleOverlay extends ConsumerWidget {
     final chrome = ref.watch(playerControllerProvider.select(playbackChromeOf));
     final isVisible = !isPlaying || isBuffering;
     final title = chrome?.mediaTitle ?? '';
+    final t = EnjoyThemeTokens.of(context);
 
     return Align(
       alignment: Alignment.topCenter,
@@ -261,7 +262,7 @@ class _VideoPausedTitleOverlay extends ConsumerWidget {
         ignoring: !isVisible,
         child: AnimatedOpacity(
           opacity: isVisible ? 1.0 : 0.0,
-          duration: const Duration(milliseconds: 200),
+          duration: t.motionMedium,
           child: DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -415,6 +416,7 @@ class _ResizeSplitter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = EnjoyThemeTokens.of(context);
     return MouseRegion(
       onEnter: (_) => onHover(true),
       onExit: (_) => onHover(false),
@@ -431,14 +433,12 @@ class _ResizeSplitter extends StatelessWidget {
             message: semanticLabel,
             child: Center(
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 160),
+                duration: t.motionFast,
                 curve: Curves.easeOut,
                 width: hovered ? 4 : 3,
                 height: 88,
                 decoration: BoxDecoration(
-                  color: EnjoyThemeTokens.of(
-                    context,
-                  ).ink3.withValues(alpha: hovered ? 0.65 : 0.25),
+                  color: t.ink3.withValues(alpha: hovered ? 0.65 : 0.25),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),

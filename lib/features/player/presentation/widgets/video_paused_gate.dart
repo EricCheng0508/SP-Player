@@ -5,6 +5,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/features/player/application/player_state_providers.dart';
 
 class VideoPausedGate extends ConsumerWidget {
@@ -22,7 +23,7 @@ class VideoPausedGate extends ConsumerWidget {
       ignoring: !visible,
       child: AnimatedOpacity(
         opacity: visible ? 1.0 : 0.0,
-        duration: const Duration(milliseconds: 200),
+        duration: EnjoyThemeTokens.of(context).motionMedium,
         child: child,
       ),
     );

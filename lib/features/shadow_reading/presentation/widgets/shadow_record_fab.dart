@@ -99,7 +99,7 @@ class ShadowRecordFab extends StatelessWidget {
       onTargetAction: echoActive ? onTap : null,
       child: AnimatedScale(
         scale: scale,
-        duration: const Duration(milliseconds: 280),
+        duration: EnjoyThemeTokens.of(context).motionStandard,
         curve: Curves.easeOutCubic,
         child: SizedBox(
           width: ringOuterHitSize,

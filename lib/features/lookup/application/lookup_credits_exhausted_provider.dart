@@ -4,7 +4,7 @@ library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-enum LookupSectionId { translation, dictionary, contextualTranslation }
+enum LookupSectionId { translation, dictionary, contextualTranslation, explain }
 
 class LookupCreditsExhausted extends Notifier<Map<LookupSectionId, String>> {
   @override

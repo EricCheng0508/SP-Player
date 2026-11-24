@@ -48,6 +48,11 @@ abstract class PlayerEngine {
 
   Stream<bool> get buffering;
 
+  /// End of the buffered range, when the backend exposes one (media_kit /
+  /// mpv). Empty stream on engines without buffered-ahead data (YouTube) —
+  /// the scrubber simply draws no buffered band there.
+  Stream<Duration> get bufferEnd => const Stream<Duration>.empty();
+
   /// Fires when the current media reaches the end (ADR-0044).
   ///
   /// - **MediaKit**: forwards `media_kit`'s `Player.stream.completed`.

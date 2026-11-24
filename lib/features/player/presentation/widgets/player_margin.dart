@@ -46,16 +46,16 @@ Future<void> openPlayerMargin(
     ).read(playerMarginProvider.notifier).show(entry);
     return;
   }
+  final t = EnjoyThemeTokens.of(context);
   await Navigator.of(context, rootNavigator: true).push(
     AnchoredPopoverRoute<void>(
       barrierLabel: entry.label,
       alignment: Alignment.centerRight,
-      transitionDuration: const Duration(milliseconds: 220),
-      reverseTransitionDuration: const Duration(milliseconds: 180),
+      transitionDuration: t.motionMedium,
+      reverseTransitionDuration: t.motionExit,
       slideOffset: const Offset(1, 0),
       slideCurve: Curves.easeOutCubic,
       builder: (context) {
-        final t = EnjoyThemeTokens.of(context);
         return SizedBox(
           width: t.marginWidth,
           child: Semantics(

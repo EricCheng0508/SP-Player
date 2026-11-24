@@ -9,7 +9,8 @@ enum AiKind {
   translation('translation'),
   dictionary('dictionary'),
   contextualTranslation('contextual_translation'),
-  autoTranslateLine('auto_translate_line');
+  autoTranslateLine('auto_translate_line'),
+  explain('explain');
 
   const AiKind(this.wire);
 

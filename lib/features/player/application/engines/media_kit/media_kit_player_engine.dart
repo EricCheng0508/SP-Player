@@ -137,6 +137,10 @@ class MediaKitPlayerEngine
       __player?.stream.buffering ?? const Stream<bool>.empty();
 
   @override
+  Stream<Duration> get bufferEnd =>
+      __player?.stream.buffer ?? const Stream<Duration>.empty();
+
+  @override
   Stream<void> get completed =>
       __player?.stream.completed ?? const Stream<void>.empty();
 

@@ -21,11 +21,13 @@ import 'package:enjoy_player/features/transcript/application/transcript_lines_pr
 import 'package:enjoy_player/features/transcript/domain/transcript_fetch_status.dart';
 import 'package:enjoy_player/features/transcript/application/video_row_for_media_provider.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_blur_mode_provider.dart';
+import 'package:enjoy_player/features/transcript/application/transcript_search_controller.dart';
 import 'package:enjoy_player/features/transcript/presentation/dictate_hint_pill.dart';
 import 'package:enjoy_player/features/transcript/presentation/import_subtitle_file.dart';
 import 'package:enjoy_player/features/transcript/presentation/transcript_empty_state.dart';
 import 'package:enjoy_player/features/transcript/presentation/transcript_embedded_extract.dart';
 import 'package:enjoy_player/features/transcript/presentation/transcript_scrollable_list.dart';
+import 'package:enjoy_player/features/transcript/presentation/transcript_search.dart';
 import 'package:enjoy_player/features/transcript/presentation/transcript_typeface_scope.dart';
 import 'package:enjoy_player/core/theme/widgets/skeleton.dart';
 import 'package:go_router/go_router.dart';
@@ -80,6 +82,8 @@ class _TranscriptPanelState extends ConsumerState<TranscriptPanel> {
     final showExtractButton = dexieTargetType == 'Video' && showLocalActions;
 
     final signedIn = ref.watch(authIsSignedInProvider);
+    final searchOpen = ref.watch(transcriptSearchOpenProvider);
+    final searchQuery = ref.watch(transcriptSearchQueryProvider).trim();
 
     ref.listen(transcriptLinesForMediaProvider(mediaId), (prev, next) {
       final lines = next.asData?.value;
@@ -99,6 +103,8 @@ class _TranscriptPanelState extends ConsumerState<TranscriptPanel> {
     return Column(
       children: [
         AsrGenerationProgressBanner(mediaId: mediaId),
+        // Ctrl+F：搜索栏常驻面板顶部；有查询词时结果列表替代常规字幕列表。
+        if (searchOpen) TranscriptSearchBar(mediaId: mediaId),
         Expanded(
           child: linesAsync.when(
       data: (lines) {
@@ -184,6 +190,9 @@ class _TranscriptPanelState extends ConsumerState<TranscriptPanel> {
         final list = TranscriptTypefaceScope(
           child: TranscriptScrollableList(mediaId: mediaId, lines: lines),
         );
+        if (searchOpen && searchQuery.isNotEmpty) {
+          return TranscriptSearchResults(mediaId: mediaId);
+        }
         if (!ref.watch(transcriptBlurModeProvider)) return list;
         return Stack(
           children: [

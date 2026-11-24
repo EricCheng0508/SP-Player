@@ -11,9 +11,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:enjoy_player/core/riverpod/async_value_x.dart';
+import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/features/player/application/caption_overlay_settings.dart';
 import 'package:enjoy_player/features/player/application/player_controller.dart';
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
+import 'package:enjoy_player/features/transcript/application/transcript_blur_mode_provider.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_lines_provider.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_playback_highlight_provider.dart';
 
@@ -26,6 +28,9 @@ class VideoCaptionOverlay extends ConsumerWidget {
         ref.watch(captionOverlaySettingsProvider).valueOrNull ??
         CaptionOverlayMode.off;
     if (mode == CaptionOverlayMode.off) return const SizedBox.shrink();
+
+    // 盲听模式（transcript 模糊）联动：覆盖字幕一并隐藏，避免漏答案。
+    if (ref.watch(transcriptBlurModeProvider)) return const SizedBox.shrink();
 
     final chrome = ref.watch(playerControllerProvider.select(playbackChromeOf));
     final mediaId = chrome?.mediaId;
@@ -120,10 +125,10 @@ class VideoCaptionOverlay extends ConsumerWidget {
           )
         : const SizedBox.shrink(key: ValueKey('caption-hidden'));
 
-    // 150ms 淡入淡出：同一句显示期间 child 不变（完全稳定）；
+    // 淡入淡出走统一 motionFast token：同一句显示期间 child 不变（完全稳定）；
     // 句子说完或换句时才触发过渡——淡出只会发生在语音结束之后。
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 150),
+      duration: EnjoyThemeTokens.of(context).motionFast,
       switchInCurve: Curves.easeOut,
       switchOutCurve: Curves.easeIn,
       child: content,

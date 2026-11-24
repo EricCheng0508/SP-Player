@@ -142,6 +142,68 @@ class AppLocalizationsZh extends AppLocalizations {
   String get transcriptFetchingSubtitles => '正在获取字幕…';
 
   @override
+  String get transcriptSearchHint => '搜索字幕';
+
+  @override
+  String get transcriptSearchNoMatches => '没有匹配的句子';
+
+  @override
+  String get lookupSectionExplain => '讲解这句';
+
+  @override
+  String get lookupExplainRun => '开始讲解';
+
+  @override
+  String get libraryTabPlaylists => '播放列表';
+
+  @override
+  String get playlistCreateButton => '新建播放列表';
+
+  @override
+  String get playlistRename => '重命名';
+
+  @override
+  String get playlistDelete => '删除播放列表';
+
+  @override
+  String get playlistNameHint => '播放列表名称';
+
+  @override
+  String get playlistSave => '保存';
+
+  @override
+  String get playlistEmptyTitle => '还没有播放列表';
+
+  @override
+  String get playlistEmptyHint => '创建一个播放列表，把媒体分组按顺序播放。';
+
+  @override
+  String playlistItemCount(int count) {
+    return '$count 个条目';
+  }
+
+  @override
+  String get playlistAddMedia => '添加媒体';
+
+  @override
+  String get playlistPlayAll => '播放全部';
+
+  @override
+  String get playlistRemoveItem => '移出播放列表';
+
+  @override
+  String get playlistMoveUp => '上移';
+
+  @override
+  String get playlistMoveDown => '下移';
+
+  @override
+  String get playlistMissingMedia => '媒体已不在媒体库中';
+
+  @override
+  String get playlistPickerNoMedia => '先导入媒体，再在这里添加。';
+
+  @override
   String get asrStatusExtracting => 'Extracting audio…';
 
   @override
@@ -1257,6 +1319,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get hotkeysDescToggleFullscreen => '切换全屏';
+
+  @override
+  String get hotkeysDescSearchTranscript => '搜索字幕 (Ctrl+F)';
 
   @override
   String get hotkeysDescSeekBack => '快退 3 秒';
@@ -4837,6 +4902,68 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String get transcriptFetchingSubtitles => '正在获取字幕…';
 
   @override
+  String get transcriptSearchHint => '搜索字幕';
+
+  @override
+  String get transcriptSearchNoMatches => '没有匹配的句子';
+
+  @override
+  String get lookupSectionExplain => '讲解这句';
+
+  @override
+  String get lookupExplainRun => '开始讲解';
+
+  @override
+  String get libraryTabPlaylists => '播放列表';
+
+  @override
+  String get playlistCreateButton => '新建播放列表';
+
+  @override
+  String get playlistRename => '重命名';
+
+  @override
+  String get playlistDelete => '删除播放列表';
+
+  @override
+  String get playlistNameHint => '播放列表名称';
+
+  @override
+  String get playlistSave => '保存';
+
+  @override
+  String get playlistEmptyTitle => '还没有播放列表';
+
+  @override
+  String get playlistEmptyHint => '创建一个播放列表，把媒体分组按顺序播放。';
+
+  @override
+  String playlistItemCount(int count) {
+    return '$count 个条目';
+  }
+
+  @override
+  String get playlistAddMedia => '添加媒体';
+
+  @override
+  String get playlistPlayAll => '播放全部';
+
+  @override
+  String get playlistRemoveItem => '移出播放列表';
+
+  @override
+  String get playlistMoveUp => '上移';
+
+  @override
+  String get playlistMoveDown => '下移';
+
+  @override
+  String get playlistMissingMedia => '媒体已不在媒体库中';
+
+  @override
+  String get playlistPickerNoMedia => '先导入媒体，再在这里添加。';
+
+  @override
   String get asrStatusExtracting => '正在提取音频…';
 
   @override
@@ -5740,6 +5867,9 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get hotkeysDescToggleFullscreen => '切换全屏';
+
+  @override
+  String get hotkeysDescSearchTranscript => '搜索字幕 (Ctrl+F)';
 
   @override
   String get hotkeysDescSeekBack => '快退 3 秒';

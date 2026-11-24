@@ -30,6 +30,7 @@ import 'tables/vocabulary_items.dart';
 import 'tables/vocabulary_reviews.dart';
 import 'tables/youtube_channel_subscriptions.dart';
 import 'tables/youtube_feed_entries.dart';
+import 'tables/playlists.dart';
 
 part 'app_database.g.dart';
 part 'daos/ai_cache_dao.dart';
@@ -47,6 +48,7 @@ part 'daos/vocabulary_item_dao.dart';
 part 'daos/vocabulary_review_dao.dart';
 part 'daos/youtube_channel_subscription_dao.dart';
 part 'daos/youtube_feed_entry_dao.dart';
+part 'daos/playlist_dao.dart';
 
 final _log = logNamed('db.app_database');
 
@@ -67,6 +69,8 @@ final _log = logNamed('db.app_database');
     VocabularyItems,
     VocabularyContexts,
     VocabularyReviews,
+    Playlists,
+    PlaylistItems,
   ],
   daos: [
     VideoDao,
@@ -84,6 +88,7 @@ final _log = logNamed('db.app_database');
     VocabularyItemDao,
     VocabularyContextDao,
     VocabularyReviewDao,
+    PlaylistDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -119,7 +124,7 @@ class AppDatabase extends _$AppDatabase {
   bool get isDeviceGlobalDatabase => _dbName == deviceGlobalDatabaseName;
 
   @override
-  int get schemaVersion => 22;
+  int get schemaVersion => 23;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -341,6 +346,17 @@ class AppDatabase extends _$AppDatabase {
         await m.database.customStatement(
           'CREATE INDEX IF NOT EXISTS idx_echo_sessions_last_active '
           'ON echo_sessions (last_active_at DESC)',
+        );
+      } else if (next == 23) {
+        await m.createTable(playlists);
+        await m.createTable(playlistItems);
+        await m.database.customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_playlist_items_playlist_position '
+          'ON playlist_items (playlist_id, position)',
+        );
+        await m.database.customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_playlist_items_target '
+          'ON playlist_items (target_type, target_id)',
         );
       }
       current = next;

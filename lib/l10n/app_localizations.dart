@@ -333,6 +333,126 @@ abstract class AppLocalizations {
   /// **'Fetching subtitles…'**
   String get transcriptFetchingSubtitles;
 
+  /// No description provided for @transcriptSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search transcript'**
+  String get transcriptSearchHint;
+
+  /// No description provided for @transcriptSearchNoMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching lines'**
+  String get transcriptSearchNoMatches;
+
+  /// No description provided for @lookupSectionExplain.
+  ///
+  /// In en, this message translates to:
+  /// **'Explain this sentence'**
+  String get lookupSectionExplain;
+
+  /// No description provided for @lookupExplainRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Explain'**
+  String get lookupExplainRun;
+
+  /// No description provided for @libraryTabPlaylists.
+  ///
+  /// In en, this message translates to:
+  /// **'Playlists'**
+  String get libraryTabPlaylists;
+
+  /// No description provided for @playlistCreateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'New playlist'**
+  String get playlistCreateButton;
+
+  /// No description provided for @playlistRename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename playlist'**
+  String get playlistRename;
+
+  /// No description provided for @playlistDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete playlist'**
+  String get playlistDelete;
+
+  /// No description provided for @playlistNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist name'**
+  String get playlistNameHint;
+
+  /// No description provided for @playlistSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get playlistSave;
+
+  /// No description provided for @playlistEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No playlists yet'**
+  String get playlistEmptyTitle;
+
+  /// No description provided for @playlistEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a playlist to group media and play them in order.'**
+  String get playlistEmptyHint;
+
+  /// No description provided for @playlistItemCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items'**
+  String playlistItemCount(int count);
+
+  /// No description provided for @playlistAddMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Add media'**
+  String get playlistAddMedia;
+
+  /// No description provided for @playlistPlayAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Play all'**
+  String get playlistPlayAll;
+
+  /// No description provided for @playlistRemoveItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from playlist'**
+  String get playlistRemoveItem;
+
+  /// No description provided for @playlistMoveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get playlistMoveUp;
+
+  /// No description provided for @playlistMoveDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get playlistMoveDown;
+
+  /// No description provided for @playlistMissingMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Media no longer in library'**
+  String get playlistMissingMedia;
+
+  /// No description provided for @playlistPickerNoMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Import media first, then add it here.'**
+  String get playlistPickerNoMedia;
+
   /// No description provided for @asrStatusExtracting.
   ///
   /// In en, this message translates to:
@@ -2438,6 +2558,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Toggle fullscreen'**
   String get hotkeysDescToggleFullscreen;
+
+  /// No description provided for @hotkeysDescSearchTranscript.
+  ///
+  /// In en, this message translates to:
+  /// **'Search transcript (Ctrl+F)'**
+  String get hotkeysDescSearchTranscript;
 
   /// No description provided for @hotkeysDescSeekBack.
   ///

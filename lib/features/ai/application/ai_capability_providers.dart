@@ -12,6 +12,7 @@ import 'package:enjoy_player/features/ai/data/byok/byok_batch_translation_capabi
 import 'package:enjoy_player/features/ai/data/byok/byok_contextual_translation_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_dictionary_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_llm_capability.dart';
+import 'package:enjoy_player/features/ai/data/byok/byok_line_explanation_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_tts_azure_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_tts_openai_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_translation_capability.dart';
@@ -25,6 +26,7 @@ import 'package:enjoy_player/features/ai/domain/capabilities/assessment_capabili
 import 'package:enjoy_player/features/ai/domain/capabilities/contextual_translation_capability.dart';
 import 'package:enjoy_player/features/ai/domain/capabilities/dictionary_capability.dart';
 import 'package:enjoy_player/features/ai/domain/capabilities/llm_capability.dart';
+import 'package:enjoy_player/features/ai/domain/capabilities/line_explanation_capability.dart';
 import 'package:enjoy_player/features/ai/domain/capabilities/translation_capability.dart';
 import 'package:enjoy_player/features/ai/domain/capabilities/tts_capability.dart';
 import 'package:enjoy_player/features/ai/domain/speech_byok_kind.dart';
@@ -185,6 +187,12 @@ DictionaryCapability dictionaryCapability(Ref ref) {
 ContextualTranslationCapability contextualTranslationCapability(Ref ref) {
   final c = ref.watch(aiModalityConfigsProvider);
   return resolveContextualTranslationCapability(ref, c.llm);
+}
+
+@Riverpod(keepAlive: true)
+LineExplanationCapability lineExplanationCapability(Ref ref) {
+  final c = ref.watch(aiModalityConfigsProvider);
+  return ByokLineExplanationCapability(resolveLlmCapability(ref, c.llm));
 }
 
 @Riverpod(keepAlive: true)

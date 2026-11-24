@@ -11,6 +11,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:enjoy_player/core/analytics/analytics.dart';
 import 'package:enjoy_player/core/analytics/analytics_provider.dart';
+import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/player/player_surface_overlay_coordinator.dart';
 import 'package:enjoy_player/core/player/player_surface_overlay_navigator_observer.dart';
 import 'package:enjoy_player/core/routing/auth_redirect.dart';
@@ -57,18 +58,28 @@ CustomTransitionPage<void> _shellPage({
     key: key,
     child: child,
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      final curved = CurvedAnimation(
+      // Fade *through*: the covered route fades OUT (its secondaryAnimation)
+      // while the incoming one fades IN. The previous plain fade-in kept the
+      // old route fully visible under a semi-transparent new one, and since
+      // the pages have transparent scaffolds the two contents superimposed —
+      // the "ghosting" on tab switches. The opaque fill behind the child also
+      // guarantees the outgoing content can never bleed through.
+      final inCurve = CurvedAnimation(
         parent: animation,
         curve: Curves.easeOutCubic,
       );
-      return FadeTransition(
-        opacity: curved,
-        child: SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(0, 0.02),
-            end: Offset.zero,
-          ).animate(curved),
-          child: child,
+      final outCurve = CurvedAnimation(
+        parent: secondaryAnimation,
+        curve: Curves.easeIn,
+      );
+      return ColoredBox(
+        color: EnjoyThemeTokens.of(context).canvas,
+        child: FadeTransition(
+          opacity: Tween<double>(begin: 1.0, end: 0.0).animate(outCurve),
+          child: FadeTransition(
+            opacity: Tween<double>(begin: 0.0, end: 1.0).animate(inCurve),
+            child: child,
+          ),
         ),
       );
     },

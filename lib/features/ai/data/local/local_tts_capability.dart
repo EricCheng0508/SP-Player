@@ -50,11 +50,18 @@ final class LocalTtsCapability implements TtsCapability {
       // NOT UTF-8 — a UTF-8 payload decodes to garbage and always fails.
       final encoded = base64Encode(_utf16LeBytes(script));
 
+      // PowerShell on Windows writes its console output in the system ANSI
+      // code page (cp936 on zh-CN), NOT UTF-8. Decoding strictly as UTF-8
+      // threw FormatException("Missing extension byte") before we could even
+      // check the exit code, which surfaced as a bogus "TTS failed". Use a
+      // lenient UTF-8 codec so undecodable bytes become replacement chars
+      // instead of aborting the whole call.
+      const lenient = Utf8Codec(allowMalformed: true);
       final result = await Process.run(
         'powershell.exe',
         ['-NoProfile', '-NonInteractive', '-EncodedCommand', encoded],
-        stdoutEncoding: utf8,
-        stderrEncoding: utf8,
+        stdoutEncoding: lenient,
+        stderrEncoding: lenient,
       ).timeout(const Duration(seconds: 60));
 
       if (result.exitCode != 0) {
@@ -66,8 +73,14 @@ final class LocalTtsCapability implements TtsCapability {
         throw StateError('local TTS produced no output file');
       }
       final bytes = await file.readAsBytes();
-      if (bytes.isEmpty) {
-        throw StateError('local TTS produced an empty wav');
+      // A header-only wav (~46 bytes) means SAPI produced no audio at all —
+      // typically the selected voice cannot speak the requested language.
+      // Returning it would be a silently "successful" silent clip.
+      if (bytes.length < 1000) {
+        throw StateError(
+          'local TTS produced no audio (${bytes.length} bytes) — '
+          'no installed voice can speak "$language"',
+        );
       }
       return bytes;
     } on TimeoutException {

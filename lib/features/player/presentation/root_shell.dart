@@ -164,7 +164,13 @@ class _RootShellState extends ConsumerState<RootShell> {
               /// frames (nested scaffold / safe-area constraint propagation), which pins the
               /// bar under the status bar and hides video + transcript. [Scaffold] reserves
               /// space via [bottomNavigationBar] instead.
-              final playerWithTransport = sessionActive && onPlayer;
+              // The dock slot is held for the whole player route: while the
+              // session is still opening a placeholder of the dock's exact
+              // height stands in (a plain SizedBox — no provider reads, so
+              // the engine-identity lazy allocation is not triggered). A dock
+              // that appears mid-open resizes a *playing* video — the "flash
+              // on open" report.
+              final playerWithTransport = onPlayer;
 
               final bottomClearance = !useSidebar && !onPlayer && !onReview
                   ? rootShellBottomNavClearance(context)
@@ -181,7 +187,9 @@ class _RootShellState extends ConsumerState<RootShell> {
                     ),
                     bottomNavigationBar: Material(
                       type: MaterialType.transparency,
-                      child: PlayerDock(chrome: chrome),
+                      child: sessionActive
+                          ? PlayerDock(chrome: chrome)
+                          : const SizedBox(height: kDockPlaceholderHeight),
                     ),
                   );
                 }

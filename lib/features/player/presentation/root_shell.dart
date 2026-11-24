@@ -187,23 +187,12 @@ class _RootShellState extends ConsumerState<RootShell> {
                     ),
                     bottomNavigationBar: Material(
                       type: MaterialType.transparency,
-                      // Crossfade skeleton → real dock (same slot, same
-                      // height) instead of a hard content swap. The key only
-                      // distinguishes skeleton vs live dock, so mode-tab
-                      // switches inside the real dock do not re-trigger the
-                      // fade.
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 180),
-                        child: sessionActive
-                            ? KeyedSubtree(
-                                key: const ValueKey('dock-live'),
-                                child: PlayerDock(chrome: chrome),
-                              )
-                            : const KeyedSubtree(
-                                key: ValueKey('dock-skeleton'),
-                                child: PlayerDockSkeleton(),
-                              ),
-                      ),
+                      // Hard swap skeleton → real dock (same slot, same
+                      // height). A crossfade here superimposes skeleton
+                      // ghosts on the live controls for its duration.
+                      child: sessionActive
+                          ? PlayerDock(chrome: chrome)
+                          : const PlayerDockSkeleton(),
                     ),
                   );
                 }

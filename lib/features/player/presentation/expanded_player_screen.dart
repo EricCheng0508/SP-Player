@@ -34,12 +34,15 @@ class _ExpandedPlayerScreenState extends ConsumerState<ExpandedPlayerScreen> {
     final cs = Theme.of(context).colorScheme;
     final mediaId = widget.mediaId;
 
-    Widget body;
-    var isChrome = false;
+    // Hard swap, no crossfade: a crossfade superimposes the outgoing skeleton
+    // on the playing video for its whole duration — visible ghosting (user
+    // report). Geometry is identical between the two bodies, so the single-
+    // frame swap reads as the skeleton simply becoming the real content.
     if (chrome != null && chrome.mediaId == mediaId) {
-      isChrome = true;
-      body = ExpandedPlayerChromeBody(mediaId: mediaId, chrome: chrome);
-    } else if (open.hasError) {
+      return ExpandedPlayerChromeBody(mediaId: mediaId, chrome: chrome);
+    }
+
+    if (open.hasError) {
       final err = open.error;
       if (err is MediaNeedsRelocateException) {
         return LocateMediaScreen(info: err);
@@ -52,21 +55,8 @@ class _ExpandedPlayerScreenState extends ConsumerState<ExpandedPlayerScreen> {
         );
       }
       return ExpandedPlayerGenericErrorBody(colorScheme: cs);
-    } else {
-      body = ExpandedPlayerLoadingBody(colorScheme: cs, mediaId: mediaId);
     }
 
-    // Crossfade loading ↔ chrome instead of a hard swap. Both bodies share
-    // the same geometry (the loading split mirrors the chrome split and the
-    // dock slot is always reserved), so the dissolve reads as the skeleton
-    // and poster morphing into the live content — the hard swap was the
-    // "flash this frame on open" report.
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 180),
-      child: KeyedSubtree(
-        key: ValueKey('player-body-$isChrome'),
-        child: body,
-      ),
-    );
+    return ExpandedPlayerLoadingBody(colorScheme: cs, mediaId: mediaId);
   }
 }

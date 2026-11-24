@@ -187,9 +187,15 @@ class _RootShellState extends ConsumerState<RootShell> {
                     ),
                     bottomNavigationBar: Material(
                       type: MaterialType.transparency,
-                      child: sessionActive
-                          ? PlayerDock(chrome: chrome)
-                          : const SizedBox(height: kDockPlaceholderHeight),
+                      // Real dock from the first frame: during the open it
+                      // renders against [emptyPlaybackChrome] (zeroed ruler,
+                      // disabled controls) and fills in when the session
+                      // lands — no empty-slot → dock content flip.
+                      child: PlayerDock(
+                        chrome: sessionActive
+                            ? chrome
+                            : emptyPlaybackChrome,
+                      ),
                     ),
                   );
                 }

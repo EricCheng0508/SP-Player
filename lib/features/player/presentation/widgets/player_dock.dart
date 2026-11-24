@@ -34,16 +34,6 @@ import 'package:enjoy_player/features/player/presentation/widgets/transport/tran
 /// the slot at the tallest row keeps the picture size stable across modes.
 const double kDockControlsHeight = 76;
 
-/// Total desktop dock height, derived from the dock's own structure: top
-/// border 1 + ruler row (8 padding + 34 `rulerHitHeight`) + controls row
-/// (4 + `kDockControlsHeight` + 12). The root shell holds a placeholder of
-/// exactly this height while the session is still opening, so the video stage
-/// keeps one geometry from the first frame — a dock that appears late resizes
-/// a *playing* video (the "flash on open" report). Keep in sync with the
-/// paddings in [PlayerDock.build].
-const double kDockPlaceholderHeight =
-    1 + 8 + 34 + 4 + kDockControlsHeight + 12;
-
 /// The Duet dock. Mounted by [RootShell] on `/player/:id` while a session is
 /// active.
 class PlayerDock extends ConsumerStatefulWidget {

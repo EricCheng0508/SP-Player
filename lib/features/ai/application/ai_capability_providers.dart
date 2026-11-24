@@ -15,6 +15,7 @@ import 'package:enjoy_player/features/ai/data/byok/byok_llm_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_tts_azure_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_tts_openai_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_translation_capability.dart';
+import 'package:enjoy_player/features/ai/data/local/local_assessment_capability.dart';
 import 'package:enjoy_player/features/ai/data/local_subgen_asr_capability.dart';
 import 'package:enjoy_player/features/ai/data/stub_ai_capabilities.dart';
 import 'package:enjoy_player/features/ai/domain/ai_provider.dart';
@@ -124,7 +125,12 @@ AssessmentCapability resolveAssessmentCapability(
     case AIProvider.byok:
       final speechByok = config.speechByok;
       if (speechByok == null) {
-        return const ByokNotConfiguredAssessmentCapability();
+        // 本地版：发音评分未配置 Azure 时默认走本地评估
+        // (faster-whisper 识别 + 单词对齐算分)，零配置可用；
+        // 配置了 Azure 的用户仍以配置为准(音素级诊断)。
+        return LocalAssessmentCapability(
+          httpClient: ref.read(httpClientProvider),
+        );
       }
       return ByokAssessmentAzureCapability(
         config: speechByok,

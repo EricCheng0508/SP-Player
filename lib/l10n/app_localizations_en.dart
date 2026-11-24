@@ -1074,7 +1074,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsAiProvidersSpeechKindHintAzure =>
-      'Azure Speech: required for pronunciation scoring. Also supports speech-to-text.';
+      'Azure Speech: phoneme-level pronunciation diagnosis. Also supports speech-to-text. Without it, take scoring falls back to local assessment.';
 
   @override
   String get settingsAiProvidersSpeechWhisperModelLabel => 'Whisper model';

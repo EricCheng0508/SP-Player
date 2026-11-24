@@ -430,7 +430,7 @@
   "settingsAiProvidersSpeechKindOpenAi": "OpenAI Whisper",
   "settingsAiProvidersSpeechKindAzure": "Azure Speech",
   "settingsAiProvidersSpeechKindHintOpenAi": "OpenAI 兼容：用于语音转文字（生成字幕、听写、跟读复述）。",
-  "settingsAiProvidersSpeechKindHintAzure": "Azure 语音：发音评分（跟读打分）必须使用此项；也支持语音转文字。",
+  "settingsAiProvidersSpeechKindHintAzure": "Azure 语音：音素级发音诊断；也支持语音转文字。不配置则跟读打分自动走本地评估。",
   "settingsAiProvidersSpeechWhisperModelLabel": "Whisper 模型",
   "settingsAiProvidersSpeechWhisperModelHint": "whisper-1",
   "settingsAiProvidersSpeechTtsModelLabel": "TTS 模型",

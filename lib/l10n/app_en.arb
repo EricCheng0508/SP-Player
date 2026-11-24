@@ -661,7 +661,7 @@
   "@settingsAiProvidersSpeechKindHintOpenAi": {
     "description": "Hint under the speech provider segmented button, OpenAI option."
   },
-  "settingsAiProvidersSpeechKindHintAzure": "Azure Speech: required for pronunciation scoring. Also supports speech-to-text.",
+  "settingsAiProvidersSpeechKindHintAzure": "Azure Speech: phoneme-level pronunciation diagnosis. Also supports speech-to-text. Without it, take scoring falls back to local assessment.",
   "@settingsAiProvidersSpeechKindHintAzure": {
     "description": "Hint under the speech provider segmented button, Azure option."
   },

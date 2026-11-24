@@ -2004,7 +2004,7 @@ abstract class AppLocalizations {
   /// Hint under the speech provider segmented button, Azure option.
   ///
   /// In en, this message translates to:
-  /// **'Azure Speech: required for pronunciation scoring. Also supports speech-to-text.'**
+  /// **'Azure Speech: phoneme-level pronunciation diagnosis. Also supports speech-to-text. Without it, take scoring falls back to local assessment.'**
   String get settingsAiProvidersSpeechKindHintAzure;
 
   /// Label for Whisper model field in ASR BYOK form

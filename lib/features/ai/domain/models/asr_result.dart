@@ -60,7 +60,8 @@ final class AsrSegment {
 final class AsrWord {
   factory AsrWord.fromJson(Map<String, dynamic> json) {
     return AsrWord(
-      word: json['word'] as String? ?? '',
+      // Azure/OpenAI 兼容端点用 `word`，本地 subgen 服务用 `text`。
+      word: json['word'] as String? ?? json['text'] as String? ?? '',
       start: (json['start'] as num?)?.toDouble() ?? 0,
       end: (json['end'] as num?)?.toDouble() ?? 0,
     );

@@ -1025,7 +1025,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingsAiProvidersSpeechKindHintAzure =>
-      'Azure 语音：发音评分（跟读打分）必须使用此项；也支持语音转文字。';
+      'Azure 语音：音素级发音诊断；也支持语音转文字。不配置则跟读打分自动走本地评估。';
 
   @override
   String get settingsAiProvidersSpeechWhisperModelLabel => 'Whisper 模型';
@@ -5547,7 +5547,7 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get settingsAiProvidersSpeechKindHintAzure =>
-      'Azure 语音：发音评分（跟读打分）必须使用此项；也支持语音转文字。';
+      'Azure 语音：音素级发音诊断；也支持语音转文字。不配置则跟读打分自动走本地评估。';
 
   @override
   String byokNotConfiguredMessage(String modality) {

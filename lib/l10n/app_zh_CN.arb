@@ -1,6 +1,6 @@
 {
   "@@locale": "zh_CN",
-  "appTitle": "Enjoy 播放器",
+  "appTitle": "SP Player",
   "libraryTitle": "资料库",
   "librarySourceLocal": "本地",
   "librarySourceCloud": "云端",
@@ -199,7 +199,7 @@
   "settingsSectionAppearance": "外观",
   "settingsAppearanceSubtitle": "主题跟随系统设置",
   "settingsSectionAbout": "关于",
-  "settingsAboutSubtitle": "Enjoy 播放器 — 本地字幕与跟读练习",
+  "settingsAboutSubtitle": "SP Player — 本地字幕与跟读练习",
   "settingsThemeRowTitle": "主题",
   "settingsThemeDarkLocked": "跟随系统外观",
   "settingsThemeSystem": "系统",

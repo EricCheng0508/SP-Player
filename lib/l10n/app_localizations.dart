@@ -4410,7 +4410,7 @@ abstract class AppLocalizations {
   /// No description provided for @aiPlaygroundIntro.
   ///
   /// In en, this message translates to:
-  /// **'Exercise AI modalities using Enjoy cloud or your BYOK credentials from Settings → AI providers. Translation and dictionary follow the LLM provider.'**
+  /// **'Exercise AI modalities with your credentials from Settings → AI providers. Translation and dictionary follow the LLM provider.'**
   String get aiPlaygroundIntro;
 
   /// No description provided for @aiPlaygroundActiveProviders.
@@ -4524,7 +4524,7 @@ abstract class AppLocalizations {
   /// No description provided for @aiPlaygroundAssessmentTtsNote.
   ///
   /// In en, this message translates to:
-  /// **'Enjoy TTS is not wired yet; configure TTS BYOK under AI providers for synthesis. Assessment uses the provider shown above.'**
+  /// **'TTS is not wired yet; configure TTS BYOK under AI providers for synthesis. Assessment uses the provider shown above.'**
   String get aiPlaygroundAssessmentTtsNote;
 
   /// No description provided for @aiPlaygroundOutput.

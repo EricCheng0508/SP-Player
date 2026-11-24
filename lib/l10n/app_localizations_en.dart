@@ -2387,7 +2387,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aiPlaygroundIntro =>
-      'Exercise AI modalities using Enjoy cloud or your BYOK credentials from Settings → AI providers. Translation and dictionary follow the LLM provider.';
+      'Exercise AI modalities with your credentials from Settings → AI providers. Translation and dictionary follow the LLM provider.';
 
   @override
   String get aiPlaygroundActiveProviders => 'Active providers';
@@ -2448,7 +2448,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aiPlaygroundAssessmentTtsNote =>
-      'Enjoy TTS is not wired yet; configure TTS BYOK under AI providers for synthesis. Assessment uses the provider shown above.';
+      'TTS is not wired yet; configure TTS BYOK under AI providers for synthesis. Assessment uses the provider shown above.';
 
   @override
   String get aiPlaygroundOutput => 'Output';

@@ -9,7 +9,7 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
-  String get appTitle => 'Enjoy 播放器';
+  String get appTitle => 'SP Player';
 
   @override
   String get libraryTitle => '资料库';
@@ -504,7 +504,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsSectionAbout => '关于';
 
   @override
-  String get settingsAboutSubtitle => 'Enjoy 播放器 — 本地字幕与跟读练习。';
+  String get settingsAboutSubtitle => 'SP Player — 本地字幕与跟读练习。';
 
   @override
   String get settingsThemeRowTitle => '主题';
@@ -2285,7 +2285,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get aiPlaygroundIntro =>
-      '通过 Enjoy 云端或「设置 → AI 提供商」中的 BYOK 凭据测试各 AI 能力。翻译与词典跟随 LLM 提供商。';
+      '通过「设置 → AI 提供商」中的凭据测试各 AI 能力。翻译与词典跟随 LLM 提供商。';
 
   @override
   String get aiPlaygroundActiveProviders => '当前提供商';
@@ -2345,7 +2345,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get aiPlaygroundAssessmentTtsNote =>
-      'Enjoy TTS 尚未接入；可在 AI 提供商中配置 TTS BYOK。评测使用上方所示提供商。';
+      'TTS 尚未接入；可在 AI 提供商中配置 TTS BYOK。评测使用上方所示提供商。';
 
   @override
   String get aiPlaygroundOutput => '输出';
@@ -4704,7 +4704,7 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   AppLocalizationsZhCn() : super('zh_CN');
 
   @override
-  String get appTitle => 'Enjoy 播放器';
+  String get appTitle => 'SP Player';
 
   @override
   String get libraryTitle => '资料库';
@@ -5160,7 +5160,7 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String get settingsSectionAbout => '关于';
 
   @override
-  String get settingsAboutSubtitle => 'Enjoy 播放器 — 本地字幕与跟读练习';
+  String get settingsAboutSubtitle => 'SP Player — 本地字幕与跟读练习';
 
   @override
   String get settingsThemeRowTitle => '主题';

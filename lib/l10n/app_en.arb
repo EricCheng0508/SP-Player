@@ -1426,7 +1426,7 @@
   "settingsAiPlaygroundTileTitle": "AI playground",
   "settingsAiPlaygroundTileSubtitle": "Exercise ASR, chat, translation, and dictionary APIs",
   "aiPlaygroundTitle": "AI playground",
-  "aiPlaygroundIntro": "Exercise AI modalities using Enjoy cloud or your BYOK credentials from Settings → AI providers. Translation and dictionary follow the LLM provider.",
+  "aiPlaygroundIntro": "Exercise AI modalities with your credentials from Settings → AI providers. Translation and dictionary follow the LLM provider.",
   "aiPlaygroundActiveProviders": "Active providers",
   "aiPlaygroundProviderByokDetail": "BYOK · {detail}",
   "@aiPlaygroundProviderByokDetail": {
@@ -1454,7 +1454,7 @@
   "aiPlaygroundAssessmentReference": "Reference text (what you spoke)",
   "aiPlaygroundAssessmentLanguage": "Language (e.g. en, en-US)",
   "aiPlaygroundAssess": "Run pronunciation assessment",
-  "aiPlaygroundAssessmentTtsNote": "Enjoy TTS is not wired yet; configure TTS BYOK under AI providers for synthesis. Assessment uses the provider shown above.",
+  "aiPlaygroundAssessmentTtsNote": "TTS is not wired yet; configure TTS BYOK under AI providers for synthesis. Assessment uses the provider shown above.",
   "aiPlaygroundOutput": "Output",
   "aiPlaygroundClearOutput": "Clear output",
   "aiPlaygroundSectionAsr": "ASR",

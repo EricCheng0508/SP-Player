@@ -16,7 +16,11 @@ concurrency:
 jobs:
   release:
     name: Build & publish Windows release
-    runs-on: windows-latest
+    # windows-2025 (windows-latest) ships VS 18 / MSVC 14.52, which turned the
+    # deprecated /await coroutine feature into a hard error — and
+    # flutter_inappwebview_windows still uses it (STL1011). Pin the VS 2022
+    # image, which matches the toolchain the project builds with locally.
+    runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
 

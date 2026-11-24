@@ -26,11 +26,16 @@ jobs:
           flutter-version: "3.47.6"
           cache: true
 
+      # MSBuild overflows MAX_PATH (260) in the default D:\a\... workspace —
+      # plugin .tlog paths alone reach ~270 chars (MSB3491). Mirror the repo
+      # to C:\e\<repo> and repoint GITHUB_WORKSPACE there; all later steps
+      # (pub get, codegen, build, packaging) run in the short path.
+      - name: Short workspace path (Windows MAX_PATH)
+        shell: pwsh
+        run: .github/scripts/use_short_windows_workdir.ps1
+
       - name: Enable long paths
         run: git config --global core.longpaths true
-
-      - name: Flutter pub get
-        run: flutter pub get
 
       # flutter_secure_storage_windows compiles <atlstr.h>, which ships only
       # with the "C++ ATL for latest v143 build tools" VS component — not
@@ -40,14 +45,32 @@ jobs:
         shell: pwsh
         run: .github/scripts/ensure_vs_cpp_atl.ps1
 
+      - name: Flutter pub get
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: flutter pub get
+
       - name: Codegen (drift / build_runner)
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Build Windows release
-        run: flutter build windows --release
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        shell: pwsh
+        run: |
+          flutter build windows --release *>&1 | Tee-Object -FilePath flutter_build.log
+          $code = $LASTEXITCODE
+          if ($code -ne 0) {
+            # Surface the tail as error annotations so the failure is
+            # readable via the checks API without authentication.
+            Get-Content flutter_build.log -Tail 80 | ForEach-Object {
+              if ($_.Trim()) { "::error::$_" }
+            }
+            exit $code
+          }
 
       - name: Read version
         id: version
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
         shell: pwsh
         run: |
           $m = Select-String -Path pubspec.yaml -Pattern '^version:\s*([0-9]+\.[0-9]+\.[0-9]+)'
@@ -57,26 +80,28 @@ jobs:
       # excluding the heavy local-components directory (users install those
       # in-app or fetch them separately).
       - name: Package portable zip
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
         shell: pwsh
         run: |
           $v = "${{ steps.version.outputs.version }}"
-          $stage = "build/portable/SP Player"
+          $stage = Join-Path $env:GITHUB_WORKSPACE "build/portable/SP Player"
           New-Item -ItemType Directory -Force -Path $stage | Out-Null
-          robocopy "build/windows/x64/runner/Release" $stage /E /XD components /NFL /NDL /NJH /NJS
+          robocopy (Join-Path $env:GITHUB_WORKSPACE "build/windows/x64/runner/Release") $stage /E /XD components /NFL /NDL /NJH /NJS
           if ($LASTEXITCODE -ge 8) { exit $LASTEXITCODE }
-          $out = "build/SP-Player-$v-portable-win64.zip"
-          Compress-Archive -Path "$stage/*" -DestinationPath $out -Force
+          $out = Join-Path $env:GITHUB_WORKSPACE "build/SP-Player-$v-portable-win64.zip"
+          Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $out -Force
           "PORTABLE=$out" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Build installer (Inno Setup)
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
         shell: pwsh
         run: |
           choco install innosetup -y --no-progress
           $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
           if (-not (Test-Path $iscc)) { $iscc = "C:\Program Files\Inno Setup 6\ISCC.exe" }
-          & $iscc "windows/installer.iss"
+          & $iscc (Join-Path $env:GITHUB_WORKSPACE "windows/installer.iss")
           $v = "${{ steps.version.outputs.version }}"
-          $src = "build/installer/SPPlayer-Setup-$v.exe"
+          $src = Join-Path $env:GITHUB_WORKSPACE "build/installer/SPPlayer-Setup-$v.exe"
           if (-not (Test-Path $src)) { throw "installer not found: $src" }
           "SETUP=$src" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
@@ -90,3 +115,10 @@ jobs:
           files: |
             ${{ env.PORTABLE }}
             ${{ env.SETUP }}
+
+      - name: Remove short workspace stage
+        if: always()
+        shell: pwsh
+        run: |
+          $shortPath = Join-Path 'C:\e' (Split-Path -Leaf $env:GITHUB_WORKSPACE)
+          if (Test-Path $shortPath) { Remove-Item -Path $shortPath -Recurse -Force }

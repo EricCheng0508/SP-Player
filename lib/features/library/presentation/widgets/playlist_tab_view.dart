@@ -24,6 +24,8 @@ import 'package:enjoy_player/features/library/application/library_media_provider
 import 'package:enjoy_player/features/library/application/playlist_providers.dart';
 import 'package:enjoy_player/features/library/domain/media.dart';
 import 'package:enjoy_player/features/player/application/local_thumbnail_provider.dart';
+import 'package:enjoy_player/features/library/presentation/widgets/local_library_tab_view.dart'
+    show libraryBodyInset;
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 /// Third local-library tab: playlists.
@@ -81,10 +83,13 @@ class _PlaylistList extends ConsumerWidget {
         }
         return LayoutBuilder(
           builder: (context, constraints) {
+            // Align with the video/audio tabs: same browse-column inset for
+            // both the create button and the poster grid.
+            final inset = libraryBodyInset(context, constraints.maxWidth);
             return CustomScrollView(
               slivers: [
                 SliverPadding(
-                  padding: EdgeInsets.fromLTRB(0, t.space4, 0, t.space16),
+                  padding: EdgeInsets.fromLTRB(inset, t.space4, inset, t.space16),
                   sliver: SliverToBoxAdapter(
                     child: Align(
                       alignment: Alignment.centerLeft,
@@ -104,7 +109,7 @@ class _PlaylistList extends ConsumerWidget {
                   sliver: SliverGrid(
                     gridDelegate:
                         mediaCardTileGridDelegateForMinTileWidth(
-                          crossAxisExtent: constraints.maxWidth,
+                          crossAxisExtent: constraints.maxWidth - inset * 2,
                           minTileWidth: 210,
                           mainAxisSpacing: 24,
                           crossAxisSpacing: 20,
@@ -262,12 +267,15 @@ class _PlaylistDetail extends ConsumerWidget {
           }
         }
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: EdgeInsets.only(bottom: t.space12),
-              child: Row(
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final inset = libraryBodyInset(context, constraints.maxWidth);
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: EdgeInsets.fromLTRB(inset, 0, inset, t.space12),
+                  child: Row(
                 children: [
                   IconButton(
                     tooltip:
@@ -325,26 +333,31 @@ class _PlaylistDetail extends ConsumerWidget {
               )
             else
               Expanded(
-                child: ListView.builder(
-                  itemCount: items.length,
-                  itemBuilder: (context, index) {
-                    final item = items[index];
-                    final media = ref.watch(
-                      playlistMediaResolverProvider(
-                        (item.targetType, item.targetId),
-                      ),
-                    );
-                    return _PlaylistItemTile(
-                      item: item,
-                      media: media,
-                      isFirst: index == 0,
-                      isLast: index == items.length - 1,
-                      dao: dao,
-                    );
-                  },
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: inset),
+                  child: ListView.builder(
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      final item = items[index];
+                      final media = ref.watch(
+                        playlistMediaResolverProvider(
+                          (item.targetType, item.targetId),
+                        ),
+                      );
+                      return _PlaylistItemTile(
+                        item: item,
+                        media: media,
+                        isFirst: index == 0,
+                        isLast: index == items.length - 1,
+                        dao: dao,
+                      );
+                    },
+                  ),
                 ),
               ),
           ],
+        );
+          },
         );
       },
     );

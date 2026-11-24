@@ -237,17 +237,26 @@ GoRouter appRouter(Ref ref) {
           GoRoute(
             name: 'youtube-login',
             path: '/youtube/login',
-            builder: (context, state) => const YoutubeLoginScreen(),
+            pageBuilder: (context, state) => _shellPage(
+              key: const ValueKey<String>('shell-youtube-login'),
+              child: const YoutubeLoginScreen(),
+            ),
           ),
           GoRoute(
             name: 'craft',
             path: '/craft',
-            builder: (context, state) => const CraftScreen(),
+            pageBuilder: (context, state) => _shellPage(
+              key: const ValueKey<String>('shell-craft'),
+              child: const CraftScreen(),
+            ),
           ),
           GoRoute(
             name: 'craft-history',
             path: '/craft/history',
-            builder: (context, state) => const CraftHistoryScreen(),
+            pageBuilder: (context, state) => _shellPage(
+              key: const ValueKey<String>('shell-craft-history'),
+              child: const CraftHistoryScreen(),
+            ),
           ),
           GoRoute(
             name: 'settings',
@@ -260,45 +269,66 @@ GoRouter appRouter(Ref ref) {
           GoRoute(
             name: 'settings-keyboard',
             path: '/settings/keyboard',
-            builder: (context, state) => const HotkeysSettingsScreen(),
+            pageBuilder: (context, state) => _shellPage(
+              key: const ValueKey<String>('shell-settings-keyboard'),
+              child: const HotkeysSettingsScreen(),
+            ),
           ),
           GoRoute(
             name: 'settings-ai-providers',
             path: '/settings/ai-providers',
-            builder: (context, state) => const AiProvidersScreen(),
+            pageBuilder: (context, state) => _shellPage(
+              key: const ValueKey<String>('shell-settings-ai-providers'),
+              child: const AiProvidersScreen(),
+            ),
           ),
           GoRoute(
             name: 'settings-appearance-language',
             path: '/settings/appearance-language',
-            builder: (context, state) => const SettingsSectionPageScreen(
-              sectionId: SettingsSectionIds.appearanceLanguage,
+            pageBuilder: (context, state) => _shellPage(
+              key: const ValueKey<String>('shell-settings-appearance-language'),
+              child: const SettingsSectionPageScreen(
+                sectionId: SettingsSectionIds.appearanceLanguage,
+              ),
             ),
           ),
           GoRoute(
             name: 'settings-recording',
             path: '/settings/recording',
-            builder: (context, state) => const SettingsSectionPageScreen(
-              sectionId: SettingsSectionIds.recording,
+            pageBuilder: (context, state) => _shellPage(
+              key: const ValueKey<String>('shell-settings-recording'),
+              child: const SettingsSectionPageScreen(
+                sectionId: SettingsSectionIds.recording,
+              ),
             ),
           ),
           GoRoute(
             name: 'settings-developer',
             path: '/settings/developer',
-            builder: (context, state) => const SettingsSectionPageScreen(
-              sectionId: SettingsSectionIds.developer,
+            pageBuilder: (context, state) => _shellPage(
+              key: const ValueKey<String>('shell-settings-developer'),
+              child: const SettingsSectionPageScreen(
+                sectionId: SettingsSectionIds.developer,
+              ),
             ),
           ),
           GoRoute(
             name: 'settings-about',
             path: '/settings/about',
-            builder: (context, state) => const SettingsSectionPageScreen(
-              sectionId: SettingsSectionIds.about,
+            pageBuilder: (context, state) => _shellPage(
+              key: const ValueKey<String>('shell-settings-about'),
+              child: const SettingsSectionPageScreen(
+                sectionId: SettingsSectionIds.about,
+              ),
             ),
           ),
           GoRoute(
             name: 'settings-ai-playground',
             path: '/settings/ai-playground',
-            builder: (context, state) => const AiPlaygroundScreen(),
+            pageBuilder: (context, state) => _shellPage(
+              key: const ValueKey<String>('shell-settings-ai-playground'),
+              child: const AiPlaygroundScreen(),
+            ),
           ),
           GoRoute(
             name: 'vocabulary',
@@ -320,7 +350,10 @@ GoRouter appRouter(Ref ref) {
               }
               return true;
             },
-            builder: (context, state) => const VocabularyReviewSessionScreen(),
+            pageBuilder: (context, state) => _shellPage(
+              key: const ValueKey<String>('shell-vocabulary-review'),
+              child: const VocabularyReviewSessionScreen(),
+            ),
           ),
         ],
       ),

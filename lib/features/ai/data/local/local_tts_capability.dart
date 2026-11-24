@@ -46,7 +46,9 @@ final class LocalTtsCapability implements TtsCapability {
       final langPrefix =
           language.split('-').first.toLowerCase().replaceAll(RegExp(r'[^a-z]'), '');
       final script = _buildScript(text: text, langPrefix: langPrefix, wavPath: wavPath);
-      final encoded = base64Encode(utf8.encode(script));
+      // -EncodedCommand expects Base64 of UTF-16LE bytes (PowerShell spec),
+      // NOT UTF-8 — a UTF-8 payload decodes to garbage and always fails.
+      final encoded = base64Encode(_utf16LeBytes(script));
 
       final result = await Process.run(
         'powershell.exe',
@@ -105,4 +107,16 @@ if (\$prefix.Length -gt 0) {
 
   /// Single-quoted PowerShell string needs only `'` doubling.
   static String _escapePs(String value) => value.replaceAll("'", "''");
+
+  /// UTF-16LE bytes of [s], little-endian per code unit — what
+  /// `powershell -EncodedCommand` specifies as its input encoding.
+  static Uint8List _utf16LeBytes(String s) {
+    final units = s.codeUnits;
+    final out = Uint8List(units.length * 2);
+    for (var i = 0; i < units.length; i++) {
+      out[i * 2] = units[i] & 0xff;
+      out[i * 2 + 1] = (units[i] >> 8) & 0xff;
+    }
+    return out;
+  }
 }

@@ -19,6 +19,7 @@ import 'package:enjoy_player/features/ai/domain/speech_byok_kind.dart';
 import 'package:enjoy_player/features/ai/presentation/settings/widgets/asr_local_components.dart';
 import 'package:enjoy_player/features/ai/presentation/settings/widgets/byok_api_key_field.dart';
 import 'package:enjoy_player/features/ai/presentation/settings/widgets/llm_byok_form.dart';
+import 'package:enjoy_player/features/ai/presentation/settings/widgets/speech_endpoint_tile.dart';
 import 'package:enjoy_player/features/local_components/data/managed_llama_server.dart';
 import 'package:enjoy_player/features/local_components/domain/component_catalog.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
@@ -267,6 +268,18 @@ class _AiProvidersScreenState extends ConsumerState<AiProvidersScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                if (showSpeechEndpoint) ...[
+                  _SpeechServiceBlock(
+                    kind: _speechKind,
+                    onKindChanged: (k) => setState(() => _speechKind = k),
+                    baseUrlController: _speechBaseUrl,
+                    keyController: _speechKey,
+                    regionController: _speechRegion,
+                    hasExistingKey: _hasSpeechKey,
+                    maskedPreview: _speechMasked,
+                  ),
+                  Divider(height: t.space24, color: t.line),
+                ],
                 // ① 语音识别
                 _EngineSection(
                   icon: EnjoyIcons.waveform,
@@ -297,7 +310,7 @@ class _AiProvidersScreenState extends ConsumerState<AiProvidersScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
-                        '使用下方「云端语音服务」的地址与密钥（只需填一次，识别与合成共用）。这里只填识别用的模型名。',
+                        '端点在卡片顶部「云端语音服务」选择（识别与合成共用），这里只填识别模型名。',
                         style: tt.bodySmall?.copyWith(
                           color: cs.onSurfaceVariant,
                           height: 1.35,
@@ -322,6 +335,7 @@ class _AiProvidersScreenState extends ConsumerState<AiProvidersScreen> {
                   icon: EnjoyIcons.sparkle,
                   title: '字幕翻译与语言模型',
                   subtitle: '字幕翻译、词典与语境翻译共用这一份配置',
+                  cloudLabel: '云端 · 推荐',
                   isLocal: _mtLocal,
                   onChanged: (local) => setState(() => _mtLocal = local),
                   localBody: Column(
@@ -382,7 +396,7 @@ class _AiProvidersScreenState extends ConsumerState<AiProvidersScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
-                        '与语音识别共用下方「云端语音服务」；这里只填合成用的模型名。',
+                        '端点在卡片顶部「云端语音服务」选择，与识别共用；这里只填合成模型名。',
                         style: tt.bodySmall?.copyWith(
                           color: cs.onSurfaceVariant,
                           height: 1.35,
@@ -400,91 +414,6 @@ class _AiProvidersScreenState extends ConsumerState<AiProvidersScreen> {
                     ],
                   ),
                 ),
-                // 共享云端语音服务（识别与合成共用，只填一次）
-                if (_speechKind == SpeechByokKind.azureSpeech ||
-                    showSpeechEndpoint) ...[
-                  Divider(height: t.space24, color: t.line),
-                  Text(
-                    '云端语音服务（识别与合成共用，只填一次）',
-                    style: tt.titleSmall?.copyWith(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: t.ink,
-                    ),
-                  ),
-                  SizedBox(height: t.space12),
-                  SectionLabel(
-                    icon: EnjoyIcons.route,
-                    text: l10n.settingsAiProvidersSpeechKindLabel,
-                  ),
-                  SizedBox(height: t.space8),
-                  SegmentedButton<SpeechByokKind>(
-                    segments: [
-                      ButtonSegment(
-                        value: SpeechByokKind.openAiCompatible,
-                        label: Text(l10n.settingsAiProvidersSpeechKindOpenAi),
-                      ),
-                      ButtonSegment(
-                        value: SpeechByokKind.azureSpeech,
-                        label: Text(l10n.settingsAiProvidersSpeechKindAzure),
-                      ),
-                    ],
-                    selected: {_speechKind},
-                    onSelectionChanged: (sel) =>
-                        setState(() => _speechKind = sel.first),
-                    style: SegmentedButton.styleFrom(
-                      visualDensity: VisualDensity.comfortable,
-                      selectedBackgroundColor: cs.primaryContainer.withValues(
-                        alpha: 0.55,
-                      ),
-                      selectedForegroundColor: cs.onPrimaryContainer,
-                      foregroundColor: cs.onSurfaceVariant,
-                      side: BorderSide(
-                        color: cs.outlineVariant.withValues(alpha: 0.32),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: t.space8),
-                  Text(
-                    _speechKind == SpeechByokKind.azureSpeech
-                        ? l10n.settingsAiProvidersSpeechKindHintAzure
-                        : l10n.settingsAiProvidersSpeechKindHintOpenAi,
-                    style: tt.bodySmall?.copyWith(fontSize: 12, color: t.ink2),
-                  ),
-                  SizedBox(height: t.space16),
-                  if (_speechKind != SpeechByokKind.azureSpeech) ...[
-                    TextField(
-                      controller: _speechBaseUrl,
-                      decoration: InputDecoration(
-                        labelText: l10n.settingsAiProvidersBaseUrlLabel,
-                        hintText: l10n.settingsAiProvidersBaseUrlHint,
-                      ),
-                      keyboardType: TextInputType.url,
-                      autocorrect: false,
-                    ),
-                    SizedBox(height: t.space12),
-                  ],
-                  ByokApiKeyField(
-                    controller: _speechKey,
-                    hasExistingKey: _hasSpeechKey,
-                    labelText: _speechKind == SpeechByokKind.azureSpeech
-                        ? l10n.settingsAiProvidersSpeechSubscriptionKeyLabel
-                        : l10n.settingsAiProvidersApiKeyLabel,
-                    maskedPreview: _speechMasked,
-                  ),
-                  if (_speechKind == SpeechByokKind.azureSpeech) ...[
-                    SizedBox(height: t.space12),
-                    TextField(
-                      controller: _speechRegion,
-                      decoration: InputDecoration(
-                        labelText: l10n.settingsAiProvidersSpeechRegionLabel,
-                        hintText: l10n.settingsAiProvidersSpeechRegionHint,
-                      ),
-                      textCapitalization: TextCapitalization.none,
-                      autocorrect: false,
-                    ),
-                  ],
-                ],
                 SizedBox(height: t.space16),
                 Row(
                   children: [
@@ -533,6 +462,7 @@ class _EngineSection extends StatelessWidget {
     required this.onChanged,
     required this.localBody,
     required this.cloudBody,
+    this.cloudLabel,
   });
 
   final IconData icon;
@@ -542,6 +472,9 @@ class _EngineSection extends StatelessWidget {
   final ValueChanged<bool> onChanged;
   final Widget localBody;
   final Widget cloudBody;
+
+  /// Optional label override for the cloud segment (e.g. "云端 · 推荐").
+  final String? cloudLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -596,7 +529,10 @@ class _EngineSection extends StatelessWidget {
         SegmentedButton<bool>(
           segments: [
             ButtonSegment(value: true, label: Text(l10n.settingsAiEngineLocal)),
-            ButtonSegment(value: false, label: Text(l10n.settingsAiEngineCloud)),
+            ButtonSegment(
+              value: false,
+              label: Text(cloudLabel ?? l10n.settingsAiEngineCloud),
+            ),
           ],
           selected: {isLocal},
           onSelectionChanged: (sel) => onChanged(sel.first),
@@ -608,6 +544,113 @@ class _EngineSection extends StatelessWidget {
           alignment: Alignment.topCenter,
           child: isLocal ? localBody : cloudBody,
         ),
+      ],
+    );
+  }
+}
+
+
+/// Shared cloud speech service block (top of the card): vendor kind, endpoint
+/// picker tile, key and Azure region. One source of truth for ASR + TTS.
+class _SpeechServiceBlock extends StatelessWidget {
+  const _SpeechServiceBlock({
+    required this.kind,
+    required this.onKindChanged,
+    required this.baseUrlController,
+    required this.keyController,
+    required this.regionController,
+    required this.hasExistingKey,
+    required this.maskedPreview,
+  });
+
+  final SpeechByokKind kind;
+  final ValueChanged<SpeechByokKind> onKindChanged;
+  final TextEditingController baseUrlController;
+  final TextEditingController keyController;
+  final TextEditingController regionController;
+  final bool hasExistingKey;
+  final String? maskedPreview;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final t = EnjoyThemeTokens.of(context);
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+    final isAzure = kind == SpeechByokKind.azureSpeech;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          '云端语音服务（识别与合成共用，只需填一次）',
+          style: tt.titleSmall?.copyWith(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: t.ink,
+          ),
+        ),
+        SizedBox(height: t.space12),
+        SectionLabel(
+          icon: EnjoyIcons.route,
+          text: l10n.settingsAiProvidersSpeechKindLabel,
+        ),
+        SizedBox(height: t.space8),
+        SegmentedButton<SpeechByokKind>(
+          segments: [
+            ButtonSegment(
+              value: SpeechByokKind.openAiCompatible,
+              label: Text(l10n.settingsAiProvidersSpeechKindOpenAi),
+            ),
+            ButtonSegment(
+              value: SpeechByokKind.azureSpeech,
+              label: Text(l10n.settingsAiProvidersSpeechKindAzure),
+            ),
+          ],
+          selected: {kind},
+          onSelectionChanged: (sel) => onKindChanged(sel.first),
+          style: SegmentedButton.styleFrom(
+            visualDensity: VisualDensity.comfortable,
+            selectedBackgroundColor: cs.primaryContainer.withValues(
+              alpha: 0.55,
+            ),
+            selectedForegroundColor: cs.onPrimaryContainer,
+            foregroundColor: cs.onSurfaceVariant,
+            side: BorderSide(
+              color: cs.outlineVariant.withValues(alpha: 0.32),
+            ),
+          ),
+        ),
+        SizedBox(height: t.space8),
+        Text(
+          isAzure
+              ? l10n.settingsAiProvidersSpeechKindHintAzure
+              : l10n.settingsAiProvidersSpeechKindHintOpenAi,
+          style: tt.bodySmall?.copyWith(fontSize: 12, color: t.ink2),
+        ),
+        SizedBox(height: t.space12),
+        SpeechEndpointTile(controller: baseUrlController, enabled: !isAzure),
+        SizedBox(height: t.space12),
+        ByokApiKeyField(
+          controller: keyController,
+          hasExistingKey: hasExistingKey,
+          labelText: isAzure
+              ? l10n.settingsAiProvidersSpeechSubscriptionKeyLabel
+              : l10n.settingsAiProvidersApiKeyLabel,
+          maskedPreview: maskedPreview,
+        ),
+        if (isAzure) ...[
+          SizedBox(height: t.space12),
+          TextField(
+            controller: regionController,
+            decoration: InputDecoration(
+              labelText: l10n.settingsAiProvidersSpeechRegionLabel,
+              hintText: l10n.settingsAiProvidersSpeechRegionHint,
+            ),
+            textCapitalization: TextCapitalization.none,
+            autocorrect: false,
+          ),
+        ],
       ],
     );
   }

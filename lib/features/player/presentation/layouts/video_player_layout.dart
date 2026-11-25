@@ -10,6 +10,7 @@ import 'package:enjoy_player/core/interaction/haptics.dart';
 import 'package:enjoy_player/core/interaction/mouse_tracker_safe.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/transcript/transcript_lens_metrics.dart';
+import 'package:enjoy_player/core/window/window_fullscreen_provider.dart';
 import 'package:enjoy_player/features/player/application/player_controller.dart';
 import 'package:enjoy_player/features/player/application/player_engine.dart';
 import 'package:enjoy_player/features/player/application/player_engine_capabilities_provider.dart';
@@ -25,7 +26,7 @@ import 'package:enjoy_player/features/player/presentation/widgets/youtube_open_i
 import 'package:enjoy_player/features/player/presentation/widgets/youtube_video_poster.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
-class VideoPlayerLayout extends StatefulWidget {
+class VideoPlayerLayout extends ConsumerStatefulWidget {
   const VideoPlayerLayout({
     required this.engine,
     required this.transcript,
@@ -44,7 +45,7 @@ class VideoPlayerLayout extends StatefulWidget {
   final ValueChanged<double>? onTranscriptSplitWidthCommitted;
 
   @override
-  State<VideoPlayerLayout> createState() => _VideoPlayerLayoutState();
+  ConsumerState<VideoPlayerLayout> createState() => _VideoPlayerLayoutState();
 }
 
 /// Transcript may use at most this fraction of total width (video keeps >=50%).
@@ -70,7 +71,7 @@ double transcriptColumnWidthFor(
   return raw.clamp(minW, maxW);
 }
 
-class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
+class _VideoPlayerLayoutState extends ConsumerState<VideoPlayerLayout> {
   /// Hit target for the invisible resize strip.
   static const double _kSplitterHitWidth = 12;
 
@@ -121,9 +122,21 @@ class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
   @override
   Widget build(BuildContext context) {
     final transportInset = MediaQuery.paddingOf(context).bottom;
+    // OS window fullscreen = true video fullscreen: the stage takes the whole
+    // surface; transcript panel and aspect-ratio letterboxing are dropped.
+    final fullscreen = ref.watch(windowFullscreenProvider);
     return LayoutBuilder(
       builder: (context, constraints) {
         final useSideBySide = constraints.maxWidth > constraints.maxHeight;
+
+        if (fullscreen) {
+          return SizedBox.expand(
+            child: _VideoColumn(
+              engine: widget.engine,
+              bottomInset: transportInset,
+            ),
+          );
+        }
 
         if (useSideBySide) {
           final total = constraints.maxWidth;

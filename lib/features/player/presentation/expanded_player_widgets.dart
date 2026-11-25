@@ -12,6 +12,7 @@ import 'package:enjoy_player/core/platform/linux_platform_availability.dart';
 import 'package:enjoy_player/core/theme/enjoy_icons.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/skeleton.dart';
+import 'package:enjoy_player/core/window/window_fullscreen_provider.dart';
 import 'package:enjoy_player/features/player/application/player_engine_provider.dart';
 import 'package:enjoy_player/features/player/application/player_preferences_provider.dart';
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
@@ -322,6 +323,9 @@ class ExpandedPlayerChromeBody extends ConsumerWidget {
       ),
     );
     final transcript = TranscriptPanel(mediaId: mediaId);
+    // Window fullscreen = true video fullscreen: drop the top bar so the
+    // stage owns the screen. The transport dock keeps the exit control.
+    final fullscreen = isVideo && ref.watch(windowFullscreenProvider);
 
     final mediaBody = isVideo
         ? VideoPlayerLayout(
@@ -339,7 +343,7 @@ class ExpandedPlayerChromeBody extends ConsumerWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          PlayerTopBar(mediaId: mediaId),
+          if (!fullscreen) PlayerTopBar(mediaId: mediaId),
           Expanded(child: PlayerMarginLayout(child: mediaBody)),
         ],
       ),

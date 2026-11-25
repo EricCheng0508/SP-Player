@@ -3,7 +3,7 @@
 ; All paths are relative to this script (repo portable — no machine-specific
 ; absolute paths): {#SourcePath} is the directory containing this script.
 
-#define AppVersion "0.10.5"
+#define AppVersion "0.10.6"
 
 [Setup]
 AppName=SP Player

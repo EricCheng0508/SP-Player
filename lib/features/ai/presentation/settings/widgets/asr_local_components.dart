@@ -14,7 +14,12 @@ import 'package:enjoy_player/features/local_components/domain/component_catalog.
 
 /// Consumer stateful so a finished install can force a status refresh.
 class AsrLocalComponents extends ConsumerStatefulWidget {
-  const AsrLocalComponents({super.key});
+  const AsrLocalComponents({super.key, this.kinds = const []});
+
+  /// Component kinds to render, e.g. the recognition pair
+  /// (asrRuntime + asrModel) or the offline-translation pair
+  /// (mtRuntime + mtModel) — both belong to the subtitle pipeline.
+  final List<ComponentKind> kinds;
 
   @override
   ConsumerState<AsrLocalComponents> createState() => _AsrLocalComponentsState();
@@ -24,11 +29,7 @@ class _AsrLocalComponentsState extends ConsumerState<AsrLocalComponents> {
   int _generation = 0;
 
   List<ComponentSpec> get _specs => kComponentSpecs
-      .where(
-        (s) =>
-            s.kind == ComponentKind.asrRuntime ||
-            s.kind == ComponentKind.asrModel,
-      )
+      .where((s) => widget.kinds.contains(s.kind))
       .toList();
 
   Future<void> _install(ComponentSpec spec) async {

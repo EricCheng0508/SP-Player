@@ -176,14 +176,10 @@ final List<SettingsSectionSpec> kSettingsSectionSpecs = [
     icon: EnjoyIcons.sparkle,
     title: (l10n) => l10n.settingsSectionAi,
     hint: (l10n) => l10n.settingsSectionAiHint,
-    rows: [
-      SettingsRowSpec(
-        rowId: 'aiProviders',
-        title: (l10n) => l10n.settingsAiProvidersTileTitle,
-      ),
-    ],
+    rows: const [],
     body: () => const AiProvidersSectionBody(),
-    collapsedByDefault: true,
+    wrapInCard: false,
+    collapsedByDefault: false,
   ),
   SettingsSectionSpec(
     sectionId: SettingsSectionIds.network,

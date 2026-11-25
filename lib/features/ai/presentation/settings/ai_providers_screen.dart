@@ -31,14 +31,14 @@ import 'package:enjoy_player/l10n/app_localizations.dart';
 /// Each block shows exactly one pane (local or cloud) inside a fixed-height
 /// area, so switching never resizes the page. Cloud panes are a single
 /// compact box that opens the profile dialog.
-class AiProvidersScreen extends ConsumerStatefulWidget {
-  const AiProvidersScreen({super.key});
+class AiEnginesBody extends ConsumerStatefulWidget {
+  const AiEnginesBody({super.key});
 
   @override
-  ConsumerState<AiProvidersScreen> createState() => _AiProvidersScreenState();
+  ConsumerState<AiEnginesBody> createState() => _AiEnginesBodyState();
 }
 
-class _AiProvidersScreenState extends ConsumerState<AiProvidersScreen> {
+class _AiEnginesBodyState extends ConsumerState<AiEnginesBody> {
   bool _mtCloud = true; // translation defaults to cloud (recommended)
   bool _speechLocal = true;
 
@@ -59,7 +59,10 @@ class _AiProvidersScreenState extends ConsumerState<AiProvidersScreen> {
         llm != null &&
         llm.baseUrl.startsWith('http://127.0.0.1') &&
         llm.baseUrl.contains('8760');
-    _mtCloud = llm != null && !isLocalLlm;
+    // Cloud is the recommended default: only an explicitly local llama
+    // endpoint (127.0.0.1:8760) switches this to local; no config at all keeps
+    // the cloud pane visible (its box then says 未配置).
+    _mtCloud = llm == null || !isLocalLlm;
 
     final asr = configs.asr.speechByok;
     final tts = configs.tts.speechByok;
@@ -110,7 +113,7 @@ class _AiProvidersScreenState extends ConsumerState<AiProvidersScreen> {
     return false;
   }
 
-  Future<void> _pickLlm({required bool revertOnCancel}) async {
+  Future<void> _pickLlm() async {
     final selection = await showCloudProfileDialog(
       context: context,
       ref: ref,
@@ -119,10 +122,7 @@ class _AiProvidersScreenState extends ConsumerState<AiProvidersScreen> {
     );
     if (!mounted) return;
     final picked = selection?.llm;
-    if (picked == null) {
-      if (revertOnCancel) setState(() => _mtCloud = false);
-      return;
-    }
+    if (picked == null) return;
     await _applyLlm(picked, selection!.apiKey);
   }
 
@@ -161,7 +161,7 @@ class _AiProvidersScreenState extends ConsumerState<AiProvidersScreen> {
     }
   }
 
-  Future<void> _pickSpeech({required bool revertOnCancel}) async {
+  Future<void> _pickSpeech() async {
     final selection = await showCloudProfileDialog(
       context: context,
       ref: ref,
@@ -170,10 +170,7 @@ class _AiProvidersScreenState extends ConsumerState<AiProvidersScreen> {
     );
     if (!mounted) return;
     final picked = selection?.speech;
-    if (picked == null) {
-      if (revertOnCancel) setState(() => _speechLocal = true);
-      return;
-    }
+    if (picked == null) return;
     await _applySpeech(picked, selection!.apiKey);
   }
 
@@ -270,141 +267,112 @@ class _AiProvidersScreenState extends ConsumerState<AiProvidersScreen> {
     final tt = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
 
-    return EnjoyPage(
-      kind: EnjoyPageKind.hub,
-      title: l10n.settingsAiProvidersTitle,
-      showBack: true,
-      body: (context, metrics) => ListView(
-        padding: metrics.padding(top: t.space16, bottom: t.space32),
+    return Container(
+      decoration: ShapeDecoration(
+        color: t.paper,
+        shape: RoundedSuperellipseBorder(
+          borderRadius: BorderRadius.circular(t.radiusCard),
+          side: BorderSide(color: t.brandInk),
+        ),
+      ),
+      padding: EdgeInsets.all(t.space16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            l10n.settingsAiProvidersSubtitle,
-            style: tt.bodyMedium?.copyWith(
-              color: cs.onSurfaceVariant,
-              height: 1.4,
-            ),
-          ),
-          SizedBox(height: t.space16),
-          Container(
-            decoration: ShapeDecoration(
-              color: t.paper,
-              shape: RoundedSuperellipseBorder(
-                borderRadius: BorderRadius.circular(t.radiusCard),
-                side: BorderSide(color: t.brandInk),
-              ),
-            ),
-            padding: EdgeInsets.all(t.space16),
-            child: Column(
+          // ① 字幕翻译与语言模型（默认云端）
+          _EngineSection(
+            icon: EnjoyIcons.sparkle,
+            title: '字幕翻译与语言模型',
+            subtitle: '字幕翻译、词典与语境翻译共用这一份配置',
+            cloudFirst: true,
+            isLocal: !_mtCloud,
+            onChanged: (local) async {
+              if (local) {
+                await _useLocalTranslation();
+              } else {
+                // Switching the pane must not auto-open the dialog — the
+                // user opens it by tapping the cloud box.
+                setState(() => _mtCloud = true);
+              }
+            },
+            localBody: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // ① 字幕翻译与语言模型（默认云端）
-                _EngineSection(
-                  icon: EnjoyIcons.sparkle,
-                  title: '字幕翻译与语言模型',
-                  subtitle: '字幕翻译、词典与语境翻译共用这一份配置',
-                  cloudFirst: true,
-                  isLocal: !_mtCloud,
-                  onChanged: (local) async {
-                    if (local) {
-                      await _useLocalTranslation();
-                    } else {
-                      setState(() => _mtCloud = true);
-                      await _pickLlm(revertOnCancel: true);
-                    }
-                  },
-                  localBody: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        '离线翻译：llama.cpp + TranslateGemma，下载后无需联网。翻译质量低于云端 LLM。',
-                        style: tt.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                          height: 1.35,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      const AsrLocalComponents(
-                        kinds: [
-                          ComponentKind.mtRuntime,
-                          ComponentKind.mtModel,
-                        ],
-                      ),
-                    ],
-                  ),
-                  cloudBody: _CloudBox(
-                    title: '云端语言模型',
-                    meta:
-                        _llmProfile?.summary ??
-                        '未配置 · 点击设置（推荐，显著提升翻译质量）',
-                    configured: _llmProfile != null,
-                    onTap: _applying ? null : () => _pickLlm(revertOnCancel: false),
+                Text(
+                  '离线翻译：llama.cpp + TranslateGemma，下载后无需联网。翻译质量低于云端 LLM。',
+                  style: tt.bodySmall?.copyWith(
+                    color: cs.onSurfaceVariant,
+                    height: 1.35,
                   ),
                 ),
-                Divider(height: t.space24 + 16, color: t.line),
-                // ② 语音服务（识别 + 合成）
-                _EngineSection(
-                  icon: EnjoyIcons.waveform,
-                  title: '语音服务（识别与合成）',
-                  subtitle: '识别视频语音生成字幕；Craft 用它把文本合成练习音频',
-                  isLocal: _speechLocal,
-                  onChanged: (local) async {
-                    if (local) {
-                      await _useLocalSpeech();
-                    } else {
-                      setState(() => _speechLocal = false);
-                      await _pickSpeech(revertOnCancel: true);
-                    }
-                  },
-                  localBody: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const AsrLocalComponents(
-                        kinds: [
-                          ComponentKind.asrRuntime,
-                          ComponentKind.asrModel,
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        '合成使用 Windows 系统自带语音，无需下载；音色跟随系统语音包。',
-                        style: tt.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                          height: 1.35,
-                        ),
-                      ),
-                    ],
-                  ),
-                  cloudBody: _CloudBox(
-                    title: '云端语音服务',
-                    meta:
-                        _speechProfile?.summary ??
-                        '未配置 · 点击设置（识别与合成共用一个端点）',
-                    configured: _speechProfile != null,
-                    onTap: _applying
-                        ? null
-                        : () => _pickSpeech(revertOnCancel: false),
-                  ),
-                ),
-                SizedBox(height: t.space16),
-                Row(
-                  children: [
-                    Icon(EnjoyIcons.lock, size: 16, color: t.ink3),
-                    SizedBox(width: t.space8),
-                    Expanded(
-                      child: Text(
-                        l10n.settingsAiProvidersPrivacyNotice,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: tt.bodySmall?.copyWith(
-                          color: t.ink3,
-                          height: 1.3,
-                        ),
-                      ),
-                    ),
-                  ],
+                const SizedBox(height: 8),
+                const AsrLocalComponents(
+                  kinds: [ComponentKind.mtRuntime, ComponentKind.mtModel],
                 ),
               ],
             ),
+            cloudBody: _CloudBox(
+              title: '云端语言模型',
+              meta:
+                  _llmProfile?.summary ??
+                  '未配置 · 点击设置（推荐，显著提升翻译质量）',
+              configured: _llmProfile != null,
+              onTap: _applying ? null : _pickLlm,
+            ),
+          ),
+          Divider(height: t.space24 + 16, color: t.line),
+          // ② 语音服务（识别 + 合成）
+          _EngineSection(
+            icon: EnjoyIcons.waveform,
+            title: '语音服务（识别与合成）',
+            subtitle: '识别视频语音生成字幕；Craft 用它把文本合成练习音频',
+            isLocal: _speechLocal,
+            onChanged: (local) async {
+              if (local) {
+                await _useLocalSpeech();
+              } else {
+                setState(() => _speechLocal = false);
+              }
+            },
+            localBody: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const AsrLocalComponents(
+                  kinds: [ComponentKind.asrRuntime, ComponentKind.asrModel],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  '合成使用 Windows 系统自带语音，无需下载；音色跟随系统语音包。',
+                  style: tt.bodySmall?.copyWith(
+                    color: cs.onSurfaceVariant,
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
+            cloudBody: _CloudBox(
+              title: '云端语音服务',
+              meta:
+                  _speechProfile?.summary ??
+                  '未配置 · 点击设置（识别与合成共用一个端点）',
+              configured: _speechProfile != null,
+              onTap: _applying ? null : _pickSpeech,
+            ),
+          ),
+          SizedBox(height: t.space16),
+          Row(
+            children: [
+              Icon(EnjoyIcons.lock, size: 16, color: t.ink3),
+              SizedBox(width: t.space8),
+              Expanded(
+                child: Text(
+                  l10n.settingsAiProvidersPrivacyNotice,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: tt.bodySmall?.copyWith(color: t.ink3, height: 1.3),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -591,6 +559,27 @@ class _CloudBox extends StatelessWidget {
             Icon(Icons.unfold_more, size: 18, color: cs.onSurfaceVariant),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Standalone route wrapper (deep links keep working); the settings page
+/// embeds [AiEnginesBody] directly instead of linking to this screen.
+class AiProvidersScreen extends StatelessWidget {
+  const AiProvidersScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final t = EnjoyThemeTokens.of(context);
+    return EnjoyPage(
+      kind: EnjoyPageKind.hub,
+      title: l10n.settingsAiProvidersTitle,
+      showBack: true,
+      body: (context, metrics) => ListView(
+        padding: metrics.padding(top: t.space16, bottom: t.space32),
+        children: const [AiEnginesBody()],
       ),
     );
   }

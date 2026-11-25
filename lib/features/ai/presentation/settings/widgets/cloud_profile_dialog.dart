@@ -6,8 +6,12 @@
 library;
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:enjoy_player/core/theme/enjoy_icons.dart';
+import 'package:enjoy_player/data/api/api_client_provider.dart';
+import 'package:enjoy_player/data/api/byok_secret_store.dart';
+import 'package:enjoy_player/features/ai/domain/modality_kind.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -78,6 +82,17 @@ class _CloudProfileDialogState extends State<_CloudProfileDialog> {
   final _llmModel = TextEditingController(text: 'gpt-4o-mini');
   final _name = TextEditingController();
 
+  // Fetched model list ("拉取模型" against the endpoint's /models).
+  bool _fetchingModels = false;
+  List<String> _fetchedModels = const [];
+  String? _fetchError;
+
+  void _resetModelFetch() {
+    _fetchingModels = false;
+    _fetchedModels = const [];
+    _fetchError = null;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -124,6 +139,7 @@ class _CloudProfileDialogState extends State<_CloudProfileDialog> {
       _asrModel.text = 'whisper-1';
       _ttsModel.text = 'tts-1';
       _llmModel.text = 'gpt-4o-mini';
+      _resetModelFetch();
     });
   }
 
@@ -140,6 +156,7 @@ class _CloudProfileDialogState extends State<_CloudProfileDialog> {
       _key.clear();
       _asrModel.text = p.asrModel;
       _ttsModel.text = p.ttsModel;
+      _resetModelFetch();
     });
   }
 
@@ -155,6 +172,7 @@ class _CloudProfileDialogState extends State<_CloudProfileDialog> {
       _name.text = p.name;
       _key.clear();
       _llmModel.text = p.model;
+      _resetModelFetch();
     });
   }
 
@@ -166,7 +184,77 @@ class _CloudProfileDialogState extends State<_CloudProfileDialog> {
       _vendor = preset.id == 'azureOpenAi'
           ? CloudVendor.azure
           : CloudVendor.openAiCompatible;
+      _resetModelFetch();
     });
+  }
+
+  /// Queries `{endpoint}/models` (OpenAI-compatible list API) and fills the
+  /// suggestion list. Uses the typed key; when empty, falls back to the
+  /// stored LLM key so editing an existing profile works without retyping.
+  Future<void> _fetchModels() async {
+    final endpoint = _endpoint.text.trim().replaceAll(RegExp(r'/+$'), '');
+    if (endpoint.isEmpty) {
+      setState(() => _fetchError = '请先填写端点地址');
+      return;
+    }
+    var key = _key.text.trim();
+    if (key.isEmpty) {
+      try {
+        key =
+            await widget.speakerRef
+                .read(byokSecretStoreProvider)
+                .readApiKey(ModalityKind.llm) ??
+            '';
+      } on Object {
+        // Secure storage unavailable — proceed without a key.
+      }
+    }
+    setState(() {
+      _fetchingModels = true;
+      _fetchError = null;
+      _fetchedModels = const [];
+    });
+    try {
+      final uri = Uri.parse('$endpoint/models');
+      final response = await widget.speakerRef
+          .read(httpClientProvider)
+          .get(
+            uri,
+            headers: {
+              'Accept': 'application/json',
+              if (key.isNotEmpty) 'Authorization': 'Bearer $key',
+            },
+          ).timeout(const Duration(seconds: 20));
+      if (response.statusCode != 200) {
+        throw 'HTTP ${response.statusCode}';
+      }
+      final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+      List<String> models = const [];
+      if (decoded is Map && decoded['data'] is List) {
+        models = [
+          for (final item in decoded['data'] as List)
+            if (item is Map && item['id'] != null) item['id'].toString(),
+        ];
+      } else if (decoded is List) {
+        // Some gateways return a bare array of ids or objects.
+        models = [
+          for (final item in decoded)
+            if (item is String) item else if (item is Map && item['id'] != null)
+              item['id'].toString(),
+        ];
+      }
+      models = [...models.where((m) => m.isNotEmpty)]..sort();
+      if (models.isEmpty) {
+        throw '端点没有返回模型列表';
+      }
+      setState(() => _fetchedModels = models);
+    } on TimeoutException {
+      setState(() => _fetchError = '请求超时，检查端点或网络');
+    } on Object catch (e) {
+      setState(() => _fetchError = '拉取失败：$e');
+    } finally {
+      if (mounted) setState(() => _fetchingModels = false);
+    }
   }
 
   Future<void> _deleteSpeech(CloudSpeechProfile p) async {
@@ -530,14 +618,72 @@ class _CloudProfileDialogState extends State<_CloudProfileDialog> {
               hintText: 'tts-1',
             ),
           ),
-        ] else
-          TextField(
-            controller: _llmModel,
-            decoration: const InputDecoration(
-              labelText: '翻译模型',
-              hintText: 'gpt-4o-mini',
-            ),
+        ] else ...[
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _llmModel,
+                  decoration: const InputDecoration(
+                    labelText: '翻译模型',
+                    hintText: 'gpt-4o-mini',
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              if (_fetchingModels)
+                const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              else
+                OutlinedButton(
+                  onPressed: isAzure ? null : _fetchModels,
+                  child: const Text('拉取模型'),
+                ),
+            ],
           ),
+          if (_fetchError != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              _fetchError!,
+              style: tt.bodySmall?.copyWith(color: cs.error),
+            ),
+          ],
+          if (_fetchedModels.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Container(
+              constraints: const BoxConstraints(maxHeight: 168),
+              decoration: BoxDecoration(
+                border: Border.all(color: cs.outlineVariant),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: _fetchedModels.length,
+                itemBuilder: (context, index) {
+                  final model = _fetchedModels[index];
+                  final selected = model == _llmModel.text.trim();
+                  return ListTile(
+                    dense: true,
+                    visualDensity: VisualDensity.compact,
+                    title: Text(
+                      model,
+                      overflow: TextOverflow.ellipsis,
+                      style: tt.bodySmall,
+                    ),
+                    trailing: selected
+                        ? Icon(Icons.check, size: 16, color: cs.primary)
+                        : null,
+                    onTap: () => setState(() => _llmModel.text = model),
+                  );
+                },
+              ),
+            ),
+          ],
+        ],
         const SizedBox(height: 10),
         TextField(
           controller: _name,

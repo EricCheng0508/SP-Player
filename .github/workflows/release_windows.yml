@@ -118,6 +118,7 @@ jobs:
 
       - name: Build installer (Inno Setup)
         working-directory: ${{ env.BUILD_WS }}
+        continue-on-error: true
         shell: pwsh
         run: |
           [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -165,9 +166,23 @@ jobs:
           $src = Join-Path $env:BUILD_WS "build/installer/SPPlayer-Setup-$v.exe"
           if (-not (Test-Path $src)) { throw "installer not found: $src" }
           "SETUP=$src" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          # Same trap as the portable step: never let a native command's
-          # exit code leak into the step's result once the artifact is built.
           exit 0
+
+      # Assemble the release file list: portable zip always; the installer
+      # only when the previous step produced it. A missing SETUP line must
+      # not break the publish — a portable-only release is strictly better
+      # than no release.
+      - name: Assemble release file list
+        if: always()
+        working-directory: ${{ env.BUILD_WS }}
+        shell: pwsh
+        run: |
+          $files = $env:PORTABLE
+          if (-not $files) {
+            $files = Join-Path $env:BUILD_WS "build/SP-Player-portable-win64.zip"
+          }
+          if ($env:SETUP) { $files = "$files`n$env:SETUP" }
+          "FILES<<GITHUB_ENV_FILES_DELIM`n$files`nGITHUB_ENV_FILES_DELIM" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
@@ -175,10 +190,8 @@ jobs:
           tag_name: ${{ github.ref_name }}
           name: SP Player ${{ steps.version.outputs.version }}
           generate_release_notes: true
-          fail_on_unmatched_files: true
-          files: |
-            ${{ env.PORTABLE }}
-            ${{ env.SETUP }}
+          fail_on_unmatched_files: false
+          files: ${{ env.FILES }}
 
       - name: Remove short workspace stage
         if: always()

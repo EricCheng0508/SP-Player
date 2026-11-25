@@ -1,6 +1,8 @@
 /// Application shell: adaptive navigation + page stack + player-route transport.
 library;
 
+import 'dart:async';
+
 import 'package:enjoy_player/core/theme/enjoy_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +13,8 @@ import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/app_background.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_bottom_nav.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_chrome_icon.dart';
+import 'package:enjoy_player/core/window/desktop_window.dart';
+import 'package:enjoy_player/core/window/window_fullscreen_provider.dart';
 import 'package:enjoy_player/features/onboarding/presentation/onboarding_showcase_host.dart';
 import 'package:enjoy_player/features/player/application/player_controller.dart';
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
@@ -38,6 +42,32 @@ class _RootShellState extends ConsumerState<RootShell> {
   static const _navDiscover = 1;
   static const _navLibrary = 2;
   static const _navAccount = 3;
+
+  /// Fullscreen dock auto-reveal: idle delay before the floating dock slides
+  /// away again after a mouse move.
+  static const Duration _dockAutoHideDelay = Duration(seconds: 3);
+
+  Timer? _dockHideTimer;
+  bool _dockVisible = true;
+
+  @override
+  void dispose() {
+    _dockHideTimer?.cancel();
+    super.dispose();
+  }
+
+  /// Mouse moved over the fullscreen stage: show the dock, re-arm the timer.
+  void _pokeDock() {
+    _dockHideTimer?.cancel();
+    if (!_dockVisible && mounted) setState(() => _dockVisible = true);
+    _dockHideTimer = Timer(_dockAutoHideDelay, () {
+      if (mounted) setState(() => _dockVisible = false);
+    });
+  }
+
+  void _cancelDockHide() {
+    _dockHideTimer?.cancel();
+  }
 
   static const _accountPrefixes = {
     '/profile',
@@ -172,6 +202,23 @@ class _RootShellState extends ConsumerState<RootShell> {
               // on open" report.
               final playerWithTransport = onPlayer;
 
+              // True video fullscreen: dock floats over the stage and
+              // auto-hides after idle (mouse move reveals it again).
+              final videoFullscreen =
+                  playerWithTransport &&
+                  isDesktop &&
+                  ref.watch(windowFullscreenProvider);
+              ref.listen(windowFullscreenProvider, (prev, next) {
+                if (!playerWithTransport || !isDesktop || prev == next) return;
+                _dockHideTimer?.cancel();
+                if (mounted) setState(() => _dockVisible = true);
+                if (next) {
+                  _dockHideTimer = Timer(_dockAutoHideDelay, () {
+                    if (mounted) setState(() => _dockVisible = false);
+                  });
+                }
+              });
+
               final bottomClearance = !useSidebar && !onPlayer && !onReview
                   ? rootShellBottomNavClearance(context)
                   : 0.0;
@@ -185,23 +232,64 @@ class _RootShellState extends ConsumerState<RootShell> {
 
               Widget mobileShellScaffold() {
                 if (playerWithTransport) {
+                  Widget playerBody = SafeArea(
+                    bottom: false,
+                    child: SizedBox.expand(child: widget.child),
+                  );
+                  Widget? bottomDock = sessionActive
+                      ? PlayerDock(chrome: chrome)
+                      : const PlayerDockSkeleton();
+                  if (videoFullscreen) {
+                    // Dock floats over the stage and slides away after idle.
+                    playerBody = MouseRegion(
+                      onHover: (_) => _pokeDock(),
+                      child: playerBody,
+                    );
+                    return RootShellBottomInset(
+                      bottomClearance: noticeBottomClearance,
+                      child: Scaffold(
+                        backgroundColor: Colors.transparent,
+                        extendBody: true,
+                        body: Stack(
+                          children: [
+                            Positioned.fill(child: playerBody),
+                            Positioned(
+                              left: 0,
+                              right: 0,
+                              bottom: 0,
+                              child: AnimatedSlide(
+                                offset: _dockVisible
+                                    ? Offset.zero
+                                    : const Offset(0, 1),
+                                duration: tokens.motionMedium,
+                                curve: Curves.easeOutCubic,
+                                child: MouseRegion(
+                                  onEnter: (_) => _cancelDockHide(),
+                                  onExit: (_) => _pokeDock(),
+                                  child: Material(
+                                    type: MaterialType.transparency,
+                                    child: bottomDock,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
                   return RootShellBottomInset(
                     bottomClearance: noticeBottomClearance,
                     child: Scaffold(
                       backgroundColor: Colors.transparent,
                       extendBody: true,
-                      body: SafeArea(
-                        bottom: false,
-                        child: SizedBox.expand(child: widget.child),
-                      ),
+                      body: playerBody,
                       bottomNavigationBar: Material(
                         type: MaterialType.transparency,
                         // Hard swap skeleton → real dock (same slot, same
                         // height). A crossfade here superimposes skeleton
                         // ghosts on the live controls for its duration.
-                        child: sessionActive
-                            ? PlayerDock(chrome: chrome)
-                            : const PlayerDockSkeleton(),
+                        child: bottomDock,
                       ),
                     ),
                   );

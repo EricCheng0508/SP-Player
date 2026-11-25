@@ -539,9 +539,12 @@ class _EngineSection extends StatelessWidget {
           style: const ButtonStyle(visualDensity: VisualDensity.compact),
         ),
         SizedBox(height: t.space12),
-        AnimatedSize(
-          duration: t.motionFast,
-          alignment: Alignment.topCenter,
+        // Fixed minimum body height: switching local <-> cloud swaps content
+        // of different sizes, and an animated/loose height made the whole
+        // card jump under the cursor. Reserve a stable block instead (no
+        // animation).
+        ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 132),
           child: isLocal ? localBody : cloudBody,
         ),
       ],

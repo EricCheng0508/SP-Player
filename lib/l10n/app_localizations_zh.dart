@@ -972,16 +972,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsAiProvidersModalityLlmHint => '对话、翻译、词典与语境翻译';
 
   @override
-  String get settingsAiProvidersModalityAsr => '语音识别';
+  String get settingsAiProvidersModalityAsr => '语音识别（生成字幕）';
 
   @override
-  String get settingsAiProvidersModalityAsrHint => '将音频转写为文字';
+  String get settingsAiProvidersModalityAsrHint => '识别视频语音，生成本地字幕';
 
   @override
-  String get settingsAiProvidersModalityTts => '文字转语音';
+  String get settingsAiProvidersModalityTts => '文字转语音（Craft 合成）';
 
   @override
-  String get settingsAiProvidersModalityTtsHint => '将文字合成为语音';
+  String get settingsAiProvidersModalityTtsHint => 'Craft 用它把文本合成为练习音频';
 
   @override
   String get settingsAiProvidersModalityAssessment => '发音评估';
@@ -1094,6 +1094,20 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingsAiProvidersSpeechWhisperModelHint => 'whisper-1';
+
+  @override
+  String get settingsAiEngineLocal => '本地（默认）';
+
+  @override
+  String get settingsAiEngineCloud => '自定义云端';
+
+  @override
+  String get settingsAiProvidersTtsLocalHint =>
+      '使用 Windows 系统自带语音合成，无需下载；音色跟随系统已安装的语音包（设置 → 时间和语言 → 语音 可添加更多）。';
+
+  @override
+  String get settingsAiProvidersAsrLocalHint =>
+      '使用本地组件离线识别，无需联网；未安装时首次使用会引导下载。';
 
   @override
   String get settingsAiProvidersSpeechTtsModelLabel => 'TTS 模型';

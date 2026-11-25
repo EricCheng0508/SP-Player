@@ -7,6 +7,7 @@ import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_page.dart';
 import 'package:enjoy_player/features/ai/application/ai_modality_config_controller.dart';
 import 'package:enjoy_player/features/ai/domain/modality_kind.dart';
+import 'package:enjoy_player/features/ai/presentation/settings/widgets/asr_local_components.dart';
 import 'package:enjoy_player/features/ai/presentation/settings/widgets/modality_provider_card.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
@@ -48,6 +49,34 @@ class AiProvidersScreen extends ConsumerWidget {
             title: l10n.settingsAiProvidersModalityAsr,
             subtitle: l10n.settingsAiProvidersModalityAsrHint,
             config: configs.asr,
+            localBody: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  l10n.settingsAiProvidersAsrLocalHint,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    height: 1.35,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const AsrLocalComponents(),
+              ],
+            ),
+          ),
+          SizedBox(height: t.space12),
+          ModalityProviderCard(
+            modality: ModalityKind.tts,
+            title: l10n.settingsAiProvidersModalityTts,
+            subtitle: l10n.settingsAiProvidersModalityTtsHint,
+            config: configs.tts,
+            localBody: Text(
+              l10n.settingsAiProvidersTtsLocalHint,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                height: 1.4,
+              ),
+            ),
           ),
         ],
       ),

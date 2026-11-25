@@ -396,19 +396,19 @@
   "@settingsAiProvidersModalityLlmHint": {
     "description": "Card subtitle for LLM modality."
   },
-  "settingsAiProvidersModalityAsr": "语音识别",
+  "settingsAiProvidersModalityAsr": "语音识别（生成字幕）",
   "@settingsAiProvidersModalityAsr": {
     "description": "Card title for ASR modality."
   },
-  "settingsAiProvidersModalityAsrHint": "将音频转写为文字",
+  "settingsAiProvidersModalityAsrHint": "识别视频语音，生成本地字幕",
   "@settingsAiProvidersModalityAsrHint": {
     "description": "Card subtitle for ASR modality."
   },
-  "settingsAiProvidersModalityTts": "文字转语音",
+  "settingsAiProvidersModalityTts": "文字转语音（Craft 合成）",
   "@settingsAiProvidersModalityTts": {
     "description": "Card title for TTS modality."
   },
-  "settingsAiProvidersModalityTtsHint": "将文字合成为语音",
+  "settingsAiProvidersModalityTtsHint": "Craft 用它把文本合成为练习音频",
   "@settingsAiProvidersModalityTtsHint": {
     "description": "Card subtitle for TTS modality."
   },
@@ -454,6 +454,10 @@
   "settingsAiProvidersSpeechKindHintAzure": "Azure 语音：音素级发音诊断；也支持语音转文字。不配置则跟读打分自动走本地评估。",
   "settingsAiProvidersSpeechWhisperModelLabel": "Whisper 模型",
   "settingsAiProvidersSpeechWhisperModelHint": "whisper-1",
+  "settingsAiEngineLocal": "本地（默认）",
+  "settingsAiEngineCloud": "自定义云端",
+  "settingsAiProvidersTtsLocalHint": "使用 Windows 系统自带语音合成，无需下载；音色跟随系统已安装的语音包（设置 → 时间和语言 → 语音 可添加更多）。",
+  "settingsAiProvidersAsrLocalHint": "使用本地组件离线识别，无需联网；未安装时首次使用会引导下载。",
   "settingsAiProvidersSpeechTtsModelLabel": "TTS 模型",
   "settingsAiProvidersSpeechTtsModelHint": "tts-1",
   "settingsAiProvidersApiKeySavedMask": "••••••••••••",

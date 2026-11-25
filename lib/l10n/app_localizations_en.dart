@@ -1015,7 +1015,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Chat, translation, dictionary, and contextual translation';
 
   @override
-  String get settingsAiProvidersModalityAsr => 'Speech recognition';
+  String get settingsAiProvidersModalityAsr => 'Speech recognition (subtitles)';
 
   @override
   String get settingsAiProvidersModalityAsrHint => 'Transcribe audio to text';
@@ -1144,6 +1144,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsAiProvidersSpeechWhisperModelHint => 'whisper-1';
+
+  @override
+  String get settingsAiEngineLocal => 'Local (default)';
+
+  @override
+  String get settingsAiEngineCloud => 'Custom cloud';
+
+  @override
+  String get settingsAiProvidersTtsLocalHint =>
+      'Uses the built-in Windows speech synthesis — no download needed. Voices follow your installed system voice packs (Settings → Time & language → Speech).';
+
+  @override
+  String get settingsAiProvidersAsrLocalHint =>
+      'Offline recognition via the local components; no network needed. First use guides you through the download.';
 
   @override
   String get settingsAiProvidersSpeechTtsModelLabel => 'TTS model';

@@ -537,7 +537,7 @@
   "@settingsAiProvidersModalityLlmHint": {
     "description": "Card subtitle for LLM modality."
   },
-  "settingsAiProvidersModalityAsr": "Speech recognition",
+  "settingsAiProvidersModalityAsr": "Speech recognition (subtitles)",
   "@settingsAiProvidersModalityAsr": {
     "description": "Card title for ASR modality."
   },
@@ -697,6 +697,10 @@
   "@settingsAiProvidersSpeechWhisperModelHint": {
     "description": "Hint for Whisper model field"
   },
+  "settingsAiEngineLocal": "Local (default)",
+  "settingsAiEngineCloud": "Custom cloud",
+  "settingsAiProvidersTtsLocalHint": "Uses the built-in Windows speech synthesis — no download needed. Voices follow your installed system voice packs (Settings → Time & language → Speech).",
+  "settingsAiProvidersAsrLocalHint": "Offline recognition via the local components; no network needed. First use guides you through the download.",
   "settingsAiProvidersSpeechTtsModelLabel": "TTS model",
   "@settingsAiProvidersSpeechTtsModelLabel": {
     "description": "Label for OpenAI-compatible TTS model field"

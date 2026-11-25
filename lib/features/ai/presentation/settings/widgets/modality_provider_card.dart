@@ -31,12 +31,18 @@ class ModalityProviderCard extends ConsumerStatefulWidget {
     required this.title,
     required this.subtitle,
     required this.config,
+    this.localBody,
   });
 
   final ModalityKind modality;
   final String title;
   final String subtitle;
   final AIServiceConfig config;
+
+  /// Shown instead of the cloud form when the user picks the local engine
+  /// (asr/tts only). For ASR this carries the component download rows; for
+  /// TTS the zero-download system-voice explanation.
+  final Widget? localBody;
 
   @override
   ConsumerState<ModalityProviderCard> createState() =>
@@ -54,6 +60,10 @@ class _ModalityProviderCardState extends ConsumerState<ModalityProviderCard> {
   bool _hasExistingKey = false;
   String? _maskedApiKeyPreview;
   bool _saving = false;
+
+  /// asr/tts only: explicit engine choice. Local means no speechByok config
+  /// is persisted — the resolver falls back to the zero-config capability.
+  bool _useLocalEngine = false;
 
   bool get _supportsByokForm =>
       widget.modality == ModalityKind.llm ||
@@ -99,6 +109,10 @@ class _ModalityProviderCardState extends ConsumerState<ModalityProviderCard> {
     _modelController.text = llm?.model ?? '';
 
     final speech = config.speechByok;
+    _useLocalEngine =
+        speech == null &&
+        (widget.modality == ModalityKind.asr ||
+            widget.modality == ModalityKind.tts);
     _speechKind = speech?.kind ?? SpeechByokKind.openAiCompatible;
     if (speech != null && speech.baseUrl != null) {
       _baseUrlController.text = speech.baseUrl!;
@@ -218,7 +232,41 @@ class _ModalityProviderCardState extends ConsumerState<ModalityProviderCard> {
                                 _modelController.text = preset.model;
                               }),
                             ),
-                          if (speechMode != null)
+                          if (speechMode != null) ...[
+                            SegmentedButton<String>(
+                              segments: [
+                                ButtonSegment(
+                                  value: 'local',
+                                  label: Text(
+                                    l10n.settingsAiEngineLocal,
+                                  ),
+                                ),
+                                ButtonSegment(
+                                  value: 'cloud',
+                                  label: Text(l10n.settingsAiEngineCloud),
+                                ),
+                              ],
+                              selected: {
+                                _useLocalEngine ? 'local' : 'cloud',
+                              },
+                              onSelectionChanged: (selection) =>
+                                  setState(() {
+                                    _useLocalEngine =
+                                        selection.first == 'local';
+                                  }),
+                              style: ButtonStyle(
+                                visualDensity: VisualDensity.compact,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                          ],
+                          if (speechMode != null && _useLocalEngine)
+                            Padding(
+                              key: const ValueKey('local-body'),
+                              padding: EdgeInsets.only(top: t.space12),
+                              child: widget.localBody,
+                            )
+                          else if (speechMode != null)
                             SpeechByokForm(
                               mode: speechMode,
                               kind: _speechKind,
@@ -263,7 +311,8 @@ class _ModalityProviderCardState extends ConsumerState<ModalityProviderCard> {
                             ),
                           ),
                   ),
-                  if (widget.config.provider == AIProvider.byok) ...[
+                  if (widget.config.provider == AIProvider.byok &&
+                      !_useLocalEngine) ...[
                     SizedBox(width: t.space12),
                     EnjoyButton.ghost(
                       onPressed: _saving ? null : _confirmRemove,
@@ -336,6 +385,21 @@ class _ModalityProviderCardState extends ConsumerState<ModalityProviderCard> {
     final l10n = AppLocalizations.of(context)!;
     setState(() => _saving = true);
     try {
+      // Local engine choice: clear the cloud config instead of saving one —
+      // the resolver falls back to the zero-config local capability when
+      // speechByok/llmByok is absent.
+      if (_useLocalEngine &&
+          (widget.modality == ModalityKind.asr ||
+              widget.modality == ModalityKind.tts)) {
+        await ref
+            .read(aiModalityConfigCtrlProvider.notifier)
+            .removeByok(widget.modality);
+        _apiKeyController.clear();
+        await _loadKeyHint();
+        if (!mounted) return;
+        AppNotice.success(context, l10n.settingsAiProvidersSaveSuccess);
+        return;
+      }
       final config = _buildByokConfig();
 
       final apiKey = _apiKeyController.text.trim();

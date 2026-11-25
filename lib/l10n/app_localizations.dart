@@ -1902,7 +1902,7 @@ abstract class AppLocalizations {
   /// Card title for ASR modality.
   ///
   /// In en, this message translates to:
-  /// **'Speech recognition'**
+  /// **'Speech recognition (subtitles)'**
   String get settingsAiProvidersModalityAsr;
 
   /// Card subtitle for ASR modality.
@@ -2138,6 +2138,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'whisper-1'**
   String get settingsAiProvidersSpeechWhisperModelHint;
+
+  /// No description provided for @settingsAiEngineLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Local (default)'**
+  String get settingsAiEngineLocal;
+
+  /// No description provided for @settingsAiEngineCloud.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom cloud'**
+  String get settingsAiEngineCloud;
+
+  /// No description provided for @settingsAiProvidersTtsLocalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Uses the built-in Windows speech synthesis — no download needed. Voices follow your installed system voice packs (Settings → Time & language → Speech).'**
+  String get settingsAiProvidersTtsLocalHint;
+
+  /// No description provided for @settingsAiProvidersAsrLocalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline recognition via the local components; no network needed. First use guides you through the download.'**
+  String get settingsAiProvidersAsrLocalHint;
 
   /// Label for OpenAI-compatible TTS model field
   ///

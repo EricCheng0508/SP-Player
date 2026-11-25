@@ -6,30 +6,31 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:enjoy_player/core/layout/enjoy_page_kind.dart';
 import 'package:enjoy_player/core/notices/app_notice.dart';
-import 'package:enjoy_player/core/presentation/section_label.dart';
-import 'package:enjoy_player/core/validation/byok_secret_mask.dart';
+import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
+import 'package:enjoy_player/core/theme/widgets/enjoy_page.dart';
 import 'package:enjoy_player/data/api/byok_secret_store.dart';
 import 'package:enjoy_player/features/ai/application/ai_modality_config_controller.dart';
+import 'package:enjoy_player/features/ai/data/cloud_profiles_repository.dart';
 import 'package:enjoy_player/features/ai/domain/ai_provider.dart';
 import 'package:enjoy_player/features/ai/domain/ai_service_config.dart';
+import 'package:enjoy_player/features/ai/domain/cloud_profile.dart';
 import 'package:enjoy_player/features/ai/domain/llm_api_spec.dart';
 import 'package:enjoy_player/features/ai/domain/modality_byok_config.dart';
 import 'package:enjoy_player/features/ai/domain/modality_kind.dart';
 import 'package:enjoy_player/features/ai/domain/speech_byok_kind.dart';
 import 'package:enjoy_player/features/ai/presentation/settings/widgets/asr_local_components.dart';
-import 'package:enjoy_player/features/ai/presentation/settings/widgets/byok_api_key_field.dart';
-import 'package:enjoy_player/features/ai/presentation/settings/widgets/llm_byok_form.dart';
-import 'package:enjoy_player/features/ai/presentation/settings/widgets/speech_endpoint_tile.dart';
+import 'package:enjoy_player/features/ai/presentation/settings/widgets/cloud_profile_dialog.dart';
 import 'package:enjoy_player/features/local_components/data/managed_llama_server.dart';
 import 'package:enjoy_player/features/local_components/domain/component_catalog.dart';
-import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
-import 'package:enjoy_player/core/theme/widgets/enjoy_button.dart';
-import 'package:enjoy_player/core/theme/widgets/enjoy_page.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
-/// AI engines screen — one card, three engine sections (recognition,
-/// translation & language model, text-to-speech) and ONE shared cloud
-/// speech endpoint typed once for recognition + synthesis.
+/// AI engines screen — two functional blocks:
+/// ① translation & language model (cloud recommended, default),
+/// ② speech service (recognition + synthesis, shared cloud config).
+///
+/// Each block shows exactly one pane (local or cloud) inside a fixed-height
+/// area, so switching never resizes the page. Cloud panes are a single
+/// compact box that opens the profile dialog.
 class AiProvidersScreen extends ConsumerStatefulWidget {
   const AiProvidersScreen({super.key});
 
@@ -38,30 +39,12 @@ class AiProvidersScreen extends ConsumerStatefulWidget {
 }
 
 class _AiProvidersScreenState extends ConsumerState<AiProvidersScreen> {
-  bool _asrLocal = true;
-  bool _ttsLocal = true;
-  bool _mtLocal = true;
+  bool _mtCloud = true; // translation defaults to cloud (recommended)
+  bool _speechLocal = true;
 
-  // Shared cloud speech endpoint (ASR + TTS).
-  SpeechByokKind _speechKind = SpeechByokKind.openAiCompatible;
-  final _speechBaseUrl = TextEditingController();
-  final _speechKey = TextEditingController();
-  final _speechRegion = TextEditingController();
-  final _whisperModel = TextEditingController();
-  final _ttsModel = TextEditingController();
-  bool _hasSpeechKey = false;
-  String? _speechMasked;
-
-  // Translation & language model (cloud side uses the LLM form).
-  LlmApiSpec _llmSpec = LlmApiSpec.openAiCompatible;
-  String? _llmPresetId;
-  final _llmBaseUrl = TextEditingController();
-  final _llmKey = TextEditingController();
-  final _llmModel = TextEditingController();
-  bool _hasLlmKey = false;
-  String? _llmMasked;
-
-  bool _saving = false;
+  CloudLlmProfile? _llmProfile;
+  CloudSpeechProfile? _speechProfile;
+  bool _applying = false;
 
   @override
   void initState() {
@@ -71,110 +54,186 @@ class _AiProvidersScreenState extends ConsumerState<AiProvidersScreen> {
 
   void _hydrate() {
     final configs = ref.read(aiModalityConfigCtrlProvider);
-    final asr = configs.asr.speechByok;
-    final tts = configs.tts.speechByok;
-    _asrLocal = asr == null;
-    _ttsLocal = tts == null;
-    final speech = asr ?? tts;
-    if (speech != null) {
-      _speechKind = speech.kind;
-      _speechBaseUrl.text = speech.baseUrl ?? '';
-      _speechRegion.text = speech.region ?? '';
-      _whisperModel.text = asr?.model ?? '';
-      _ttsModel.text = tts?.model ?? '';
-    }
-
     final llm = configs.llm.llmByok;
     final isLocalLlm =
         llm != null &&
         llm.baseUrl.startsWith('http://127.0.0.1') &&
         llm.baseUrl.contains('8760');
-    _mtLocal = llm == null || isLocalLlm;
-    if (llm != null && !isLocalLlm) {
-      _llmSpec = llm.apiSpec;
-      _llmPresetId = llm.presetId;
-      _llmBaseUrl.text = llm.baseUrl;
-      _llmModel.text = llm.model;
-    }
-    unawaited(_loadKeyHints());
-  }
+    _mtCloud = llm != null && !isLocalLlm;
 
-  Future<void> _loadKeyHints() async {
-    final store = ref.read(byokSecretStoreProvider);
-    final hasSpeech = await store.hasApiKey(ModalityKind.asr);
-    final hasLlm = await store.hasApiKey(ModalityKind.llm);
-    String? speechMask;
-    String? llmMask;
-    if (hasSpeech) {
-      final k = await store.readApiKey(ModalityKind.asr);
-      if (k != null && k.isNotEmpty) speechMask = maskByokApiKey(k);
-    }
-    if (hasLlm) {
-      final k = await store.readApiKey(ModalityKind.llm);
-      if (k != null && k.isNotEmpty) llmMask = maskByokApiKey(k);
-    }
-    if (!mounted) return;
-    setState(() {
-      _hasSpeechKey = hasSpeech;
-      _speechMasked = speechMask;
-      _hasLlmKey = hasLlm;
-      _llmMasked = llmMask;
-    });
-  }
+    final asr = configs.asr.speechByok;
+    final tts = configs.tts.speechByok;
+    _speechLocal = asr == null && tts == null;
 
-  @override
-  void dispose() {
-    _speechBaseUrl.dispose();
-    _speechKey.dispose();
-    _speechRegion.dispose();
-    _whisperModel.dispose();
-    _ttsModel.dispose();
-    _llmBaseUrl.dispose();
-    _llmKey.dispose();
-    _llmModel.dispose();
-    super.dispose();
-  }
-
-  SpeechByokConfig _sharedSpeechConfig(String model) {
-    if (_speechKind == SpeechByokKind.azureSpeech) {
-      return SpeechByokConfig(
-        kind: SpeechByokKind.azureSpeech,
-        region: _speechRegion.text.trim(),
-        model: model.isEmpty ? null : model,
+    final profiles = ref.read(cloudProfilesProvider).value;
+    if (profiles != null) {
+      _matchProfiles(profiles);
+    } else {
+      unawaited(
+        ref.read(cloudProfilesProvider.future).then((loaded) {
+          if (!mounted) return;
+          setState(() => _matchProfiles(loaded));
+        }),
       );
     }
-    return SpeechByokConfig(
-      kind: SpeechByokKind.openAiCompatible,
-      baseUrl: _speechBaseUrl.text.trim(),
-      model: model.isEmpty ? null : model,
-    );
   }
 
-  Future<void> _saveAll() async {
-    final l10n = AppLocalizations.of(context)!;
-    setState(() => _saving = true);
-    final ctrl = ref.read(aiModalityConfigCtrlProvider.notifier);
-    final failures = <String>[];
-    try {
-      // ① 语音识别
-      if (_asrLocal) {
-        await ctrl.removeByok(ModalityKind.asr);
-      } else {
-        final r = await ctrl.saveModality(
-          modality: ModalityKind.asr,
-          config: AIServiceConfig(
-            provider: AIProvider.byok,
-            speechByok: _sharedSpeechConfig(_whisperModel.text.trim()),
-          ),
-          apiKey: _speechKey.text.trim().isEmpty
-              ? null
-              : _speechKey.text.trim(),
-        );
-        if (!r.isValid) failures.add('语音识别');
+  void _matchProfiles(CloudProfiles profiles) {
+    final configs = ref.read(aiModalityConfigCtrlProvider);
+    final llm = configs.llm.llmByok;
+    if (_mtCloud && llm != null) {
+      for (final p in profiles.llm) {
+        if (_endpointMatches(p.endpoint, p.region, llm.baseUrl)) {
+          _llmProfile = p;
+          break;
+        }
       }
-      // ② 字幕翻译与语言模型
-      if (_mtLocal) {
-        await ctrl.saveModality(
+    }
+    if (!_speechLocal) {
+      final speech = configs.asr.speechByok ?? configs.tts.speechByok;
+      for (final p in profiles.speech) {
+        if (_endpointMatches(
+          p.endpoint,
+          p.region,
+          speech?.baseUrl ?? '',
+        )) {
+          _speechProfile = p;
+          break;
+        }
+      }
+    }
+  }
+
+  bool _endpointMatches(String endpoint, String region, String baseUrl) {
+    if (endpoint.isNotEmpty && endpoint == baseUrl) return true;
+    if (region.isNotEmpty && baseUrl.contains(region)) return true;
+    return false;
+  }
+
+  Future<void> _pickLlm({required bool revertOnCancel}) async {
+    final selection = await showCloudProfileDialog(
+      context: context,
+      ref: ref,
+      speech: false,
+      selectedId: _llmProfile?.id,
+    );
+    if (!mounted) return;
+    final picked = selection?.llm;
+    if (picked == null) {
+      if (revertOnCancel) setState(() => _mtCloud = false);
+      return;
+    }
+    await _applyLlm(picked, selection!.apiKey);
+  }
+
+  Future<void> _applyLlm(CloudLlmProfile p, String? key) async {
+    setState(() => _applying = true);
+    try {
+      final secrets = ref.read(byokSecretStoreProvider);
+      if (key != null && key.isNotEmpty) {
+        await secrets.writeApiKey(ModalityKind.llm, key);
+      }
+      final baseUrl = p.vendor == CloudVendor.azure && p.endpoint.isEmpty
+          ? 'https://${p.region}.openai.azure.com/openai/v1'
+          : p.endpoint;
+      await ref
+          .read(aiModalityConfigCtrlProvider.notifier)
+          .saveModality(
+            modality: ModalityKind.llm,
+            config: AIServiceConfig(
+              provider: AIProvider.byok,
+              llmByok: LlmByokConfig(
+                apiSpec: LlmApiSpec.openAiCompatible,
+                baseUrl: baseUrl,
+                model: p.model,
+              ),
+            ),
+            apiKey: key,
+          );
+      if (!mounted) return;
+      setState(() {
+        _llmProfile = p;
+        _mtCloud = true;
+      });
+      AppNotice.success(context, '已启用：${p.name}');
+    } finally {
+      if (mounted) setState(() => _applying = false);
+    }
+  }
+
+  Future<void> _pickSpeech({required bool revertOnCancel}) async {
+    final selection = await showCloudProfileDialog(
+      context: context,
+      ref: ref,
+      speech: true,
+      selectedId: _speechProfile?.id,
+    );
+    if (!mounted) return;
+    final picked = selection?.speech;
+    if (picked == null) {
+      if (revertOnCancel) setState(() => _speechLocal = true);
+      return;
+    }
+    await _applySpeech(picked, selection!.apiKey);
+  }
+
+  Future<void> _applySpeech(CloudSpeechProfile p, String? key) async {
+    setState(() => _applying = true);
+    try {
+      final secrets = ref.read(byokSecretStoreProvider);
+      if (key != null && key.isNotEmpty) {
+        await secrets.writeApiKey(ModalityKind.asr, key);
+        await secrets.writeApiKey(ModalityKind.tts, key);
+      }
+      final kind = p.vendor == CloudVendor.azure
+          ? SpeechByokKind.azureSpeech
+          : SpeechByokKind.openAiCompatible;
+      final ctrl = ref.read(aiModalityConfigCtrlProvider.notifier);
+      final r1 = await ctrl.saveModality(
+        modality: ModalityKind.asr,
+        config: AIServiceConfig(
+          provider: AIProvider.byok,
+          speechByok: SpeechByokConfig(
+            kind: kind,
+            baseUrl: p.endpoint.isEmpty ? null : p.endpoint,
+            region: p.region.isEmpty ? null : p.region,
+            model: p.asrModel,
+          ),
+        ),
+        apiKey: key,
+      );
+      final r2 = await ctrl.saveModality(
+        modality: ModalityKind.tts,
+        config: AIServiceConfig(
+          provider: AIProvider.byok,
+          speechByok: SpeechByokConfig(
+            kind: kind,
+            baseUrl: p.endpoint.isEmpty ? null : p.endpoint,
+            region: p.region.isEmpty ? null : p.region,
+            model: p.ttsModel,
+          ),
+        ),
+        apiKey: key,
+      );
+      if (!mounted) return;
+      if (!r1.isValid || !r2.isValid) {
+        AppNotice.error(context, '该配置缺少密钥，请点「编辑」补充密钥后再试');
+        return;
+      }
+      setState(() {
+        _speechProfile = p;
+        _speechLocal = false;
+      });
+      AppNotice.success(context, '已启用：${p.name}');
+    } finally {
+      if (mounted) setState(() => _applying = false);
+    }
+  }
+
+  Future<void> _useLocalTranslation() async {
+    await ref
+        .read(aiModalityConfigCtrlProvider.notifier)
+        .saveModality(
           modality: ModalityKind.llm,
           config: const AIServiceConfig(
             provider: AIProvider.byok,
@@ -186,51 +245,22 @@ class _AiProvidersScreenState extends ConsumerState<AiProvidersScreen> {
           ),
           apiKey: 'local',
         );
-      } else {
-        final r = await ctrl.saveModality(
-          modality: ModalityKind.llm,
-          config: AIServiceConfig(
-            provider: AIProvider.byok,
-            llmByok: LlmByokConfig(
-              apiSpec: _llmSpec,
-              baseUrl: _llmBaseUrl.text.trim(),
-              model: _llmModel.text.trim(),
-              presetId: _llmPresetId,
-            ),
-          ),
-          apiKey: _llmKey.text.trim().isEmpty ? null : _llmKey.text.trim(),
-        );
-        if (!r.isValid) failures.add('字幕翻译');
-      }
-      // ③ 文字转语音
-      if (_ttsLocal) {
-        await ctrl.removeByok(ModalityKind.tts);
-      } else {
-        final r = await ctrl.saveModality(
-          modality: ModalityKind.tts,
-          config: AIServiceConfig(
-            provider: AIProvider.byok,
-            speechByok: _sharedSpeechConfig(_ttsModel.text.trim()),
-          ),
-          apiKey: _speechKey.text.trim().isEmpty
-              ? null
-              : _speechKey.text.trim(),
-        );
-        if (!r.isValid) failures.add('文字转语音');
-      }
-    } finally {
-      if (mounted) setState(() => _saving = false);
-    }
     if (!mounted) return;
-    if (failures.isEmpty) {
-      _speechKey.clear();
-      _llmKey.clear();
-      await _loadKeyHints();
-      if (!mounted) return;
-      AppNotice.success(context, l10n.settingsAiProvidersSaveSuccess);
-    } else {
-      AppNotice.error(context, '以下配置不完整：${failures.join('、')}');
-    }
+    setState(() {
+      _mtCloud = false;
+      _llmProfile = null;
+    });
+  }
+
+  Future<void> _useLocalSpeech() async {
+    final ctrl = ref.read(aiModalityConfigCtrlProvider.notifier);
+    await ctrl.removeByok(ModalityKind.asr);
+    await ctrl.removeByok(ModalityKind.tts);
+    if (!mounted) return;
+    setState(() {
+      _speechLocal = true;
+      _speechProfile = null;
+    });
   }
 
   @override
@@ -239,7 +269,6 @@ class _AiProvidersScreenState extends ConsumerState<AiProvidersScreen> {
     final t = EnjoyThemeTokens.of(context);
     final tt = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
-    final showSpeechEndpoint = !_asrLocal || !_ttsLocal;
 
     return EnjoyPage(
       kind: EnjoyPageKind.hub,
@@ -268,81 +297,26 @@ class _AiProvidersScreenState extends ConsumerState<AiProvidersScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                if (showSpeechEndpoint) ...[
-                  _SpeechServiceBlock(
-                    kind: _speechKind,
-                    onKindChanged: (k) => setState(() => _speechKind = k),
-                    baseUrlController: _speechBaseUrl,
-                    keyController: _speechKey,
-                    regionController: _speechRegion,
-                    hasExistingKey: _hasSpeechKey,
-                    maskedPreview: _speechMasked,
-                  ),
-                  Divider(height: t.space24, color: t.line),
-                ],
-                // ① 语音识别
-                _EngineSection(
-                  icon: EnjoyIcons.waveform,
-                  title: l10n.settingsAiProvidersModalityAsr,
-                  subtitle: l10n.settingsAiProvidersModalityAsrHint,
-                  isLocal: _asrLocal,
-                  onChanged: (local) => setState(() => _asrLocal = local),
-                  localBody: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        l10n.settingsAiProvidersAsrLocalHint,
-                        style: tt.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                          height: 1.35,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      const AsrLocalComponents(
-                        kinds: [
-                          ComponentKind.asrRuntime,
-                          ComponentKind.asrModel,
-                        ],
-                      ),
-                    ],
-                  ),
-                  cloudBody: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        '端点在卡片顶部「云端语音服务」选择（识别与合成共用），这里只填识别模型名。',
-                        style: tt.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
-                          height: 1.35,
-                        ),
-                      ),
-                      SizedBox(height: t.space12),
-                      TextField(
-                        controller: _whisperModel,
-                        decoration: InputDecoration(
-                          labelText: l10n
-                              .settingsAiProvidersSpeechWhisperModelLabel,
-                          hintText: l10n
-                              .settingsAiProvidersSpeechWhisperModelHint,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Divider(height: t.space24, color: t.line),
-                // ② 字幕翻译与语言模型
+                // ① 字幕翻译与语言模型（默认云端）
                 _EngineSection(
                   icon: EnjoyIcons.sparkle,
                   title: '字幕翻译与语言模型',
                   subtitle: '字幕翻译、词典与语境翻译共用这一份配置',
-                  cloudLabel: '云端 · 推荐',
-                  isLocal: _mtLocal,
-                  onChanged: (local) => setState(() => _mtLocal = local),
+                  cloudFirst: true,
+                  isLocal: !_mtCloud,
+                  onChanged: (local) async {
+                    if (local) {
+                      await _useLocalTranslation();
+                    } else {
+                      setState(() => _mtCloud = true);
+                      await _pickLlm(revertOnCancel: true);
+                    }
+                  },
                   localBody: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
-                        '离线翻译：llama.cpp + TranslateGemma，下载后无需联网。',
+                        '离线翻译：llama.cpp + TranslateGemma，下载后无需联网。翻译质量低于云端 LLM。',
                         style: tt.bodySmall?.copyWith(
                           color: cs.onSurfaceVariant,
                           height: 1.35,
@@ -357,61 +331,58 @@ class _AiProvidersScreenState extends ConsumerState<AiProvidersScreen> {
                       ),
                     ],
                   ),
-                  cloudBody: LlmByokForm(
-                    apiSpec: _llmSpec,
-                    baseUrlController: _llmBaseUrl,
-                    apiKeyController: _llmKey,
-                    modelController: _llmModel,
-                    hasExistingKey: _hasLlmKey,
-                    presetId: _llmPresetId,
-                    maskedApiKeyPreview: _llmMasked,
-                    onSpecChanged: (spec) => setState(() {
-                      _llmSpec = spec;
-                      _llmPresetId = null;
-                    }),
-                    onPresetSelected: (preset) => setState(() {
-                      _llmSpec = preset.apiSpec;
-                      _llmPresetId = preset.id;
-                      _llmBaseUrl.text = preset.baseUrl;
-                      _llmModel.text = preset.model;
-                    }),
+                  cloudBody: _CloudBox(
+                    title: '云端语言模型',
+                    meta:
+                        _llmProfile?.summary ??
+                        '未配置 · 点击设置（推荐，显著提升翻译质量）',
+                    configured: _llmProfile != null,
+                    onTap: _applying ? null : () => _pickLlm(revertOnCancel: false),
                   ),
                 ),
-                Divider(height: t.space24, color: t.line),
-                // ③ 文字转语音
+                Divider(height: t.space24 + 16, color: t.line),
+                // ② 语音服务（识别 + 合成）
                 _EngineSection(
-                  icon: EnjoyIcons.speak,
-                  title: l10n.settingsAiProvidersModalityTts,
-                  subtitle: l10n.settingsAiProvidersModalityTtsHint,
-                  isLocal: _ttsLocal,
-                  onChanged: (local) => setState(() => _ttsLocal = local),
-                  localBody: Text(
-                    l10n.settingsAiProvidersTtsLocalHint,
-                    style: tt.bodySmall?.copyWith(
-                      color: cs.onSurfaceVariant,
-                      height: 1.4,
-                    ),
-                  ),
-                  cloudBody: Column(
+                  icon: EnjoyIcons.waveform,
+                  title: '语音服务（识别与合成）',
+                  subtitle: '识别视频语音生成字幕；Craft 用它把文本合成练习音频',
+                  isLocal: _speechLocal,
+                  onChanged: (local) async {
+                    if (local) {
+                      await _useLocalSpeech();
+                    } else {
+                      setState(() => _speechLocal = false);
+                      await _pickSpeech(revertOnCancel: true);
+                    }
+                  },
+                  localBody: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      const AsrLocalComponents(
+                        kinds: [
+                          ComponentKind.asrRuntime,
+                          ComponentKind.asrModel,
+                        ],
+                      ),
+                      const SizedBox(height: 6),
                       Text(
-                        '端点在卡片顶部「云端语音服务」选择，与识别共用；这里只填合成模型名。',
+                        '合成使用 Windows 系统自带语音，无需下载；音色跟随系统语音包。',
                         style: tt.bodySmall?.copyWith(
                           color: cs.onSurfaceVariant,
                           height: 1.35,
                         ),
                       ),
-                      SizedBox(height: t.space12),
-                      TextField(
-                        controller: _ttsModel,
-                        decoration: InputDecoration(
-                          labelText:
-                              l10n.settingsAiProvidersSpeechTtsModelLabel,
-                          hintText: l10n.settingsAiProvidersSpeechTtsModelHint,
-                        ),
-                      ),
                     ],
+                  ),
+                  cloudBody: _CloudBox(
+                    title: '云端语音服务',
+                    meta:
+                        _speechProfile?.summary ??
+                        '未配置 · 点击设置（识别与合成共用一个端点）',
+                    configured: _speechProfile != null,
+                    onTap: _applying
+                        ? null
+                        : () => _pickSpeech(revertOnCancel: false),
                   ),
                 ),
                 SizedBox(height: t.space16),
@@ -430,17 +401,6 @@ class _AiProvidersScreenState extends ConsumerState<AiProvidersScreen> {
                         ),
                       ),
                     ),
-                    SizedBox(width: t.space8),
-                    EnjoyButton.brand(
-                      onPressed: _saving ? null : _saveAll,
-                      child: _saving
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text(l10n.settingsAiProvidersSave),
-                    ),
                   ],
                 ),
               ],
@@ -452,7 +412,7 @@ class _AiProvidersScreenState extends ConsumerState<AiProvidersScreen> {
   }
 }
 
-/// One engine section: header, local/cloud toggle, and the matching body.
+/// Fixed-height section: header, engine toggle, and one pane at a time.
 class _EngineSection extends StatelessWidget {
   const _EngineSection({
     required this.icon,
@@ -462,7 +422,7 @@ class _EngineSection extends StatelessWidget {
     required this.onChanged,
     required this.localBody,
     required this.cloudBody,
-    this.cloudLabel,
+    this.cloudFirst = false,
   });
 
   final IconData icon;
@@ -472,16 +432,23 @@ class _EngineSection extends StatelessWidget {
   final ValueChanged<bool> onChanged;
   final Widget localBody;
   final Widget cloudBody;
-
-  /// Optional label override for the cloud segment (e.g. "云端 · 推荐").
-  final String? cloudLabel;
+  final bool cloudFirst;
 
   @override
   Widget build(BuildContext context) {
     final t = EnjoyThemeTokens.of(context);
     final tt = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
-    final l10n = AppLocalizations.of(context)!;
+
+    final localSeg = ButtonSegment<bool>(
+      value: true,
+      label: Text(cloudFirst ? '本地' : '本地（默认）'),
+    );
+    final cloudSeg = ButtonSegment<bool>(
+      value: false,
+      label: Text(cloudFirst ? '云端 · 推荐' : '自定义云端'),
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -527,134 +494,104 @@ class _EngineSection extends StatelessWidget {
         ),
         SizedBox(height: t.space12),
         SegmentedButton<bool>(
-          segments: [
-            ButtonSegment(value: true, label: Text(l10n.settingsAiEngineLocal)),
-            ButtonSegment(
-              value: false,
-              label: Text(cloudLabel ?? l10n.settingsAiEngineCloud),
-            ),
-          ],
+          segments: cloudFirst ? [cloudSeg, localSeg] : [localSeg, cloudSeg],
           selected: {isLocal},
           onSelectionChanged: (sel) => onChanged(sel.first),
           style: const ButtonStyle(visualDensity: VisualDensity.compact),
         ),
         SizedBox(height: t.space12),
-        // Fixed minimum body height: switching local <-> cloud swaps content
-        // of different sizes, and an animated/loose height made the whole
-        // card jump under the cursor. Reserve a stable block instead (no
-        // animation).
-        ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 132),
-          child: isLocal ? localBody : cloudBody,
+        SizedBox(
+          height: 172,
+          child: SingleChildScrollView(
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: isLocal ? localBody : cloudBody,
+            ),
+          ),
         ),
       ],
     );
   }
 }
 
-
-/// Shared cloud speech service block (top of the card): vendor kind, endpoint
-/// picker tile, key and Azure region. One source of truth for ASR + TTS.
-class _SpeechServiceBlock extends StatelessWidget {
-  const _SpeechServiceBlock({
-    required this.kind,
-    required this.onKindChanged,
-    required this.baseUrlController,
-    required this.keyController,
-    required this.regionController,
-    required this.hasExistingKey,
-    required this.maskedPreview,
+/// Compact cloud service box: summary + state badge + chevron.
+class _CloudBox extends StatelessWidget {
+  const _CloudBox({
+    required this.title,
+    required this.meta,
+    required this.configured,
+    this.onTap,
   });
 
-  final SpeechByokKind kind;
-  final ValueChanged<SpeechByokKind> onKindChanged;
-  final TextEditingController baseUrlController;
-  final TextEditingController keyController;
-  final TextEditingController regionController;
-  final bool hasExistingKey;
-  final String? maskedPreview;
+  final String title;
+  final String meta;
+  final bool configured;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final t = EnjoyThemeTokens.of(context);
     final tt = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
-    final isAzure = kind == SpeechByokKind.azureSpeech;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          '云端语音服务（识别与合成共用，只需填一次）',
-          style: tt.titleSmall?.copyWith(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: t.ink,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(t.radiusTile),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        decoration: ShapeDecoration(
+          color: cs.primaryContainer.withValues(alpha: 0.18),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(t.radiusTile),
+            side: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.5)),
           ),
         ),
-        SizedBox(height: t.space12),
-        SectionLabel(
-          icon: EnjoyIcons.route,
-          text: l10n.settingsAiProvidersSpeechKindLabel,
-        ),
-        SizedBox(height: t.space8),
-        SegmentedButton<SpeechByokKind>(
-          segments: [
-            ButtonSegment(
-              value: SpeechByokKind.openAiCompatible,
-              label: Text(l10n.settingsAiProvidersSpeechKindOpenAi),
+        child: Row(
+          children: [
+            Icon(EnjoyIcons.cloud, size: 18, color: cs.onSurfaceVariant),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: tt.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    meta,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: tt.bodySmall?.copyWith(color: t.ink3),
+                  ),
+                ],
+              ),
             ),
-            ButtonSegment(
-              value: SpeechByokKind.azureSpeech,
-              label: Text(l10n.settingsAiProvidersSpeechKindAzure),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: configured
+                    ? cs.primaryContainer.withValues(alpha: 0.6)
+                    : cs.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                configured ? '已配置' : '未配置',
+                style: tt.labelSmall?.copyWith(
+                  fontSize: 11,
+                  color: configured ? cs.onPrimaryContainer : t.ink3,
+                ),
+              ),
             ),
+            const SizedBox(width: 6),
+            Icon(Icons.unfold_more, size: 18, color: cs.onSurfaceVariant),
           ],
-          selected: {kind},
-          onSelectionChanged: (sel) => onKindChanged(sel.first),
-          style: SegmentedButton.styleFrom(
-            visualDensity: VisualDensity.comfortable,
-            selectedBackgroundColor: cs.primaryContainer.withValues(
-              alpha: 0.55,
-            ),
-            selectedForegroundColor: cs.onPrimaryContainer,
-            foregroundColor: cs.onSurfaceVariant,
-            side: BorderSide(
-              color: cs.outlineVariant.withValues(alpha: 0.32),
-            ),
-          ),
         ),
-        SizedBox(height: t.space8),
-        Text(
-          isAzure
-              ? l10n.settingsAiProvidersSpeechKindHintAzure
-              : l10n.settingsAiProvidersSpeechKindHintOpenAi,
-          style: tt.bodySmall?.copyWith(fontSize: 12, color: t.ink2),
-        ),
-        SizedBox(height: t.space12),
-        SpeechEndpointTile(controller: baseUrlController, enabled: !isAzure),
-        SizedBox(height: t.space12),
-        ByokApiKeyField(
-          controller: keyController,
-          hasExistingKey: hasExistingKey,
-          labelText: isAzure
-              ? l10n.settingsAiProvidersSpeechSubscriptionKeyLabel
-              : l10n.settingsAiProvidersApiKeyLabel,
-          maskedPreview: maskedPreview,
-        ),
-        if (isAzure) ...[
-          SizedBox(height: t.space12),
-          TextField(
-            controller: regionController,
-            decoration: InputDecoration(
-              labelText: l10n.settingsAiProvidersSpeechRegionLabel,
-              hintText: l10n.settingsAiProvidersSpeechRegionHint,
-            ),
-            textCapitalization: TextCapitalization.none,
-            autocorrect: false,
-          ),
-        ],
-      ],
+      ),
     );
   }
 }

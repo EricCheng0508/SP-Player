@@ -568,8 +568,8 @@ class _SetupWizardDialogState extends ConsumerState<SetupWizardDialog> {
         const SizedBox(height: 12),
         Text(
           later
-              ? '字幕识别组件已安装。翻译方式选择了本地模型：请到「设置 → 本地组件」下载翻译模型，下载完成前本地翻译无法使用。'
-              : '组件已安装完成，可以开始使用了。之后可在「设置 → 本地组件」管理这些组件。',
+              ? '字幕识别组件已安装。翻译方式选择了本地模型：请到「设置 → AI 提供商 → 字幕翻译」下载翻译模型，下载完成前本地翻译无法使用。'
+              : '组件已安装完成，可以开始使用了。之后可在「设置 → AI 提供商」里管理这些组件。',
           style: theme.textTheme.bodyMedium,
         ),
       ],

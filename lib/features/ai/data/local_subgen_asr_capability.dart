@@ -42,7 +42,7 @@ final class LocalSubgenAsrCapability
       _log.warning('ensureLocalAsrService failed: $e');
       throw const ApiException(
         message:
-            '本地语音识别服务未能自动启动:请到「设置 → 本地组件」确认已安装识别组件,'
+            '本地语音识别服务未能自动启动:请到「设置 → AI 提供商 → 语音服务」确认已安装识别组件,'
             '然后点「重试识别」。',
         statusCode: 503,
       );
@@ -76,7 +76,7 @@ final class LocalSubgenAsrCapability
       );
       throw const ApiException(
         message:
-            '本地语音识别服务连接失败:服务可能已退出,请到「设置 → 本地组件」检查,'
+            '本地语音识别服务连接失败:服务可能已退出,请到「设置 → AI 提供商 → 语音服务」检查,'
             '然后点「重试识别」。',
         statusCode: 503,
       );

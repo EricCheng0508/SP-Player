@@ -284,6 +284,15 @@ abstract final class SettingsKeys {
     defaultValue: '',
   );
 
+  /// Saved cloud service profiles (speech / llm) for the AI settings screen,
+  /// JSON encoded. Keys are not stored here (ByokSecretStore owns them).
+  static const aiCloudProfilesV1 = SettingKey<String>(
+    name: 'ai.cloud_profiles_v1',
+    scope: SettingsScope.device,
+    codec: StringSettingCodec(),
+    defaultValue: '',
+  );
+
   static const aiModalityConfigsV1 = SettingKey<Map<String, dynamic>?>(
     name: 'ai.modality_configs_v1',
     scope: SettingsScope.user,
@@ -394,6 +403,7 @@ abstract final class SettingsKeys {
     hotkeysCustomBindings,
     aiModalityConfigsV1,
     aiSavedSpeechEndpoints,
+    aiCloudProfilesV1,
     onboardingTipProgressV1,
     localComponentsRoot,
     setupWizardCompletedV1,

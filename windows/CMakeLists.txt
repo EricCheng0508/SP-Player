@@ -7,6 +7,15 @@ if(POLICY CMP0175)
 endif()
 project(sp_player LANGUAGES CXX)
 
+# Suppress benign third-party MSVC warnings: flutter_inappwebview_windows
+# and the WebView2 headers emit C4458 (local shadows member) and C4244
+# (int64 -> int narrowing) by the hundreds. They are plugin-side style
+# issues, not app defects; silencing just these two keeps our own warnings
+# visible. Targets created after this line (all plugins) inherit the flags.
+if(MSVC)
+  add_compile_options(/wd4458 /wd4244)
+endif()
+
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
 set(BINARY_NAME "sp_player")

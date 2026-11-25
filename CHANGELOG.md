@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.8] - 2026-11-25
+
+### Added
+
+- **True video fullscreen** — the fullscreen button now enters a real fullscreen: the OS window covers the whole screen (taskbar hidden, including when triggered from a maximized window), the top bar, transcript panel and docked margin panels collapse, and the video fills the display. The transport dock floats over the video, slides away after 3 seconds idle, and reappears on mouse move. Exit via the dock button or Esc.
+- **Fetch model list** — the cloud LLM profile dialog gains a "拉取模型" button that queries the endpoint's `GET /models` (OpenAI-compatible) and lets you pick from the returned list; it reuses the stored API key when the field is left empty.
+
+### Changed
+
+- Settings → Network → connection test no longer probes the removed Enjoy API endpoint; only the YouTube connectivity check remains.
+
 ## [0.10.6] - 2026-11-24
 
 ### Added

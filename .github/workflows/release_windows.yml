@@ -120,17 +120,23 @@ jobs:
         working-directory: ${{ env.BUILD_WS }}
         shell: pwsh
         run: |
-          choco install innosetup -y --no-progress *>&1 | Tee-Object -FilePath choco.log
-          $chocoCode = $LASTEXITCODE
-          Write-Host "choco exit=$chocoCode"
+          # choco install proved flaky on the hosted image; install the
+          # pinned official build directly instead.
+          $innoUrl = "https://files.jrsoftware.org/is/6/innosetup-6.7.3.exe"
+          $innoExe = Join-Path $env:RUNNER_TEMP "innosetup-6.7.3.exe"
+          try {
+            Invoke-WebRequest $innoUrl -OutFile $innoExe -UseBasicParsing
+          } catch {
+            "::error::Inno Setup download failed: $_"
+            exit 1
+          }
+          Start-Process $innoExe "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART" -Wait
           $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
           if (-not (Test-Path $iscc)) { $iscc = "C:\Program Files\Inno Setup 6\ISCC.exe" }
           if (-not (Test-Path $iscc)) {
-            Get-Content choco.log -Tail 30 | ForEach-Object { if ($_.Trim()) { "::error::$_" } }
-            "::error::ISCC.exe not found after choco install"
+            "::error::ISCC.exe not found after Inno Setup install"
             exit 1
           }
-          if ($chocoCode -ne 0 -and $chocoCode -ne 3010) { exit $chocoCode }
           & $iscc (Join-Path $env:BUILD_WS "windows/installer.iss") *>&1 | Tee-Object -FilePath iscc.log
           $isccCode = $LASTEXITCODE
           Write-Host "ISCC exit=$isccCode"

@@ -120,17 +120,34 @@ jobs:
         working-directory: ${{ env.BUILD_WS }}
         shell: pwsh
         run: |
-          # choco install proved flaky on the hosted image; install the
-          # pinned official build directly instead.
-          $innoUrl = "https://files.jrsoftware.org/is/6/innosetup-6.7.3.exe"
-          $innoExe = Join-Path $env:RUNNER_TEMP "innosetup-6.7.3.exe"
-          try {
-            Invoke-WebRequest $innoUrl -OutFile $innoExe -UseBasicParsing
-          } catch {
-            "::error::Inno Setup download failed: $_"
-            exit 1
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+          $innoExe = Join-Path $env:RUNNER_TEMP "innosetup.exe"
+          $downloaded = $false
+          $urls = @(
+            "https://files.jrsoftware.org/is/6/innosetup-6.7.3.exe",
+            "https://jrsoftware.org/download.php/is.exe",
+            "https://github.com/jrsoftware/issrc/releases/download/is-6_7_3/innosetup-6.7.3.exe"
+          )
+          foreach ($u in $urls) {
+            try {
+              Write-Host "downloading: $u"
+              Invoke-WebRequest $u -OutFile $innoExe -UseBasicParsing -UserAgent "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" -MaximumRedirection 5
+              if ((Get-Item $innoExe).Length -gt 1MB) { $downloaded = $true; break }
+              Write-Host "downloaded file too small from $u"
+            } catch {
+              Write-Host "download failed from ${u}: $_"
+            }
           }
-          Start-Process $innoExe "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART" -Wait
+          if (-not $downloaded) {
+            Write-Host "falling back to chocolatey"
+            choco install innosetup -y --no-progress *>&1 | Tee-Object -FilePath choco.log
+            $cc = $LASTEXITCODE
+            if ($cc -ne 0 -and $cc -ne 3010) {
+              Get-Content choco.log -Tail 30 | ForEach-Object { if ($_.Trim()) { "::error::$_" } }
+              "::error::choco install innosetup failed rc=$cc"
+              exit 1
+            }
+          }
           $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
           if (-not (Test-Path $iscc)) { $iscc = "C:\Program Files\Inno Setup 6\ISCC.exe" }
           if (-not (Test-Path $iscc)) {

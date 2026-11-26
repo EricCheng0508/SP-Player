@@ -3,6 +3,8 @@ library;
 
 import 'dart:async';
 
+import 'package:flutter/services.dart';
+
 import 'package:enjoy_player/core/theme/enjoy_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -49,10 +51,31 @@ class _RootShellState extends ConsumerState<RootShell> {
 
   Timer? _dockHideTimer;
   bool _dockVisible = true;
+  bool _keyRevealHandlerActive = false;
+
+  /// While in video fullscreen, any key press reveals the dock (standard
+  /// fullscreen UX: mouse move OR keyboard). Returns false so hotkeys and
+  /// player shortcuts keep working untouched.
+  bool _handleKeyReveal(KeyEvent event) {
+    if (event is KeyDownEvent || event is KeyRepeatEvent) _pokeDock();
+    return false;
+  }
+
+  void _setKeyRevealHandler(bool active) {
+    if (active == _keyRevealHandlerActive) return;
+    final keyboard = HardwareKeyboard.instance;
+    if (active) {
+      keyboard.addHandler(_handleKeyReveal);
+    } else {
+      keyboard.removeHandler(_handleKeyReveal);
+    }
+    _keyRevealHandlerActive = active;
+  }
 
   @override
   void dispose() {
     _dockHideTimer?.cancel();
+    _setKeyRevealHandler(false);
     super.dispose();
   }
 
@@ -212,6 +235,7 @@ class _RootShellState extends ConsumerState<RootShell> {
                 if (!playerWithTransport || !isDesktop || prev == next) return;
                 _dockHideTimer?.cancel();
                 if (mounted) setState(() => _dockVisible = true);
+                _setKeyRevealHandler(next);
                 if (next) {
                   _dockHideTimer = Timer(_dockAutoHideDelay, () {
                     if (mounted) setState(() => _dockVisible = false);

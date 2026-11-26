@@ -241,7 +241,8 @@ class DockIconButton extends StatelessWidget {
     return IconButton(
       tooltip: tooltip,
       onPressed: enabled ? () => unawaited(onTap()) : null,
-      icon: Icon(icon, size: 22),
+      icon: Icon(icon, size: 20),
+      visualDensity: VisualDensity.compact,
       color: t.ink2,
     );
   }
@@ -265,7 +266,9 @@ class DockPlayButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = EnjoyThemeTokens.of(context);
-    final size = phone ? t.playButtonSizePhone : t.playButtonSize;
+    // Desktop dock compaction: 60px ring read oversized between the
+    // small transport icons (user report).
+    final size = phone ? t.playButtonSizePhone : t.playButtonSize - 12;
     return EnjoyPressable(
       onTap: buffering ? null : onToggle,
       borderRadius: BorderRadius.circular(size / 2),

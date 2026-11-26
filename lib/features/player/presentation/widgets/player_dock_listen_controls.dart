@@ -76,7 +76,7 @@ class DockListenControls extends StatelessWidget {
           onTap: onPrev,
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 2),
           child: DockPlayButton(
             playing: playing,
             buffering: buffering,

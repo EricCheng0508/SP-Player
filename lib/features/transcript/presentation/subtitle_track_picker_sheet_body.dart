@@ -16,6 +16,7 @@ import 'package:enjoy_player/core/theme/widgets/skeleton.dart';
 import 'package:enjoy_player/core/errors/ai_failure_messages.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 import '../application/all_transcripts_provider.dart';
+import '../application/auto_translate_controller.dart';
 import '../application/transcript_repository_provider.dart';
 import '../domain/auto_translate.dart';
 import '../domain/transcript_track.dart';
@@ -202,6 +203,27 @@ List<Widget> buildTrackListBody({
                   padding: trackOptionPadding(t),
                   targetLanguage: targetLanguage,
                   enabled: primaryId != null,
+                ),
+              if (autoTranslateSelected && blockedMessage == null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: EnjoyButton.ghost(
+                      size: EnjoyButtonSize.small,
+                      icon: EnjoyIcons.refresh,
+                      onPressed: () => unawaited(
+                        ref
+                            .read(
+                              autoTranslateCtrlProvider(
+                                mediaId,
+                              ).notifier,
+                            )
+                            .retranslateAll(),
+                      ),
+                      child: Text(l10n.subtitlesAutoTranslateRetranslateAll),
+                    ),
+                  ),
                 ),
               if (blockedMessage != null)
                 Padding(

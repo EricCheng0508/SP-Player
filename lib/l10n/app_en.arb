@@ -364,6 +364,7 @@
     }
   },
   "subtitlesAutoTranslateRetranslateLine": "Re-translate this line",
+  "subtitlesAutoTranslateRetranslateAll": "Re-translate",
   "subtitlesAutoTranslateBlockedStalePrimary": "The primary subtitle changed. Auto translate will rebuild from the new primary.",
   "subtitlesAutoTranslateLineFailed": "Couldn’t translate this line",
   "subtitlesAutoTranslatePendingLine": "Translating…",

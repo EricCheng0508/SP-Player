@@ -1527,6 +1527,12 @@ abstract class AppLocalizations {
   /// **'Re-translate this line'**
   String get subtitlesAutoTranslateRetranslateLine;
 
+  /// No description provided for @subtitlesAutoTranslateRetranslateAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-translate'**
+  String get subtitlesAutoTranslateRetranslateAll;
+
   /// No description provided for @subtitlesAutoTranslateBlockedStalePrimary.
   ///
   /// In en, this message translates to:

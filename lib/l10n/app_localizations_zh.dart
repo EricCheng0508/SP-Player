@@ -772,6 +772,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get subtitlesAutoTranslateRetranslateLine => '重新翻译此行';
 
   @override
+  String get subtitlesAutoTranslateRetranslateAll => '重新翻译';
+
+  @override
   String get subtitlesAutoTranslateBlockedStalePrimary =>
       '主字幕已更改，自动翻译将根据新的主字幕重建。';
 
@@ -5505,6 +5508,9 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get subtitlesAutoTranslateRetranslateLine => '重新翻译此行';
+
+  @override
+  String get subtitlesAutoTranslateRetranslateAll => '重新翻译';
 
   @override
   String get subtitlesAutoTranslateBlockedStalePrimary =>

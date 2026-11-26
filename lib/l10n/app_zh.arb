@@ -264,6 +264,7 @@
     }
   },
   "subtitlesAutoTranslateRetranslateLine": "重新翻译此行",
+  "subtitlesAutoTranslateRetranslateAll": "重新翻译",
   "subtitlesAutoTranslateBlockedStalePrimary": "主字幕已更改，自动翻译将根据新的主字幕重建。",
   "byokNotConfiguredMessage": "已为 {modality} 选择 BYOK，但本设备未保存 API 密钥。",
   "@byokNotConfiguredMessage": {

@@ -802,6 +802,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subtitlesAutoTranslateRetranslateLine => 'Re-translate this line';
 
   @override
+  String get subtitlesAutoTranslateRetranslateAll => 'Re-translate';
+
+  @override
   String get subtitlesAutoTranslateBlockedStalePrimary =>
       'The primary subtitle changed. Auto translate will rebuild from the new primary.';
 

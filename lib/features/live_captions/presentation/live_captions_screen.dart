@@ -49,10 +49,36 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
     super.dispose();
   }
 
+  Future<bool> _confirmDelete(BuildContext context) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('删除会话'),
+        content: const Text('确定删除这条会话及其全部字幕记录吗？此操作不可恢复。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('取消'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: Colors.red.shade600,
+            ),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('删除'),
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = EnjoyThemeTokens.of(context);
     final state = ref.watch(liveCaptionsControllerProvider);
+    final historyNotifier = ref.read(liveCaptionsHistoryProvider.notifier);
     final history =
         ref.watch(liveCaptionsHistoryProvider).asData?.value ?? const [];
 
@@ -68,21 +94,28 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
             width: 264,
             child: _HistoryRail(
               sessions: history,
+              currentSession: state.session,
+              listening: state.phase == LiveCaptionsPhase.listening ||
+                  state.phase == LiveCaptionsPhase.starting,
               viewingId: _viewing?.id,
-              currentId: state.session?.id,
-              onSelect: (session) => setState(() => _viewing = session),
+              onSelect: (session) => setState(() {
+                _viewing = identical(session, state.session) ? null : session;
+              }),
               onNew: () {
                 setState(() => _viewing = null);
                 unawaited(
                   ref
                       .read(liveCaptionsControllerProvider.notifier)
-                      .beginNewSession(),
+                      .beginNewSession()
+                      .whenComplete(historyNotifier.reload),
                 );
               },
               onDelete: (session) async {
+                final confirmed = await _confirmDelete(context);
+                if (!confirmed) return;
                 await ref.read(liveCaptionsStoreProvider).delete(session.id);
                 if (identical(_viewing, session)) _viewing = null;
-                await ref.read(liveCaptionsHistoryProvider.notifier).reload();
+                await historyNotifier.reload();
               },
               onExport: (session) async {
                 final path = await ref
@@ -146,8 +179,9 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
 final class _HistoryRail extends StatelessWidget {
   const _HistoryRail({
     required this.sessions,
+    required this.currentSession,
+    required this.listening,
     required this.viewingId,
-    required this.currentId,
     required this.onSelect,
     required this.onNew,
     required this.onDelete,
@@ -155,8 +189,12 @@ final class _HistoryRail extends StatelessWidget {
   });
 
   final List<LiveCaptionSession> sessions;
+
+  /// The in-memory session for this page visit, pinned at the top of the rail
+  /// so 「新会话」 always has a visible counterpart on the left.
+  final LiveCaptionSession? currentSession;
+  final bool listening;
   final String? viewingId;
-  final String? currentId;
   final void Function(LiveCaptionSession) onSelect;
   final void Function() onNew;
   final void Function(LiveCaptionSession) onDelete;
@@ -165,6 +203,9 @@ final class _HistoryRail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = EnjoyThemeTokens.of(context);
+    // The current visit's session is pinned right under the button so the
+    // left rail and the right pane always agree on "what is open now".
+    final current = currentSession;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -195,6 +236,17 @@ final class _HistoryRail extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
+        if (current != null) ...[
+          _SessionCard(
+            session: current,
+            selected: viewingId == null,
+            inProgress: listening,
+            onTap: () => onSelect(current),
+            onDelete: () => onDelete(current),
+            onExport: () => onExport(current),
+          ),
+          const SizedBox(height: 8),
+        ],
         Expanded(
           child: sessions.isEmpty
               ? Center(
@@ -211,12 +263,14 @@ final class _HistoryRail extends StatelessWidget {
                   separatorBuilder: (_, __) => const SizedBox(height: 8),
                   itemBuilder: (context, index) {
                     final session = sessions[index];
-                    final selected =
-                        session.id == viewingId || session.id == currentId;
+                    if (session.id == currentSession?.id) {
+                      return const SizedBox.shrink(); // pinned above already
+                    }
+                    final selected = session.id == viewingId;
                     return _SessionCard(
                       session: session,
                       selected: selected,
-                      inProgress: session.id == currentId,
+                      inProgress: false,
                       onTap: () => onSelect(session),
                       onDelete: () => onDelete(session),
                       onExport: () => onExport(session),
@@ -409,7 +463,16 @@ class _HeaderState extends ConsumerState<_Header> {
             ),
           OutlinedButton.icon(
             onPressed: listening
-                ? () => ref.read(liveCaptionsControllerProvider.notifier).stop()
+                ? () {
+                    unawaited(
+                      ref
+                          .read(liveCaptionsControllerProvider.notifier)
+                          .stop()
+                          .whenComplete(
+                            ref.read(liveCaptionsHistoryProvider.notifier).reload,
+                          ),
+                    );
+                  }
                 : () =>
                     ref.read(liveCaptionsControllerProvider.notifier).start(),
             icon: Icon(

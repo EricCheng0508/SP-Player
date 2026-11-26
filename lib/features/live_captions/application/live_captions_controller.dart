@@ -246,13 +246,31 @@ class LiveCaptionsController extends _$LiveCaptionsController {
   void _appendLine(LiveCaptionLine line) {
     final session = state.session;
     if (session == null) return;
+    // Cross-source dedupe: with mic + loopback both on, the mic re-captures
+    // whatever the speakers play, so the same utterance arrives twice (once
+    // per pipeline, racing each other). Compare normalized text against the
+    // last few lines; close in time and identical in content = same audio.
+    final normalized = _normalizeForDedupe(line.text);
+    for (final existing in session.lines.reversed.take(4)) {
+      if (_normalizeForDedupe(existing.text) == normalized) {
+        // Merge: if the older twin already has a translation, keep it.
+        if (existing.translation == null && line.translation != null) {
+          existing.translation = line.translation;
+          state = state.copyWith();
+        }
+        return;
+      }
+    }
     session.lines.add(line);
     // Persist opportunistically; files are small so every line is fine.
     ref.read(liveCaptionsStoreProvider).save(session);
-    // Copy-with a new timestamp list identity is unnecessary; session is
-    // mutated in place and the UI listens to a manual tick below.
+    // Session is mutated in place; bump state identity so listeners rebuild.
     state = state.copyWith();
   }
+
+  static String _normalizeForDedupe(String text) => text
+      .toLowerCase()
+      .replaceAll(RegExp(r'[\s\p{P}]', unicode: true), '');
 
   static String? _captureExePath() {
     final exe = Platform.resolvedExecutable;
@@ -398,7 +416,10 @@ final class _CaptureRun {
         text: text,
       );
       onLine(line);
-      await _maybeTranslate(line);
+      // Fire concurrently: translation must not block the transcription
+      // queue, or every line pays the LLM latency before the next utterance
+      // even starts being recognized.
+      unawaited(_maybeTranslate(line));
     } on Object catch (e, st) {
       _log.warning('transcribe segment failed: $e', e, st);
     }

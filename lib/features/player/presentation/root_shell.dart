@@ -19,6 +19,7 @@ import 'package:enjoy_player/core/window/desktop_window.dart';
 import 'package:enjoy_player/core/window/window_fullscreen_provider.dart';
 import 'package:enjoy_player/features/onboarding/presentation/onboarding_showcase_host.dart';
 import 'package:enjoy_player/features/player/application/player_controller.dart';
+import 'package:enjoy_player/features/player/application/player_state_providers.dart';
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
 import 'package:enjoy_player/features/player/presentation/widgets/player_dock.dart';
 import 'package:enjoy_player/core/local/no_tier_host.dart';
@@ -52,6 +53,15 @@ class _RootShellState extends ConsumerState<RootShell> {
   Timer? _dockHideTimer;
   bool _dockVisible = true;
   bool _keyRevealHandlerActive = false;
+  bool _pointerOverDock = false;
+
+  bool _fullscreenActive() =>
+      _keyRevealHandlerActive && mounted;
+
+  /// Paused video keeps the dock visible (standard fullscreen UX); playing
+  /// arms the idle auto-hide.
+  bool get _shouldAutoHide =>
+      (ref.read(playerIsPlayingProvider).value ?? false);
 
   /// While in video fullscreen, any key press reveals the dock (standard
   /// fullscreen UX: mouse move OR keyboard). Returns false so hotkeys and
@@ -79,10 +89,13 @@ class _RootShellState extends ConsumerState<RootShell> {
     super.dispose();
   }
 
-  /// Mouse moved over the fullscreen stage: show the dock, re-arm the timer.
+  /// Pointer moved / pressed over the fullscreen stage: show the dock, and
+  /// arm the idle hide only while playing. Paused video keeps it visible.
   void _pokeDock() {
     _dockHideTimer?.cancel();
+    if (_pointerOverDock) return; // hovering the dock itself: never hide
     if (!_dockVisible && mounted) setState(() => _dockVisible = true);
+    if (!_shouldAutoHide) return;
     _dockHideTimer = Timer(_dockAutoHideDelay, () {
       if (mounted) setState(() => _dockVisible = false);
     });
@@ -234,9 +247,27 @@ class _RootShellState extends ConsumerState<RootShell> {
               ref.listen(windowFullscreenProvider, (prev, next) {
                 if (!playerWithTransport || !isDesktop || prev == next) return;
                 _dockHideTimer?.cancel();
-                if (mounted) setState(() => _dockVisible = true);
                 _setKeyRevealHandler(next);
-                if (next) {
+                final playing =
+                    ref.read(playerIsPlayingProvider).value ?? false;
+                if (mounted) setState(() => _dockVisible = true);
+                if (next && playing) {
+                  _dockHideTimer = Timer(_dockAutoHideDelay, () {
+                    if (mounted) setState(() => _dockVisible = false);
+                  });
+                }
+              });
+
+              // Pausing in fullscreen keeps the dock up; resuming re-arms
+              // the idle hide.
+              ref.listen(playerIsPlayingProvider, (prev, next) {
+                if (!_fullscreenActive()) return;
+                _dockHideTimer?.cancel();
+                final playing = next.value ?? false;
+                if (mounted && !playing && !_dockVisible) {
+                  setState(() => _dockVisible = true);
+                }
+                if (playing) {
                   _dockHideTimer = Timer(_dockAutoHideDelay, () {
                     if (mounted) setState(() => _dockVisible = false);
                   });
@@ -265,8 +296,9 @@ class _RootShellState extends ConsumerState<RootShell> {
                       : const PlayerDockSkeleton();
                   if (videoFullscreen) {
                     // Dock floats over the stage and slides away after idle.
-                    playerBody = MouseRegion(
-                      onHover: (_) => _pokeDock(),
+                    playerBody = Listener(
+                      onPointerHover: (_) => _pokeDock(),
+                      onPointerDown: (_) => _pokeDock(),
                       child: playerBody,
                     );
                     return RootShellBottomInset(
@@ -288,8 +320,14 @@ class _RootShellState extends ConsumerState<RootShell> {
                                 duration: tokens.motionMedium,
                                 curve: Curves.easeOutCubic,
                                 child: MouseRegion(
-                                  onEnter: (_) => _cancelDockHide(),
-                                  onExit: (_) => _pokeDock(),
+                                  onEnter: (_) {
+                                    _pointerOverDock = true;
+                                    _cancelDockHide();
+                                  },
+                                  onExit: (_) {
+                                    _pointerOverDock = false;
+                                    _pokeDock();
+                                  },
                                   child: Material(
                                     type: MaterialType.transparency,
                                     child: bottomDock,

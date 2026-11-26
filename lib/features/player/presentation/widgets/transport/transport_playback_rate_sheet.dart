@@ -1,8 +1,8 @@
-/// The dock's playback-rate preset bottom sheet.
+/// The dock's playback-rate preset bottom sheet and the desktop anchored
+/// hover menu.
 library;
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,30 +22,21 @@ import 'package:enjoy_player/l10n/app_localizations.dart';
 
 const double kMenuItemHeight = 40;
 
-/// Single-flight state for the desktop hover-open rate menu: the pointer may
-/// travel between the speed control and the floating panel, so dismissal is
-/// scheduled with a short grace timer and cancelled by entering either side.
-_AnchoredRateMenuRoute? _openRateRoute;
-bool _ratePointerInAnchor = false;
-bool _ratePointerInPanel = false;
-Timer? _rateDismissTimer;
+/// Single-flight state for the anchored hover menu: only one instance shows
+/// at a time, and the previous one is closed when a new one opens.
+OverlayPortalController? _activeRateMenu;
+void Function()? _activeRateMenuCloser;
 
-void _cancelRateDismiss() {
-  _rateDismissTimer?.cancel();
-  _rateDismissTimer = null;
-}
-
-void _scheduleRateDismiss() {
-  _cancelRateDismiss();
-  _rateDismissTimer = Timer(const Duration(milliseconds: 260), () {
-    if (_ratePointerInAnchor || _ratePointerInPanel) return;
-    _openRateRoute?.navigator?.pop();
-  });
-}
-
-/// Hover-open wrapper for the desktop speed controls: the menu shows while
-/// the pointer rests on the control (or the panel), like the volume slider —
-/// one hover idiom across the transport bars.
+/// Anchored rate menu host for desktop speed controls: the menu shows while
+/// the pointer rests on the control or the panel (same hover idiom as the
+/// volume slider), click pins it open, click outside dismisses. Unlike the
+/// old PopupRoute version there is NO modal barrier — the barrier blocked
+/// hit-testing below and made the anchor's MouseRegion flap open/close every
+/// time the pointer moved ("menu keeps jumping").
+///
+/// Wrap the speed control ([child]) with this; the child may keep its own
+/// tap handler calling [showPlaybackRatePicker], which becomes a no-op while
+/// the menu is open.
 class RateMenuHoverRegion extends ConsumerStatefulWidget {
   const RateMenuHoverRegion({required this.child, super.key});
 
@@ -57,208 +48,196 @@ class RateMenuHoverRegion extends ConsumerStatefulWidget {
 }
 
 class _RateMenuHoverRegionState extends ConsumerState<RateMenuHoverRegion> {
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) {
-        _ratePointerInAnchor = true;
-        _cancelRateDismiss();
-        showPlaybackRatePicker(
-          context: context,
-          ref: ref,
-          anchor: context,
-        );
-      },
-      onExit: (_) {
-        _ratePointerInAnchor = false;
-        _scheduleRateDismiss();
-      },
-      child: widget.child,
-    );
-  }
-}
+  final OverlayPortalController _portal = OverlayPortalController();
+  final LayerLink _link = LayerLink();
+  Timer? _hideTimer;
+  bool _hovering = false;
+  bool _pinned = false;
 
-/// Speed presets picker: on desktop a small popup menu anchored right at the
-/// speed button (one tap switches, no big dialog); on mobile falls back to
-/// the bottom sheet. [anchor] is the [BuildContext] of the speed button.
-Future<void> showPlaybackRatePicker({
-  required BuildContext context,
-  required WidgetRef ref,
-  required BuildContext anchor,
-}) async {
-  if (!isMobilePlatform) {
-    if (_openRateRoute != null) return;
-    final anchorBox = anchor.findRenderObject();
-    if (anchorBox is RenderBox && anchorBox.hasSize) {
-      await _showAnchoredRateMenu(context, ref, anchor, anchorBox);
-      return;
+  void _cancelHideTimer() {
+    _hideTimer?.cancel();
+    _hideTimer = null;
+  }
+
+  void _syncPopup() {
+    final visible = _hovering || _pinned;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (visible) {
+        if (!_portal.isShowing) {
+          // Close any other instance's menu first — one menu at a time.
+          if (_activeRateMenu != null && !identical(_activeRateMenu, _portal)) {
+            _activeRateMenuCloser?.call();
+          }
+          _activeRateMenu = _portal;
+          _activeRateMenuCloser = _hideNow;
+          _portal.show();
+        }
+      } else if (_portal.isShowing) {
+        _portal.hide();
+        if (identical(_activeRateMenu, _portal)) {
+          _activeRateMenu = null;
+          _activeRateMenuCloser = null;
+        }
+      }
+    });
+  }
+
+  void _onPointerInside(bool inside) {
+    _hovering = inside;
+    if (inside) {
+      _cancelHideTimer();
+      _syncPopup();
+    } else if (!_pinned) {
+      _cancelHideTimer();
+      _hideTimer = Timer(const Duration(milliseconds: 260), () {
+        if (!mounted || _hovering || _pinned) return;
+        _syncPopup();
+      });
     }
   }
-  await showPlaybackRateSheet(context: context, ref: ref);
-}
 
-Future<void> _showAnchoredRateMenu(
-  BuildContext context,
-  WidgetRef ref,
-  BuildContext anchor,
-  RenderBox anchorBox,
-) async {
-  final overlay =
-      Navigator.of(anchor).overlay!.context.findRenderObject()! as RenderBox;
-  final topLeft = topLeftOf(anchorBox, overlay);
-  final bottomRight = anchorBox
-      .localToGlobal(anchorBox.size.bottomRight(Offset.zero), ancestor: overlay);
-  final anchorRect = Rect.fromPoints(topLeft, bottomRight);
-  final rate = ref.read(
-    playerPreferencesCtrlProvider.select((p) => p.playbackRate),
-  );
-  // Over the OS-fullscreen video the chrome family is dark translucent (same
-  // as the fullscreen transport bar); in the windowed dock it is paper. The
-  // provider reports false on mobile, so this is a no-op there.
-  final dark = ref.read(windowFullscreenProvider);
-  final l10n = AppLocalizations.of(anchor)!;
-  final route = _AnchoredRateMenuRoute(
-    anchorRect: anchorRect,
-    rate: rate,
-    l10n: l10n,
-    dark: dark,
-  );
-  _openRateRoute = route;
-  final picked = await Navigator.of(anchor, rootNavigator: true).push(route);
-  _openRateRoute = null;
-  if (picked != null) {
-    await ref
-        .read(playerPreferencesCtrlProvider.notifier)
-        .setPlaybackRate(picked);
+  void _togglePin() {
+    _cancelHideTimer();
+    setState(() => _pinned = !_pinned);
+    _syncPopup();
   }
-}
 
-Offset topLeftOf(RenderBox box, RenderBox ancestor) =>
-    box.localToGlobal(Offset.zero, ancestor: ancestor);
+  void _dismissPinned() {
+    if (!_pinned) return;
+    setState(() => _pinned = false);
+    _syncPopup();
+  }
 
-/// Themed anchored rate menu — same visual language as the player's popover
-/// family (paper panel, brand check) with a soft fade + rise transition, in
-/// place of the stock PopupMenu's flat white sheet and stiff fade. Over the
-/// fullscreen video it switches to the dark translucent chrome family shared
-/// with the fullscreen transport bar.
-class _AnchoredRateMenuRoute extends PopupRoute<double> {
-  _AnchoredRateMenuRoute({
-    required this.anchorRect,
-    required this.rate,
-    required this.l10n,
-    required this.dark,
-  }) : super();
-
-  final Rect anchorRect;
-  final double rate;
-  final AppLocalizations l10n;
-  final bool dark;
-
-  @override
-  Color? get barrierColor => null;
-
-  @override
-  bool get barrierDismissible => true;
-
-  @override
-  String? get barrierLabel => l10n.speed;
-
-  @override
-  Duration get transitionDuration => const Duration(milliseconds: 160);
-
-  @override
-  Duration get reverseTransitionDuration => const Duration(milliseconds: 120);
-
-  @override
-  Widget buildPage(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation) {
-    return CustomSingleChildLayout(
-      delegate: _RateMenuLayout(anchorRect: anchorRect),
-      child: _RateMenuPanel(dark: dark),
-    );
+  void _hideNow() {
+    _cancelHideTimer();
+    _hovering = false;
+    _pinned = false;
+    if (_portal.isShowing) _portal.hide();
+    if (identical(_activeRateMenu, _portal)) {
+      _activeRateMenu = null;
+      _activeRateMenuCloser = null;
+    }
   }
 
   @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation, Widget child) {
-    return FadeTransition(
-      opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
-      child: SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(0, 0.06),
-          end: Offset.zero,
-        ).animate(
-          CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+  void dispose() {
+    _cancelHideTimer();
+    if (identical(_activeRateMenu, _portal)) {
+      _activeRateMenu = null;
+      _activeRateMenuCloser = null;
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return OverlayPortal(
+      controller: _portal,
+      overlayChildBuilder: (overlayCtx) {
+        // Over the OS-fullscreen video the menu joins the dark translucent
+        // chrome family (same as the fullscreen transport bar); in the
+        // windowed dock it is paper.
+        final dark = ref.read(windowFullscreenProvider);
+        final panel = CompositedTransformFollower(
+          link: _link,
+          showWhenUnlinked: false,
+          targetAnchor: Alignment.topRight,
+          followerAnchor: Alignment.bottomRight,
+          offset: const Offset(0, -6),
+          child: _RateMenuPanel(
+            dark: dark,
+            rate: ref.read(playerPreferencesCtrlProvider).playbackRate,
+            onHover: _onPointerInside,
+            onPick: (option) {
+              unawaited(
+                ref
+                    .read(playerPreferencesCtrlProvider.notifier)
+                    .setPlaybackRate(option),
+              );
+              _hideNow();
+            },
+          ),
+        );
+        return Stack(
+          children: [
+            if (_pinned)
+              Positioned.fill(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: _dismissPinned,
+                ),
+              ),
+            panel,
+          ],
+        );
+      },
+      child: CompositedTransformTarget(
+        link: _link,
+        child: MouseRegion(
+          onEnter: (_) => _onPointerInside(true),
+          onExit: (_) => _onPointerInside(false),
+          // Click the control to pin/unpin. Translucent so the inner press
+          // ripple still plays; the inner onTap's [showPlaybackRatePicker]
+          // no-ops while the menu is open.
+          child: Listener(
+            behavior: HitTestBehavior.translucent,
+            onPointerDown: (_) => _togglePin(),
+            child: widget.child,
+          ),
         ),
-        child: child,
       ),
     );
   }
 }
 
-/// Places the menu right above the speed chip, right-aligned with it,
-/// clamped into the overlay bounds.
-class _RateMenuLayout extends SingleChildLayoutDelegate {
-  _RateMenuLayout({required this.anchorRect});
-
-  final Rect anchorRect;
-
-  @override
-  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    return BoxConstraints(
-      maxWidth: kRateMenuMaxWidth,
-      maxHeight: constraints.maxHeight * 0.9,
-    );
-  }
-
-  @override
-  Offset getPositionForChild(Size size, Size childSize) {
-    final dx = (anchorRect.right - childSize.width).clamp(
-      8.0,
-      math.max(8.0, size.width - childSize.width - 8),
-    ).toDouble();
-    final dy = (anchorRect.top - childSize.height - 8).clamp(
-      8.0,
-      math.max(8.0, size.height - childSize.height - 8),
-    ).toDouble();
-    return Offset(dx, dy);
-  }
-
-  @override
-  bool shouldRelayout(_RateMenuLayout old) => old.anchorRect != anchorRect;
+/// Speed presets picker: on desktop the anchored hover menu (owned by the
+/// enclosing [RateMenuHoverRegion]) — this is a no-op while it is open; on
+/// mobile falls back to the bottom sheet.
+Future<void> showPlaybackRatePicker({
+  required BuildContext context,
+  required WidgetRef ref,
+  required BuildContext anchor,
+}) async {
+  if (!isMobilePlatform) return;
+  await showPlaybackRateSheet(context: context, ref: ref);
 }
 
-const double kRateMenuMaxWidth = 168;
+/// Height of the compact rate menu: 6 x 24 px rows + 8 px vertical padding =
+/// 152 px, matching the volume slider popup for one popover silhouette.
+const double kRateMenuHeight = 152;
+
+const double kRateMenuWidth = 120;
 
 class _RateMenuPanel extends StatelessWidget {
-  const _RateMenuPanel({required this.dark});
+  const _RateMenuPanel({
+    required this.dark,
+    required this.rate,
+    required this.onHover,
+    required this.onPick,
+  });
 
   final bool dark;
+  final double rate;
+  final void Function(bool inside) onHover;
+  final void Function(double option) onPick;
 
   @override
   Widget build(BuildContext context) {
-    final route =
-        ModalRoute.of(context)! as _AnchoredRateMenuRoute;
     final t = EnjoyThemeTokens.of(context);
     final color = dark ? Colors.black.withValues(alpha: 0.72) : t.paper;
     final borderColor = dark
         ? Colors.white.withValues(alpha: 0.14)
         : t.line;
-    // Pointer may travel from the speed control onto the panel; entering the
-    // panel cancels the pending hover dismissal.
     return MouseRegion(
-      onEnter: (_) {
-        _ratePointerInPanel = true;
-        _cancelRateDismiss();
-      },
-      onExit: (_) {
-        _ratePointerInPanel = false;
-        _scheduleRateDismiss();
-      },
+      onEnter: (_) => onHover(true),
+      onExit: (_) => onHover(false),
       child: Material(
         color: color,
         borderRadius: BorderRadius.circular(12),
         child: Container(
+          width: kRateMenuWidth,
+          height: kRateMenuHeight,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: borderColor),
@@ -270,8 +249,6 @@ class _RateMenuPanel extends StatelessWidget {
               ),
             ],
           ),
-          // 6 x 24 px rows + 8 px vertical padding = 152 px, matching the
-          // volume slider popup height for a single popover silhouette.
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -279,10 +256,10 @@ class _RateMenuPanel extends StatelessWidget {
             children: [
               for (final option in kPlaybackRatePresets)
                 _RateMenuEntry(
-                  route: route,
                   option: option,
-                  selected: playbackRatesEqual(option, route.rate),
+                  selected: playbackRatesEqual(option, rate),
                   dark: dark,
+                  onPick: onPick,
                 ),
             ],
           ),
@@ -294,16 +271,16 @@ class _RateMenuPanel extends StatelessWidget {
 
 class _RateMenuEntry extends StatelessWidget {
   const _RateMenuEntry({
-    required this.route,
     required this.option,
     required this.selected,
     required this.dark,
+    required this.onPick,
   });
 
-  final _AnchoredRateMenuRoute route;
   final double option;
   final bool selected;
   final bool dark;
+  final void Function(double option) onPick;
 
   @override
   Widget build(BuildContext context) {
@@ -317,23 +294,24 @@ class _RateMenuEntry extends StatelessWidget {
               : Colors.white.withValues(alpha: 0.72))
         : (selected ? t.ink : t.ink2);
     return InkWell(
-      onTap: () => Navigator.of(context).pop(option),
+      onTap: () => onPick(option),
       child: SizedBox(
         height: 24,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [
               SizedBox(
-                width: 20,
+                width: 24,
                 child: selected
                     ? Icon(EnjoyIcons.check, size: 13, color: checkColor)
                     : null,
               ),
               Text(
-                route.l10n.playbackRateTimes(formatRateCore(option)),
+                '${formatRateCore(option)}×',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontSize: 12.5,
+                  fontSize: 13,
+                  letterSpacing: 0.3,
                   fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
                   color: labelColor,
                 ),

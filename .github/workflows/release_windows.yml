@@ -124,10 +124,13 @@ jobs:
           [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
           $innoExe = Join-Path $env:RUNNER_TEMP "innosetup.exe"
           $downloaded = $false
+          # GitHub releases download is the most reliable source on Actions
+          # runners; jrsoftware.org has flaked (0.10.8/0.10.9 shipped
+          # installer-less because of it).
           $urls = @(
+            "https://github.com/jrsoftware/issrc/releases/download/is-6_7_3/innosetup-6.7.3.exe",
             "https://files.jrsoftware.org/is/6/innosetup-6.7.3.exe",
-            "https://jrsoftware.org/download.php/is.exe",
-            "https://github.com/jrsoftware/issrc/releases/download/is-6_7_3/innosetup-6.7.3.exe"
+            "https://jrsoftware.org/download.php/is.exe"
           )
           foreach ($u in $urls) {
             try {

@@ -231,9 +231,12 @@ class AsrGenerationController extends _$AsrGenerationController {
         return;
       }
 
-      if (!isLongForm) {
-        _beginRecognizingProgress(durationSeconds);
-      }
+      // Always surface the recognizing phase before the ASR call: long-form
+      // local passes never emit uploading/polling callbacks, so without this
+      // the banner sat at "extracting 100%" for the whole transcription.
+      // The wall-clock estimate is provider-seeded; cloud long-form flips to
+      // uploading/polling on its own callbacks and stops the ticker.
+      _beginRecognizingProgress(durationSeconds);
       final asrService = ref.read(asrServiceProvider);
       final req = AsrRequest(
         audioPath: extracted?.filePath,

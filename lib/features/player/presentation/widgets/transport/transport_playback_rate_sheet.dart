@@ -234,22 +234,21 @@ class _RateMenuPanel extends StatelessWidget {
     return MouseRegion(
       onEnter: (_) => onHover(true),
       onExit: (_) => onHover(false),
+      // The elevation draws the drop shadow OUTSIDE the surface. A Container
+      // boxShadow cannot be used here: without a color of its own it paints
+      // the blurred shadow OVER the Material's surface and turns the white
+      // panel muddy grey (35% black over white = rgb 166).
       child: Material(
         color: color,
         borderRadius: BorderRadius.circular(12),
+        elevation: 10,
+        shadowColor: Colors.black.withValues(alpha: 0.35),
         child: Container(
           width: kRateMenuWidth,
           height: kRateMenuHeight,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: borderColor),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.35),
-                blurRadius: 18,
-                offset: const Offset(0, 6),
-              ),
-            ],
           ),
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: Column(

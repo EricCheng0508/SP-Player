@@ -28,6 +28,7 @@ import 'package:enjoy_player/features/discover/presentation/channel_feed_screen.
 import 'package:enjoy_player/features/discover/presentation/discover_screen.dart';
 import 'package:enjoy_player/features/library/presentation/home_screen.dart';
 import 'package:enjoy_player/features/library/presentation/library_screen.dart';
+import 'package:enjoy_player/features/live_captions/presentation/live_captions_screen.dart';
 import 'package:enjoy_player/features/player/application/leave_player_route_observer.dart';
 import 'package:enjoy_player/features/player/application/leave_player_session.dart';
 import 'package:enjoy_player/features/player/application/player_controller.dart';
@@ -256,6 +257,14 @@ GoRouter appRouter(Ref ref) {
             pageBuilder: (context, state) => _shellPage(
               key: const ValueKey<String>('shell-craft-history'),
               child: const CraftHistoryScreen(),
+            ),
+          ),
+          GoRoute(
+            name: 'live-captions',
+            path: '/live-captions',
+            pageBuilder: (context, state) => _shellPage(
+              key: const ValueKey<String>('shell-live-captions'),
+              child: const LiveCaptionsScreen(),
             ),
           ),
           GoRoute(

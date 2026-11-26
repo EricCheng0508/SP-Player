@@ -285,6 +285,12 @@ class _AppSidebarState extends ConsumerState<AppSidebar> {
                   onTap: () => context.go('/craft'),
                   trailing: isDesktop ? EnjoyKeycap(label: craftKey) : null,
                 ),
+                NavItemPill(
+                  icon: EnjoyIcons.cc,
+                  label: '实时字幕',
+                  selected: path.startsWith('/live-captions'),
+                  onTap: () => context.go('/live-captions'),
+                ),
 
                 const Spacer(),
 

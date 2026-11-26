@@ -15,6 +15,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_chrome_icon.dart';
+import 'package:enjoy_player/core/window/window_fullscreen_provider.dart';
 import 'package:enjoy_player/features/player/application/player_preferences_provider.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
@@ -87,14 +88,24 @@ class _TransportVolumeButtonState extends ConsumerState<TransportVolumeButton> {
 
   Widget _sliderCard(BuildContext overlayCtx) {
     final t = EnjoyThemeTokens.of(context);
+    // Over the OS-fullscreen video the popup joins the dark translucent
+    // chrome family (same as the fullscreen transport bar); in the windowed
+    // dock it stays on the light raised panel.
+    final dark = ref.read(windowFullscreenProvider);
+    final surfaceColor = dark
+        ? Colors.black.withValues(alpha: 0.72)
+        : t.raised;
+    final borderColor = dark
+        ? Colors.white.withValues(alpha: 0.14)
+        : t.line;
     return MouseRegion(
       onEnter: (_) => _onPointerInside(true),
       onExit: (_) => _onPointerInside(false),
       child: Material(
-        color: t.raised,
+        color: surfaceColor,
         shape: RoundedSuperellipseBorder(
           borderRadius: BorderRadius.circular(t.radiusMd),
-          side: BorderSide(color: t.line),
+          side: BorderSide(color: borderColor),
         ),
         clipBehavior: Clip.antiAlias,
         elevation: 10,
@@ -115,6 +126,14 @@ class _TransportVolumeButtonState extends ConsumerState<TransportVolumeButton> {
                   overlayShape: const RoundSliderOverlayShape(
                     overlayRadius: 12,
                   ),
+                  // White monochrome on the dark surface, matching the bar.
+                  activeTrackColor:
+                      dark ? Colors.white : null,
+                  inactiveTrackColor:
+                      dark ? Colors.white.withValues(alpha: 0.24) : null,
+                  thumbColor: dark ? Colors.white : null,
+                  overlayColor:
+                      dark ? Colors.white.withValues(alpha: 0.12) : null,
                 ),
                 child: Consumer(
                   builder: (_, ref, _) {

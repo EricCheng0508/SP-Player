@@ -97,7 +97,9 @@ final class TranscriptAutoScrollController {
   /// Re-syncs the viewport to the active cue after the host list re-enters
   /// the tree (e.g. the transcript panel is torn down during video fullscreen
   /// and rebuilt on exit). Without this the fresh list sits at its restored
-  /// offset and only re-joins the cue on the NEXT cue change.
+  /// offset and only re-joins the cue on the NEXT cue change. Deliberately
+  /// bypasses the playing gate: the cue at the paused position is still the
+  /// current line and must be scrolled into view (paused + exit fullscreen).
   void resyncToActiveCue() {
     if (!_positionReady) {
       // The scrollable's dimensions may not exist until a frame after the
@@ -111,7 +113,7 @@ final class TranscriptAutoScrollController {
       return;
     }
     resumeAutoFollow();
-    scheduleScrollIntoView(force: true);
+    scheduleScrollIntoView(force: true, ignorePlaying: true);
   }
 
   GlobalKey scrollKeyForEcho(EchoState echo) {
@@ -161,13 +163,21 @@ final class TranscriptAutoScrollController {
     return false;
   }
 
-  void scheduleScrollIntoView({bool force = false}) {
-    final playingAsync = ref().read(playerIsPlayingProvider);
-    final playing = switch (playingAsync) {
-      AsyncData(:final value) => value,
-      _ => false,
-    };
-    if (!playing) return;
+  void scheduleScrollIntoView({
+    bool force = false,
+    bool ignorePlaying = false,
+  }) {
+    // Follow the playhead only while playing: while paused the user may be
+    // browsing, and cue changes don't happen anyway. Explicit resyncs
+    // (panel rebuild after fullscreen) pass [ignorePlaying] to override.
+    if (!ignorePlaying) {
+      final playingAsync = ref().read(playerIsPlayingProvider);
+      final playing = switch (playingAsync) {
+        AsyncData(:final value) => value,
+        _ => false,
+      };
+      if (!playing) return;
+    }
 
     final echo =
         activeEchoForTranscript(ref().read(echoModeProvider), lineCount()) ??

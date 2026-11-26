@@ -28,10 +28,13 @@ import 'package:enjoy_player/features/transcript/application/transcript_line_rec
 import 'package:enjoy_player/features/transcript/application/transcript_lines_provider.dart';
 
 /// The dock's ruler row: mono elapsed · track · mono total, hit height 34.
+/// [bright] switches the mono times to near-white for dark translucent
+/// surfaces (the OS-fullscreen transport bar).
 class SentenceRuler extends ConsumerStatefulWidget {
-  const SentenceRuler({required this.chrome, super.key});
+  const SentenceRuler({required this.chrome, this.bright = false, super.key});
 
   final PlaybackChrome chrome;
+  final bool bright;
 
   @override
   ConsumerState<SentenceRuler> createState() => _SentenceRulerState();
@@ -201,7 +204,11 @@ class _SentenceRulerState extends ConsumerState<SentenceRuler> {
       _bufferedFraction.value = bufferedFraction;
     }
 
-    final timeStyle = enjoyMonoStyle(context, size: 12.5, color: t.ink3);
+    final timeStyle = enjoyMonoStyle(
+      context,
+      size: 12.5,
+      color: widget.bright ? Colors.white.withValues(alpha: 0.9) : t.ink3,
+    );
 
     return MouseRegion(
       onEnter: (_) => _setHovered(true),

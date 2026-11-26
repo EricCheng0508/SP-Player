@@ -58,7 +58,7 @@ class FullscreenTransportBar extends ConsumerWidget {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: SentenceRuler(chrome: chrome),
+                child: SentenceRuler(chrome: chrome, bright: true),
               ),
             ),
             _RateChip(label: rateLabel, rate: playbackRate),

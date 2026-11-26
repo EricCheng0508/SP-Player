@@ -19,7 +19,6 @@ import 'package:enjoy_player/core/window/desktop_window.dart';
 import 'package:enjoy_player/core/window/window_fullscreen_provider.dart';
 import 'package:enjoy_player/features/onboarding/presentation/onboarding_showcase_host.dart';
 import 'package:enjoy_player/features/player/application/player_controller.dart';
-import 'package:enjoy_player/features/player/application/player_state_providers.dart';
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
 import 'package:enjoy_player/features/player/presentation/widgets/player_dock.dart';
 import 'package:enjoy_player/core/local/no_tier_host.dart';
@@ -55,14 +54,6 @@ class _RootShellState extends ConsumerState<RootShell> {
   bool _keyRevealHandlerActive = false;
   bool _pointerOverDock = false;
 
-  bool _fullscreenActive() =>
-      _keyRevealHandlerActive && mounted;
-
-  /// Paused video keeps the dock visible (standard fullscreen UX); playing
-  /// arms the idle auto-hide.
-  bool get _shouldAutoHide =>
-      (ref.read(playerIsPlayingProvider).value ?? false);
-
   /// While in video fullscreen, any key press reveals the dock (standard
   /// fullscreen UX: mouse move OR keyboard). Returns false so hotkeys and
   /// player shortcuts keep working untouched.
@@ -89,20 +80,32 @@ class _RootShellState extends ConsumerState<RootShell> {
     super.dispose();
   }
 
-  /// Pointer moved / pressed over the fullscreen stage: show the dock, and
-  /// arm the idle hide only while playing. Paused video keeps it visible.
+  /// Engine transport snapshot — the same source the video surface uses, so
+  /// it always agrees with what is actually on screen (the playerIsPlaying
+  /// stream has been observed to lag reality during playback).
+  bool _enginePlaying() =>
+      ref
+          .read(playerControllerProvider.notifier)
+          .engineIdentity
+          .resolveOrNull()
+          ?.transportSnapshot
+          .playing ??
+      false;
+
+  /// Idle timer fired: hide only while actually playing. Paused video keeps
+  /// the dock visible (standard fullscreen UX); the next poke re-arms.
+  void _hideDockIfPlaying() {
+    if (!_enginePlaying()) return;
+    if (mounted) setState(() => _dockVisible = false);
+  }
+
+  /// Pointer moved / pressed over the fullscreen stage: show the dock, arm
+  /// the idle hide. Hovering the dock itself never hides it.
   void _pokeDock() {
     _dockHideTimer?.cancel();
     if (_pointerOverDock) return; // hovering the dock itself: never hide
     if (!_dockVisible && mounted) setState(() => _dockVisible = true);
-    if (!_shouldAutoHide) return;
-    _dockHideTimer = Timer(_dockAutoHideDelay, () {
-      if (mounted) setState(() => _dockVisible = false);
-    });
-  }
-
-  void _cancelDockHide() {
-    _dockHideTimer?.cancel();
+    _dockHideTimer = Timer(_dockAutoHideDelay, _hideDockIfPlaying);
   }
 
   static const _accountPrefixes = {
@@ -248,29 +251,9 @@ class _RootShellState extends ConsumerState<RootShell> {
                 if (!playerWithTransport || !isDesktop || prev == next) return;
                 _dockHideTimer?.cancel();
                 _setKeyRevealHandler(next);
-                final playing =
-                    ref.read(playerIsPlayingProvider).value ?? false;
                 if (mounted) setState(() => _dockVisible = true);
-                if (next && playing) {
-                  _dockHideTimer = Timer(_dockAutoHideDelay, () {
-                    if (mounted) setState(() => _dockVisible = false);
-                  });
-                }
-              });
-
-              // Pausing in fullscreen keeps the dock up; resuming re-arms
-              // the idle hide.
-              ref.listen(playerIsPlayingProvider, (prev, next) {
-                if (!_fullscreenActive()) return;
-                _dockHideTimer?.cancel();
-                final playing = next.value ?? false;
-                if (mounted && !playing && !_dockVisible) {
-                  setState(() => _dockVisible = true);
-                }
-                if (playing) {
-                  _dockHideTimer = Timer(_dockAutoHideDelay, () {
-                    if (mounted) setState(() => _dockVisible = false);
-                  });
+                if (next && _enginePlaying()) {
+                  _dockHideTimer = Timer(_dockAutoHideDelay, _hideDockIfPlaying);
                 }
               });
 
@@ -295,48 +278,19 @@ class _RootShellState extends ConsumerState<RootShell> {
                       ? PlayerDock(chrome: chrome)
                       : const PlayerDockSkeleton();
                   if (videoFullscreen) {
-                    // Dock floats over the stage and slides away after idle.
-                    playerBody = Listener(
-                      onPointerHover: (_) => _pokeDock(),
-                      onPointerDown: (_) => _pokeDock(),
-                      child: playerBody,
-                    );
+                    // The floating dock is NOT rendered here: the engine video
+                    // surface paints above this entire scaffold
+                    // (PlayerSurfaceHost is the root Stack's top layer), which
+                    // would cover any in-shell overlay. RootShell mounts the
+                    // dock ABOVE the surface host instead — see the root Stack
+                    // below. Fullscreen just drops the dock slot so the stage
+                    // owns the full height.
                     return RootShellBottomInset(
                       bottomClearance: noticeBottomClearance,
                       child: Scaffold(
                         backgroundColor: Colors.transparent,
                         extendBody: true,
-                        body: Stack(
-                          children: [
-                            Positioned.fill(child: playerBody),
-                            Positioned(
-                              left: 0,
-                              right: 0,
-                              bottom: 0,
-                              child: AnimatedSlide(
-                                offset: _dockVisible
-                                    ? Offset.zero
-                                    : const Offset(0, 1),
-                                duration: tokens.motionMedium,
-                                curve: Curves.easeOutCubic,
-                                child: MouseRegion(
-                                  onEnter: (_) {
-                                    _pointerOverDock = true;
-                                    _cancelDockHide();
-                                  },
-                                  onExit: (_) {
-                                    _pointerOverDock = false;
-                                    _pokeDock();
-                                  },
-                                  child: Material(
-                                    type: MaterialType.transparency,
-                                    child: bottomDock,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                        body: playerBody,
                       ),
                     );
                   }
@@ -412,11 +366,81 @@ class _RootShellState extends ConsumerState<RootShell> {
                   path.startsWith('/youtube/login') ||
                   (onPlayer &&
                       GoRouterState.of(context).uri.pathSegments.length > 2);
+              final fullscreen =
+                  playerWithTransport &&
+                  ref.watch(windowFullscreenProvider);
               return Stack(
                 fit: StackFit.expand,
                 children: [
                   shell,
+                  // Engine video surface paints above the shell — any
+                  // fullscreen chrome must stack ABOVE it to be visible.
                   PlayerSurfaceHost(forcePark: parkSurface),
+                  // Fullscreen reveal layer: pointer move / press over the
+                  // video wakes the dock. translucent + non-opaque so video
+                  // gestures and hotkeys keep working.
+                  if (fullscreen)
+                    Positioned.fill(
+                      child: MouseRegion(
+                        opaque: false,
+                        cursor: _dockVisible
+                            ? MouseCursor.defer
+                            : SystemMouseCursors.none,
+                        onHover: (_) => _pokeDock(),
+                        child: Listener(
+                          behavior: HitTestBehavior.translucent,
+                          onPointerDown: (_) => _pokeDock(),
+                          child: const SizedBox.expand(),
+                        ),
+                      ),
+                    ),
+                  // Floating fullscreen dock, above the video surface.
+                  if (fullscreen && sessionActive)
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: AnimatedSlide(
+                        offset: _dockVisible
+                            ? Offset.zero
+                            : const Offset(0, 1),
+                        duration: tokens.motionMedium,
+                        curve: Curves.easeOutCubic,
+                        child: MouseRegion(
+                          onEnter: (_) {
+                            _pointerOverDock = true;
+                            _dockHideTimer?.cancel();
+                          },
+                          onExit: (_) {
+                            _pointerOverDock = false;
+                            _pokeDock();
+                          },
+                          child: Opacity(
+                            opacity: 0.88,
+                            child: Transform.scale(
+                              scale: 0.85,
+                              alignment: Alignment.bottomCenter,
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.bottomCenter,
+                                    end: Alignment.topCenter,
+                                    colors: [
+                                      Colors.black.withValues(alpha: 0.65),
+                                      Colors.transparent,
+                                    ],
+                                  ),
+                                ),
+                                child: Material(
+                                  type: MaterialType.transparency,
+                                  child: PlayerDock(chrome: chrome),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               );
             },

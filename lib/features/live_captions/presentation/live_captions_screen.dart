@@ -32,11 +32,14 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
   @override
   void initState() {
     super.initState();
-    // Sessions load once for the history rail.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        unawaited(ref.read(liveCaptionsHistoryProvider.notifier).reload());
-      }
+      if (!mounted) return;
+      // Entering the page opens a fresh conversation (kept when a run is
+      // already in progress so we never tear down live capture on re-entry).
+      unawaited(
+        ref.read(liveCaptionsControllerProvider.notifier).beginNewSession(),
+      );
+      unawaited(ref.read(liveCaptionsHistoryProvider.notifier).reload());
     });
   }
 
@@ -70,7 +73,11 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
               onSelect: (session) => setState(() => _viewing = session),
               onNew: () {
                 setState(() => _viewing = null);
-                ref.read(liveCaptionsControllerProvider.notifier).stop();
+                unawaited(
+                  ref
+                      .read(liveCaptionsControllerProvider.notifier)
+                      .beginNewSession(),
+                );
               },
               onDelete: (session) async {
                 await ref.read(liveCaptionsStoreProvider).delete(session.id);
@@ -103,26 +110,24 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   _Header(state: state),
-                  if (shown == null)
-                    Expanded(
-                      child: _IdlePane(
-                        state: state,
-                        scroll: _scroll,
-                      ),
-                    )
-                  else
-                    Expanded(
-                      child: _CaptionStream(
-                        session: shown,
-                        live: identical(shown, state.session),
-                        scroll: _scroll,
-                        onRetryTranslation: state.session == shown
-                            ? (line) => ref
-                                .read(liveCaptionsControllerProvider.notifier)
-                                .retryTranslation(line)
-                            : null,
-                      ),
-                    ),
+                  Expanded(
+                    child: shown == null
+                        ? const SizedBox.shrink()
+                        : _CaptionStream(
+                            session: shown,
+                            live: identical(shown, state.session),
+                            scroll: _scroll,
+                            onRetryTranslation:
+                                identical(shown, state.session)
+                                    ? (line) => ref
+                                        .read(
+                                          liveCaptionsControllerProvider
+                                              .notifier,
+                                        )
+                                        .retryTranslation(line)
+                                    : null,
+                          ),
+                  ),
                   _StatusBar(state: state),
                 ],
               ),
@@ -478,88 +483,55 @@ class _StatusPillState extends State<_StatusPill>
 }
 
 // ---------------------------------------------------------------------------
-// Idle pane: source chips + translate toggle + big start hint
+// Controls row: source chips + translate toggle (always visible)
 // ---------------------------------------------------------------------------
 
-final class _IdlePane extends ConsumerWidget {
-  const _IdlePane({required this.state, required this.scroll});
-
-  final LiveCaptionsState state;
-  final ScrollController scroll;
+final class _ControlsRow extends ConsumerWidget {
+  const _ControlsRow();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = EnjoyThemeTokens.of(context);
+    final state = ref.watch(liveCaptionsControllerProvider);
     final controller = ref.read(liveCaptionsControllerProvider.notifier);
 
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-          child: Row(
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+      child: Row(
+        children: [
+          _SourceChip(
+            label: '系统声音（不含麦克风）',
+            checked: state.systemEnabled,
+            onTap: () => controller.setSystemEnabled(!state.systemEnabled),
+          ),
+          const SizedBox(width: 8),
+          _SourceChip(
+            label: '麦克风',
+            checked: state.micEnabled,
+            onTap: () => controller.setMicEnabled(!state.micEnabled),
+          ),
+          const SizedBox(width: 12),
+          Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              _SourceChip(
-                label: '系统声音（不含麦克风）',
-                checked: state.systemEnabled,
-                onTap: () => controller.setSystemEnabled(!state.systemEnabled),
+              Switch(
+                value: state.translate,
+                onChanged: (v) => controller.setTranslate(v),
               ),
-              const SizedBox(width: 8),
-              _SourceChip(
-                label: '麦克风',
-                checked: state.micEnabled,
-                onTap: () => controller.setMicEnabled(!state.micEnabled),
-              ),
-              const SizedBox(width: 12),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Switch(
-                    value: state.translate,
-                    onChanged: (v) => controller.setTranslate(v),
-                  ),
-                  const SizedBox(width: 4),
-                  Text('翻译', style: Theme.of(context).textTheme.bodyMedium),
-                  const SizedBox(width: 6),
-                  Text(
-                    '关闭后仅显示原文',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(color: t.ink3),
-                  ),
-                ],
+              const SizedBox(width: 4),
+              Text('翻译', style: Theme.of(context).textTheme.bodyMedium),
+              const SizedBox(width: 6),
+              Text(
+                '关闭后仅显示原文',
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: t.ink3),
               ),
             ],
           ),
-        ),
-        Expanded(
-          child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(EnjoyIcons.cc,
-                    size: 44, color: t.ink3.withValues(alpha: 0.6)),
-                const SizedBox(height: 12),
-                Text(
-                  '选择监听来源，点「开始监听」',
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyMedium
-                      ?.copyWith(color: t.ink2),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  '字幕会比说话晚 2~4 秒出现（本地识别的自然延迟）',
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodySmall
-                      ?.copyWith(color: t.ink3),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -631,14 +603,17 @@ final class _CaptionStream extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final translate =
-        ref.watch(liveCaptionsControllerProvider.select((s) => s.translate));
+    final controllerState = ref.watch(liveCaptionsControllerProvider);
+    final translate = controllerState.translate;
+    final listening = controllerState.phase == LiveCaptionsPhase.listening ||
+        controllerState.phase == LiveCaptionsPhase.starting;
     final lines = session.lines;
 
     return Column(
       children: [
+        const _ControlsRow(),
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+          padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
           child: Row(
             children: [
               Text(
@@ -647,7 +622,12 @@ final class _CaptionStream extends ConsumerWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                '${session.sources.map((s) => s == LiveCaptionSource.system ? '系统声音' : '麦克风').join(' + ')}',
+                session.sources.isEmpty
+                    ? '未选择监听来源'
+                    : session.sources
+                        .map((s) =>
+                            s == LiveCaptionSource.system ? '系统声音' : '麦克风')
+                        .join(' + '),
                 style: Theme.of(context)
                     .textTheme
                     .bodySmall
@@ -658,16 +638,17 @@ final class _CaptionStream extends ConsumerWidget {
         ),
         Expanded(
           child: lines.isEmpty
-              ? Center(
-                  child: Text(
-                    live ? '等待说话…' : '会话没有字幕内容',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
+              ? _EmptyState(
+                  listening: listening,
+                  idle: controllerState.phase == LiveCaptionsPhase.idle,
+                  onStart: () => ref
+                      .read(liveCaptionsControllerProvider.notifier)
+                      .start(),
                 )
               : ListView.builder(
                   controller: scroll,
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                  itemCount: lines.length + (live ? 1 : 0),
+                  itemCount: lines.length + (live && listening ? 1 : 0),
                   itemBuilder: (context, index) {
                     if (index == lines.length) {
                       return const _ListeningPlaceholder();
@@ -683,6 +664,52 @@ final class _CaptionStream extends ConsumerWidget {
                 ),
         ),
       ],
+    );
+  }
+}
+
+/// Empty session: guidance while idle, "waiting for speech" while listening.
+final class _EmptyState extends StatelessWidget {
+  const _EmptyState({
+    required this.listening,
+    required this.idle,
+    required this.onStart,
+  });
+
+  final bool listening;
+  final bool idle;
+  final VoidCallback onStart;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = EnjoyThemeTokens.of(context);
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(EnjoyIcons.cc, size: 44, color: t.ink3.withValues(alpha: 0.6)),
+          const SizedBox(height: 12),
+          if (listening)
+            const Text('正在聆听，说几句话试试…')
+          else ...[
+            const Text('勾选监听来源，点「开始监听」'),
+            const SizedBox(height: 14),
+            FilledButton.icon(
+              onPressed: onStart,
+              icon: const Icon(Icons.play_arrow_rounded, size: 20),
+              label: const Text('开始监听'),
+            ),
+          ],
+          const SizedBox(height: 8),
+          Text(
+            '字幕会比说话晚 2~4 秒出现（本地识别的自然延迟）',
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall
+                ?.copyWith(color: t.ink3),
+          ),
+        ],
+      ),
     );
   }
 }

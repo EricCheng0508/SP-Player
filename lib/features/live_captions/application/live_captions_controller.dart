@@ -78,11 +78,42 @@ class LiveCaptionsController extends _$LiveCaptionsController {
   @override
   LiveCaptionsState build() {
     ref.onDispose(_stopAll);
-    return const LiveCaptionsState();
+    // Entering the page opens a fresh (idle) session right away — every visit
+    // is its own conversation per the product decision.
+    return LiveCaptionsState(session: _newSessionObject());
   }
 
   bool get _isRunning => state.phase == LiveCaptionsPhase.listening ||
       state.phase == LiveCaptionsPhase.starting;
+
+  LiveCaptionSession _newSessionObject() {
+    final now = DateTime.now().toLocal();
+    String two(int v) => v.toString().padLeft(2, '0');
+    final id = 'live-'
+        '${now.year}${two(now.month)}${two(now.day)}-'
+        '${two(now.hour)}${two(now.minute)}${two(now.second)}';
+    return LiveCaptionSession(
+      id: id,
+      startedAt: now,
+      sources: [
+        if (state.systemEnabled) LiveCaptionSource.system,
+        if (state.micEnabled) LiveCaptionSource.mic,
+      ],
+      translated: state.translate,
+    );
+  }
+
+  /// Creates a fresh session as the current one. While listening this first
+  /// stops the capture; a session with content is already persisted line by
+  /// line, an empty one simply vanishes.
+  Future<void> beginNewSession() async {
+    if (_isRunning) await stop();
+    state = state.copyWith(
+      phase: LiveCaptionsPhase.idle,
+      session: _newSessionObject(),
+      error: null,
+    );
+  }
 
   void setSystemEnabled(bool value) {
     if (_isRunning && !value) _stopSource(LiveCaptionSource.system);
@@ -99,7 +130,7 @@ class LiveCaptionsController extends _$LiveCaptionsController {
   void setTranslate(bool value) =>
       state = state.copyWith(translate: value);
 
-  /// Starts a fresh session with the currently checked sources.
+  /// Starts listening on the current session with the checked sources.
   Future<void> start() async {
     if (_isRunning) return;
     final sources = <LiveCaptionSource>[
@@ -113,17 +144,12 @@ class LiveCaptionsController extends _$LiveCaptionsController {
       );
       return;
     }
-    final now = DateTime.now().toLocal();
-    String two(int v) => v.toString().padLeft(2, '0');
-    final id = 'live-'
-        '${now.year}${two(now.month)}${two(now.day)}-'
-        '${two(now.hour)}${two(now.minute)}${two(now.second)}';
-    final session = LiveCaptionSession(
-      id: id,
-      startedAt: now,
-      sources: sources,
-      translated: state.translate,
-    );
+    final session = state.session ?? _newSessionObject();
+    // Reflect the sources the run actually uses.
+    session.sources
+      ..clear()
+      ..addAll(sources);
+    session.translated = state.translate;
     state = state.copyWith(
       phase: LiveCaptionsPhase.starting,
       session: session,
@@ -144,7 +170,6 @@ class LiveCaptionsController extends _$LiveCaptionsController {
     if (!anyStarted) {
       state = state.copyWith(
         phase: LiveCaptionsPhase.idle,
-        session: null,
         error: '无法启动音频监听${failures.isEmpty ? '' : '（$failures）'}：'
             '请确认应用目录中存在 sp_audio_capture.exe',
       );

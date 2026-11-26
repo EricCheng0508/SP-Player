@@ -67,6 +67,21 @@ class _TranscriptScrollableListState
   List<TranscriptLine>? _cachedSecondaryRef;
 
   @override
+  void initState() {
+    super.initState();
+    // Freshly mounted list (the transcript panel is torn down during video
+    // fullscreen and rebuilt on exit): jump straight to the active cue
+    // instead of waiting for the next cue change.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final active = ref
+          .read(transcriptPlaybackHighlightProvider(widget.mediaId))
+          .cueIndex;
+      if (active >= 0) _autoScroll.resyncToActiveCue();
+    });
+  }
+
+  @override
   void dispose() {
     _autoScroll.dispose();
     super.dispose();

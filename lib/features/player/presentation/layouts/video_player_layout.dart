@@ -1,6 +1,7 @@
 /// Video surface + transcript side panel (desktop-friendly split).
 library;
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:enjoy_player/core/interaction/haptics.dart';
 import 'package:enjoy_player/core/interaction/mouse_tracker_safe.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
+import 'package:enjoy_player/core/window/desktop_window.dart' show isDesktop;
 import 'package:enjoy_player/core/transcript/transcript_lens_metrics.dart';
 import 'package:enjoy_player/core/window/window_fullscreen_provider.dart';
 import 'package:enjoy_player/features/player/application/player_controller.dart';
@@ -332,6 +334,24 @@ class _VideoStageWithChromeState extends ConsumerState<_VideoStageWithChrome> {
   /// State's `ref`, so it is allocated once per engine.
   PlayerSurfaceOverlayBuilder? _overlayBuilder;
 
+  /// Single-tap (play/pause) is deferred briefly so a double-tap can claim
+  /// it — double-tap toggles video fullscreen instead.
+  Timer? _stageTapDebounce;
+
+  void _handleStageTap() {
+    _stageTapDebounce?.cancel();
+    _stageTapDebounce = Timer(const Duration(milliseconds: 260), () {
+      if (!mounted) return;
+      ref.read(playerControllerProvider.notifier).togglePlay();
+    });
+  }
+
+  void _handleStageDoubleTap() {
+    _stageTapDebounce?.cancel();
+    if (!isDesktop) return;
+    unawaited(ref.read(windowFullscreenProvider.notifier).toggle());
+  }
+
   void _rebuildOverlayBuilder() {
     final isYoutube = ref.read(playerEnginePlaysYoutubeProvider);
     _overlayBuilder = (ctx) => MouseRegion(
@@ -343,11 +363,8 @@ class _VideoStageWithChromeState extends ConsumerState<_VideoStageWithChrome> {
             Positioned.fill(
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onTap: Haptics.wrapTap(
-                  ctx,
-                  () =>
-                      ref.read(playerControllerProvider.notifier).togglePlay(),
-                ),
+                onTap: Haptics.wrapTap(ctx, _handleStageTap),
+                onDoubleTap: Haptics.wrapTap(ctx, _handleStageDoubleTap),
                 child: const ColoredBox(color: Colors.transparent),
               ),
             ),
@@ -379,6 +396,12 @@ class _VideoStageWithChromeState extends ConsumerState<_VideoStageWithChrome> {
   void initState() {
     super.initState();
     _rebuildOverlayBuilder();
+  }
+
+  @override
+  void dispose() {
+    _stageTapDebounce?.cancel();
+    super.dispose();
   }
 
   @override

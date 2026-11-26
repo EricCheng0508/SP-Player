@@ -47,52 +47,190 @@ Future<void> _showAnchoredRateMenu(
 ) async {
   final overlay =
       Navigator.of(anchor).overlay!.context.findRenderObject()! as RenderBox;
-  final topLeft = anchorBox.localToGlobal(Offset.zero, ancestor: overlay);
+  final topLeft = topLeftOf(anchorBox, overlay);
   final bottomRight = anchorBox
       .localToGlobal(anchorBox.size.bottomRight(Offset.zero), ancestor: overlay);
-  // The dock sits at the bottom of the screen: ask for the menu *above* the
-  // button (bottom aligned with the button top). showMenu clamps the position
-  // back into the screen if the estimate misses.
-  final estimatedMenuHeight =
-      kPlaybackRatePresets.length * kMenuItemHeight + 16;
-  final wantedTop = math.max(0.0, topLeft.dy - estimatedMenuHeight);
+  final anchorRect = Rect.fromPoints(topLeft, bottomRight);
   final rate = ref.read(
     playerPreferencesCtrlProvider.select((p) => p.playbackRate),
   );
-  final t = EnjoyThemeTokens.of(context);
   final l10n = AppLocalizations.of(anchor)!;
-  final picked = await showMenu<double>(
-    context: anchor,
-    position: RelativeRect.fromLTRB(
-      topLeft.dx,
-      wantedTop,
-      overlay.size.width - bottomRight.dx,
-      overlay.size.height - bottomRight.dy,
-    ),
-    constraints: const BoxConstraints(minWidth: 130, maxWidth: 200),
-    items: [
-      for (final option in kPlaybackRatePresets)
-        PopupMenuItem<double>(
-          value: option,
-          height: kMenuItemHeight,
-          child: Row(
-            children: [
-              SizedBox(
-                width: 22,
-                child: playbackRatesEqual(option, rate)
-                    ? Icon(EnjoyIcons.check, size: 16, color: t.brandInk)
-                    : null,
-              ),
-              Text(l10n.playbackRateTimes(formatRateCore(option))),
-            ],
-          ),
-        ),
-    ],
+  final picked = await Navigator.of(anchor, rootNavigator: true).push(
+    _AnchoredRateMenuRoute(anchorRect: anchorRect, rate: rate, l10n: l10n),
   );
   if (picked != null) {
     await ref
         .read(playerPreferencesCtrlProvider.notifier)
         .setPlaybackRate(picked);
+  }
+}
+
+Offset topLeftOf(RenderBox box, RenderBox ancestor) =>
+    box.localToGlobal(Offset.zero, ancestor: ancestor);
+
+/// Themed anchored rate menu — same visual language as the player's popover
+/// family (paper panel, brand check) with a soft fade + rise transition, in
+/// place of the stock PopupMenu's flat white sheet and stiff fade.
+class _AnchoredRateMenuRoute extends PopupRoute<double> {
+  _AnchoredRateMenuRoute({
+    required this.anchorRect,
+    required this.rate,
+    required this.l10n,
+  }) : super();
+
+  final Rect anchorRect;
+  final double rate;
+  final AppLocalizations l10n;
+
+  @override
+  Color? get barrierColor => null;
+
+  @override
+  bool get barrierDismissible => true;
+
+  @override
+  String? get barrierLabel => l10n.speed;
+
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 160);
+
+  @override
+  Duration get reverseTransitionDuration => const Duration(milliseconds: 120);
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation) {
+    return CustomSingleChildLayout(
+      delegate: _RateMenuLayout(anchorRect: anchorRect),
+      child: const _RateMenuPanel(),
+    );
+  }
+
+  @override
+  Widget buildTransitions(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation, Widget child) {
+    return FadeTransition(
+      opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 0.06),
+          end: Offset.zero,
+        ).animate(
+          CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+        ),
+        child: child,
+      ),
+    );
+  }
+}
+
+/// Places the menu right above the speed chip, right-aligned with it,
+/// clamped into the overlay bounds.
+class _RateMenuLayout extends SingleChildLayoutDelegate {
+  _RateMenuLayout({required this.anchorRect});
+
+  final Rect anchorRect;
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+    return BoxConstraints(
+      maxWidth: kRateMenuMaxWidth,
+      maxHeight: constraints.maxHeight * 0.9,
+    );
+  }
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) {
+    final dx = (anchorRect.right - childSize.width).clamp(
+      8.0,
+      math.max(8.0, size.width - childSize.width - 8),
+    ).toDouble();
+    final dy = (anchorRect.top - childSize.height - 8).clamp(
+      8.0,
+      math.max(8.0, size.height - childSize.height - 8),
+    ).toDouble();
+    return Offset(dx, dy);
+  }
+
+  @override
+  bool shouldRelayout(_RateMenuLayout old) => old.anchorRect != anchorRect;
+}
+
+const double kRateMenuMaxWidth = 168;
+
+class _RateMenuPanel extends StatelessWidget {
+  const _RateMenuPanel();
+
+  @override
+  Widget build(BuildContext context) {
+    final route =
+        ModalRoute.of(context)! as _AnchoredRateMenuRoute;
+    final t = EnjoyThemeTokens.of(context);
+    return Material(
+      color: t.paper,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: t.line),
+          boxShadow: t.shadowFloat,
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (final option in kPlaybackRatePresets)
+              _RateMenuEntry(
+                route: route,
+                option: option,
+                selected: playbackRatesEqual(option, route.rate),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RateMenuEntry extends StatelessWidget {
+  const _RateMenuEntry({
+    required this.route,
+    required this.option,
+    required this.selected,
+  });
+
+  final _AnchoredRateMenuRoute route;
+  final double option;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = EnjoyThemeTokens.of(context);
+    return InkWell(
+      onTap: () => Navigator.of(context).pop(option),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 24,
+              child: selected
+                  ? Icon(EnjoyIcons.check, size: 16, color: t.brandInk)
+                  : null,
+            ),
+            Text(
+              route.l10n.playbackRateTimes(formatRateCore(option)),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontSize: 13.5,
+                fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                color: selected ? t.ink : t.ink2,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

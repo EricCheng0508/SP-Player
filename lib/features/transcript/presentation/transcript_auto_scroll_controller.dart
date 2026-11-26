@@ -94,6 +94,26 @@ final class TranscriptAutoScrollController {
     _suppressAutoScroll = false;
   }
 
+  /// Re-syncs the viewport to the active cue after the host list re-enters
+  /// the tree (e.g. the transcript panel is torn down during video fullscreen
+  /// and rebuilt on exit). Without this the fresh list sits at its restored
+  /// offset and only re-joins the cue on the NEXT cue change.
+  void resyncToActiveCue() {
+    if (!_positionReady) {
+      // The scrollable's dimensions may not exist until a frame after the
+      // first layout; retry instead of silently dropping the sync.
+      _scrollGeneration++;
+      final generation = _scrollGeneration;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!isMounted() || generation != _scrollGeneration) return;
+        resyncToActiveCue();
+      });
+      return;
+    }
+    resumeAutoFollow();
+    scheduleScrollIntoView(force: true);
+  }
+
   GlobalKey scrollKeyForEcho(EchoState echo) {
     final bounds = (echo.startLineIndex, echo.endLineIndex);
     if (_echoRegionScrollKeyBounds != bounds) {

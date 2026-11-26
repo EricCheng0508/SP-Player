@@ -35,36 +35,43 @@ class FullscreenTransportBar extends ConsumerWidget {
     final rateLabel =
         '${playbackRate == playbackRate.roundToDouble() ? playbackRate.toStringAsFixed(1) : playbackRate.toString()}倍';
 
-    return Container(
-      height: 52,
-      color: Colors.black.withValues(alpha: 0.55),
-      padding: const EdgeInsets.fromLTRB(14, 4, 10, 6),
-      child: Row(
-        children: [
-          TransportPlayRingButton(
-            playing: playing,
-            buffering: buffering,
-            tooltip: playing ? '暂停' : '播放',
-            onPressed: () => ref
-                .read(playerControllerProvider.notifier)
-                .togglePlay(),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: SentenceRuler(chrome: chrome),
+    // Material ancestor: this bar mounts directly in the shell Stack with no
+    // Scaffold above it — without a Material (which provides the ambient
+    // DefaultTextStyle) every Text here renders Flutter's yellow
+    // double-underline "missing default style" debug decoration.
+    return Material(
+      type: MaterialType.transparency,
+      child: Container(
+        height: 52,
+        color: Colors.black.withValues(alpha: 0.55),
+        padding: const EdgeInsets.fromLTRB(14, 4, 10, 6),
+        child: Row(
+          children: [
+            TransportPlayRingButton(
+              playing: playing,
+              buffering: buffering,
+              tooltip: playing ? '暂停' : '播放',
+              onPressed: () => ref
+                  .read(playerControllerProvider.notifier)
+                  .togglePlay(),
             ),
-          ),
-          _RateChip(label: rateLabel, rate: playbackRate),
-          const TransportVolumeButton(),
-          IconButton(
-            tooltip: '退出全屏',
-            icon: const Icon(EnjoyIcons.fullscreenExit, size: 20),
-            color: Colors.white,
-            onPressed: () =>
-                ref.read(windowFullscreenProvider.notifier).toggle(),
-          ),
-        ],
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: SentenceRuler(chrome: chrome),
+              ),
+            ),
+            _RateChip(label: rateLabel, rate: playbackRate),
+            const TransportVolumeButton(),
+            IconButton(
+              tooltip: '退出全屏',
+              icon: const Icon(EnjoyIcons.fullscreenExit, size: 20),
+              color: Colors.white,
+              onPressed: () =>
+                  ref.read(windowFullscreenProvider.notifier).toggle(),
+            ),
+          ],
+        ),
       ),
     );
   }

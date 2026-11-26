@@ -90,20 +90,22 @@ class _RateChip extends ConsumerWidget {
     bool rateEquals(double a, double b) => (a - b).abs() < 0.01;
     return Tooltip(
       message: '倍速',
-      child: InkWell(
-        borderRadius: BorderRadius.circular(8),
-        onTap: () => showPlaybackRatePicker(
-          context: context,
-          ref: ref,
-          anchor: context,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12.5,
-              color: rateEquals(rate, 1.0) ? Colors.white70 : Colors.white,
+      child: RateMenuHoverRegion(
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: () => showPlaybackRatePicker(
+            context: context,
+            ref: ref,
+            anchor: context,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12.5,
+                color: rateEquals(rate, 1.0) ? Colors.white70 : Colors.white,
+              ),
             ),
           ),
         ),

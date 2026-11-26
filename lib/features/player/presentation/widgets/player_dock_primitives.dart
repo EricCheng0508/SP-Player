@@ -12,6 +12,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:enjoy_player/core/interaction/enjoy_pressable.dart';
 import 'package:enjoy_player/core/theme/enjoy_icons.dart';
+import 'package:enjoy_player/features/player/presentation/widgets/transport/transport_playback_rate_sheet.dart'
+    show RateMenuHoverRegion;
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/typography.dart';
 import 'package:enjoy_player/core/window/desktop_window.dart';
@@ -499,22 +501,24 @@ class DockSpeedButton extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     return Tooltip(
       message: l10n.speed,
-      child: EnjoyPressable(
-        key: const ValueKey('dock-speed'),
-        onTap: () => onOpen(context),
-        borderRadius: BorderRadius.circular(t.radiusControl),
-        washColor: t.sunk,
-        child: SizedBox(
-          width: 54,
-          height: 40,
-          child: Center(
-            child: Text(
-              l10n.playbackRateTimes(formatRateCore(rate)),
-              style: enjoyMonoStyle(
-                context,
-                size: 13,
-                weight: FontWeight.w600,
-                color: t.ink2,
+      child: RateMenuHoverRegion(
+        child: EnjoyPressable(
+          key: const ValueKey('dock-speed'),
+          onTap: () => onOpen(context),
+          borderRadius: BorderRadius.circular(t.radiusControl),
+          washColor: t.sunk,
+          child: SizedBox(
+            width: 54,
+            height: 40,
+            child: Center(
+              child: Text(
+                l10n.playbackRateTimes(formatRateCore(rate)),
+                style: enjoyMonoStyle(
+                  context,
+                  size: 13,
+                  weight: FontWeight.w600,
+                  color: t.ink2,
+                ),
               ),
             ),
           ),

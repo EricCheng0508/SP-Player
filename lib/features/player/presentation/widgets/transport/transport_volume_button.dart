@@ -1,15 +1,15 @@
 /// Volume icon + vertical slider overlay for the transport bar.
 ///
-/// Opens on click (pinned) like the playback-rate menu — hover-to-show made
-/// the two transports feel inconsistent. Click outside or click the icon
-/// again to dismiss.
+/// Shows while the pointer rests on the icon or the slider, and click pins
+/// it open (click outside to dismiss) — the same hover idiom as the
+/// playback-rate menu.
 ///
 /// The overlay child is always wrapped in a [Stack]: the theatre lays a
 /// non-positioned overlay child out with tight constraints (Flutter 3.44
 /// `StackFit.expand` semantics), which would stretch the follower's
 /// [SizedBox] popup to the whole window. The [Stack] opts out, so the popup
-/// takes its intrinsic size on the pinned path, and stays transparent to
-/// pointer events outside the popup unless it is pinned.
+/// takes its intrinsic size, and stays transparent to pointer events outside
+/// the popup unless it is pinned.
 ///
 /// Over the OS-fullscreen video the popup joins the dark translucent chrome
 /// family (black surface, white slider) and the icon renders white; in the
@@ -41,14 +41,20 @@ class _TransportVolumeButtonState extends ConsumerState<TransportVolumeButton> {
 
   final OverlayPortalController _portal = OverlayPortalController();
   final LayerLink _link = LayerLink();
+  Timer? _hideTimer;
+  bool _hovering = false;
   bool _pinned = false;
 
-  void _setPinned(bool value) {
-    if (_pinned == value) return;
-    setState(() => _pinned = value);
+  void _cancelHideTimer() {
+    _hideTimer?.cancel();
+    _hideTimer = null;
+  }
+
+  void _syncPopup() {
+    final visible = _hovering || _pinned;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      if (_pinned) {
+      if (visible) {
         if (!_portal.isShowing) _portal.show();
       } else if (_portal.isShowing) {
         _portal.hide();
@@ -56,9 +62,37 @@ class _TransportVolumeButtonState extends ConsumerState<TransportVolumeButton> {
     });
   }
 
-  void _togglePopup() => _setPinned(!_pinned);
+  void _onPointerInside(bool inside) {
+    _hovering = inside;
+    if (inside) {
+      _cancelHideTimer();
+      _syncPopup();
+    } else if (!_pinned) {
+      _cancelHideTimer();
+      _hideTimer = Timer(const Duration(milliseconds: 200), () {
+        if (!mounted || _hovering || _pinned) return;
+        _syncPopup();
+      });
+    }
+  }
 
-  void _dismissPinned() => _setPinned(false);
+  void _togglePopup() {
+    _cancelHideTimer();
+    setState(() => _pinned = !_pinned);
+    _syncPopup();
+  }
+
+  void _dismissPinned() {
+    if (!_pinned) return;
+    setState(() => _pinned = false);
+    _syncPopup();
+  }
+
+  @override
+  void dispose() {
+    _cancelHideTimer();
+    super.dispose();
+  }
 
   Widget _sliderCard(BuildContext overlayCtx) {
     final t = EnjoyThemeTokens.of(context);
@@ -69,7 +103,10 @@ class _TransportVolumeButtonState extends ConsumerState<TransportVolumeButton> {
     final borderColor = dark
         ? Colors.white.withValues(alpha: 0.14)
         : t.line;
-    return Material(
+    return MouseRegion(
+      onEnter: (_) => _onPointerInside(true),
+      onExit: (_) => _onPointerInside(false),
+      child: Material(
       color: surfaceColor,
       shape: RoundedSuperellipseBorder(
         borderRadius: BorderRadius.circular(t.radiusMd),
@@ -129,6 +166,7 @@ class _TransportVolumeButtonState extends ConsumerState<TransportVolumeButton> {
           ),
         ),
       ),
+      ),
     );
   }
 
@@ -167,14 +205,18 @@ class _TransportVolumeButtonState extends ConsumerState<TransportVolumeButton> {
       },
       child: CompositedTransformTarget(
         link: _link,
-        child: IconButton(
-          tooltip: l10n.volume,
-          // Theme tint in the windowed dock; white on the dark fullscreen bar.
-          color: dark ? Colors.white : null,
-          icon: EnjoyChromeIcon(
-            muted ? EnjoyChromeGlyph.volumeOff : EnjoyChromeGlyph.volume,
+        child: MouseRegion(
+          onEnter: (_) => _onPointerInside(true),
+          onExit: (_) => _onPointerInside(false),
+          child: IconButton(
+            tooltip: l10n.volume,
+            // Theme tint in the windowed dock; white on the dark fullscreen bar.
+            color: dark ? Colors.white : null,
+            icon: EnjoyChromeIcon(
+              muted ? EnjoyChromeGlyph.volumeOff : EnjoyChromeGlyph.volume,
+            ),
+            onPressed: _togglePopup,
           ),
-          onPressed: _togglePopup,
         ),
       ),
     );

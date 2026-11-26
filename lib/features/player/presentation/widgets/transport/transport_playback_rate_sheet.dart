@@ -22,6 +22,62 @@ import 'package:enjoy_player/l10n/app_localizations.dart';
 
 const double kMenuItemHeight = 40;
 
+/// Single-flight state for the desktop hover-open rate menu: the pointer may
+/// travel between the speed control and the floating panel, so dismissal is
+/// scheduled with a short grace timer and cancelled by entering either side.
+_AnchoredRateMenuRoute? _openRateRoute;
+bool _ratePointerInAnchor = false;
+bool _ratePointerInPanel = false;
+Timer? _rateDismissTimer;
+
+void _cancelRateDismiss() {
+  _rateDismissTimer?.cancel();
+  _rateDismissTimer = null;
+}
+
+void _scheduleRateDismiss() {
+  _cancelRateDismiss();
+  _rateDismissTimer = Timer(const Duration(milliseconds: 260), () {
+    if (_ratePointerInAnchor || _ratePointerInPanel) return;
+    _openRateRoute?.navigator?.pop();
+  });
+}
+
+/// Hover-open wrapper for the desktop speed controls: the menu shows while
+/// the pointer rests on the control (or the panel), like the volume slider —
+/// one hover idiom across the transport bars.
+class RateMenuHoverRegion extends ConsumerStatefulWidget {
+  const RateMenuHoverRegion({required this.child, super.key});
+
+  final Widget child;
+
+  @override
+  ConsumerState<RateMenuHoverRegion> createState() =>
+      _RateMenuHoverRegionState();
+}
+
+class _RateMenuHoverRegionState extends ConsumerState<RateMenuHoverRegion> {
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) {
+        _ratePointerInAnchor = true;
+        _cancelRateDismiss();
+        showPlaybackRatePicker(
+          context: context,
+          ref: ref,
+          anchor: context,
+        );
+      },
+      onExit: (_) {
+        _ratePointerInAnchor = false;
+        _scheduleRateDismiss();
+      },
+      child: widget.child,
+    );
+  }
+}
+
 /// Speed presets picker: on desktop a small popup menu anchored right at the
 /// speed button (one tap switches, no big dialog); on mobile falls back to
 /// the bottom sheet. [anchor] is the [BuildContext] of the speed button.
@@ -31,6 +87,7 @@ Future<void> showPlaybackRatePicker({
   required BuildContext anchor,
 }) async {
   if (!isMobilePlatform) {
+    if (_openRateRoute != null) return;
     final anchorBox = anchor.findRenderObject();
     if (anchorBox is RenderBox && anchorBox.hasSize) {
       await _showAnchoredRateMenu(context, ref, anchor, anchorBox);
@@ -60,14 +117,15 @@ Future<void> _showAnchoredRateMenu(
   // provider reports false on mobile, so this is a no-op there.
   final dark = ref.read(windowFullscreenProvider);
   final l10n = AppLocalizations.of(anchor)!;
-  final picked = await Navigator.of(anchor, rootNavigator: true).push(
-    _AnchoredRateMenuRoute(
-      anchorRect: anchorRect,
-      rate: rate,
-      l10n: l10n,
-      dark: dark,
-    ),
+  final route = _AnchoredRateMenuRoute(
+    anchorRect: anchorRect,
+    rate: rate,
+    l10n: l10n,
+    dark: dark,
   );
+  _openRateRoute = route;
+  final picked = await Navigator.of(anchor, rootNavigator: true).push(route);
+  _openRateRoute = null;
   if (picked != null) {
     await ref
         .read(playerPreferencesCtrlProvider.notifier)
@@ -186,34 +244,48 @@ class _RateMenuPanel extends StatelessWidget {
     final borderColor = dark
         ? Colors.white.withValues(alpha: 0.14)
         : t.line;
-    return Material(
-      color: color,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: borderColor),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.35),
-              blurRadius: 18,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (final option in kPlaybackRatePresets)
-              _RateMenuEntry(
-                route: route,
-                option: option,
-                selected: playbackRatesEqual(option, route.rate),
-                dark: dark,
+    // Pointer may travel from the speed control onto the panel; entering the
+    // panel cancels the pending hover dismissal.
+    return MouseRegion(
+      onEnter: (_) {
+        _ratePointerInPanel = true;
+        _cancelRateDismiss();
+      },
+      onExit: (_) {
+        _ratePointerInPanel = false;
+        _scheduleRateDismiss();
+      },
+      child: Material(
+        color: color,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: borderColor),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.35),
+                blurRadius: 18,
+                offset: const Offset(0, 6),
               ),
-          ],
+            ],
+          ),
+          // 6 x 24 px rows + 8 px vertical padding = 152 px, matching the
+          // volume slider popup height for a single popover silhouette.
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (final option in kPlaybackRatePresets)
+                _RateMenuEntry(
+                  route: route,
+                  option: option,
+                  selected: playbackRatesEqual(option, route.rate),
+                  dark: dark,
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -246,25 +318,28 @@ class _RateMenuEntry extends StatelessWidget {
         : (selected ? t.ink : t.ink2);
     return InkWell(
       onTap: () => Navigator.of(context).pop(option),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        child: Row(
-          children: [
-            SizedBox(
-              width: 24,
-              child: selected
-                  ? Icon(EnjoyIcons.check, size: 16, color: checkColor)
-                  : null,
-            ),
-            Text(
-              route.l10n.playbackRateTimes(formatRateCore(option)),
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontSize: 13.5,
-                fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-                color: labelColor,
+      child: SizedBox(
+        height: 24,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 20,
+                child: selected
+                    ? Icon(EnjoyIcons.check, size: 13, color: checkColor)
+                    : null,
               ),
-            ),
-          ],
+              Text(
+                route.l10n.playbackRateTimes(formatRateCore(option)),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontSize: 12.5,
+                  fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                  color: labelColor,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

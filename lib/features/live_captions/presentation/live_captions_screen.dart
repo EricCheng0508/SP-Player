@@ -114,8 +114,15 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
               onDelete: (session) async {
                 final confirmed = await _confirmDelete(context);
                 if (!confirmed) return;
-                await ref.read(liveCaptionsStoreProvider).delete(session.id);
-                if (identical(_viewing, session)) _viewing = null;
+                // Controller stops capture + drops the in-memory session
+                // when the live one is deleted (no resurrect-by-save).
+                await ref
+                    .read(liveCaptionsControllerProvider.notifier)
+                    .deleteSession(session);
+                if (!mounted) return;
+                if (identical(_viewing, session)) {
+                  setState(() => _viewing = null);
+                }
                 await historyNotifier.reload();
               },
               onExport: (session) async {
@@ -823,7 +830,7 @@ final class _EmptyState extends StatelessWidget {
           ],
           const SizedBox(height: 8),
           Text(
-            '字幕会比说话晚 2~4 秒出现（本地识别的自然延迟）',
+            '字幕会比说话晚 1~3 秒出现（本地识别的自然延迟）',
             style: Theme.of(context)
                 .textTheme
                 .bodySmall
@@ -1067,7 +1074,7 @@ final class _StatusBar extends StatelessWidget {
             const SizedBox(width: 14),
             Text('翻译：${state.translate ? '已配置 LLM' : '已关闭'}'),
             const SizedBox(width: 14),
-            const Text('延迟约 2~4 秒'),
+            const Text('延迟约 1~3 秒'),
             const Spacer(),
             if (listening && state.session != null)
               Text('${state.session!.lines.length} 句'),

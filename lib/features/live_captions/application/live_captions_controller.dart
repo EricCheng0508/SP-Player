@@ -75,9 +75,18 @@ final class LiveCaptionsState {
 class LiveCaptionsController extends _$LiveCaptionsController {
   final _active = <_CaptureRun>[];
 
+  // Translation batching: consecutive lines share one LLM round-trip, which
+  // cuts per-line latency several times versus one request per caption.
+  final _translationQueue = <LiveCaptionLine>[];
+  Timer? _translationTimer;
+  bool _translationDraining = false;
+
   @override
   LiveCaptionsState build() {
-    ref.onDispose(_stopAll);
+    ref.onDispose(() {
+      unawaited(_stopAll());
+      _translationTimer?.cancel();
+    });
     // No session on entry: the right pane shows an empty guide until the
     // user clicks 「新会话」, which creates a session and starts listening.
     // Never construct a session here — _newSessionObject reads `state`,
@@ -119,6 +128,139 @@ class LiveCaptionsController extends _$LiveCaptionsController {
       session: _newSessionObject(),
       error: null,
     );
+  }
+
+  /// Deletes a session. If it is the live one, capture stops first and the
+  /// in-memory copy is dropped so the per-line opportunistic save cannot
+  /// resurrect it right after the file was removed (the "delete does
+  /// nothing" bug when the rail holds only the current session).
+  Future<void> deleteSession(LiveCaptionSession session) async {
+    final store = ref.read(liveCaptionsStoreProvider);
+    if (session.id == state.session?.id) {
+      if (_isRunning) {
+        state = state.copyWith(phase: LiveCaptionsPhase.stopping);
+        await _stopAll(); // no save — the file is about to be deleted
+      }
+      await store.delete(session.id);
+      // Back to the empty guide; also resets error and keeps defaults.
+      state = LiveCaptionsState(
+        systemEnabled: state.systemEnabled,
+        micEnabled: state.micEnabled,
+        translate: state.translate,
+      );
+    } else {
+      await store.delete(session.id);
+    }
+  }
+
+  /// Enqueues a line for translation (batched). Chinese text passes through
+  /// immediately; everything else waits ~0.5 s to group with neighbours.
+  void queueTranslation(LiveCaptionLine line) {
+    if (!ref.read(liveCaptionsControllerProvider).translate) return;
+    if (cjkRatio(line.text) > 0.5) {
+      line.translation = line.text;
+      state = state.copyWith();
+      return;
+    }
+    _translationQueue.add(line);
+    _translationTimer ??= Timer(const Duration(milliseconds: 500), () {
+      _translationTimer = null;
+      unawaited(_drainTranslations());
+    });
+  }
+
+  Future<void> _drainTranslations() async {
+    if (_translationDraining) return;
+    _translationDraining = true;
+    try {
+      while (_translationQueue.isNotEmpty) {
+        final batch = _translationQueue.take(5).toList();
+        _translationQueue.removeRange(0, batch.length);
+        var done = false;
+        if (batch.length > 1) {
+          done = await _translateBatch(batch);
+        }
+        if (!done) {
+          // Single line, or the batch response did not line up — fall back
+          // to one request per line for this batch.
+          for (final line in batch) {
+            if (line.translation != null) continue;
+            await _translateSingle(line);
+          }
+        }
+        state = state.copyWith();
+      }
+    } finally {
+      _translationDraining = false;
+    }
+    if (_translationQueue.isNotEmpty) {
+      _translationTimer ??= Timer(const Duration(milliseconds: 200), () {
+        _translationTimer = null;
+        unawaited(_drainTranslations());
+      });
+    }
+  }
+
+  /// Translates [batch] in one request, numbered line by line. Returns false
+  /// when the reply cannot be mapped back (caller falls back to per-line).
+  Future<bool> _translateBatch(List<LiveCaptionLine> batch) async {
+    final numbered = [
+      for (var i = 0; i < batch.length; i++) '${i + 1}. ${batch[i].text}',
+    ].join('\n');
+    try {
+      final chat = ref.read(chatServiceProvider);
+      final result = await chat.complete(
+        messages: [
+          const ChatMessage(
+            role: ChatMessage.roleSystem,
+            content: '你是实时字幕翻译器。用户给出若干行编号文本，逐行翻译成简体中文，'
+                '输出同样的编号、每行一条译文，不要解释、不要引号。保留专有名词原文。',
+          ),
+          ChatMessage(role: ChatMessage.roleUser, content: numbered),
+        ],
+        temperature: 0.2,
+        maxTokens: 1000,
+      );
+      final parsed = result
+          .trim()
+          .split('\n')
+          .map((l) => l.trim())
+          .where((l) => l.isNotEmpty)
+          .map((l) => l.replaceFirst(RegExp(r'^\d+\s*[.、:：)\]]\s*'), ''))
+          .toList();
+      if (parsed.length < batch.length) return false;
+      for (var i = 0; i < batch.length; i++) {
+        batch[i].translation = parsed[i];
+        batch[i].failedTranslation = false;
+      }
+      return true;
+    } on Object catch (e) {
+      _log.warning('batch translate failed: $e');
+      return false;
+    }
+  }
+
+  Future<void> _translateSingle(LiveCaptionLine line) async {
+    try {
+      final chat = ref.read(chatServiceProvider);
+      final result = await chat.complete(
+        messages: [
+          const ChatMessage(
+            role: ChatMessage.roleSystem,
+            content: '你是实时字幕翻译器。把用户提供的文本翻译成简体中文，'
+                '只输出译文本身，不要解释、不要引号。保留专有名词原文。',
+          ),
+          ChatMessage(role: ChatMessage.roleUser, content: line.text),
+        ],
+        temperature: 0.2,
+        maxTokens: 500,
+      );
+      line.translation = result.trim();
+      line.failedTranslation = false;
+    } on Object catch (e) {
+      _log.warning('translate line failed: $e');
+      line.failedTranslation = true;
+    }
   }
 
   void setSystemEnabled(bool value) {
@@ -279,35 +421,7 @@ class LiveCaptionsController extends _$LiveCaptionsController {
     line.failedTranslation = false;
     line.translation = null;
     state = state.copyWith();
-    await translateLine(ref, line);
-    state = state.copyWith();
-  }
-}
-
-/// Shared translation step: Chinese passthrough / LLM translate / failure flag.
-Future<void> translateLine(Ref ref, LiveCaptionLine line) async {
-  if (cjkRatio(line.text) > 0.5) {
-    line.translation = line.text;
-    return;
-  }
-  try {
-    final chat = ref.read(chatServiceProvider);
-    final result = await chat.complete(
-      messages: [
-        const ChatMessage(
-          role: ChatMessage.roleSystem,
-          content: '你是实时字幕翻译器。把用户提供的文本翻译成简体中文，'
-              '只输出译文本身，不要解释、不要引号。保留专有名词原文。',
-        ),
-        ChatMessage(role: ChatMessage.roleUser, content: line.text),
-      ],
-      temperature: 0.2,
-      maxTokens: 500,
-    );
-    line.translation = result.trim();
-  } on Object catch (e) {
-    _log.warning('translate line failed: $e');
-    line.failedTranslation = true;
+    queueTranslation(line);
   }
 }
 
@@ -410,20 +524,13 @@ final class _CaptureRun {
         text: text,
       );
       onLine(line);
-      // Fire concurrently: translation must not block the transcription
-      // queue, or every line pays the LLM latency before the next utterance
-      // even starts being recognized.
-      unawaited(_maybeTranslate(line));
+      // Hand the line to the notifier's batched translation queue — it must
+      // not block the transcription queue, and neighbouring lines share one
+      // LLM round-trip.
+      ref.read(liveCaptionsControllerProvider.notifier).queueTranslation(line);
     } on Object catch (e, st) {
       _log.warning('transcribe segment failed: $e', e, st);
     }
-  }
-
-  Future<void> _maybeTranslate(LiveCaptionLine line) async {
-    final translate = ref.read(liveCaptionsControllerProvider).translate;
-    if (!translate) return;
-    await translateLine(ref, line);
-    onLine(line); // tick UI with the translation result
   }
 
   /// Near-silent audio makes whisper hallucinate; skip those segments.

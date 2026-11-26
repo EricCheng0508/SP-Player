@@ -1,9 +1,10 @@
 /// Splits the 16 kHz mono s16le capture stream into sentence-ish segments.
 ///
 /// Whisper is not streaming, so latency comes from segmenting: a segment is
-/// cut when ~0.8 s of silence follows at least ~1 s of speech, or when the
-/// speech grows past a hard cap (bounds per-request size and keeps the local
-/// service responsive). Speech/silence is decided by RMS over 100 ms windows.
+/// cut when ~0.5 s of silence follows at least ~0.5 s of speech, or when the
+/// buffered audio passes a hard cap (~8 s) so continuous speech still emits
+/// one short utterance instead of piling many sentences into one segment.
+/// Speech/silence is decided by RMS over 100 ms windows.
 library;
 
 import 'dart:math' as math;
@@ -23,9 +24,9 @@ final class AudioSegmenter {
   AudioSegmenter({
     this.sampleRate = 16000,
     this.silenceRms = 350,
-    this.minSpeechMs = 900,
-    this.tailSilenceMs = 800,
-    this.maxSegmentMs = 15000,
+    this.minSpeechMs = 500,
+    this.tailSilenceMs = 500,
+    this.maxSegmentMs = 8000,
   });
 
   final int sampleRate;

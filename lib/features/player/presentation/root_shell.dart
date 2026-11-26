@@ -20,6 +20,7 @@ import 'package:enjoy_player/core/window/window_fullscreen_provider.dart';
 import 'package:enjoy_player/features/onboarding/presentation/onboarding_showcase_host.dart';
 import 'package:enjoy_player/features/player/application/player_controller.dart';
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
+import 'package:enjoy_player/features/player/presentation/widgets/fullscreen_transport_bar.dart';
 import 'package:enjoy_player/features/player/presentation/widgets/player_dock.dart';
 import 'package:enjoy_player/core/local/no_tier_host.dart';
 import 'package:enjoy_player/features/sync/application/sync_controller.dart';
@@ -47,7 +48,7 @@ class _RootShellState extends ConsumerState<RootShell> {
 
   /// Fullscreen dock auto-reveal: idle delay before the floating dock slides
   /// away again after a mouse move.
-  static const Duration _dockAutoHideDelay = Duration(seconds: 3);
+  static const Duration _dockAutoHideDelay = Duration(seconds: 1);
 
   Timer? _dockHideTimer;
   bool _dockVisible = true;
@@ -415,29 +416,7 @@ class _RootShellState extends ConsumerState<RootShell> {
                             _pointerOverDock = false;
                             _pokeDock();
                           },
-                          child: Opacity(
-                            opacity: 0.88,
-                            child: Transform.scale(
-                              scale: 0.85,
-                              alignment: Alignment.bottomCenter,
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.bottomCenter,
-                                    end: Alignment.topCenter,
-                                    colors: [
-                                      Colors.black.withValues(alpha: 0.65),
-                                      Colors.transparent,
-                                    ],
-                                  ),
-                                ),
-                                child: Material(
-                                  type: MaterialType.transparency,
-                                  child: PlayerDock(chrome: chrome),
-                                ),
-                              ),
-                            ),
-                          ),
+                          child: FullscreenTransportBar(chrome: chrome),
                         ),
                       ),
                     ),

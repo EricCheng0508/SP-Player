@@ -34,11 +34,8 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      // Entering the page opens a fresh conversation (kept when a run is
-      // already in progress so we never tear down live capture on re-entry).
-      unawaited(
-        ref.read(liveCaptionsControllerProvider.notifier).beginNewSession(),
-      );
+      // Nothing is created on entry: the right pane shows an empty guide
+      // until the user clicks 「新会话」.
       unawaited(ref.read(liveCaptionsHistoryProvider.notifier).reload());
     });
   }
@@ -104,10 +101,14 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
               onNew: () {
                 setState(() => _viewing = null);
                 unawaited(
-                  ref
-                      .read(liveCaptionsControllerProvider.notifier)
-                      .beginNewSession()
-                      .whenComplete(historyNotifier.reload),
+                  () async {
+                    final notifier = ref
+                        .read(liveCaptionsControllerProvider.notifier);
+                    await notifier.beginNewSession();
+                    // A new session means "start listening now".
+                    await notifier.start();
+                    await historyNotifier.reload();
+                  }(),
                 );
               },
               onDelete: (session) async {
@@ -139,14 +140,25 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
                 border: Border.all(color: t.line),
               ),
               clipBehavior: Clip.antiAlias,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _Header(state: state),
-                  Expanded(
-                    child: shown == null
-                        ? const SizedBox.shrink()
-                        : _CaptionStream(
+              child: shown == null
+                  ? _EmptyGuide(onNew: () {
+                      setState(() => _viewing = null);
+                      unawaited(
+                        () async {
+                          final notifier = ref
+                              .read(liveCaptionsControllerProvider.notifier);
+                          await notifier.beginNewSession();
+                          await notifier.start();
+                          await historyNotifier.reload();
+                        }(),
+                      );
+                    })
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _Header(state: state),
+                        Expanded(
+                          child: _CaptionStream(
                             session: shown,
                             live: identical(shown, state.session),
                             scroll: _scroll,
@@ -160,11 +172,57 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
                                         .retryTranslation(line)
                                     : null,
                           ),
-                  ),
-                  _StatusBar(state: state),
-                ],
-              ),
+                        ),
+                        _StatusBar(state: state),
+                      ],
+                    ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Empty guide (no session yet — before the first 「新会话」 click)
+// ---------------------------------------------------------------------------
+
+final class _EmptyGuide extends StatelessWidget {
+  const _EmptyGuide({required this.onNew});
+
+  final VoidCallback onNew;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = EnjoyThemeTokens.of(context);
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(EnjoyIcons.cc, size: 44, color: t.ink3),
+          const SizedBox(height: 14),
+          Text(
+            '还没有会话',
+            style: Theme.of(context)
+                .textTheme
+                .titleSmall
+                ?.copyWith(fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            '点击「新会话」开始监听系统声音或麦克风，\n实时生成中英双语字幕。',
+            textAlign: TextAlign.center,
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall
+                ?.copyWith(color: t.ink3, height: 1.6),
+          ),
+          const SizedBox(height: 18),
+          FilledButton.icon(
+            onPressed: onNew,
+            icon: const Icon(Icons.add, size: 18),
+            label: const Text('新会话'),
           ),
         ],
       ),

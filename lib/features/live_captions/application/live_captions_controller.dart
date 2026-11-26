@@ -78,17 +78,11 @@ class LiveCaptionsController extends _$LiveCaptionsController {
   @override
   LiveCaptionsState build() {
     ref.onDispose(_stopAll);
-    // Entering the page opens a fresh (idle) session right away — every visit
-    // is its own conversation per the product decision. Defaults mirror the
-    // initial [LiveCaptionsState] flags; reading `state` here is illegal —
-    // the notifier state is not initialized until build returns.
-    return LiveCaptionsState(
-      session: _newSessionObject(
-        system: true,
-        mic: false,
-        translate: true,
-      ),
-    );
+    // No session on entry: the right pane shows an empty guide until the
+    // user clicks 「新会话」, which creates a session and starts listening.
+    // Never construct a session here — _newSessionObject reads `state`,
+    // which is illegal before build() returns (uninitialized provider).
+    return const LiveCaptionsState();
   }
 
   bool get _isRunning => state.phase == LiveCaptionsPhase.listening ||

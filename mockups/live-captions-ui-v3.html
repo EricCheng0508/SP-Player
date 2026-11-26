@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>实时字幕 · 交互修正确认稿 v3</title>
+<style>
+  :root{
+    --bg:#f4f2ee; --paper:#ffffff; --line:#e4e0d8; --ink:#1d1c1a;
+    --ink2:#5c5852; --ink3:#8f8a82; --brand:#2f5af4; --green:#1fa971; --red:#d64545;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:"Segoe UI","Microsoft YaHei UI",sans-serif;}
+  body{background:var(--bg);color:var(--ink);padding:28px;display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;}
+  h1{font-size:16px;margin-bottom:14px;}
+  .note{background:#fffbe8;border:1px solid #eadfa8;border-radius:10px;padding:10px 14px;font-size:13px;color:#6b5d1e;max-width:420px;line-height:1.7;}
+  .frame{width:880px;background:var(--paper);border:1px solid var(--line);border-radius:16px;display:flex;height:600px;overflow:hidden;}
+  /* left rail */
+  .rail{width:264px;border-right:1px solid var(--line);padding:16px 12px;display:flex;flex-direction:column;gap:8px;background:#faf9f6;}
+  .rail-title{display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:600;padding:0 4px 4px;}
+  .rail-count{font-size:12px;color:var(--ink3);font-family:Consolas,monospace;}
+  .btn-new{height:40px;border-radius:10px;background:#eef1fe;color:var(--brand);font-weight:600;font-size:14px;display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid #d8e0fd;}
+  .sess{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--paper);position:relative;}
+  .sess.current{border-color:var(--brand);background:#f4f7ff;}
+  .sess-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;}
+  .sess-sub{font-size:11.5px;color:var(--ink3);margin-top:4px;}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 1.6s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .badge-live{font-size:10px;color:var(--green);border:1px solid var(--green);border-radius:6px;padding:1px 6px;font-weight:600;}
+  .sess-actions{position:absolute;right:8px;top:8px;display:flex;gap:4px;opacity:0;}
+  .sess:hover .sess-actions{opacity:1;}
+  .icon-btn{width:24px;height:24px;border-radius:7px;border:1px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--ink2);}
+  .icon-btn.danger{color:var(--red);}
+  .pin{font-size:10px;color:var(--brand);background:#e8eeff;border-radius:6px;padding:1px 6px;font-weight:600;}
+  /* right pane */
+  .main{flex:1;display:flex;flex-direction:column;}
+  .header{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:10px;}
+  .hrow{display:flex;align-items:center;gap:10px;}
+  .pill{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--green);}
+  .pill .dot{background:var(--green);}
+  .chips{display:flex;gap:8px;}
+  .chip{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:5px 14px;color:var(--ink2);display:flex;align-items:center;gap:6px;}
+  .chip.on{border-color:var(--brand);color:var(--brand);background:#eef1fe;font-weight:600;}
+  .toggle{margin-left:auto;font-size:12px;color:var(--ink2);display:flex;align-items:center;gap:8px;}
+  .switch{width:34px;height:20px;border-radius:999px;background:var(--brand);position:relative;}
+  .switch::after{content:"";position:absolute;right:2px;top:2px;width:16px;height:16px;border-radius:50%;background:#fff;}
+  .stream{flex:1;overflow:auto;padding:14px 18px;display:flex;flex-direction:column;gap:10px;background:#fbfaf8;}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:10px 14px;}
+  .card .en{font-size:14px;font-weight:600;line-height:1.5;}
+  .card .zh{font-size:13px;color:var(--ink2);margin-top:4px;line-height:1.5;}
+  .card.pending .zh{color:var(--ink3);font-style:italic;}
+  .time{font-size:10.5px;color:var(--ink3);font-family:Consolas,monospace;}
+  .statusbar{border-top:1px solid var(--line);padding:8px 18px;font-size:11.5px;color:var(--ink3);display:flex;gap:16px;font-family:Consolas,monospace;}
+  /* dialog */
+  .dialog-wrap{width:360px;}
+  .dialog{background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:0 12px 32px rgba(0,0,0,.14);padding:20px;}
+  .dialog h3{font-size:15px;margin-bottom:10px;}
+  .dialog p{font-size:13px;color:var(--ink2);line-height:1.7;margin-bottom:16px;}
+  .dialog .row{display:flex;justify-content:flex-end;gap:10px;}
+  .d-btn{padding:8px 18px;border-radius:9px;font-size:13px;border:1px solid var(--line);background:#fff;color:var(--ink2);}
+  .d-btn.danger{background:var(--red);border-color:var(--red);color:#fff;font-weight:600;}
+</style>
+</head>
+<body>
+<div>
+  <h1>主界面 · 进页面即自动新建会话</h1>
+  <div class="frame">
+    <div class="rail">
+      <div class="rail-title">历史会话 <span class="rail-count">3</span></div>
+      <div class="btn-new">＋ 新会话</div>
+      <!-- 当前会话：钉在按钮下方，进页面就在 -->
+      <div class="sess current">
+        <div class="sess-actions"><div class="icon-btn">⤓</div><div class="icon-btn danger">🗑</div></div>
+        <div class="sess-title"><span class="dot"></span>会话 27日 00:03 <span class="badge-live">监听中</span></div>
+        <div class="sess-sub">00:03 – 进行中 · 6 条字幕</div>
+      </div>
+      <div class="sess">
+        <div class="sess-actions"><div class="icon-btn">⤓</div><div class="icon-btn danger">🗑</div></div>
+        <div class="sess-title">会话 26日 22:41</div>
+        <div class="sess-sub">22:41 – 22:58 · 132 条字幕</div>
+      </div>
+      <div class="sess">
+        <div class="sess-actions"><div class="icon-btn">⤓</div><div class="icon-btn danger">🗑</div></div>
+        <div class="sess-title">会话 26日 20:15</div>
+        <div class="sess-sub">20:15 – 20:37 · 89 条字幕</div>
+      </div>
+    </div>
+    <div class="main">
+      <div class="header">
+        <div class="hrow">
+          <div class="pill"><span class="dot"></span>正在监听系统声音</div>
+          <div class="toggle">翻译中文 <div class="switch"></div></div>
+        </div>
+        <!-- 来源选项：常驻在字幕流上方，不需要先点新会话才出现 -->
+        <div class="chips">
+          <div class="chip on">🔊 系统声音</div>
+          <div class="chip">🎤 麦克风</div>
+        </div>
+      </div>
+      <div class="stream">
+        <div class="card"><div class="time">00:03:12</div><div class="en">So let me share my screen with everyone.</div><div class="zh">那么我把屏幕共享给大家。</div></div>
+        <div class="card"><div class="time">00:03:15</div><div class="en">Can you see the slide now?</div><div class="zh">你们现在能看到幻灯片吗？</div></div>
+        <div class="card pending"><div class="time">00:03:18</div><div class="en">I will walk you through the quarterly results.</div><div class="zh">翻译中…</div></div>
+      </div>
+      <div class="statusbar"><span>引擎 local-whisper</span><span>延迟 ~1.2s</span><span>来源 系统声音</span></div>
+    </div>
+  </div>
+</div>
+<div class="dialog-wrap">
+  <h1>删除会话 · 二次确认</h1>
+  <div class="dialog">
+    <h3>删除会话</h3>
+    <p>确定删除这条会话及其全部字幕记录吗？此操作不可恢复。</p>
+    <div class="row"><div class="d-btn">取消</div><div class="d-btn danger">删除</div></div>
+  </div>
+</div>
+</body>
+</html>

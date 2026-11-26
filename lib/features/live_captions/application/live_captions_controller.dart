@@ -79,14 +79,26 @@ class LiveCaptionsController extends _$LiveCaptionsController {
   LiveCaptionsState build() {
     ref.onDispose(_stopAll);
     // Entering the page opens a fresh (idle) session right away — every visit
-    // is its own conversation per the product decision.
-    return LiveCaptionsState(session: _newSessionObject());
+    // is its own conversation per the product decision. Defaults mirror the
+    // initial [LiveCaptionsState] flags; reading `state` here is illegal —
+    // the notifier state is not initialized until build returns.
+    return LiveCaptionsState(
+      session: _newSessionObject(
+        system: true,
+        mic: false,
+        translate: true,
+      ),
+    );
   }
 
   bool get _isRunning => state.phase == LiveCaptionsPhase.listening ||
       state.phase == LiveCaptionsPhase.starting;
 
-  LiveCaptionSession _newSessionObject() {
+  LiveCaptionSession _newSessionObject({
+    bool? system,
+    bool? mic,
+    bool? translate,
+  }) {
     final now = DateTime.now().toLocal();
     String two(int v) => v.toString().padLeft(2, '0');
     final id = 'live-'
@@ -96,10 +108,10 @@ class LiveCaptionsController extends _$LiveCaptionsController {
       id: id,
       startedAt: now,
       sources: [
-        if (state.systemEnabled) LiveCaptionSource.system,
-        if (state.micEnabled) LiveCaptionSource.mic,
+        if (system ?? state.systemEnabled) LiveCaptionSource.system,
+        if (mic ?? state.micEnabled) LiveCaptionSource.mic,
       ],
-      translated: state.translate,
+      translated: translate ?? state.translate,
     );
   }
 

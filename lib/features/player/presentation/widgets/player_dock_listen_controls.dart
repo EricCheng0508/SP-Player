@@ -126,7 +126,7 @@ class DockListenControls extends StatelessWidget {
     }
 
     return SizedBox(
-      height: 60,
+      height: 52,
       child: Row(
         children: [
           Expanded(child: left),

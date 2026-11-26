@@ -34,7 +34,7 @@ import 'package:enjoy_player/features/player/presentation/widgets/transport/tran
 /// stage absorbs whatever height is left, so a dock that grows by 16 px under
 /// the picture shrinks it by ~28 px once `BoxFit.contain` letterboxes. Holding
 /// the slot at the tallest row keeps the picture size stable across modes.
-const double kDockControlsHeight = 76;
+const double kDockControlsHeight = 64;
 
 /// Total desktop dock height, derived from the dock's own structure: top
 /// border 1 + ruler row (8 padding + 34 `rulerHitHeight`) + controls row
@@ -118,13 +118,13 @@ class _PlayerDockState extends ConsumerState<PlayerDock> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                  padding: const EdgeInsets.fromLTRB(20, 3, 20, 0),
                   child: RepaintBoundary(child: SentenceRuler(chrome: chrome)),
                 ),
                 Padding(
                   padding: phone
                       ? const EdgeInsets.fromLTRB(12, 4, 12, 8)
-                      : const EdgeInsets.fromLTRB(20, 4, 20, 12),
+                      : const EdgeInsets.fromLTRB(20, 2, 20, 8),
                   // The three control rows are 60 px (listen) and 76 px
                   // (echo, recording). The video stage takes whatever height
                   // the dock leaves, and `BoxFit.contain` turns a 16 px taller

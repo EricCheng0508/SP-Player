@@ -225,7 +225,9 @@ class _RateMenuPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = EnjoyThemeTokens.of(context);
-    final color = dark ? Colors.black.withValues(alpha: 0.72) : t.paper;
+    // 88% opaque: translucent panels read as washed grey over bright video
+    // content; near-solid keeps the popover uniform over any background.
+    final color = dark ? Colors.black.withValues(alpha: 0.88) : t.paper;
     final borderColor = dark
         ? Colors.white.withValues(alpha: 0.14)
         : t.line;
@@ -291,7 +293,7 @@ class _RateMenuEntry extends StatelessWidget {
     final labelColor = dark
         ? (selected
               ? Colors.white
-              : Colors.white.withValues(alpha: 0.72))
+              : Colors.white.withValues(alpha: 0.78))
         : (selected ? t.ink : t.ink2);
     return InkWell(
       onTap: () => onPick(option),

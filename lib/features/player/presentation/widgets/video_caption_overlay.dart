@@ -65,35 +65,61 @@ class VideoCaptionOverlay extends ConsumerWidget {
     final hasContent =
         cue >= 0 && (originalText.isNotEmpty || hasTranslation);
 
-    final List<Shadow> outline = [
-      for (final offsets in const [
-        Offset(-2.5, -2.5),
-        Offset(2.5, -2.5),
-        Offset(-2.5, 2.5),
-        Offset(2.5, 2.5),
-        Offset(-2.5, 0),
-        Offset(2.5, 0),
-        Offset(0, -2.5),
-        Offset(0, 2.5),
-      ])
-        Shadow(color: Colors.black, offset: offsets, blurRadius: 2),
-    ];
-
-    Widget captionText(String text, double size, Color color) => Text(
-      text,
-      textAlign: TextAlign.center,
-      maxLines: 2,
-      overflow: TextOverflow.ellipsis,
-      style: TextStyle(
+    // Classic hard-edged video subtitle stroke: stack 8 black copies of the
+    // text offset around the white original — crisper than soft Shadows,
+    // matching the look of burned-in player subs.
+    Widget captionText(String text, double size, Color color) {
+      const stroke = 2.2;
+      const offsets = [
+        Offset(-stroke, -stroke),
+        Offset(stroke, -stroke),
+        Offset(-stroke, stroke),
+        Offset(stroke, stroke),
+        Offset(-stroke, 0),
+        Offset(stroke, 0),
+        Offset(0, -stroke),
+        Offset(0, stroke),
+      ];
+      final base = TextStyle(
         inherit: false,
+        fontFamily: 'Microsoft YaHei UI',
         fontSize: size,
-        height: 1.25,
-        fontWeight: FontWeight.w600,
+        height: 1.3,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 0.5,
         color: color,
         decoration: TextDecoration.none,
-        shadows: outline,
-      ),
-    );
+      );
+      return Stack(
+        alignment: Alignment.center,
+        children: [
+          for (final offset in offsets)
+            Text(
+              text,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: base.copyWith(
+                color: Colors.black,
+                shadows: [
+                  Shadow(
+                    color: Colors.black.withValues(alpha: 0.35),
+                    offset: const Offset(0, 1.5),
+                    blurRadius: 3,
+                  ),
+                ],
+              ),
+            ),
+          Text(
+            text,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: base,
+          ),
+        ],
+      );
+    }
 
     final content = hasContent
         ? KeyedSubtree(

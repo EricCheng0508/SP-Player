@@ -98,7 +98,7 @@ class _TransportVolumeButtonState extends ConsumerState<TransportVolumeButton> {
     final t = EnjoyThemeTokens.of(context);
     final dark = ref.read(windowFullscreenProvider);
     final surfaceColor = dark
-        ? Colors.black.withValues(alpha: 0.72)
+        ? Colors.black.withValues(alpha: 0.88)
         : t.raised;
     final borderColor = dark
         ? Colors.white.withValues(alpha: 0.14)

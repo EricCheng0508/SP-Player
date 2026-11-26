@@ -12,6 +12,7 @@ import 'package:enjoy_player/core/theme/enjoy_icons.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_modal.dart';
 import 'package:enjoy_player/core/theme/widgets/sheet_drag_handle.dart';
+import 'package:enjoy_player/core/window/window_fullscreen_provider.dart';
 import 'package:enjoy_player/features/player/application/player_preferences_provider.dart';
 import 'package:enjoy_player/features/player/presentation/widgets/player_dock_primitives.dart'
     show formatRateCore;
@@ -54,9 +55,18 @@ Future<void> _showAnchoredRateMenu(
   final rate = ref.read(
     playerPreferencesCtrlProvider.select((p) => p.playbackRate),
   );
+  // Over the OS-fullscreen video the chrome family is dark translucent (same
+  // as the fullscreen transport bar); in the windowed dock it is paper. The
+  // provider reports false on mobile, so this is a no-op there.
+  final dark = ref.read(windowFullscreenProvider);
   final l10n = AppLocalizations.of(anchor)!;
   final picked = await Navigator.of(anchor, rootNavigator: true).push(
-    _AnchoredRateMenuRoute(anchorRect: anchorRect, rate: rate, l10n: l10n),
+    _AnchoredRateMenuRoute(
+      anchorRect: anchorRect,
+      rate: rate,
+      l10n: l10n,
+      dark: dark,
+    ),
   );
   if (picked != null) {
     await ref
@@ -70,17 +80,21 @@ Offset topLeftOf(RenderBox box, RenderBox ancestor) =>
 
 /// Themed anchored rate menu — same visual language as the player's popover
 /// family (paper panel, brand check) with a soft fade + rise transition, in
-/// place of the stock PopupMenu's flat white sheet and stiff fade.
+/// place of the stock PopupMenu's flat white sheet and stiff fade. Over the
+/// fullscreen video it switches to the dark translucent chrome family shared
+/// with the fullscreen transport bar.
 class _AnchoredRateMenuRoute extends PopupRoute<double> {
   _AnchoredRateMenuRoute({
     required this.anchorRect,
     required this.rate,
     required this.l10n,
+    required this.dark,
   }) : super();
 
   final Rect anchorRect;
   final double rate;
   final AppLocalizations l10n;
+  final bool dark;
 
   @override
   Color? get barrierColor => null;
@@ -102,7 +116,7 @@ class _AnchoredRateMenuRoute extends PopupRoute<double> {
       Animation<double> secondaryAnimation) {
     return CustomSingleChildLayout(
       delegate: _RateMenuLayout(anchorRect: anchorRect),
-      child: const _RateMenuPanel(),
+      child: _RateMenuPanel(dark: dark),
     );
   }
 
@@ -159,21 +173,33 @@ class _RateMenuLayout extends SingleChildLayoutDelegate {
 const double kRateMenuMaxWidth = 168;
 
 class _RateMenuPanel extends StatelessWidget {
-  const _RateMenuPanel();
+  const _RateMenuPanel({required this.dark});
+
+  final bool dark;
 
   @override
   Widget build(BuildContext context) {
     final route =
         ModalRoute.of(context)! as _AnchoredRateMenuRoute;
     final t = EnjoyThemeTokens.of(context);
+    final color = dark ? Colors.black.withValues(alpha: 0.72) : t.paper;
+    final borderColor = dark
+        ? Colors.white.withValues(alpha: 0.14)
+        : t.line;
     return Material(
-      color: t.paper,
+      color: color,
       borderRadius: BorderRadius.circular(12),
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: t.line),
-          boxShadow: t.shadowFloat,
+          border: Border.all(color: borderColor),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.35),
+              blurRadius: 18,
+              offset: const Offset(0, 6),
+            ),
+          ],
         ),
         padding: const EdgeInsets.symmetric(vertical: 6),
         child: Column(
@@ -185,6 +211,7 @@ class _RateMenuPanel extends StatelessWidget {
                 route: route,
                 option: option,
                 selected: playbackRatesEqual(option, route.rate),
+                dark: dark,
               ),
           ],
         ),
@@ -198,15 +225,25 @@ class _RateMenuEntry extends StatelessWidget {
     required this.route,
     required this.option,
     required this.selected,
+    required this.dark,
   });
 
   final _AnchoredRateMenuRoute route;
   final double option;
   final bool selected;
+  final bool dark;
 
   @override
   Widget build(BuildContext context) {
     final t = EnjoyThemeTokens.of(context);
+    // Dark variant mirrors the fullscreen transport bar: white monochrome on
+    // translucent black. Paper variant keeps brand ink on paper.
+    final checkColor = dark ? Colors.white : t.brandInk;
+    final labelColor = dark
+        ? (selected
+              ? Colors.white
+              : Colors.white.withValues(alpha: 0.72))
+        : (selected ? t.ink : t.ink2);
     return InkWell(
       onTap: () => Navigator.of(context).pop(option),
       child: Padding(
@@ -216,7 +253,7 @@ class _RateMenuEntry extends StatelessWidget {
             SizedBox(
               width: 24,
               child: selected
-                  ? Icon(EnjoyIcons.check, size: 16, color: t.brandInk)
+                  ? Icon(EnjoyIcons.check, size: 16, color: checkColor)
                   : null,
             ),
             Text(
@@ -224,7 +261,7 @@ class _RateMenuEntry extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontSize: 13.5,
                 fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-                color: selected ? t.ink : t.ink2,
+                color: labelColor,
               ),
             ),
           ],

@@ -13,6 +13,8 @@ LiveCaptionLine _$LiveCaptionLineFromJson(Map<String, dynamic> json) =>
       text: json['text'] as String,
       translation: json['translation'] as String?,
       failedTranslation: json['failedTranslation'] as bool? ?? false,
+      event: json['event'] as String?,
+      starred: json['starred'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$LiveCaptionLineToJson(LiveCaptionLine instance) =>
@@ -22,6 +24,8 @@ Map<String, dynamic> _$LiveCaptionLineToJson(LiveCaptionLine instance) =>
       'text': instance.text,
       'translation': instance.translation,
       'failedTranslation': instance.failedTranslation,
+      'event': instance.event,
+      'starred': instance.starred,
     };
 
 const _$LiveCaptionSourceEnumMap = {

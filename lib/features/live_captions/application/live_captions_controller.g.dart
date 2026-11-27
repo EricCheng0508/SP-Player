@@ -42,7 +42,7 @@ final class LiveCaptionsControllerProvider
 }
 
 String _$liveCaptionsControllerHash() =>
-    r'1648a8ec4e67fe0836d928e7839ef43972b84d31';
+    r'a2e110f027e074bd3c87bcd8b2d998e84338ffe5';
 
 abstract class _$LiveCaptionsController extends $Notifier<LiveCaptionsState> {
   LiveCaptionsState build();

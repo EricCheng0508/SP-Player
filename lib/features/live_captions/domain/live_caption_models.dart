@@ -21,6 +21,8 @@ final class LiveCaptionLine {
     required this.text,
     this.translation,
     this.failedTranslation = false,
+    this.event,
+    this.starred = false,
   });
 
   /// Seconds since the session started, for the timestamp column.
@@ -37,6 +39,14 @@ final class LiveCaptionLine {
   /// True when the translation call failed — UI shows a retry hint instead
   /// of spinning forever.
   bool failedTranslation;
+
+  /// Non-null for synthetic UI-event rows (监听开关切换、开始/停止监听) —
+  /// rendered as a grey divider, never translated.
+  String? event;
+
+  /// User starred this line (右键菜单「收藏本句」).
+  @JsonKey(defaultValue: false)
+  bool starred;
 
   factory LiveCaptionLine.fromJson(Map<String, dynamic> json) =>
       _$LiveCaptionLineFromJson(json);

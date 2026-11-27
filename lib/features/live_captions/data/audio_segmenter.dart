@@ -43,6 +43,9 @@ final class AudioSegmenter {
   /// Hard cap on segment duration.
   final int maxSegmentMs;
 
+  /// Per-100ms-window RMS tap, for the UI input-level meters.
+  void Function(double rms)? onWindowRms;
+
   static const int _windowMs = 100;
 
   final List<int> _pending = <int>[]; // raw s16 samples since last cut
@@ -74,6 +77,7 @@ final class AudioSegmenter {
       _windowSampleCount = 0;
       _windowSumSquares = 0;
       _totalMs += _windowMs;
+      onWindowRms?.call(rms);
 
       final isSpeech = rms >= silenceRms;
       if (isSpeech) {

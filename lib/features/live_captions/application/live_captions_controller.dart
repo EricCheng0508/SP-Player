@@ -13,6 +13,7 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -263,16 +264,53 @@ class LiveCaptionsController extends _$LiveCaptionsController {
     }
   }
 
+  /// Live input levels (RMS) for the status-bar meters, per source.
+  final systemLevel = ValueNotifier<double>(0);
+  final micLevel = ValueNotifier<double>(0);
+
   void setSystemEnabled(bool value) {
-    if (_isRunning && !value) _stopSource(LiveCaptionSource.system);
+    if (_isRunning && !value) {
+      _stopSource(LiveCaptionSource.system);
+      _appendEvent('已停止监听扬声器');
+    }
     state = state.copyWith(systemEnabled: value);
-    if (_isRunning && value) _startSource(LiveCaptionSource.system);
+    if (_isRunning && value) {
+      _startSource(LiveCaptionSource.system);
+      _appendEvent('已开始监听扬声器');
+    }
   }
 
   void setMicEnabled(bool value) {
-    if (_isRunning && !value) _stopSource(LiveCaptionSource.mic);
+    if (_isRunning && !value) {
+      _stopSource(LiveCaptionSource.mic);
+      _appendEvent('已停止监听麦克风');
+    }
     state = state.copyWith(micEnabled: value);
-    if (_isRunning && value) _startSource(LiveCaptionSource.mic);
+    if (_isRunning && value) {
+      _startSource(LiveCaptionSource.mic);
+      _appendEvent('已开始监听麦克风');
+    }
+  }
+
+  /// Bumps the state so UI-only mutations (收藏标记) repaint.
+  void touch() => state = state.copyWith();
+
+  /// Synthetic divider rows in the chat stream (监听开关、开始/停止监听).
+  void _appendEvent(String text) {
+    final session = state.session;
+    if (session == null) return;
+    final offset = DateTime.now()
+        .difference(session.startedAt)
+        .inMilliseconds / 1000.0;
+    session.lines.add(
+      LiveCaptionLine(
+        offsetSeconds: offset,
+        source: LiveCaptionSource.system,
+        text: text,
+        event: text,
+      ),
+    );
+    state = state.copyWith();
   }
 
   void setTranslate(bool value) =>
@@ -327,6 +365,7 @@ class LiveCaptionsController extends _$LiveCaptionsController {
     if (failures.isNotEmpty) {
       state = state.copyWith(error: '${failures.join('、')}启动失败，仅监听其余来源');
     }
+    _appendEvent('开始监听');
   }
 
   Future<void> stop() async {
@@ -335,9 +374,12 @@ class LiveCaptionsController extends _$LiveCaptionsController {
     await _stopAll();
     final session = state.session;
     if (session != null) {
+      _appendEvent('停止监听');
       session.endedAt = DateTime.now().toLocal();
       await ref.read(liveCaptionsStoreProvider).save(session);
     }
+    systemLevel.value = 0;
+    micLevel.value = 0;
     state = state.copyWith(phase: LiveCaptionsPhase.idle);
   }
 
@@ -363,11 +405,18 @@ class LiveCaptionsController extends _$LiveCaptionsController {
     }
     final session = state.session;
     if (session == null) return;
+    final levelSink =
+        source == LiveCaptionSource.system ? systemLevel : micLevel;
     final run = _CaptureRun(
       ref: ref,
       source: source,
       startedAt: DateTime.now().toLocal(),
       onLine: (line) => _appendLine(line),
+      onLevel: (rms) {
+        // Smooth + map to a 0..1 bar (silence threshold ≈ 350 RMS).
+        final normalized = (rms / 3000).clamp(0.0, 1.0);
+        levelSink.value = math.max(levelSink.value * 0.55, normalized);
+      },
       onFatal: (message) {
         state = state.copyWith(
           phase: LiveCaptionsPhase.idle,
@@ -433,6 +482,7 @@ final class _CaptureRun {
     required this.startedAt,
     required this.onLine,
     required this.onFatal,
+    required this.onLevel,
   });
 
   final Ref ref;
@@ -440,6 +490,7 @@ final class _CaptureRun {
   final DateTime startedAt;
   final void Function(LiveCaptionLine) onLine;
   final void Function(String) onFatal;
+  final void Function(double rms) onLevel;
 
   Process? _process;
   final AudioSegmenter _segmenter = AudioSegmenter();
@@ -476,6 +527,17 @@ final class _CaptureRun {
 
   void _handlePcm(Uint8List chunk) {
     if (_stopping) return;
+    // Input-level meter: cheap RMS over the whole chunk.
+    final samples = chunk.length ~/ 2;
+    if (samples > 0) {
+      final b = ByteData.view(chunk.buffer, chunk.offsetInBytes, chunk.length);
+      var sum = 0.0;
+      for (var i = 0; i < samples; i++) {
+        final v = b.getInt16(i * 2, Endian.little);
+        sum += v * v;
+      }
+      onLevel(math.sqrt(sum / samples));
+    }
     for (final segment in _segmenter.feed(chunk)) {
       _enqueue(segment);
     }

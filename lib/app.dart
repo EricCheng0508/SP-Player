@@ -82,6 +82,12 @@ class _EnjoyAppState extends ConsumerState<EnjoyApp>
   /// real-UI frame — never on the boot skeleton).
   bool _windowRevealed = false;
 
+  /// Reveal requires the router branch to stay painted for a few consecutive
+  /// frames: prefs resolving can flip straight back into the auth-loading
+  /// branch, and revealing that frame re-introduces the dark skeleton flash.
+  bool _onLoadingBranch = false;
+  int _routerStableFrames = 0;
+
   /// Keeps locale/prefs visible while [appPreferencesCtrlProvider] reloads after
   /// auth-scoped DB switches (signed-in), avoiding a full-app loading flash.
   AppPreferencesState? _lastResolvedPrefs;
@@ -184,17 +190,6 @@ class _EnjoyAppState extends ConsumerState<EnjoyApp>
     );
   }
 
-  /// Reveals the desktop window once, after the first real-UI frame —
-  /// never on the boot skeleton (removes the dark "cover" flash).
-  void _revealWindowOnce() {
-    if (_windowRevealed) return;
-    _windowRevealed = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await windowManager.show();
-      await windowManager.focus();
-    });
-  }
-
   Widget _errorBranch(
     ThemeData theme,
     ThemeData darkTheme,
@@ -235,7 +230,17 @@ class _EnjoyAppState extends ConsumerState<EnjoyApp>
     required ThemeMode themeMode,
     required AppPreferencesState prefs,
   }) {
-    _revealWindowOnce();
+    _onLoadingBranch = false;
+    if (!_windowRevealed) {
+      _routerStableFrames++;
+      if (_routerStableFrames >= 3) {
+        _windowRevealed = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          await windowManager.show();
+          await windowManager.focus();
+        });
+      }
+    }
     return _baseMaterialApp(
       theme: theme,
       darkTheme: darkTheme,
@@ -335,6 +340,8 @@ class _EnjoyAppState extends ConsumerState<EnjoyApp>
     }
 
     if (prefsProj.isLoading && !hasResolved) {
+      _onLoadingBranch = true;
+      _routerStableFrames = 0;
       return _loadingBranch(lightTheme, darkTheme, themeMode);
     }
 
@@ -342,6 +349,8 @@ class _EnjoyAppState extends ConsumerState<EnjoyApp>
       authCtrlProvider.select((auth) => auth.isLoading && !auth.hasValue),
     );
     if (authBootstrapping) {
+      _onLoadingBranch = true;
+      _routerStableFrames = 0;
       return _loadingBranch(lightTheme, darkTheme, themeMode);
     }
 

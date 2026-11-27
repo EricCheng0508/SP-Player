@@ -123,6 +123,23 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
             _selectionMode = false;
             _selectedIds.clear();
           }),
+          onSelectAll: () {
+            final allIds = [
+              if (state.session != null) state.session!.id,
+              ...history.map((s) => s.id),
+            ];
+            setState(() {
+              final allSelected = allIds.isNotEmpty &&
+                  allIds.every(_selectedIds.contains);
+              if (allSelected) {
+                _selectedIds.clear();
+              } else {
+                _selectedIds
+                  ..clear()
+                  ..addAll(allIds);
+              }
+            });
+          },
           onDeleteSelected: () async {
             if (_selectedIds.isEmpty) return;
             final confirmed = await showDialog<bool>(
@@ -1510,6 +1527,7 @@ final class _HomeView extends ConsumerWidget {
     required this.onEnterSelection,
     required this.onExitSelection,
     required this.onDeleteSelected,
+    required this.onSelectAll,
   });
 
   final List<LiveCaptionSession> history;
@@ -1525,6 +1543,7 @@ final class _HomeView extends ConsumerWidget {
   final VoidCallback onEnterSelection;
   final VoidCallback onExitSelection;
   final VoidCallback onDeleteSelected;
+  final VoidCallback onSelectAll;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1587,6 +1606,15 @@ final class _HomeView extends ConsumerWidget {
                   ),
                   const Spacer(),
                   if (selectionMode) ...[
+                    TextButton(
+                      onPressed: onSelectAll,
+                      child: Text(
+                          selectedIds.length >=
+                                  (current != null ? 1 : 0) + rows.length &&
+                              selectedIds.isNotEmpty
+                              ? '全不选'
+                              : '全选'),
+                    ),
                     TextButton(
                       onPressed: onExitSelection,
                       child: const Text('取消'),

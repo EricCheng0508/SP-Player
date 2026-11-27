@@ -508,33 +508,6 @@ class _CaptionStreamState extends ConsumerState<_CaptionStream> {
       children: [
         Column(
           children: [
-            const _ControlsRow(),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
-              child: Row(
-                children: [
-                  Text(
-                    widget.session.title,
-                    style: enjoyMonoStyle(context,
-                        size: 12, weight: FontWeight.w600),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    widget.session.sources.isEmpty
-                        ? '未选择监听来源'
-                        : widget.session.sources
-                            .map((s) => s == LiveCaptionSource.system
-                                ? '监听扬声器'
-                                : '监听麦克风')
-                            .join(' + '),
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(color: Colors.grey),
-                  ),
-                ],
-              ),
-            ),
             Expanded(
               child: lines.isEmpty
                   ? _EmptyState(

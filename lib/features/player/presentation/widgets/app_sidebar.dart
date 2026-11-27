@@ -334,27 +334,32 @@ class _AppSidebarState extends ConsumerState<AppSidebar> {
                     ),
                   ),
                 ] else ...[
-                  NavItemPill(
-                    icon: EnjoyIcons.gear,
-                    iconWidget: const EnjoyChromeIcon(EnjoyChromeGlyph.gear),
-                    selectedIconWidget: const EnjoyChromeIcon(
-                      EnjoyChromeGlyph.gear,
-                    ),
-                    label: l10n.settingsTitle,
-                    selected: path.startsWith('/settings'),
-                    onTap: () => context.go('/settings'),
-                  ),
-                  const SizedBox(height: 4),
-                  Center(
-                    child: IconButton(
-                      tooltip: '折叠侧边栏',
-                      onPressed: widget.onToggleCollapse,
-                      icon: Icon(
-                        Icons.chevron_left_rounded,
-                        size: 20,
-                        color: t.ink2,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: NavItemPill(
+                          icon: EnjoyIcons.gear,
+                          iconWidget: const EnjoyChromeIcon(
+                            EnjoyChromeGlyph.gear,
+                          ),
+                          selectedIconWidget: const EnjoyChromeIcon(
+                            EnjoyChromeGlyph.gear,
+                          ),
+                          label: l10n.settingsTitle,
+                          selected: path.startsWith('/settings'),
+                          onTap: () => context.go('/settings'),
+                        ),
                       ),
-                    ),
+                      IconButton(
+                        tooltip: '折叠侧边栏',
+                        onPressed: widget.onToggleCollapse,
+                        icon: Icon(
+                          Icons.chevron_left_rounded,
+                          size: 20,
+                          color: t.ink2,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ],

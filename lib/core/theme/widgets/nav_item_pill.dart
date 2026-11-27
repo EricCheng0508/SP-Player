@@ -75,7 +75,7 @@ class NavItemPill extends StatelessWidget {
 
     if (collapsed) {
       return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4),
+        padding: const EdgeInsets.only(left: 4, right: 4, bottom: 6),
         child: Tooltip(
           message: label,
           child: EnjoyPressable(

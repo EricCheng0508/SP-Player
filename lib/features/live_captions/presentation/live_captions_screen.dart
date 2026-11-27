@@ -104,6 +104,7 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
                       icon: const Icon(Icons.chevron_right_rounded, size: 20),
                     ),
                   ),
+                  const SizedBox(height: 6),
                   SizedBox(
                     height: 40,
                     child: IconButton(
@@ -1490,6 +1491,7 @@ final class FloatCaptionsHost extends ConsumerStatefulWidget {
 class _FloatCaptionsHostState extends ConsumerState<FloatCaptionsHost> {
   final _scroll = ScrollController();
   Size? _resizeStart;
+  Offset? _resizeStartGlobal;
   bool _pinned = true;
 
   @override
@@ -1538,8 +1540,7 @@ class _FloatCaptionsHostState extends ConsumerState<FloatCaptionsHost> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Drag header.
-              GestureDetector(
-                onPanStart: (_) => windowManager.startDragging(),
+              DragToMoveArea(
                 child: Container(
                   height: 40,
                   padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -1662,21 +1663,27 @@ class _FloatCaptionsHostState extends ConsumerState<FloatCaptionsHost> {
             child: MouseRegion(
               cursor: SystemMouseCursors.resizeDownRight,
               child: GestureDetector(
-                onPanStart: (_) async {
+                onPanStart: (details) async {
                   _resizeStart = await windowManager.getSize();
+                  _resizeStartGlobal = details.globalPosition;
                 },
                 onPanUpdate: (details) async {
                   final start = _resizeStart;
-                  if (start == null) return;
+                  final startGlobal = _resizeStartGlobal;
+                  if (start == null || startGlobal == null) return;
+                  // Absolute global-position based sizing: immune to the
+                  // window reflow feedback loop that shakes accumulated
+                  // local deltas.
+                  final dx =
+                      details.globalPosition.dx - startGlobal.dx;
+                  final dy =
+                      details.globalPosition.dy - startGlobal.dy;
                   await windowManager.setSize(Size(
-                    (start.width + details.delta.dx)
-                        .clamp(320, 900)
-                        .toDouble(),
-                    (start.height + details.delta.dy)
-                        .clamp(220, 700)
-                        .toDouble(),
+                    (start.width + dx).clamp(320, 900).toDouble(),
+                    (start.height + dy).clamp(220, 700).toDouble(),
                   ));
                 },
+                onPanEnd: (_) => _resizeStartGlobal = null,
                 child: Icon(
                   Icons.open_in_full_rounded,
                   size: 13,

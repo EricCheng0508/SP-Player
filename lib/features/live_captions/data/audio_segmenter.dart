@@ -56,6 +56,11 @@ final class AudioSegmenter {
   double _windowSumSquares = 0;
   int _totalMs = 0;
 
+  /// Total samples ever fed — never reset, so segment offsets are absolute
+  /// within the capture (the old per-cut relative offsets all came out ≈0,
+  /// which glued every caption into one chat bubble downstream).
+  int _totalSamplesFed = 0;
+
   bool get hasOpenUtterance => _inSpeech;
 
   /// Milliseconds of audio currently buffered (approx, whole windows + tail).
@@ -69,6 +74,7 @@ final class AudioSegmenter {
     for (var i = 0; i < sampleCount; i++) {
       final s = byteData.getInt16(i * 2, Endian.little);
       _pending.add(s);
+      _totalSamplesFed++;
       _windowSumSquares += s * s;
       if (++_windowSampleCount < sampleRate * _windowMs ~/ 1000) continue;
 
@@ -115,7 +121,12 @@ final class AudioSegmenter {
     for (var i = 0; i < _pending.length; i++) {
       byteData.setInt16(i * 2, _pending[i], Endian.little);
     }
-    final segment = AudioSegment(bytes, _totalMs / 1000 - _pending.length / sampleRate);
+    // Segment start = samples already flushed before this buffer, i.e. the
+    // absolute offset within the whole capture.
+    final segment = AudioSegment(
+      bytes,
+      (_totalSamplesFed - _pending.length) / sampleRate,
+    );
     _pending.clear();
     _speechMs = 0;
     _silenceMs = 0;

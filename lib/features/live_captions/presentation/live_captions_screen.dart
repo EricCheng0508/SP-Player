@@ -636,8 +636,10 @@ class _CaptionStreamState extends ConsumerState<_CaptionStream> {
   }
 }
 
-/// Consecutive same-source lines within 5 s merge into one bubble; event
-/// rows become dividers. Shared by the in-page stream and the float window.
+/// Consecutive same-source lines whose starts are within 1.5 s merge into
+/// one bubble (only rapid fragments glue; each normal utterance gets its
+/// own bubble); event rows become dividers. Shared by the in-page stream
+/// and the float window.
 List<_StreamItem> buildLiveStreamItems(List<LiveCaptionLine> lines) {
   final items = <_StreamItem>[];
   _BubbleItem? open;
@@ -649,7 +651,7 @@ List<_StreamItem> buildLiveStreamItems(List<LiveCaptionLine> lines) {
     }
     if (open != null &&
         open.source == line.source &&
-        line.offsetSeconds - open.lines.last.offsetSeconds < 5) {
+        line.offsetSeconds - open.lines.last.offsetSeconds < 1.5) {
       open.lines.add(line);
     } else {
       open = _BubbleItem([line]);

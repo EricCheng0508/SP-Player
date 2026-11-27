@@ -12,6 +12,7 @@ import 'package:enjoy_player/core/routing/route_paths.dart';
 import 'package:enjoy_player/core/theme/enjoy_icons.dart';
 import 'package:enjoy_player/features/asr/presentation/asr_generation_launcher.dart';
 import 'package:enjoy_player/features/player/application/player_controller.dart';
+import 'package:enjoy_player/features/transcript/application/full_translate_ctrl.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 import '../application/all_transcripts_provider.dart';
 import '../application/transcript_display_readiness_provider.dart';
@@ -28,6 +29,7 @@ enum TranscriptActionKind {
   importFile,
   embeddedSubtitles,
   aiTranscript,
+  translateAll,
   wordTimings,
   refreshCloud,
   downloadTranscript,
@@ -113,6 +115,17 @@ List<TranscriptAction> watchTranscriptActions(
             ? l10n.playerMoreTranscribeAgain
             : l10n.playerMoreCreateAiTranscript,
         run: (context) => launchAsrGeneration(context, ref, mediaId: mediaId),
+      ),
+    // Manual full-video batch translation (ADR-0106 §5): one click
+    // translates every line — no follow-playback per-line scheduling.
+    if (hasTranscript)
+      TranscriptAction(
+        kind: TranscriptActionKind.translateAll,
+        icon: EnjoyIcons.translate,
+        label: l10n.playerMoreTranslateAll,
+        run: (_) => ref
+            .read(fullTranslateCtrlProvider(mediaId).notifier)
+            .translateAll(),
       ),
     if (readiness.showEnrich && !enrich.isRunning)
       TranscriptAction(

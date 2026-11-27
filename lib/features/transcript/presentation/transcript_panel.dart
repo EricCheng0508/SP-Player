@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:enjoy_player/features/asr/presentation/asr_generation_launcher.dart';
 import 'package:enjoy_player/features/asr/presentation/asr_generation_progress_banner.dart';
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
+import 'package:enjoy_player/features/transcript/presentation/full_translate_progress_banner.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 import 'package:enjoy_player/features/onboarding/application/practice_tip_trigger.dart';
@@ -23,6 +24,7 @@ import 'package:enjoy_player/features/transcript/application/video_row_for_media
 import 'package:enjoy_player/features/transcript/application/transcript_blur_mode_provider.dart';
 import 'package:enjoy_player/features/transcript/presentation/dictate_hint_pill.dart';
 import 'package:enjoy_player/features/transcript/presentation/import_subtitle_file.dart';
+import 'package:enjoy_player/features/transcript/presentation/transcript_align_entry.dart';
 import 'package:enjoy_player/features/transcript/presentation/transcript_empty_state.dart';
 import 'package:enjoy_player/features/transcript/presentation/transcript_embedded_extract.dart';
 import 'package:enjoy_player/features/transcript/presentation/transcript_scrollable_list.dart';
@@ -99,6 +101,7 @@ class _TranscriptPanelState extends ConsumerState<TranscriptPanel> {
     return Column(
       children: [
         AsrGenerationProgressBanner(mediaId: mediaId),
+        FullTranslateProgressBanner(mediaId: mediaId),
         Expanded(
           child: linesAsync.when(
       data: (lines) {
@@ -175,10 +178,14 @@ class _TranscriptPanelState extends ConsumerState<TranscriptPanel> {
                       .read(transcriptFetchCtrlProvider(mediaId).notifier)
                       .refreshFromCloud(signedIn: signedIn)
                 : null,
+            onAlign: showLocalActions
+                ? () => alignExistingScript(context, ref, mediaId)
+                : null,
             showImportButton: showLocalActions,
             showExtractButton: showExtractButton,
             showGenerateButton: showLocalActions,
             showFetchYoutubeButton: isYoutube,
+            showAlignButton: showLocalActions,
           );
         }
         final list = TranscriptTypefaceScope(

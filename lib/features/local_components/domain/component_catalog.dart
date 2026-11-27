@@ -19,6 +19,23 @@ enum ComponentKind {
 
   /// TranslateGemma 4B Q4 GGUF — translation-specialized local model.
   mtModel,
+
+  /// qwen3-asr-wgpu native sidecar (Rust, no Python) — default ASR engine.
+  /// TODO(components-v2): flip `optional` to false once the runtime pack is
+  /// published and the model asset paths below are pinned.
+  qwenAsrRuntime,
+
+  /// Qwen3-ASR-0.6B ONNX weights (English-primary, WER ≈ 8.9%).
+  qwenAsrModel,
+
+  /// HTDemucs v4 vocal separation (optional pre-ASR BGM/noise removal).
+  vocalSeparation,
+
+  /// CTC forced aligner engine — transcript matching (ADR-0106 §4, P1).
+  ctcAlignerRuntime,
+
+  /// omniASR-CTC-300M-v2 weights for transcript matching (P1).
+  ctcAlignerModel,
 }
 
 /// One downloadable file of a [ComponentSpec].
@@ -84,11 +101,20 @@ final class ComponentSpec {
 const kComponentsReleaseBase =
     'https://github.com/EricCheng0508/SP-Player/releases/download/components-v1';
 
+/// Release tag for the native (Rust / wgpu) component packs — qwen ASR
+/// sidecar and the vocal separation engine. Publish assets here before
+/// flipping the `qwenAsr*` specs from optional to required.
+const kComponentsReleaseBaseV2 =
+    'https://github.com/EricCheng0508/SP-Player/releases/download/components-v2';
+
 /// llama.cpp release pinned at implement time (Vulkan x64 build).
 const _kLlamaCppTag = 'b10679';
 
 const kHfOfficial = 'https://huggingface.co';
 const kHfChinaMirror = 'https://hf-mirror.com';
+
+/// ModelScope host for the Qwen3-ASR weights (mainland-friendly, resumable).
+const kModelScope = 'https://modelscope.cn/models';
 
 /// All managed components, in wizard install order.
 const kComponentSpecs = <ComponentSpec>[
@@ -148,6 +174,112 @@ const kComponentSpecs = <ComponentSpec>[
     ],
     // model.bin X-Linked-Size = 1,617,884,929 bytes.
     sizeHint: '约 1.7 GB',
+  ),
+  // --- Native ASR stack (ADR-0106): qwen3-asr-wgpu sidecar + 0.6B weights.
+  // Both stay `optional` until the components-v2 release is published; the
+  // engine resolver falls back to the faster-whisper sidecar meanwhile.
+  ComponentSpec(
+    kind: ComponentKind.qwenAsrRuntime,
+    displayName: '千问识别运行时',
+    installDirName: 'qwen-asr-server',
+    host: kComponentsReleaseBaseV2,
+    extract: true,
+    archiveEntry: 'sp-qwen-asr-server.exe',
+    optional: true,
+    files: [
+      ComponentFile(
+        remotePath: 'sp-qwen-asr-server-windows-x64.zip',
+        relativePath: 'sp-qwen-asr-server-windows-x64.zip',
+        // Rust/wgpu sidecar: binary + shaders + DXC, expected well under 100 MB.
+        minBytes: 20 * 1024 * 1024,
+      ),
+    ],
+    sizeHint: '约 0.1 GB',
+  ),
+  ComponentSpec(
+    kind: ComponentKind.qwenAsrModel,
+    displayName: '千问识别模型 Qwen3-ASR-0.6B',
+    installDirName: 'asr-models/qwen3-asr-0.6b',
+    host: kModelScope,
+    optional: true,
+    files: [
+      // TODO(components-v2): pin the exact ModelScope repo path and ONNX file
+      // names when the sidecar build freezes its loading layout.
+      ComponentFile(
+        remotePath: 'OneAsr/Qwen3-ASR-0.6B-hf/resolve/main/model.onnx',
+        relativePath: 'model.onnx',
+        minBytes: 1400 * 1024 * 1024 ~/ 1,
+      ),
+      ComponentFile(
+        remotePath: 'OneAsr/Qwen3-ASR-0.6B-hf/resolve/main/tokenizer.json',
+        relativePath: 'tokenizer.json',
+        minBytes: 512 * 1024,
+      ),
+      ComponentFile(
+        remotePath: 'OneAsr/Qwen3-ASR-0.6B-hf/resolve/main/config.json',
+        relativePath: 'config.json',
+        minBytes: 256,
+      ),
+    ],
+    sizeHint: '约 1.6 GB',
+  ),
+  ComponentSpec(
+    kind: ComponentKind.vocalSeparation,
+    displayName: '人声分离 HTDemucs',
+    installDirName: 'vocal-separation',
+    host: kComponentsReleaseBaseV2,
+    extract: true,
+    archiveEntry: 'sp-demucs-server.exe',
+    optional: true,
+    files: [
+      // TODO(components-v2): engine pack (demucs-wgpu + weights, ~84 MB).
+      ComponentFile(
+        remotePath: 'sp-demucs-windows-x64.zip',
+        relativePath: 'sp-demucs-windows-x64.zip',
+        minBytes: 60 * 1024 * 1024,
+      ),
+    ],
+    sizeHint: '约 0.1 GB',
+  ),
+  // --- Transcript matching (P1): CTC aligner engine + omniASR weights.
+  ComponentSpec(
+    kind: ComponentKind.ctcAlignerRuntime,
+    displayName: '台本对齐引擎',
+    installDirName: 'ctc-aligner',
+    host: kComponentsReleaseBaseV2,
+    extract: true,
+    archiveEntry: 'sp-ctc-aligner.exe',
+    optional: true,
+    files: [
+      // TODO(components-v2): ctc-forced-aligner-wgpu engine pack.
+      ComponentFile(
+        remotePath: 'sp-ctc-aligner-windows-x64.zip',
+        relativePath: 'sp-ctc-aligner-windows-x64.zip',
+        minBytes: 15 * 1024 * 1024,
+      ),
+    ],
+    sizeHint: '约 0.1 GB',
+  ),
+  ComponentSpec(
+    kind: ComponentKind.ctcAlignerModel,
+    displayName: '台本对齐模型 omniASR-CTC-300M',
+    installDirName: 'asr-models/omniasr-ctc-300m',
+    host: kModelScope,
+    optional: true,
+    files: [
+      // TODO(components-v2): pin the exact ModelScope repo path at build time.
+      ComponentFile(
+        remotePath: 'OneAsr/omniASR-CTC-300M-v2-hf/resolve/main/model.onnx',
+        relativePath: 'model.onnx',
+        minBytes: 1200 * 1024 * 1024 ~/ 1,
+      ),
+      ComponentFile(
+        remotePath: 'OneAsr/omniASR-CTC-300M-v2-hf/resolve/main/tokenizer.json',
+        relativePath: 'tokenizer.json',
+        minBytes: 256 * 1024,
+      ),
+    ],
+    sizeHint: '约 1.3 GB',
   ),
   ComponentSpec(
     kind: ComponentKind.mtRuntime,

@@ -11,12 +11,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:enjoy_player/core/notices/app_notice.dart';
 import 'package:enjoy_player/core/platform/file_share_export.dart';
+import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/data/subtitle/subtitle_filename.dart';
 import 'package:enjoy_player/data/subtitle/subtitle_serializer.dart';
 import 'package:enjoy_player/data/subtitle/transcript_line.dart';
 import 'package:enjoy_player/features/player/application/player_controller.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
+import '../application/active_transcript_provider.dart';
+import '../application/all_transcripts_provider.dart';
 import '../application/transcript_lines_provider.dart';
 import 'download_transcript_format_dialog.dart';
 
@@ -58,6 +61,23 @@ Future<void> downloadActiveTranscript(
   if (lines.isEmpty) {
     AppNotice.error(context, l10n.transcriptDownloadEmpty);
     return;
+  }
+
+  // ADR-0106 export gate: exporting the AI (translated) track requires the
+  // full-video translation to be complete — partial tracks would serialize
+  // empty cues. English tracks are unaffected.
+  final activeId = ref.read(activeTranscriptIdProvider(mediaId)).value;
+  final tracks = ref.read(allTranscriptsForMediaProvider(mediaId)).valueOrNull;
+  final activeSource = tracks
+      ?.where((track) => track.id == activeId)
+      .firstOrNull
+      ?.source;
+  if (activeSource == 'ai') {
+    final remaining = lines.where((l) => l.text.trim().isEmpty).length;
+    if (remaining > 0) {
+      AppNotice.error(context, l10n.fullTranslateExportIncomplete(remaining));
+      return;
+    }
   }
 
   final pick = pickFormat ?? showTranscriptExportFormatDialog;

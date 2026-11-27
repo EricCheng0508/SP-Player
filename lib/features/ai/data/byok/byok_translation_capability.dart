@@ -9,6 +9,12 @@ final class ByokTranslationCapability implements TranslationCapability {
 
   final LlmCapability _llm;
 
+  /// Underlying LLM — exposed for the full-video batch translator
+  /// (ADR-0106 §5), which sends numbered multi-line requests instead of
+  /// one request per line. Batch translation reuses the same modality
+  /// config fallback this capability was resolved with.
+  LlmCapability get llm => _llm;
+
   @override
   Future<TranslationResult> translate({
     required String text,

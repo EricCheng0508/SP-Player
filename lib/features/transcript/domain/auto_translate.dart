@@ -361,3 +361,105 @@ const kAutoTranslateViewportWindow = 24;
 /// (issue #810 D1). A hard kill loses at most this much translated text;
 /// a normal screen exit flushes everything pending immediately.
 const Duration kAutoTranslateFlushInterval = Duration(milliseconds: 1000);
+
+// --- Full-video manual batch translation (ADR-0106 §5, 2026-11-27 decision).
+
+/// Lines merged into ONE translation request. Merging cuts request count by
+/// this factor (344 lines → 18 requests) and gives the model cross-line
+/// context so terminology and person naming stay consistent.
+const kFullTranslateBatchSize = 20;
+
+/// Batch requests in flight simultaneously. The old per-line path ran at
+/// concurrency 2 with one request per line — the measured cause of slow
+/// full-video translation. Batch-level concurrency 6 targets ~1–2 min for a
+/// 344-line episode over a cloud LLM.
+const kFullTranslateConcurrency = 6;
+
+/// Phases of the manual full-video translation job (banner drives off this).
+enum FullTranslatePhase {
+  /// No run yet for this media (banner shows the call-to-action).
+  idle,
+
+  /// Batches in flight; [FullTranslateUiState.translatedCount] grows per
+  /// persisted batch.
+  running,
+
+  /// Stopped before completion (user cancel / batches failed) — cached
+  /// progress stays usable, "continue translation" resumes from the first
+  /// untranslated line.
+  paused,
+
+  /// Every line has cached text; reopening the media shows translations
+  /// directly.
+  done,
+}
+
+/// Why a full-video translation run is paused / refused. UI maps these to
+/// l10n strings — the controller carries no user-facing text.
+enum FullTranslateBlockReason {
+  /// No LLM configured (cloud) or capability unavailable.
+  noLlm,
+
+  /// Guard failures: no native language, no primary track, same language.
+  noTranslatableSource,
+
+  /// Signed out where auth is still required.
+  auth,
+
+  /// Track creation failed.
+  trackFailed,
+
+  /// Some batches failed; [FullTranslateUiState.failedCount] says how many.
+  partialFailure,
+
+  /// User stopped the run; continue translation resumes.
+  stopped,
+}
+
+/// UI state for the full-video translation banner. Progress is derived from
+/// the AI track itself (empty text = untranslated, non-empty = cached), so a
+/// crash or force-kill never loses more than the batch in flight.
+class FullTranslateUiState {
+  const FullTranslateUiState({
+    this.phase = FullTranslatePhase.idle,
+    this.translatedCount = 0,
+    this.totalCount = 0,
+    this.lastTranslatedStartMs = 0,
+    this.failedCount = 0,
+    this.blockReason,
+  });
+
+  final FullTranslatePhase phase;
+  final int translatedCount;
+  final int totalCount;
+
+  /// Start position of the furthest translated line — powers the
+  /// "已翻译到视频第 X 分钟" meta line without re-reading the DB per batch.
+  final int lastTranslatedStartMs;
+
+  final int failedCount;
+  final FullTranslateBlockReason? blockReason;
+
+  bool get isComplete =>
+      phase == FullTranslatePhase.done ||
+      (totalCount > 0 && translatedCount >= totalCount);
+
+  FullTranslateUiState copyWith({
+    FullTranslatePhase? phase,
+    int? translatedCount,
+    int? totalCount,
+    int? lastTranslatedStartMs,
+    int? failedCount,
+    FullTranslateBlockReason? blockReason,
+    bool clearBlockReason = false,
+  }) {
+    return FullTranslateUiState(
+      phase: phase ?? this.phase,
+      translatedCount: translatedCount ?? this.translatedCount,
+      totalCount: totalCount ?? this.totalCount,
+      lastTranslatedStartMs: lastTranslatedStartMs ?? this.lastTranslatedStartMs,
+      failedCount: failedCount ?? this.failedCount,
+      blockReason: clearBlockReason ? null : (blockReason ?? this.blockReason),
+    );
+  }
+}

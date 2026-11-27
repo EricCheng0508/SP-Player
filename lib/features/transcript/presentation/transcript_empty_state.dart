@@ -21,10 +21,12 @@ class TranscriptEmptyState extends StatelessWidget {
     this.onExtract,
     this.onGenerate,
     this.onFetchYoutube,
+    this.onAlign,
     this.showImportButton = true,
     this.showExtractButton = false,
     this.showGenerateButton = false,
     this.showFetchYoutubeButton = false,
+    this.showAlignButton = false,
     super.key,
   });
 
@@ -39,6 +41,9 @@ class TranscriptEmptyState extends StatelessWidget {
   /// YouTube cloud transcript fetch.
   final Future<void> Function()? onFetchYoutube;
 
+  /// Align an already-correct SRT/TXT to this media's timeline (ADR-0106 §5).
+  final Future<void> Function()? onAlign;
+
   /// When false, only remote/cloud hint copy (e.g. YouTube — no local file).
   final bool showImportButton;
 
@@ -51,11 +56,15 @@ class TranscriptEmptyState extends StatelessWidget {
   /// When true with [onFetchYoutube], shows Fetch transcript for YouTube.
   final bool showFetchYoutubeButton;
 
+  /// When true with [onAlign], shows the align-existing-script control.
+  final bool showAlignButton;
+
   bool get _hasActions =>
       showImportButton ||
       showExtractButton ||
       showGenerateButton ||
-      showFetchYoutubeButton;
+      showFetchYoutubeButton ||
+      showAlignButton;
 
   @override
   Widget build(BuildContext context) {
@@ -129,6 +138,12 @@ class TranscriptEmptyState extends StatelessWidget {
                             label: l10n.transcriptEmptyGenerate,
                             onPressed: onGenerate!,
                             filled: !showFetchYoutubeButton,
+                          ),
+                        if (showAlignButton && onAlign != null)
+                          TranscriptBusyButton(
+                            icon: EnjoyIcons.language,
+                            label: l10n.transcriptEmptyAlign,
+                            onPressed: onAlign!,
                           ),
                         if (showImportButton)
                           _maybeWrapLocal(

@@ -13,6 +13,8 @@ import 'package:enjoy_player/features/ai/data/byok/byok_llm_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_tts_azure_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_tts_openai_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_translation_capability.dart';
+import 'package:enjoy_player/features/ai/data/local_qwen_asr_capability.dart';
+import 'package:enjoy_player/features/ai/data/local_qwen_asr_service.dart';
 import 'package:enjoy_player/features/ai/data/local_subgen_asr_capability.dart';
 import 'package:enjoy_player/features/ai/data/stub_ai_capabilities.dart';
 import 'package:enjoy_player/features/ai/domain/ai_provider.dart';
@@ -33,9 +35,14 @@ AsrCapability resolveAsrCapability(Ref ref, AIServiceConfig config) {
     case AIProvider.byok:
       final speechByok = config.speechByok;
       if (speechByok == null) {
-        // 本地版:语音识别未配置时默认绑定 subgen 本地识别服务
-        // (D:\Tool\subgen\start-asr-server.bat → 127.0.0.1:8000,large-v3-turbo),
-        // 零配置可用;设置里显式配置过的用户仍以配置为准。
+        // 本地版:语音识别未配置时绑定本地识别服务。引擎选择遵循 ADR-0106:
+        // 千问 sidecar(wgpu 原生)已安装则优先后,否则回退 faster-whisper
+        // sidecar(过渡期保留,千问引擎稳定后移除)。无引擎选择 UI。
+        if (isQwenAsrComponentInstalled()) {
+          return LocalQwenAsrCapability(
+            httpClient: ref.read(httpClientProvider),
+          );
+        }
         return LocalSubgenAsrCapability(
           httpClient: ref.read(httpClientProvider),
         );

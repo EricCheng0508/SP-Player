@@ -29,6 +29,8 @@ class LiveCaptionsScreen extends ConsumerStatefulWidget {
 
 class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
   final _scroll = ScrollController();
+  bool _selectionMode = false;
+  final Set<String> _selectedIds = {};
 
   LiveCaptionSession? _resolveShown(
     LiveCaptionsState state,
@@ -106,6 +108,60 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
           history: history,
           currentSession: state.session,
           listening: listening,
+          selectionMode: _selectionMode,
+          selectedIds: _selectedIds,
+          onToggleSelection: (id) => setState(() {
+            _selectedIds.contains(id)
+                ? _selectedIds.remove(id)
+                : _selectedIds.add(id);
+          }),
+          onEnterSelection: () => setState(() {
+            _selectionMode = true;
+            _selectedIds.clear();
+          }),
+          onExitSelection: () => setState(() {
+            _selectionMode = false;
+            _selectedIds.clear();
+          }),
+          onDeleteSelected: () async {
+            if (_selectedIds.isEmpty) return;
+            final confirmed = await showDialog<bool>(
+              context: context,
+              builder: (dialogContext) => AlertDialog(
+                title: Text('删除 ${_selectedIds.length} 条会话'),
+                content:
+                    const Text('确定删除选中的会话及其全部字幕记录吗？此操作不可恢复。'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(false),
+                    child: const Text('取消'),
+                  ),
+                  FilledButton(
+                    style: FilledButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.red.shade600,
+                    ),
+                    onPressed: () => Navigator.of(dialogContext).pop(true),
+                    child: const Text('删除'),
+                  ),
+                ],
+              ),
+            );
+            if (confirmed != true) return;
+            final notifier =
+                ref.read(liveCaptionsControllerProvider.notifier);
+            final targets = history
+                .where((s) => _selectedIds.contains(s.id))
+                .toList();
+            for (final session in targets) {
+              await notifier.deleteSession(session);
+            }
+            _selectionMode = false;
+            _selectedIds.clear();
+            if (!mounted) return;
+            setState(() {});
+            await historyNotifier.reload();
+          },
           onNew: () {
             ref.read(liveCaptionsViewingIdProvider.notifier).state = null;
             unawaited(
@@ -1448,6 +1504,12 @@ final class _HomeView extends ConsumerWidget {
     required this.onSelect,
     required this.onDelete,
     required this.onExport,
+    required this.selectionMode,
+    required this.selectedIds,
+    required this.onToggleSelection,
+    required this.onEnterSelection,
+    required this.onExitSelection,
+    required this.onDeleteSelected,
   });
 
   final List<LiveCaptionSession> history;
@@ -1457,6 +1519,12 @@ final class _HomeView extends ConsumerWidget {
   final void Function(LiveCaptionSession) onSelect;
   final void Function(LiveCaptionSession) onDelete;
   final void Function(LiveCaptionSession) onExport;
+  final bool selectionMode;
+  final Set<String> selectedIds;
+  final void Function(String id) onToggleSelection;
+  final VoidCallback onEnterSelection;
+  final VoidCallback onExitSelection;
+  final VoidCallback onDeleteSelected;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1510,22 +1578,50 @@ final class _HomeView extends ConsumerWidget {
               Row(
                 children: [
                   Text(
-                    '历史会话',
+                    selectionMode
+                        ? '已选 ${selectedIds.length} 项'
+                        : '历史会话',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(child: Divider(color: t.line)),
+                  const Spacer(),
+                  if (selectionMode) ...[
+                    TextButton(
+                      onPressed: onExitSelection,
+                      child: const Text('取消'),
+                    ),
+                    const SizedBox(width: 4),
+                    FilledButton.icon(
+                      onPressed:
+                          selectedIds.isEmpty ? null : onDeleteSelected,
+                      icon: const Icon(Icons.delete_outline, size: 16),
+                      label: Text('删除${selectedIds.isEmpty ? '' : ' ${selectedIds.length} 项'}'),
+                      style: FilledButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.red.shade600,
+                      ),
+                    ),
+                  ] else
+                    TextButton.icon(
+                      onPressed: onEnterSelection,
+                      icon: const Icon(Icons.checklist_rounded, size: 16),
+                      label: const Text('管理'),
+                    ),
                 ],
               ),
               const SizedBox(height: 10),
               if (current != null) ...[
-                _SessionCard(
+                _HomeSessionCard(
                   session: current,
-                  selected: true,
-                  inProgress: listening,
-                  onTap: () => onSelect(current),
+                  highlighted: true,
+                  listening: listening,
+                  selectionMode: selectionMode,
+                  checked: selectedIds.contains(current.id),
+                  onToggle: () => onToggleSelection(current.id),
+                  onTap: selectionMode
+                      ? () => onToggleSelection(current.id)
+                      : () => onSelect(current),
                   onDelete: () => onDelete(current),
                   onExport: () => onExport(current),
                 ),
@@ -1534,11 +1630,16 @@ final class _HomeView extends ConsumerWidget {
               ...rows.map(
                 (s) => Padding(
                   padding: const EdgeInsets.only(bottom: 8),
-                  child: _SessionCard(
+                  child: _HomeSessionCard(
                     session: s,
-                    selected: false,
-                    inProgress: false,
-                    onTap: () => onSelect(s),
+                    highlighted: false,
+                    listening: false,
+                    selectionMode: selectionMode,
+                    checked: selectedIds.contains(s.id),
+                    onToggle: () => onToggleSelection(s.id),
+                    onTap: selectionMode
+                        ? () => onToggleSelection(s.id)
+                        : () => onSelect(s),
                     onDelete: () => onDelete(s),
                     onExport: () => onExport(s),
                   ),
@@ -1640,6 +1741,114 @@ final class _SessionTopBar extends ConsumerWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// Home history card with selection-mode support (checkbox + brand border).
+final class _HomeSessionCard extends ConsumerWidget {
+  const _HomeSessionCard({
+    required this.session,
+    required this.highlighted,
+    required this.listening,
+    required this.selectionMode,
+    required this.checked,
+    required this.onToggle,
+    required this.onTap,
+    required this.onDelete,
+    required this.onExport,
+  });
+
+  final LiveCaptionSession session;
+  final bool highlighted;
+  final bool listening;
+  final bool selectionMode;
+  final bool checked;
+  final VoidCallback onToggle;
+  final VoidCallback onTap;
+  final VoidCallback onDelete;
+  final VoidCallback onExport;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = EnjoyThemeTokens.of(context);
+    final isLive = highlighted && listening;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(11),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: checked
+              ? t.brandInk.withValues(alpha: 0.06)
+              : (highlighted ? t.paper : t.paper),
+          borderRadius: BorderRadius.circular(11),
+          border: Border.all(
+            color: checked
+                ? t.brandInk
+                : (highlighted ? t.brandInk.withValues(alpha: 0.5) : t.line),
+            width: checked ? 1.4 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            if (selectionMode)
+              Padding(
+                padding: const EdgeInsets.only(right: 10),
+                child: Icon(
+                  checked
+                      ? Icons.check_box_rounded
+                      : Icons.check_box_outline_blank_rounded,
+                  size: 20,
+                  color: checked ? t.brandInk : t.ink3,
+                ),
+              ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        session.title,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleSmall
+                            ?.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                      if (isLive) ...[
+                        const SizedBox(width: 8),
+                        Icon(Icons.fiber_manual_record,
+                            size: 9, color: Colors.green.shade600),
+                        const SizedBox(width: 3),
+                        Text(
+                          '监听中',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.green.shade700,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    '${session.duration.inMinutes} 分 ${session.duration.inSeconds % 60} 秒 · '
+                    '${session.lines.length} 句 · ${session.translated ? '已译' : '未译'}',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(color: t.ink3, fontSize: 11),
+                  ),
+                ],
+              ),
+            ),
+            if (!selectionMode)
+              _CardMenu(onDelete: onDelete, onExport: onExport),
+          ],
+        ),
       ),
     );
   }

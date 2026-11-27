@@ -93,11 +93,18 @@ Future<void> _configureDesktopWindow() async {
         minimumSize: Size(880, 560),
         title: 'SP Player',
       ),
-      () async {
+      // Stay hidden here: EnjoyApp shows the window once the real router
+      // UI (not the boot skeleton) has drawn its first frame, so the user
+      // never sees the dark boot cover.
+      () async {},
+    );
+    // Safety net: if the app fails to signal ready within 8s, show anyway.
+    Future.delayed(const Duration(seconds: 8), () async {
+      if (!(await windowManager.isVisible())) {
         await windowManager.show();
         await windowManager.focus();
-      },
-    );
+      }
+    });
   } on Object catch (e, st) {
     _bootstrapLog.warning('desktop window setup failed', e, st);
   }

@@ -8,6 +8,7 @@ import 'package:enjoy_player/core/network/proxy/proxy_providers.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:window_manager/window_manager.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
 
@@ -77,6 +78,10 @@ class EnjoyApp extends ConsumerStatefulWidget {
 
 class _EnjoyAppState extends ConsumerState<EnjoyApp>
     with WidgetsBindingObserver {
+  /// Whether the desktop window has been revealed (once, on the first
+  /// real-UI frame — never on the boot skeleton).
+  bool _windowRevealed = false;
+
   /// Keeps locale/prefs visible while [appPreferencesCtrlProvider] reloads after
   /// auth-scoped DB switches (signed-in), avoiding a full-app loading flash.
   AppPreferencesState? _lastResolvedPrefs;
@@ -179,6 +184,17 @@ class _EnjoyAppState extends ConsumerState<EnjoyApp>
     );
   }
 
+  /// Reveals the desktop window once, after the first real-UI frame —
+  /// never on the boot skeleton (removes the dark "cover" flash).
+  void _revealWindowOnce() {
+    if (_windowRevealed) return;
+    _windowRevealed = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await windowManager.show();
+      await windowManager.focus();
+    });
+  }
+
   Widget _errorBranch(
     ThemeData theme,
     ThemeData darkTheme,
@@ -219,6 +235,7 @@ class _EnjoyAppState extends ConsumerState<EnjoyApp>
     required ThemeMode themeMode,
     required AppPreferencesState prefs,
   }) {
+    _revealWindowOnce();
     return _baseMaterialApp(
       theme: theme,
       darkTheme: darkTheme,

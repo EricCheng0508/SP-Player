@@ -62,7 +62,12 @@ Future<void> _bootstrap() async {
   if (defaultTargetPlatform == TargetPlatform.windows ||
       defaultTargetPlatform == TargetPlatform.macOS ||
       defaultTargetPlatform == TargetPlatform.linux) {
-    unawaited(_configureDesktopWindow());
+    // Must complete BEFORE runApp: a fire-and-forget config races the first
+    // frame and the window pops up at the OS default (small) size first —
+    // the "flash" report. waitUntilReadyToShow keeps the window hidden until
+    // the engine reports ready-to-show, and WindowOptions gives it the
+    // correct size at creation.
+    await _configureDesktopWindow();
   }
 
   final root = ProviderScope(
@@ -82,11 +87,17 @@ Future<void> _bootstrap() async {
 Future<void> _configureDesktopWindow() async {
   try {
     await windowManager.ensureInitialized();
-    await windowManager.setMinimumSize(const Size(880, 560));
-    await windowManager.waitUntilReadyToShow(const WindowOptions(), () async {
-      await windowManager.show();
-      await windowManager.focus();
-    });
+    await windowManager.waitUntilReadyToShow(
+      const WindowOptions(
+        size: Size(1200, 800),
+        minimumSize: Size(880, 560),
+        title: 'SP Player',
+      ),
+      () async {
+        await windowManager.show();
+        await windowManager.focus();
+      },
+    );
   } on Object catch (e, st) {
     _bootstrapLog.warning('desktop window setup failed', e, st);
   }

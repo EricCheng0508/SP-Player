@@ -90,6 +90,19 @@
   "asrStatusSaving": "Saving…",
   "asrStatusSuccess": "Transcript ready",
   "asrStatusCancelled": "Cancelled",
+  "asrStatusAligning": "Aligning…",
+  "asrStageExtract": "Extract audio",
+  "asrStageRecognize": "Recognize",
+  "asrStageAlign": "Align",
+  "asrStageSegment": "Segment",
+  "asrBannerElapsed": "Elapsed",
+  "asrBannerEngine": "Engine {engine}",
+  "@asrBannerEngine": {
+    "description": "Generation banner info line: which local ASR engine is running.",
+    "placeholders": {
+      "engine": { "type": "String" }
+    }
+  },
   "asrErrorGeneric": "Couldn't generate transcript",
   "asrErrorFfmpegUnavailable": "Audio extraction isn't available on this device",
   "asrErrorFfmpegUnavailableHint": "Install ffmpeg or use a different video file.",
@@ -320,7 +333,19 @@
   "noTranscriptHint": "Add a subtitle file, extract embedded captions, or create an AI transcript.",
   "noTranscriptHintRemote": "Cloud captions load automatically when available. Open the CC menu to refresh.",
   "transcriptEmptyExtract": "Extract",
-  "transcriptEmptyAddSubtitle": "Add subtitle",
+    "transcriptEmptyAlign": "Align existing subtitles / script",
+  "@transcriptEmptyAlign": {
+    "description": "Empty state: align an already-correct SRT/TXT to this media's timeline instead of re-recognizing (ADR-0106)."
+  },
+  "transcriptAlignNotInstalled": "Alignment components are not installed — install them in Settings → Local components",
+  "@transcriptAlignNotInstalled": {
+    "description": "Align entry blocked: CTC aligner components missing."
+  },
+  "transcriptAlignPipelinePending": "Alignment components detected — word-level alignment lands in the next component release",
+  "@transcriptAlignPipelinePending": {
+    "description": "Align entry placeholder while the CTC pipeline ships (P1)."
+  },
+"transcriptEmptyAddSubtitle": "Add subtitle",
   "transcriptEmptyGenerate": "AI transcript",
   "subtitlesGenerate": "AI transcript",
   "subtitlesRegenerate": "Re-generate transcript",
@@ -2788,6 +2813,67 @@
   "playerMoreDownloadTranscript": "Download transcript…",
   "@playerMoreDownloadTranscript": {
     "description": "More menu: save the active transcript as an SRT or VTT subtitle file."
+  },
+  "playerMoreTranslateAll": "Translate full video",
+  "@playerMoreTranslateAll": {
+    "description": "More menu: translate every line of the active transcript in merged batches (ADR-0106)."
+  },
+  "fullTranslateBannerCta": "Translate full video",
+  "@fullTranslateBannerCta": {
+    "description": "Translation banner call-to-action when nothing is translated yet."
+  },
+  "fullTranslateBannerContinue": "Continue translation",
+  "@fullTranslateBannerContinue": {
+    "description": "Translation banner resume action after a stop or failure."
+  },
+  "fullTranslateBannerRunningTitle": "Translating {translated} / {total} lines",
+  "@fullTranslateBannerRunningTitle": {
+    "description": "Translation banner title while batches are in flight.",
+    "placeholders": {
+      "translated": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "fullTranslateBannerCachedProgress": "Cached {translated} / {total} lines",
+  "@fullTranslateBannerCachedProgress": {
+    "description": "Translation banner idle readout of persisted translations.",
+    "placeholders": {
+      "translated": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "fullTranslateBannerReachedMinute": "translated up to minute {minutes}",
+  "@fullTranslateBannerReachedMinute": {
+    "description": "Translation banner meta: furthest translated playback minute.",
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+  "fullTranslateBannerPausedFailure": "{failed} lines failed — continue translation to retry",
+  "@fullTranslateBannerPausedFailure": {
+    "description": "Translation banner message when some batches failed.",
+    "placeholders": {
+      "failed": { "type": "int" }
+    }
+  },
+  "fullTranslateBannerPausedStopped": "Stopped — continue translation to resume",
+  "@fullTranslateBannerPausedStopped": {
+    "description": "Translation banner message after a manual stop."
+  },
+    "fullTranslateBannerErrorGeneric": "Cannot start translation — check the transcript and language settings",
+  "@fullTranslateBannerErrorGeneric": {
+    "description": "Translation banner blocked message for guard failures (no native language, no primary track, same language, signed out)."
+  },
+"fullTranslateBannerErrorConfig": "Configure a language model in Settings → AI first",
+  "@fullTranslateBannerErrorConfig": {
+    "description": "Translation banner blocked message when no LLM is configured."
+  },
+  "fullTranslateExportIncomplete": "{remaining} lines are not translated yet — run 'Translate full video' first",
+  "@fullTranslateExportIncomplete": {
+    "description": "Export gate: bilingual SRT export requires the full-video translation to be complete.",
+    "placeholders": {
+      "remaining": { "type": "int" }
+    }
   },
   "playerMoreMediaSection": "Media",
   "@playerMoreMediaSection": {

@@ -169,6 +169,29 @@ class AppLocalizationsZh extends AppLocalizations {
   String get asrStatusCancelled => 'Cancelled';
 
   @override
+  String get asrStatusAligning => 'Aligning…';
+
+  @override
+  String get asrStageExtract => 'Extract audio';
+
+  @override
+  String get asrStageRecognize => 'Recognize';
+
+  @override
+  String get asrStageAlign => 'Align';
+
+  @override
+  String get asrStageSegment => 'Segment';
+
+  @override
+  String get asrBannerElapsed => 'Elapsed';
+
+  @override
+  String asrBannerEngine(String engine) {
+    return 'Engine $engine';
+  }
+
+  @override
   String get asrErrorGeneric => 'Couldn\'t generate transcript';
 
   @override
@@ -658,6 +681,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get transcriptEmptyExtract => '提取';
+
+  @override
+  String get transcriptEmptyAlign => '对齐已有字幕 / 台本';
+
+  @override
+  String get transcriptAlignNotInstalled => '对齐组件未安装，请到「设置 → 本地组件」安装';
+
+  @override
+  String get transcriptAlignPipelinePending => '已检测到对齐组件，词级对齐将随下一个组件包发布';
 
   @override
   String get transcriptEmptyAddSubtitle => '添加字幕';
@@ -4298,6 +4330,49 @@ class AppLocalizationsZh extends AppLocalizations {
   String get playerMoreDownloadTranscript => '下载字幕稿…';
 
   @override
+  String get playerMoreTranslateAll => '翻译全片';
+
+  @override
+  String get fullTranslateBannerCta => '翻译全片';
+
+  @override
+  String get fullTranslateBannerContinue => '继续翻译';
+
+  @override
+  String fullTranslateBannerRunningTitle(int translated, int total) {
+    return '翻译中 $translated / $total 句';
+  }
+
+  @override
+  String fullTranslateBannerCachedProgress(int translated, int total) {
+    return '已缓存 $translated / $total 句';
+  }
+
+  @override
+  String fullTranslateBannerReachedMinute(int minutes) {
+    return '已翻译到视频第 $minutes 分钟';
+  }
+
+  @override
+  String fullTranslateBannerPausedFailure(int failed) {
+    return '有 $failed 句翻译失败，可点「继续翻译」重试';
+  }
+
+  @override
+  String get fullTranslateBannerPausedStopped => '已停止，可点「继续翻译」接着翻';
+
+  @override
+  String get fullTranslateBannerErrorGeneric => '无法开始翻译，请检查字幕与语言设置';
+
+  @override
+  String get fullTranslateBannerErrorConfig => '请先在「设置 → AI」配置云端语言模型';
+
+  @override
+  String fullTranslateExportIncomplete(int remaining) {
+    return '还有 $remaining 句未翻译，请先执行「翻译全片」';
+  }
+
+  @override
   String get playerMoreMediaSection => '媒体';
 
   @override
@@ -4821,6 +4896,29 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String get asrStatusCancelled => '已取消';
 
   @override
+  String get asrStatusAligning => '正在对齐…';
+
+  @override
+  String get asrStageExtract => '提取音频';
+
+  @override
+  String get asrStageRecognize => '识别';
+
+  @override
+  String get asrStageAlign => '对齐';
+
+  @override
+  String get asrStageSegment => '断句';
+
+  @override
+  String get asrBannerElapsed => '已用时';
+
+  @override
+  String asrBannerEngine(String engine) {
+    return '引擎 $engine';
+  }
+
+  @override
   String get asrErrorGeneric => '生成字幕失败';
 
   @override
@@ -5271,6 +5369,15 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get transcriptEmptyExtract => '提取';
+
+  @override
+  String get transcriptEmptyAlign => '对齐已有字幕 / 台本';
+
+  @override
+  String get transcriptAlignNotInstalled => '对齐组件未安装，请到「设置 → 本地组件」安装';
+
+  @override
+  String get transcriptAlignPipelinePending => '已检测到对齐组件，词级对齐将随下一个组件包发布';
 
   @override
   String get transcriptEmptyAddSubtitle => '添加字幕';
@@ -8281,6 +8388,49 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get playerMoreDownloadTranscript => '下载字幕稿…';
+
+  @override
+  String get playerMoreTranslateAll => '翻译全片';
+
+  @override
+  String get fullTranslateBannerCta => '翻译全片';
+
+  @override
+  String get fullTranslateBannerContinue => '继续翻译';
+
+  @override
+  String fullTranslateBannerRunningTitle(int translated, int total) {
+    return '翻译中 $translated / $total 句';
+  }
+
+  @override
+  String fullTranslateBannerCachedProgress(int translated, int total) {
+    return '已缓存 $translated / $total 句';
+  }
+
+  @override
+  String fullTranslateBannerReachedMinute(int minutes) {
+    return '已翻译到视频第 $minutes 分钟';
+  }
+
+  @override
+  String fullTranslateBannerPausedFailure(int failed) {
+    return '有 $failed 句翻译失败，可点「继续翻译」重试';
+  }
+
+  @override
+  String get fullTranslateBannerPausedStopped => '已停止，可点「继续翻译」接着翻';
+
+  @override
+  String get fullTranslateBannerErrorGeneric => '无法开始翻译，请检查字幕与语言设置';
+
+  @override
+  String get fullTranslateBannerErrorConfig => '请先在「设置 → AI」配置云端语言模型';
+
+  @override
+  String fullTranslateExportIncomplete(int remaining) {
+    return '还有 $remaining 句未翻译，请先执行「翻译全片」';
+  }
 
   @override
   String get playerMoreMediaSection => '媒体';

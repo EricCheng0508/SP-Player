@@ -173,6 +173,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get asrStatusCancelled => 'Cancelled';
 
   @override
+  String get asrStatusAligning => 'Aligning…';
+
+  @override
+  String get asrStageExtract => 'Extract audio';
+
+  @override
+  String get asrStageRecognize => 'Recognize';
+
+  @override
+  String get asrStageAlign => 'Align';
+
+  @override
+  String get asrStageSegment => 'Segment';
+
+  @override
+  String get asrBannerElapsed => 'Elapsed';
+
+  @override
+  String asrBannerEngine(String engine) {
+    return 'Engine $engine';
+  }
+
+  @override
   String get asrErrorGeneric => 'Couldn\'t generate transcript';
 
   @override
@@ -686,6 +709,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transcriptEmptyExtract => 'Extract';
+
+  @override
+  String get transcriptEmptyAlign => 'Align existing subtitles / script';
+
+  @override
+  String get transcriptAlignNotInstalled =>
+      'Alignment components are not installed — install them in Settings → Local components';
+
+  @override
+  String get transcriptAlignPipelinePending =>
+      'Alignment components detected — word-level alignment lands in the next component release';
 
   @override
   String get transcriptEmptyAddSubtitle => 'Add subtitle';
@@ -4499,6 +4533,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get playerMoreDownloadTranscript => 'Download transcript…';
+
+  @override
+  String get playerMoreTranslateAll => 'Translate full video';
+
+  @override
+  String get fullTranslateBannerCta => 'Translate full video';
+
+  @override
+  String get fullTranslateBannerContinue => 'Continue translation';
+
+  @override
+  String fullTranslateBannerRunningTitle(int translated, int total) {
+    return 'Translating $translated / $total lines';
+  }
+
+  @override
+  String fullTranslateBannerCachedProgress(int translated, int total) {
+    return 'Cached $translated / $total lines';
+  }
+
+  @override
+  String fullTranslateBannerReachedMinute(int minutes) {
+    return 'translated up to minute $minutes';
+  }
+
+  @override
+  String fullTranslateBannerPausedFailure(int failed) {
+    return '$failed lines failed — continue translation to retry';
+  }
+
+  @override
+  String get fullTranslateBannerPausedStopped =>
+      'Stopped — continue translation to resume';
+
+  @override
+  String get fullTranslateBannerErrorGeneric =>
+      'Cannot start translation — check the transcript and language settings';
+
+  @override
+  String get fullTranslateBannerErrorConfig =>
+      'Configure a language model in Settings → AI first';
+
+  @override
+  String fullTranslateExportIncomplete(int remaining) {
+    return '$remaining lines are not translated yet — run \'Translate full video\' first';
+  }
 
   @override
   String get playerMoreMediaSection => 'Media';

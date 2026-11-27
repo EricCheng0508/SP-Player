@@ -387,6 +387,48 @@ abstract class AppLocalizations {
   /// **'Cancelled'**
   String get asrStatusCancelled;
 
+  /// No description provided for @asrStatusAligning.
+  ///
+  /// In en, this message translates to:
+  /// **'Aligning…'**
+  String get asrStatusAligning;
+
+  /// No description provided for @asrStageExtract.
+  ///
+  /// In en, this message translates to:
+  /// **'Extract audio'**
+  String get asrStageExtract;
+
+  /// No description provided for @asrStageRecognize.
+  ///
+  /// In en, this message translates to:
+  /// **'Recognize'**
+  String get asrStageRecognize;
+
+  /// No description provided for @asrStageAlign.
+  ///
+  /// In en, this message translates to:
+  /// **'Align'**
+  String get asrStageAlign;
+
+  /// No description provided for @asrStageSegment.
+  ///
+  /// In en, this message translates to:
+  /// **'Segment'**
+  String get asrStageSegment;
+
+  /// No description provided for @asrBannerElapsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Elapsed'**
+  String get asrBannerElapsed;
+
+  /// Generation banner info line: which local ASR engine is running.
+  ///
+  /// In en, this message translates to:
+  /// **'Engine {engine}'**
+  String asrBannerEngine(String engine);
+
   /// No description provided for @asrErrorGeneric.
   ///
   /// In en, this message translates to:
@@ -1310,6 +1352,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Extract'**
   String get transcriptEmptyExtract;
+
+  /// Empty state: align an already-correct SRT/TXT to this media's timeline instead of re-recognizing (ADR-0106).
+  ///
+  /// In en, this message translates to:
+  /// **'Align existing subtitles / script'**
+  String get transcriptEmptyAlign;
+
+  /// Align entry blocked: CTC aligner components missing.
+  ///
+  /// In en, this message translates to:
+  /// **'Alignment components are not installed — install them in Settings → Local components'**
+  String get transcriptAlignNotInstalled;
+
+  /// Align entry placeholder while the CTC pipeline ships (P1).
+  ///
+  /// In en, this message translates to:
+  /// **'Alignment components detected — word-level alignment lands in the next component release'**
+  String get transcriptAlignPipelinePending;
 
   /// No description provided for @transcriptEmptyAddSubtitle.
   ///
@@ -8159,6 +8219,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Download transcript…'**
   String get playerMoreDownloadTranscript;
+
+  /// More menu: translate every line of the active transcript in merged batches (ADR-0106).
+  ///
+  /// In en, this message translates to:
+  /// **'Translate full video'**
+  String get playerMoreTranslateAll;
+
+  /// Translation banner call-to-action when nothing is translated yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate full video'**
+  String get fullTranslateBannerCta;
+
+  /// Translation banner resume action after a stop or failure.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue translation'**
+  String get fullTranslateBannerContinue;
+
+  /// Translation banner title while batches are in flight.
+  ///
+  /// In en, this message translates to:
+  /// **'Translating {translated} / {total} lines'**
+  String fullTranslateBannerRunningTitle(int translated, int total);
+
+  /// Translation banner idle readout of persisted translations.
+  ///
+  /// In en, this message translates to:
+  /// **'Cached {translated} / {total} lines'**
+  String fullTranslateBannerCachedProgress(int translated, int total);
+
+  /// Translation banner meta: furthest translated playback minute.
+  ///
+  /// In en, this message translates to:
+  /// **'translated up to minute {minutes}'**
+  String fullTranslateBannerReachedMinute(int minutes);
+
+  /// Translation banner message when some batches failed.
+  ///
+  /// In en, this message translates to:
+  /// **'{failed} lines failed — continue translation to retry'**
+  String fullTranslateBannerPausedFailure(int failed);
+
+  /// Translation banner message after a manual stop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stopped — continue translation to resume'**
+  String get fullTranslateBannerPausedStopped;
+
+  /// Translation banner blocked message for guard failures (no native language, no primary track, same language, signed out).
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot start translation — check the transcript and language settings'**
+  String get fullTranslateBannerErrorGeneric;
+
+  /// Translation banner blocked message when no LLM is configured.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure a language model in Settings → AI first'**
+  String get fullTranslateBannerErrorConfig;
+
+  /// Export gate: bilingual SRT export requires the full-video translation to be complete.
+  ///
+  /// In en, this message translates to:
+  /// **'{remaining} lines are not translated yet — run \'Translate full video\' first'**
+  String fullTranslateExportIncomplete(int remaining);
 
   /// Media section heading in the player's More menu.
   ///

@@ -63,6 +63,8 @@ String asrPhaseMessageKey(AsrGenerationPhase phase) {
       return 'asrStatusUploading';
     case AsrGenerationPhase.recognizing:
       return 'asrStatusRecognizing';
+    case AsrGenerationPhase.aligning:
+      return 'asrStatusAligning';
     case AsrGenerationPhase.polling:
       return 'asrStatusPolling';
     case AsrGenerationPhase.persisting:
@@ -81,6 +83,8 @@ String asrMessageForKey(AppLocalizations l10n, String? key) {
       return l10n.asrStatusUploading;
     case 'asrStatusRecognizing':
       return l10n.asrStatusRecognizing;
+    case 'asrStatusAligning':
+      return l10n.asrStatusAligning;
     case 'asrStatusPolling':
       return l10n.asrStatusPolling;
     case 'asrStatusSaving':

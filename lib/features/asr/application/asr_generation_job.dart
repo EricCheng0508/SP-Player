@@ -19,6 +19,11 @@ enum AsrGenerationPhase {
   /// `AsrService.transcribe` is running (short-clip sync recognition).
   recognizing,
 
+  /// Word-level alignment pass over the recognition result (ADR-0106 §2,
+  /// P1). Only entered when the CTC/Qwen aligner component is installed —
+  /// the plain path goes straight from [recognizing] to [persisting].
+  aligning,
+
   /// Polling Enjoy long-form job status.
   polling,
 

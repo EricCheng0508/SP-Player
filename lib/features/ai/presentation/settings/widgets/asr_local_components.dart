@@ -34,9 +34,16 @@ class _AsrLocalComponentsState extends ConsumerState<AsrLocalComponents> {
 
   Future<void> _install(ComponentSpec spec) async {
     final store = ref.read(componentStoreProvider);
+    final progress = ref.read(componentProgressProvider.notifier);
     final messenger = ScaffoldMessenger.of(context);
     try {
-      await store.install(spec, (_) {});
+      // Feed the notifier so the tile swaps the button for a live progress
+      // bar — with a no-op callback the download ran invisible and every
+      // further click just awaited the same single-flight future.
+      await store.install(
+        spec,
+        (p) => progress.update(spec.kind, p),
+      );
       messenger.showSnackBar(
         SnackBar(content: Text('${spec.displayName} 安装完成')),
       );
@@ -47,6 +54,17 @@ class _AsrLocalComponentsState extends ConsumerState<AsrLocalComponents> {
     } finally {
       if (mounted) setState(() => _generation++);
     }
+  }
+
+  void _cancel(ComponentSpec spec) {
+    ref.read(componentStoreProvider).cancel(spec.kind);
+    ref.read(componentProgressProvider.notifier).update(
+          spec.kind,
+          const ComponentProgress(
+            phase: ComponentDownloadPhase.failed,
+            error: '已取消',
+          ),
+        );
   }
 
   Future<void> _delete(ComponentSpec spec) async {
@@ -103,6 +121,7 @@ class _AsrLocalComponentsState extends ConsumerState<AsrLocalComponents> {
             installed: store.isInstalled(spec),
             progress: progressMap[spec.kind],
             onInstall: () => _install(spec),
+            onCancel: () => _cancel(spec),
             onDelete: () => _delete(spec),
             theme: theme,
           ),
@@ -118,6 +137,7 @@ class _AsrComponentTile extends StatelessWidget {
     required this.installed,
     required this.progress,
     required this.onInstall,
+    required this.onCancel,
     required this.onDelete,
     required this.theme,
   });
@@ -126,6 +146,7 @@ class _AsrComponentTile extends StatelessWidget {
   final bool installed;
   final ComponentProgress? progress;
   final VoidCallback onInstall;
+  final VoidCallback onCancel;
   final VoidCallback onDelete;
   final ThemeData theme;
 
@@ -174,7 +195,8 @@ class _AsrComponentTile extends StatelessWidget {
                     '${progress.fileLabel.isEmpty ? '' : '${progress.fileLabel} · '}'
                     '${(progress.receivedBytes / 1e6).toStringAsFixed(0)}'
                     '/'
-                    '${(progress.totalBytes / 1e6).toStringAsFixed(0)} MB',
+                    '${(progress.totalBytes / 1e6).toStringAsFixed(0)} MB'
+                    '${(progress.speedBps ?? 0) > 0 ? ' · ${(progress.speedBps! / 1e6).toStringAsFixed(1)} MB/s' : ''}',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -190,7 +212,9 @@ class _AsrComponentTile extends StatelessWidget {
               icon: const Icon(Icons.delete_outline),
               onPressed: onDelete,
             )
-          else if (!downloading)
+          else if (downloading)
+            TextButton(onPressed: onCancel, child: const Text('取消'))
+          else
             FilledButton.tonal(onPressed: onInstall, child: const Text('下载')),
         ],
       ),

@@ -182,6 +182,7 @@ final class ComponentStore {
   ) {
     final existing = _inFlight[spec.kind];
     if (existing != null) return existing;
+    _cancelled.remove(spec.kind); // a fresh click un-cancels a past cancel
     final future = _installImpl(spec, onProgress)
         .catchError((Object e) {
           _inFlight.remove(spec.kind);
@@ -200,10 +201,14 @@ final class ComponentStore {
 
   final Map<ComponentKind, Future<void>> _inFlight = {};
 
+  /// Kinds the user asked to cancel; honoured between mirror hops and files.
+  final Set<ComponentKind> _cancelled = {};
+
   /// Drops the single-flight record for [kind] and force-closes live sockets,
   /// so a stalled install can be retried from scratch instead of awaiting the
   /// same stuck future. Partial downloads are kept and resumed.
   void cancel(ComponentKind kind) {
+    _cancelled.add(kind);
     _inFlight.remove(kind);
     _closeStrayClients();
   }
@@ -230,7 +235,9 @@ final class ComponentStore {
       await ComponentStore.warmUpSystemProxy();
 
       final endpoint = hfEndpoint;
+      bool isCancelled() => _cancelled.contains(spec.kind);
       for (final f in spec.files) {
+        if (isCancelled()) throw Exception('已取消');
         final url = componentFileUrl(spec, f, endpoint);
         final dest = File(
           '$root\\_downloads\\${spec.installDirName.replaceAll('/', '_')}'
@@ -243,6 +250,7 @@ final class ComponentStore {
           f.minBytes,
           fileLabel: f.relativePath,
           onProgress: onProgress,
+          isCancelled: isCancelled,
         );
 
         if (spec.extract) {
@@ -278,6 +286,7 @@ final class ComponentStore {
     int minBytes, {
     required String fileLabel,
     required void Function(ComponentProgress) onProgress,
+    bool Function()? isCancelled,
   }) async {
     var received = 0;
     if (dest.existsSync()) {
@@ -295,6 +304,9 @@ final class ComponentStore {
     Object? lastError;
     try {
       for (final candidate in candidates) {
+        if (isCancelled != null && isCancelled()) {
+          throw Exception('已取消');
+        }
         try {
           received = await _downloadSingle(
             candidate,
@@ -303,6 +315,7 @@ final class ComponentStore {
             resumeFrom: received,
             fileLabel: fileLabel,
             onProgress: onProgress,
+            isCancelled: isCancelled,
           );
           if (received >= minBytes) return;
           lastError = HttpException(
@@ -488,6 +501,7 @@ final class ComponentStore {
     required int resumeFrom,
     required String fileLabel,
     required void Function(ComponentProgress) onProgress,
+    bool Function()? isCancelled,
   }) async {
     final client = _newClient(url);
     try {
@@ -541,6 +555,7 @@ final class ComponentStore {
           total: total,
           fileLabel: fileLabel,
           onProgress: onProgress,
+          isCancelled: isCancelled,
         );
       }
       return await _downloadStream(
@@ -572,6 +587,7 @@ final class ComponentStore {
     required int total,
     required String fileLabel,
     required void Function(ComponentProgress) onProgress,
+    bool Function()? isCancelled,
   }) async {
     final base = resumeFrom;
     final remaining = total - base;
@@ -604,6 +620,9 @@ final class ComponentStore {
     Future<void> pullChunk(int index, int start, int end) async {
       final target = File('${dest.path}.part$index');
       for (var attempt = 1; attempt <= 4; attempt++) {
+        if (isCancelled != null && isCancelled()) {
+          throw Exception('已取消');
+        }
         var offset = 0;
         if (target.existsSync()) offset = target.lengthSync();
         if (offset >= end - start) return;

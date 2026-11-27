@@ -13,7 +13,6 @@ import 'package:window_manager/window_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:enjoy_player/core/theme/enjoy_icons.dart';
-import 'package:enjoy_player/core/window/desktop_window.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/typography.dart';
 import 'package:enjoy_player/features/live_captions/application/live_captions_controller.dart';
@@ -30,7 +29,6 @@ class LiveCaptionsScreen extends ConsumerStatefulWidget {
 
 class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
   final _scroll = ScrollController();
-  bool _railCollapsed = false;
 
   LiveCaptionSession? _resolveShown(
     LiveCaptionsState state,
@@ -49,8 +47,8 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      // Nothing is created on entry: the right pane shows an empty guide
-      // until the user clicks 「新会话」.
+      // Entering the page always lands on the home (新会话) view.
+      ref.read(liveCaptionsViewingIdProvider.notifier).state = null;
       unawaited(ref.read(liveCaptionsHistoryProvider.notifier).reload());
     });
   }
@@ -95,335 +93,99 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
         ref.watch(liveCaptionsHistoryProvider).asData?.value ?? const [];
 
     final shown = _resolveShown(state, history);
+    final viewingId = ref.watch(liveCaptionsViewingIdProvider);
+    final listening = state.phase == LiveCaptionsPhase.listening ||
+        state.phase == LiveCaptionsPhase.starting;
+    final inSessionView = viewingId != null && shown != null;
 
+    if (!inSessionView) {
+      // 首页：新会话 + 历史会话列表（监听中的会话置顶）。
+      return Padding(
+        padding: const EdgeInsets.all(20),
+        child: _HomeView(
+          history: history,
+          currentSession: state.session,
+          listening: listening,
+          onNew: () {
+            ref.read(liveCaptionsViewingIdProvider.notifier).state = null;
+            unawaited(
+              () async {
+                final notifier =
+                    ref.read(liveCaptionsControllerProvider.notifier);
+                await notifier.beginNewSession();
+                await notifier.start();
+                await historyNotifier.reload();
+              }(),
+            );
+          },
+          onSelect: (session) => ref
+              .read(liveCaptionsViewingIdProvider.notifier)
+              .state = session.id,
+          onDelete: (session) async {
+            final confirmed = await _confirmDelete(context);
+            if (!confirmed) return;
+            await ref
+                .read(liveCaptionsControllerProvider.notifier)
+                .deleteSession(session);
+            await historyNotifier.reload();
+          },
+          onExport: (session) async {
+            final path = await ref
+                .read(liveCaptionsStoreProvider)
+                .exportText(session);
+            if (!mounted) return;
+            ScaffoldMessenger.of(this.context).showSnackBar(
+              SnackBar(content: Text('已导出到 $path')),
+            );
+          },
+        ),
+      );
+    }
+
+    // 会话视图：← 返回 + 聊天流。
     return Padding(
       padding: const EdgeInsets.all(20),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // History rail (mockup 方案 B): hidden entirely while the app
-          // sidebar is collapsed — sessions live in the sidebar flyout.
-          if (!ref.watch(sidebarCollapsedProvider)) ...[
-          if (_railCollapsed) ...[
-            SizedBox(
-              width: 44,
-              child: Column(
-                children: [
-                  SizedBox(
-                    height: 34,
-                    child: IconButton(
-                      tooltip: '展开历史会话',
-                      onPressed: () => setState(() => _railCollapsed = false),
-                      visualDensity: VisualDensity.compact,
-                      icon: const Icon(Icons.chevron_right_rounded, size: 18),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  SizedBox(
-                    height: 34,
-                    child: IconButton(
-                      tooltip: '新会话',
-                      onPressed: () {
-                      ref
-                          .read(liveCaptionsViewingIdProvider.notifier)
-                          .state = null;
-                      unawaited(
-                        () async {
-                          final notifier = ref
-                              .read(liveCaptionsControllerProvider.notifier);
-                          await notifier.beginNewSession();
-                          await notifier.start();
-                          await historyNotifier.reload();
-                        }(),
-                      );
-                    },
-                    visualDensity: VisualDensity.compact,
-                    icon: const Icon(Icons.add, size: 18),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-          ] else ...[
-          SizedBox(
-            width: 264,
-            child: _HistoryRail(
-              sessions: history,
-              onCollapse: () => setState(() => _railCollapsed = true),
-              currentSession: state.session,
-              listening: state.phase == LiveCaptionsPhase.listening ||
-                  state.phase == LiveCaptionsPhase.starting,
-              viewingId: ref.watch(liveCaptionsViewingIdProvider),
-              onSelect: (session) => ref
+      child: Container(
+        decoration: BoxDecoration(
+          color: t.paper,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: t.line),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _SessionTopBar(
+              session: shown,
+              live: identical(shown, state.session),
+              listening: listening,
+              onBack: () => ref
                   .read(liveCaptionsViewingIdProvider.notifier)
-                  .state = identical(session, state.session)
-                  ? null
-                  : session.id,
-              onNew: () {
-                ref
-                    .read(liveCaptionsViewingIdProvider.notifier)
-                    .state = null;
-                unawaited(
-                  () async {
-                    final notifier = ref
-                        .read(liveCaptionsControllerProvider.notifier);
-                    await notifier.beginNewSession();
-                    // A new session means "start listening now".
-                    await notifier.start();
-                    await historyNotifier.reload();
-                  }(),
-                );
-              },
-              onDelete: (session) async {
-                final confirmed = await _confirmDelete(context);
-                if (!confirmed) return;
-                // Controller stops capture + drops the in-memory session
-                // when the live one is deleted (no resurrect-by-save).
-                await ref
-                    .read(liveCaptionsControllerProvider.notifier)
-                    .deleteSession(session);
-                if (!mounted) return;
-                if (ref.read(liveCaptionsViewingIdProvider) == session.id) {
-                  ref.read(liveCaptionsViewingIdProvider.notifier).state =
-                      null;
-                }
-                await historyNotifier.reload();
-              },
-              onExport: (session) async {
-                final path = await ref
-                    .read(liveCaptionsStoreProvider)
-                    .exportText(session);
-                if (!mounted) return;
-                ScaffoldMessenger.of(this.context).showSnackBar(
-                  SnackBar(content: Text('已导出到 $path')),
-                );
-              },
+                  .state = null,
             ),
-          ),
-            const SizedBox(width: 16),
-          ],
-          ],
-
-          // Main surface.
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: t.paper,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: t.line),
+            if (identical(shown, state.session))
+              _ControlsRow(),
+            Expanded(
+              child: _CaptionStream(
+                session: shown,
+                live: identical(shown, state.session),
+                scroll: _scroll,
+                onRetryTranslation: identical(shown, state.session)
+                    ? (line) => ref
+                        .read(liveCaptionsControllerProvider.notifier)
+                        .retryTranslation(line)
+                    : null,
               ),
-              clipBehavior: Clip.antiAlias,
-              child: shown == null
-                  ? _EmptyGuide(onNew: () {
-                      ref
-                          .read(liveCaptionsViewingIdProvider.notifier)
-                          .state = null;
-                      unawaited(
-                        () async {
-                          final notifier = ref
-                              .read(liveCaptionsControllerProvider.notifier);
-                          await notifier.beginNewSession();
-                          await notifier.start();
-                          await historyNotifier.reload();
-                        }(),
-                      );
-                    })
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _Header(state: state),
-                        Expanded(
-                          child: _CaptionStream(
-                            session: shown,
-                            live: identical(shown, state.session),
-                            scroll: _scroll,
-                            onRetryTranslation:
-                                identical(shown, state.session)
-                                    ? (line) => ref
-                                        .read(
-                                          liveCaptionsControllerProvider
-                                              .notifier,
-                                        )
-                                        .retryTranslation(line)
-                                    : null,
-                          ),
-                        ),
-                        _StatusBar(state: state),
-                      ],
-                    ),
             ),
-          ),
-        ],
+            _StatusBar(state: state),
+          ],
+        ),
       ),
     );
   }
 }
 
 // ---------------------------------------------------------------------------
-// Empty guide (no session yet — before the first 「新会话」 click)
-// ---------------------------------------------------------------------------
-
-final class _EmptyGuide extends StatelessWidget {
-  const _EmptyGuide({required this.onNew});
-
-  final VoidCallback onNew;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = EnjoyThemeTokens.of(context);
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(EnjoyIcons.cc, size: 44, color: t.ink3),
-          const SizedBox(height: 14),
-          Text(
-            '还没有会话',
-            style: Theme.of(context)
-                .textTheme
-                .titleSmall
-                ?.copyWith(fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            '点击「新会话」开始监听系统声音或麦克风，\n实时生成中英双语字幕。',
-            textAlign: TextAlign.center,
-            style: Theme.of(context)
-                .textTheme
-                .bodySmall
-                ?.copyWith(color: t.ink3, height: 1.6),
-          ),
-          const SizedBox(height: 18),
-          FilledButton.icon(
-            onPressed: onNew,
-            icon: const Icon(Icons.add, size: 18),
-            label: const Text('新会话'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// History rail
-// ---------------------------------------------------------------------------
-
-final class _HistoryRail extends StatelessWidget {
-  const _HistoryRail({
-    required this.sessions,
-    required this.currentSession,
-    required this.listening,
-    required this.viewingId,
-    required this.onSelect,
-    required this.onNew,
-    required this.onDelete,
-    required this.onExport,
-    required this.onCollapse,
-  });
-
-  final List<LiveCaptionSession> sessions;
-
-  /// The in-memory session for this page visit, pinned at the top of the rail
-  /// so 「新会话」 always has a visible counterpart on the left.
-  final LiveCaptionSession? currentSession;
-  final bool listening;
-  final String? viewingId;
-  final void Function(LiveCaptionSession) onSelect;
-  final VoidCallback onCollapse;
-  final void Function() onNew;
-  final void Function(LiveCaptionSession) onDelete;
-  final void Function(LiveCaptionSession) onExport;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = EnjoyThemeTokens.of(context);
-    // The current visit's session is pinned right under the button so the
-    // left rail and the right pane always agree on "what is open now".
-    final current = currentSession;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: Row(
-            children: [
-              Text(
-                '历史会话',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-              const Spacer(),
-              IconButton(
-                tooltip: '折叠历史会话',
-                onPressed: onCollapse,
-                icon: const Icon(Icons.chevron_left_rounded, size: 20),
-              ),
-              Text(
-                '${sessions.length}',
-                style: enjoyMonoStyle(context, size: 12, color: t.ink3),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(
-          height: 40,
-          child: FilledButton.tonalIcon(
-            onPressed: onNew,
-            icon: const Icon(Icons.add, size: 18),
-            label: const Text('新会话'),
-          ),
-        ),
-        const SizedBox(height: 10),
-        if (current != null) ...[
-          _SessionCard(
-            session: current,
-            selected: viewingId == null,
-            inProgress: listening,
-            onTap: () => onSelect(current),
-            onDelete: () => onDelete(current),
-            onExport: () => onExport(current),
-          ),
-          const SizedBox(height: 8),
-        ],
-        Expanded(
-          child: sessions.isEmpty
-              ? Center(
-                  child: Text(
-                    '还没有历史会话',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(color: t.ink3),
-                  ),
-                )
-              : ListView.separated(
-                  itemCount: sessions.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
-                  itemBuilder: (context, index) {
-                    final session = sessions[index];
-                    if (session.id == currentSession?.id) {
-                      return const SizedBox.shrink(); // pinned above already
-                    }
-                    final selected = session.id == viewingId;
-                    return _SessionCard(
-                      session: session,
-                      selected: selected,
-                      inProgress: false,
-                      onTap: () => onSelect(session),
-                      onDelete: () => onDelete(session),
-                      onExport: () => onExport(session),
-                    );
-                  },
-                ),
-        ),
-      ],
-    );
-  }
-}
-
 final class _SessionCard extends StatelessWidget {
   const _SessionCard({
     required this.session,
@@ -553,148 +315,6 @@ final class _CardMenu extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Header / controls
-// ---------------------------------------------------------------------------
-
-final class _Header extends ConsumerStatefulWidget {
-  const _Header({required this.state});
-
-  final LiveCaptionsState state;
-
-  @override
-  ConsumerState<_Header> createState() => _HeaderState();
-}
-
-class _HeaderState extends ConsumerState<_Header> {
-  @override
-  Widget build(BuildContext context) {
-    final t = EnjoyThemeTokens.of(context);
-    final state = widget.state;
-    final listening = state.phase == LiveCaptionsPhase.listening ||
-        state.phase == LiveCaptionsPhase.starting;
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
-      child: Row(
-        children: [
-          Text(
-            '实时字幕',
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium
-                ?.copyWith(fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(width: 12),
-          if (listening)
-            _StatusPill(
-              listening: true,
-              label: state.phase == LiveCaptionsPhase.starting
-                  ? '启动中…'
-                  : '监听中',
-            ),
-          const Spacer(),
-          if (state.error != null)
-            Padding(
-              padding: const EdgeInsets.only(right: 10),
-              child: Text(
-                state.error!,
-                style: TextStyle(fontSize: 12, color: Colors.red.shade700),
-              ),
-            ),
-          OutlinedButton.icon(
-            onPressed: listening
-                ? () {
-                    unawaited(
-                      ref
-                          .read(liveCaptionsControllerProvider.notifier)
-                          .stop()
-                          .whenComplete(
-                            ref.read(liveCaptionsHistoryProvider.notifier).reload,
-                          ),
-                    );
-                  }
-                : () =>
-                    ref.read(liveCaptionsControllerProvider.notifier).start(),
-            icon: Icon(
-              listening ? Icons.stop_rounded : Icons.play_arrow_rounded,
-              size: 18,
-            ),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: listening ? Colors.red.shade700 : t.brandInk,
-            ),
-            label: Text(listening ? '停止' : '开始监听'),
-          ),
-          if (isDesktop)
-            IconButton(
-              tooltip: '悬浮字幕（置顶小窗，Esc 退出）',
-              onPressed: () => unawaited(enterFloatMode(ref)),
-              icon: const Icon(Icons.picture_in_picture_alt_rounded,
-                  size: 18),
-              style: IconButton.styleFrom(
-                foregroundColor: t.brandInk,
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-final class _StatusPill extends StatefulWidget {
-  const _StatusPill({required this.listening, required this.label});
-
-  final bool listening;
-  final String label;
-
-  @override
-  State<_StatusPill> createState() => _StatusPillState();
-}
-
-class _StatusPillState extends State<_StatusPill>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _breath = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 1600),
-  )..repeat(reverse: true);
-
-  @override
-  void dispose() {
-    _breath.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final t = EnjoyThemeTokens.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: ShapeDecoration(
-        color: t.youSoft,
-        shape: const StadiumBorder(),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          FadeTransition(
-            opacity: Tween(begin: 0.35, end: 1.0).animate(_breath),
-            child: Icon(Icons.fiber_manual_record,
-                size: 10, color: Colors.green.shade700),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            widget.label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: t.youInk,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 // ---------------------------------------------------------------------------
 // Controls row: source chips + translate toggle (always visible)
@@ -1834,6 +1454,216 @@ final class _FloatIconBtn extends StatelessWidget {
             color: active ? Colors.white : const Color(0xFFAAAAAA),
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Home view: hero 新会话 + divider + history session cards (mockup v9)
+// ---------------------------------------------------------------------------
+
+final class _HomeView extends ConsumerWidget {
+  const _HomeView({
+    required this.history,
+    required this.currentSession,
+    required this.listening,
+    required this.onNew,
+    required this.onSelect,
+    required this.onDelete,
+    required this.onExport,
+  });
+
+  final List<LiveCaptionSession> history;
+  final LiveCaptionSession? currentSession;
+  final bool listening;
+  final VoidCallback onNew;
+  final void Function(LiveCaptionSession) onSelect;
+  final void Function(LiveCaptionSession) onDelete;
+  final void Function(LiveCaptionSession) onExport;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = EnjoyThemeTokens.of(context);
+    final current = currentSession;
+    // History rows exclude the live session (pinned separately).
+    final rows = history
+        .where((s) => current == null || s.id != current.id)
+        .toList()
+      ..sort((a, b) => b.startedAt.compareTo(a.startedAt));
+
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 560),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(vertical: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Column(
+                  children: [
+                    Icon(EnjoyIcons.cc, size: 44, color: t.ink3),
+                    const SizedBox(height: 10),
+                    Text(
+                      '实时字幕',
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium
+                          ?.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      '开始监听系统声音或麦克风，\n实时生成中英双语字幕。',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodySmall
+                          ?.copyWith(color: t.ink3, height: 1.6),
+                    ),
+                    const SizedBox(height: 18),
+                    FilledButton.icon(
+                      onPressed: onNew,
+                      icon: const Icon(Icons.add, size: 18),
+                      label: const Text('新会话'),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 22),
+              Row(
+                children: [
+                  Text(
+                    '历史会话',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(child: Divider(color: t.line)),
+                ],
+              ),
+              const SizedBox(height: 10),
+              if (current != null) ...[
+                _SessionCard(
+                  session: current,
+                  selected: true,
+                  inProgress: listening,
+                  onTap: () => onSelect(current),
+                  onDelete: () => onDelete(current),
+                  onExport: () => onExport(current),
+                ),
+                const SizedBox(height: 8),
+              ],
+              ...rows.map(
+                (s) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: _SessionCard(
+                    session: s,
+                    selected: false,
+                    inProgress: false,
+                    onTap: () => onSelect(s),
+                    onDelete: () => onDelete(s),
+                    onExport: () => onExport(s),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Session view top bar: ← 返回 + title + 停止/悬浮 (mockup v9)
+// ---------------------------------------------------------------------------
+
+final class _SessionTopBar extends ConsumerWidget {
+  const _SessionTopBar({
+    required this.session,
+    required this.live,
+    required this.listening,
+    required this.onBack,
+  });
+
+  final LiveCaptionSession session;
+  final bool live;
+  final bool listening;
+  final VoidCallback onBack;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = EnjoyThemeTokens.of(context);
+    final sub = session.sources.isEmpty
+        ? (listening ? '监听中' : '未监听')
+        : session.sources
+            .map((s) => s == LiveCaptionSource.system ? '扬声器' : '麦克风')
+            .join(' + ');
+    return Container(
+      padding: const EdgeInsets.fromLTRB(10, 8, 14, 8),
+      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: t.line))),
+      child: Row(
+        children: [
+          IconButton(
+            tooltip: '返回',
+            onPressed: onBack,
+            icon: const Icon(Icons.arrow_back_rounded, size: 20),
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  session.title,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleSmall
+                      ?.copyWith(fontWeight: FontWeight.w600),
+                ),
+                Text(
+                  listening
+                      ? '监听中 · $sub'
+                      : '${session.duration.inMinutes} 分 · ${session.lines.length} 句',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: t.ink3, fontSize: 11),
+                ),
+              ],
+            ),
+          ),
+          if (live)
+            IconButton(
+              tooltip: '悬浮字幕（置顶小窗，Esc 退出）',
+              onPressed: () => unawaited(enterFloatMode(ref)),
+              icon: const Icon(Icons.picture_in_picture_alt_rounded,
+                  size: 18),
+              color: t.brandInk,
+            ),
+          if (live && listening)
+            OutlinedButton.icon(
+              onPressed: () {
+                unawaited(
+                  ref
+                      .read(liveCaptionsControllerProvider.notifier)
+                      .stop()
+                      .whenComplete(
+                        ref.read(liveCaptionsHistoryProvider.notifier).reload,
+                      ),
+                );
+              },
+              icon: Icon(Icons.stop_rounded,
+                  size: 16, color: Colors.red.shade700),
+              label: Text('停止',
+                  style: TextStyle(color: Colors.red.shade700)),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: Colors.red.shade200),
+              ),
+            ),
+        ],
       ),
     );
   }

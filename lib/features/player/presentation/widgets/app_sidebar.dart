@@ -300,17 +300,13 @@ class _AppSidebarState extends ConsumerState<AppSidebar> {
                   onTap: () => context.go('/craft'),
                   trailing: isDesktop ? EnjoyKeycap(label: craftKey) : null,
                 ),
-                if (widget.collapsed)
-                  _LiveCaptionsFlyoutEntry(
-                    selected: path.startsWith('/live-captions'),
-                  )
-                else
-                  NavItemPill(
-                    icon: EnjoyIcons.cc,
-                    label: '实时字幕',
-                    selected: path.startsWith('/live-captions'),
-                    onTap: () => context.go('/live-captions'),
-                  ),
+                NavItemPill(
+                  icon: EnjoyIcons.cc,
+                  label: '实时字幕',
+                  collapsed: widget.collapsed,
+                  selected: path.startsWith('/live-captions'),
+                  onTap: () => context.go('/live-captions'),
+                ),
 
                 const Spacer(),
 
@@ -414,169 +410,6 @@ class _DueBadge extends StatelessWidget {
           height: 1,
         ),
         maxLines: 1,
-      ),
-    );
-  }
-}
-
-/// Collapsed-sidebar entry for live captions: icon with a listening dot;
-/// tapping opens a flyout menu with the live session, history and 新会话.
-final class _LiveCaptionsFlyoutEntry extends ConsumerStatefulWidget {
-  const _LiveCaptionsFlyoutEntry({required this.selected});
-
-  final bool selected;
-
-  @override
-  ConsumerState<_LiveCaptionsFlyoutEntry> createState() =>
-      _LiveCaptionsFlyoutEntryState();
-}
-
-class _LiveCaptionsFlyoutEntryState
-    extends ConsumerState<_LiveCaptionsFlyoutEntry> {
-  final GlobalKey _anchorKey = GlobalKey();
-
-  Future<void> _openFlyout() async {
-    final box = _anchorKey.currentContext?.findRenderObject() as RenderBox?;
-    if (box == null) return;
-    final origin = box.localToGlobal(Offset.zero);
-
-    final controller = ref.read(liveCaptionsControllerProvider.notifier);
-    final history =
-        ref.read(liveCaptionsHistoryProvider).asData?.value ?? const [];
-    final listening =
-        ref.read(liveCaptionsControllerProvider).phase ==
-                LiveCaptionsPhase.listening ||
-            ref.read(liveCaptionsControllerProvider).phase ==
-                LiveCaptionsPhase.starting;
-
-    Future<void> pick(String? value) async {
-      if (value == null) return;
-      if (value == '__new__') {
-        await controller.beginNewSession();
-        await controller.start();
-        await ref.read(liveCaptionsHistoryProvider.notifier).reload();
-        ref.read(liveCaptionsViewingIdProvider.notifier).state = null;
-      } else {
-        ref.read(liveCaptionsViewingIdProvider.notifier).state = value;
-      }
-      if (context.mounted) context.go('/live-captions');
-    }
-
-    final selection = await showMenu<String>(
-      context: context,
-      position: RelativeRect.fromLTRB(
-        origin.dx + 58,
-        origin.dy - 8,
-        origin.dx + 58 + 230,
-        origin.dy + 260,
-      ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      items: [
-        PopupMenuItem<String>(
-          enabled: false,
-          child: Text(
-            '实时字幕会话${listening ? ' · 监听中' : ''}',
-            style: const TextStyle(fontSize: 11.5, color: Colors.grey),
-          ),
-        ),
-        const PopupMenuItem<String>(
-          value: '__new__',
-          child: Row(
-            children: [
-              Icon(Icons.add, size: 16),
-              SizedBox(width: 8),
-              Text('新会话（开始监听）'),
-            ],
-          ),
-        ),
-        const PopupMenuDivider(),
-        if (listening && ref.read(liveCaptionsControllerProvider).session != null)
-          const PopupMenuItem<String>(
-            value: '__live__',
-            child: Row(
-              children: [
-                Icon(Icons.fiber_manual_record,
-                    size: 10, color: Colors.green),
-                SizedBox(width: 8),
-                Text('当前会话（进行中）'),
-              ],
-            ),
-          ),
-        ...history.map(
-          (s) => PopupMenuItem<String>(
-            value: s.id,
-            child: Text('${s.title} · ${s.lines.length} 条',
-                overflow: TextOverflow.ellipsis),
-          ),
-        ),
-      ],
-    );
-    if (selection == '__live__') {
-      // Viewing the live session = clear the viewing override.
-      ref.read(liveCaptionsViewingIdProvider.notifier).state = null;
-      if (context.mounted) context.go('/live-captions');
-      return;
-    }
-    await pick(selection);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final t = EnjoyThemeTokens.of(context);
-    final listening =
-        ref.watch(liveCaptionsControllerProvider).phase ==
-                LiveCaptionsPhase.listening ||
-            ref.watch(liveCaptionsControllerProvider).phase ==
-                LiveCaptionsPhase.starting;
-    return Padding(
-      key: _anchorKey,
-      padding: const EdgeInsets.only(left: 4, right: 4, bottom: 6),
-      child: Tooltip(
-        message: '实时字幕',
-        child: InkWell(
-          onTap: _openFlyout,
-          borderRadius: BorderRadius.circular(t.radiusControl - 1),
-          child: Container(
-            height: 38,
-            alignment: Alignment.center,
-            decoration: ShapeDecoration(
-              color: widget.selected ? t.paper : Colors.transparent,
-              shape: RoundedSuperellipseBorder(
-                borderRadius: BorderRadius.circular(t.radiusControl - 1),
-              ),
-              shadows: widget.selected ? t.shadowLift : null,
-            ),
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                IconTheme(
-                  data: IconThemeData(
-                    size: 20,
-                    color: widget.selected ? t.brandInk : t.ink2,
-                  ),
-                  child: const Icon(EnjoyIcons.cc),
-                ),
-                if (listening)
-                  Positioned(
-                    right: -3,
-                    top: -3,
-                    child: Container(
-                      width: 9,
-                      height: 9,
-                      decoration: BoxDecoration(
-                        color: Colors.green.shade600,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: t.paper,
-                          width: 1.5,
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

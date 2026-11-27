@@ -14,7 +14,9 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:enjoy_player/core/logging/log.dart';
@@ -654,3 +656,10 @@ class LiveCaptionsHistory extends _$LiveCaptionsHistory {
     state = AsyncData(await ref.read(liveCaptionsStoreProvider).loadAll());
   }
 }
+
+/// App-window floating captions mode: the whole window becomes a small
+/// frameless always-on-top caption card (dark, draggable, resizable).
+final floatCaptionsModeProvider = StateProvider<bool>((ref) => false);
+
+/// Window bounds saved before entering float mode, restored on exit.
+final floatWindowBoundsProvider = StateProvider<Rect?>((ref) => null);

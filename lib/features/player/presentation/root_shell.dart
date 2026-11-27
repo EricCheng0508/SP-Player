@@ -18,6 +18,8 @@ import 'package:enjoy_player/core/theme/widgets/enjoy_chrome_icon.dart';
 import 'package:enjoy_player/core/window/desktop_window.dart';
 import 'package:enjoy_player/core/window/window_fullscreen_provider.dart';
 import 'package:enjoy_player/features/onboarding/presentation/onboarding_showcase_host.dart';
+import 'package:enjoy_player/features/live_captions/application/live_captions_controller.dart';
+import 'package:enjoy_player/features/live_captions/presentation/live_captions_screen.dart';
 import 'package:enjoy_player/features/player/application/player_controller.dart';
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
 import 'package:enjoy_player/features/player/presentation/widgets/fullscreen_transport_bar.dart';
@@ -384,6 +386,9 @@ class _RootShellState extends ConsumerState<RootShell> {
                   // Engine video surface paints above the shell — any
                   // fullscreen chrome must stack ABOVE it to be visible.
                   PlayerSurfaceHost(forcePark: parkSurface),
+                  // Floating captions mini-window covers everything while on.
+                  if (ref.watch(floatCaptionsModeProvider))
+                    const Positioned.fill(child: FloatCaptionsHost()),
                   // Fullscreen reveal layer: pointer move / press over the
                   // video wakes the dock. translucent + non-opaque so video
                   // gestures and hotkeys keep working.

@@ -309,36 +309,54 @@ class _AppSidebarState extends ConsumerState<AppSidebar> {
 
                 const Spacer(),
 
-                Row(
-                  children: [
-                    Expanded(
-                      child: NavItemPill(
-                        icon: EnjoyIcons.gear,
-                        iconWidget: const EnjoyChromeIcon(
-                          EnjoyChromeGlyph.gear,
-                        ),
-                        selectedIconWidget: const EnjoyChromeIcon(
-                          EnjoyChromeGlyph.gear,
-                        ),
-                        label: l10n.settingsTitle,
-                        collapsed: widget.collapsed,
-                        selected: path.startsWith('/settings'),
-                        onTap: () => context.go('/settings'),
-                      ),
+                if (widget.collapsed) ...[
+                  NavItemPill(
+                    icon: EnjoyIcons.gear,
+                    iconWidget: const EnjoyChromeIcon(EnjoyChromeGlyph.gear),
+                    selectedIconWidget: const EnjoyChromeIcon(
+                      EnjoyChromeGlyph.gear,
                     ),
-                    IconButton(
-                      tooltip: widget.collapsed ? '展开侧边栏' : '折叠侧边栏',
+                    label: l10n.settingsTitle,
+                    collapsed: true,
+                    selected: path.startsWith('/settings'),
+                    onTap: () => context.go('/settings'),
+                  ),
+                  const SizedBox(height: 4),
+                  Center(
+                    child: IconButton(
+                      tooltip: '展开侧边栏',
                       onPressed: widget.onToggleCollapse,
                       icon: Icon(
-                        widget.collapsed
-                            ? Icons.chevron_right_rounded
-                            : Icons.chevron_left_rounded,
+                        Icons.chevron_right_rounded,
                         size: 20,
                         color: t.ink2,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ] else ...[
+                  NavItemPill(
+                    icon: EnjoyIcons.gear,
+                    iconWidget: const EnjoyChromeIcon(EnjoyChromeGlyph.gear),
+                    selectedIconWidget: const EnjoyChromeIcon(
+                      EnjoyChromeGlyph.gear,
+                    ),
+                    label: l10n.settingsTitle,
+                    selected: path.startsWith('/settings'),
+                    onTap: () => context.go('/settings'),
+                  ),
+                  const SizedBox(height: 4),
+                  Center(
+                    child: IconButton(
+                      tooltip: '折叠侧边栏',
+                      onPressed: widget.onToggleCollapse,
+                      icon: Icon(
+                        Icons.chevron_left_rounded,
+                        size: 20,
+                        color: t.ink2,
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

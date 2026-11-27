@@ -9,9 +9,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:window_manager/window_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:enjoy_player/core/theme/enjoy_icons.dart';
+import 'package:enjoy_player/core/window/desktop_window.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/typography.dart';
 import 'package:enjoy_player/features/live_captions/application/live_captions_controller.dart';
@@ -91,18 +93,22 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
           // History rail (collapsible: thin icon strip ↔ full rail).
           if (_railCollapsed) ...[
             SizedBox(
-              width: 46,
+              width: 64,
               child: Column(
                 children: [
-                  IconButton(
-                    tooltip: '展开历史会话',
-                    onPressed: () => setState(() => _railCollapsed = false),
-                    icon: const Icon(Icons.chevron_right_rounded, size: 20),
+                  SizedBox(
+                    height: 40,
+                    child: IconButton(
+                      tooltip: '展开历史会话',
+                      onPressed: () => setState(() => _railCollapsed = false),
+                      icon: const Icon(Icons.chevron_right_rounded, size: 20),
+                    ),
                   ),
-                  const SizedBox(height: 6),
-                  IconButton(
-                    tooltip: '新会话',
-                    onPressed: () {
+                  SizedBox(
+                    height: 40,
+                    child: IconButton(
+                      tooltip: '新会话',
+                      onPressed: () {
                       setState(() => _viewing = null);
                       unawaited(
                         () async {
@@ -115,6 +121,7 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
                       );
                     },
                     icon: const Icon(Icons.add, size: 20),
+                    ),
                   ),
                 ],
               ),
@@ -592,6 +599,16 @@ class _HeaderState extends ConsumerState<_Header> {
             ),
             label: Text(listening ? '停止' : '开始监听'),
           ),
+          if (isDesktop)
+            IconButton(
+              tooltip: '悬浮字幕（置顶小窗，Esc 退出）',
+              onPressed: () => unawaited(enterFloatMode(ref)),
+              icon: const Icon(Icons.picture_in_picture_alt_rounded,
+                  size: 18),
+              style: IconButton.styleFrom(
+                foregroundColor: t.brandInk,
+              ),
+            ),
         ],
       ),
     );
@@ -815,28 +832,8 @@ class _CaptionStreamState extends ConsumerState<_CaptionStream> {
     if (mounted) setState(() => _follow = true);
   }
 
-  /// Consecutive same-source lines within 5 s merge into one bubble;
-  /// event rows become dividers.
-  List<_StreamItem> _buildItems(List<LiveCaptionLine> lines) {
-    final items = <_StreamItem>[];
-    _BubbleItem? open;
-    for (final line in lines) {
-      if (line.event != null) {
-        open = null;
-        items.add(_DividerItem(line));
-        continue;
-      }
-      if (open != null &&
-          open.source == line.source &&
-          line.offsetSeconds - open.lines.last.offsetSeconds < 5) {
-        open.lines.add(line);
-      } else {
-        open = _BubbleItem([line]);
-        items.add(open);
-      }
-    }
-    return items;
-  }
+  List<_StreamItem> _buildItems(List<LiveCaptionLine> lines) =>
+      buildLiveStreamItems(lines);
 
   @override
   Widget build(BuildContext context) {
@@ -941,6 +938,29 @@ class _CaptionStreamState extends ConsumerState<_CaptionStream> {
       ],
     );
   }
+}
+
+/// Consecutive same-source lines within 5 s merge into one bubble; event
+/// rows become dividers. Shared by the in-page stream and the float window.
+List<_StreamItem> buildLiveStreamItems(List<LiveCaptionLine> lines) {
+  final items = <_StreamItem>[];
+  _BubbleItem? open;
+  for (final line in lines) {
+    if (line.event != null) {
+      open = null;
+      items.add(_DividerItem(line));
+      continue;
+    }
+    if (open != null &&
+        open.source == line.source &&
+        line.offsetSeconds - open.lines.last.offsetSeconds < 5) {
+      open.lines.add(line);
+    } else {
+      open = _BubbleItem([line]);
+      items.add(open);
+    }
+  }
+  return items;
 }
 
 /// Chat stream items: merged bubbles + event dividers.
@@ -1426,6 +1446,363 @@ final class _LevelMeter extends StatelessWidget {
           },
         ),
       ],
+    );
+  }
+}
+
+
+// ---------------------------------------------------------------------------
+// Floating captions window (形态三): the app window becomes a small dark
+// frameless always-on-top card. Drag the header to move; drag the bottom-right
+// grip to resize; Esc / ✕ restores the previous window geometry.
+// ---------------------------------------------------------------------------
+
+Future<void> enterFloatMode(WidgetRef ref) async {
+  final bounds = await windowManager.getBounds();
+  ref.read(floatWindowBoundsProvider.notifier).state = bounds;
+  await windowManager.setAlwaysOnTop(true);
+  await windowManager.setSkipTaskbar(true);
+  await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
+  await windowManager.setMinimumSize(const Size(320, 220));
+  await windowManager.setSize(const Size(440, 330));
+  ref.read(floatCaptionsModeProvider.notifier).state = true;
+}
+
+Future<void> exitFloatMode(WidgetRef ref) async {
+  ref.read(floatCaptionsModeProvider.notifier).state = false;
+  await windowManager.setAlwaysOnTop(false);
+  await windowManager.setSkipTaskbar(false);
+  await windowManager.setTitleBarStyle(TitleBarStyle.normal);
+  final bounds = ref.read(floatWindowBoundsProvider.notifier).state;
+  if (bounds != null) {
+    await windowManager.setBounds(bounds);
+  }
+}
+
+final class FloatCaptionsHost extends ConsumerStatefulWidget {
+  const FloatCaptionsHost({super.key});
+
+  @override
+  ConsumerState<FloatCaptionsHost> createState() =>
+      _FloatCaptionsHostState();
+}
+
+class _FloatCaptionsHostState extends ConsumerState<FloatCaptionsHost> {
+  final _scroll = ScrollController();
+  Size? _resizeStart;
+  bool _pinned = true;
+
+  @override
+  void initState() {
+    super.initState();
+    HardwareKeyboard.instance.addHandler(_onKey);
+  }
+
+  @override
+  void dispose() {
+    HardwareKeyboard.instance.removeHandler(_onKey);
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  bool _onKey(KeyEvent event) {
+    if (event is KeyDownEvent &&
+        event.logicalKey == LogicalKeyboardKey.escape) {
+      unawaited(exitFloatMode(ref));
+      return true;
+    }
+    return false;
+  }
+
+  Future<void> _togglePin() async {
+    _pinned = !_pinned;
+    await windowManager.setAlwaysOnTop(_pinned);
+    if (mounted) setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(liveCaptionsControllerProvider);
+    final listening = state.phase == LiveCaptionsPhase.listening ||
+        state.phase == LiveCaptionsPhase.starting;
+    final session = state.session;
+    final items = session == null
+        ? const <_StreamItem>[]
+        : buildLiveStreamItems(session.lines);
+
+    return Material(
+      color: const Color(0xFF1C1C20),
+      child: Stack(
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Drag header.
+              GestureDetector(
+                onPanStart: (_) => windowManager.startDragging(),
+                child: Container(
+                  height: 40,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  color: const Color(0xFF232328),
+                  child: Row(
+                    children: [
+                      FadeTransition(
+                        opacity: AlwaysStoppedAnimation(
+                            listening ? 1.0 : 0.5),
+                        child: Icon(
+                          Icons.fiber_manual_record,
+                          size: 9,
+                          color: listening
+                              ? Colors.green.shade600
+                              : Colors.grey.shade600,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '实时字幕 · ${_pinned ? '置顶' : '普通'}',
+                        style: const TextStyle(
+                          fontSize: 12.5,
+                          color: Color(0xFFBBBBBB),
+                        ),
+                      ),
+                      const Spacer(),
+                      _FloatIconBtn(
+                        icon: Icons.push_pin_rounded,
+                        tooltip: _pinned ? '取消置顶' : '置顶',
+                        active: _pinned,
+                        onTap: _togglePin,
+                      ),
+                      _FloatIconBtn(
+                        icon: Icons.close_rounded,
+                        tooltip: '退出悬浮 (Esc)',
+                        onTap: () => unawaited(exitFloatMode(ref)),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Expanded(
+                child: items.isEmpty
+                    ? Center(
+                        child: Text(
+                          listening ? '正在聆听…' : '会话未开始',
+                          style: const TextStyle(
+                            color: Color(0xFF888888),
+                            fontSize: 13,
+                          ),
+                        ),
+                      )
+                    : ListView.builder(
+                        controller: _scroll,
+                        padding:
+                            const EdgeInsets.fromLTRB(14, 10, 14, 10),
+                        itemCount: items.length +
+                            (listening ? 1 : 0),
+                        itemBuilder: (context, index) {
+                          if (index == items.length) {
+                            return const Padding(
+                              padding: EdgeInsets.only(top: 6),
+                              child: Center(
+                                child: Text(
+                                  '…',
+                                  style: TextStyle(color: Color(0xFF666666)),
+                                ),
+                              ),
+                            );
+                          }
+                          final item = items[index];
+                          if (item is _DividerItem) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 5),
+                              child: Center(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF2A2A30),
+                                    borderRadius: BorderRadius.circular(99),
+                                  ),
+                                  child: Text(
+                                    item.line.event ?? item.line.text,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: Color(0xFF888888),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+                          if (item is _BubbleItem) {
+                            return _FloatBubble(item: item);
+                          }
+                          return const SizedBox.shrink();
+                        },
+                      ),
+              ),
+              Container(
+                height: 26,
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                color: const Color(0xFF232328),
+                alignment: Alignment.centerLeft,
+                child: const Text(
+                  'Esc 退出 · 拖标题移动 · 右下角缩放',
+                  style: TextStyle(fontSize: 10.5, color: Color(0xFF777777)),
+                ),
+              ),
+            ],
+          ),
+          // Resize grip.
+          Positioned(
+            right: 0,
+            bottom: 0,
+            width: 20,
+            height: 20,
+            child: MouseRegion(
+              cursor: SystemMouseCursors.resizeDownRight,
+              child: GestureDetector(
+                onPanStart: (_) async {
+                  _resizeStart = await windowManager.getSize();
+                },
+                onPanUpdate: (details) async {
+                  final start = _resizeStart;
+                  if (start == null) return;
+                  await windowManager.setSize(Size(
+                    (start.width + details.delta.dx)
+                        .clamp(320, 900)
+                        .toDouble(),
+                    (start.height + details.delta.dy)
+                        .clamp(220, 700)
+                        .toDouble(),
+                  ));
+                },
+                child: Icon(
+                  Icons.open_in_full_rounded,
+                  size: 13,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Dark bubble for the float window (mock 形态三).
+final class _FloatBubble extends StatelessWidget {
+  const _FloatBubble({required this.item});
+
+  final _BubbleItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final me = item.source == LiveCaptionSource.mic;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        textDirection: me ? TextDirection.rtl : TextDirection.ltr,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 22,
+            height: 22,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: me
+                  ? const Color(0xFF2E5E46)
+                  : const Color(0xFF33333A),
+              shape: BoxShape.circle,
+            ),
+            child: Text(me ? '🎤' : '🔊',
+                style: const TextStyle(fontSize: 10)),
+          ),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: me
+                    ? const Color(0xFF2E5E46).withValues(alpha: 0.55)
+                    : const Color(0xFF33333A).withValues(alpha: 0.9),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.text,
+                    style: const TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                  if (item.translation != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Text(
+                        item.translation!,
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          color: me
+                              ? const Color(0xFFBFE0CF)
+                              : const Color(0xFFB9BDC7),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Small icon button for the float header.
+final class _FloatIconBtn extends StatelessWidget {
+  const _FloatIconBtn({
+    required this.icon,
+    required this.tooltip,
+    required this.onTap,
+    this.active = false,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onTap;
+  final bool active;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          width: 28,
+          height: 28,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: active
+                ? Colors.white.withValues(alpha: 0.14)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            icon,
+            size: 15,
+            color: active ? Colors.white : const Color(0xFFAAAAAA),
+          ),
+        ),
+      ),
     );
   }
 }

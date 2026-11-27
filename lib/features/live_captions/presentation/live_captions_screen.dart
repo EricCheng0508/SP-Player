@@ -17,6 +17,7 @@ import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/typography.dart';
 import 'package:enjoy_player/features/live_captions/application/live_captions_controller.dart';
 import 'package:enjoy_player/features/live_captions/data/live_captions_store.dart';
+import 'package:enjoy_player/features/live_captions/data/sherpa_streaming_asr.dart';
 import 'package:enjoy_player/features/live_captions/domain/live_caption_models.dart';
 
 class LiveCaptionsScreen extends ConsumerStatefulWidget {
@@ -1591,6 +1592,17 @@ final class _HomeView extends ConsumerWidget {
                       icon: const Icon(Icons.add, size: 18),
                       label: const Text('新会话'),
                     ),
+                    if (!streamingAsrInstalled) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        '提示：设置 → 本地组件 可安装流式识别引擎（约 200 MB），\n实时字幕更快更准。',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(color: t.ink3, height: 1.5),
+                      ),
+                    ],
                   ],
                 ),
               ),

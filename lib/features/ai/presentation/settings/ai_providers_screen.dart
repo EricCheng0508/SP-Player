@@ -338,7 +338,11 @@ class _AiEnginesBodyState extends ConsumerState<AiEnginesBody> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const AsrLocalComponents(
-                  kinds: [ComponentKind.asrRuntime, ComponentKind.asrModel],
+                  kinds: [
+                    ComponentKind.asrRuntime,
+                    ComponentKind.asrModel,
+                    ComponentKind.liveAsr,
+                  ],
                 ),
                 const SizedBox(height: 6),
                 Text(

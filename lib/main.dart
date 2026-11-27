@@ -93,9 +93,8 @@ Future<void> _configureDesktopWindow() async {
         minimumSize: Size(880, 560),
         title: 'SP Player',
       ),
-      // Stay hidden here: EnjoyApp shows the window once the real router
-      // UI (not the boot skeleton) has drawn its first frame, so the user
-      // never sees the dark boot cover.
+      // Stay hidden here: EnjoyApp reveals the window once the real router
+      // UI has painted stable frames — the boot skeleton is never visible.
       () async {},
     );
     // Safety net: if the app fails to signal ready within 8s, show anyway.

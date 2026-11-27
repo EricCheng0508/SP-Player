@@ -86,7 +86,6 @@ class _EnjoyAppState extends ConsumerState<EnjoyApp>
   /// frames: prefs resolving can flip straight back into the auth-loading
   /// branch, and revealing that frame re-introduces the dark skeleton flash.
   bool _onLoadingBranch = false;
-  int _routerStableFrames = 0;
 
   /// Keeps locale/prefs visible while [appPreferencesCtrlProvider] reloads after
   /// auth-scoped DB switches (signed-in), avoiding a full-app loading flash.
@@ -180,10 +179,13 @@ class _EnjoyAppState extends ConsumerState<EnjoyApp>
     ThemeData darkTheme,
     ThemeMode themeMode,
   ) {
+    // Boot cover is ALWAYS light-branded: a dark system theme must not turn
+    // the launch into a black flash — the final home is revealed from this
+    // light cover seamlessly.
     return _baseMaterialApp(
       theme: theme,
-      darkTheme: darkTheme,
-      themeMode: themeMode,
+      darkTheme: theme,
+      themeMode: ThemeMode.light,
       home: const ConstrainedAppViewport(
         child: Scaffold(body: Center(child: SkeletonAppBootstrap())),
       ),
@@ -232,14 +234,14 @@ class _EnjoyAppState extends ConsumerState<EnjoyApp>
   }) {
     _onLoadingBranch = false;
     if (!_windowRevealed) {
-      _routerStableFrames++;
-      if (_routerStableFrames >= 3) {
-        _windowRevealed = true;
-        WidgetsBinding.instance.addPostFrameCallback((_) async {
-          await windowManager.show();
-          await windowManager.focus();
-        });
-      }
+      _windowRevealed = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        // Give the home page a couple of rasters before revealing, so the
+        // window's first visible frame is real content (no blank white pop).
+        await Future<void>.delayed(const Duration(milliseconds: 150));
+        await windowManager.show();
+        await windowManager.focus();
+      });
     }
     return _baseMaterialApp(
       theme: theme,
@@ -341,7 +343,6 @@ class _EnjoyAppState extends ConsumerState<EnjoyApp>
 
     if (prefsProj.isLoading && !hasResolved) {
       _onLoadingBranch = true;
-      _routerStableFrames = 0;
       return _loadingBranch(lightTheme, darkTheme, themeMode);
     }
 
@@ -350,7 +351,6 @@ class _EnjoyAppState extends ConsumerState<EnjoyApp>
     );
     if (authBootstrapping) {
       _onLoadingBranch = true;
-      _routerStableFrames = 0;
       return _loadingBranch(lightTheme, darkTheme, themeMode);
     }
 

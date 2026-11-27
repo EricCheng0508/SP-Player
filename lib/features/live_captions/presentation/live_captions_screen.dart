@@ -29,6 +29,7 @@ class LiveCaptionsScreen extends ConsumerStatefulWidget {
 class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
   LiveCaptionSession? _viewing; // null = current/live session
   final _scroll = ScrollController();
+  bool _railCollapsed = false;
 
   @override
   void initState() {
@@ -87,11 +88,44 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // History rail.
+          // History rail (collapsible: thin icon strip ↔ full rail).
+          if (_railCollapsed) ...[
+            SizedBox(
+              width: 46,
+              child: Column(
+                children: [
+                  IconButton(
+                    tooltip: '展开历史会话',
+                    onPressed: () => setState(() => _railCollapsed = false),
+                    icon: const Icon(Icons.chevron_right_rounded, size: 20),
+                  ),
+                  const SizedBox(height: 6),
+                  IconButton(
+                    tooltip: '新会话',
+                    onPressed: () {
+                      setState(() => _viewing = null);
+                      unawaited(
+                        () async {
+                          final notifier = ref
+                              .read(liveCaptionsControllerProvider.notifier);
+                          await notifier.beginNewSession();
+                          await notifier.start();
+                          await historyNotifier.reload();
+                        }(),
+                      );
+                    },
+                    icon: const Icon(Icons.add, size: 20),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+          ] else ...[
           SizedBox(
             width: 264,
             child: _HistoryRail(
               sessions: history,
+              onCollapse: () => setState(() => _railCollapsed = true),
               currentSession: state.session,
               listening: state.phase == LiveCaptionsPhase.listening ||
                   state.phase == LiveCaptionsPhase.starting,
@@ -137,7 +171,8 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
               },
             ),
           ),
-          const SizedBox(width: 16),
+            const SizedBox(width: 16),
+          ],
 
           // Main surface.
           Expanded(
@@ -252,6 +287,7 @@ final class _HistoryRail extends StatelessWidget {
     required this.onNew,
     required this.onDelete,
     required this.onExport,
+    required this.onCollapse,
   });
 
   final List<LiveCaptionSession> sessions;
@@ -262,6 +298,7 @@ final class _HistoryRail extends StatelessWidget {
   final bool listening;
   final String? viewingId;
   final void Function(LiveCaptionSession) onSelect;
+  final VoidCallback onCollapse;
   final void Function() onNew;
   final void Function(LiveCaptionSession) onDelete;
   final void Function(LiveCaptionSession) onExport;
@@ -286,6 +323,11 @@ final class _HistoryRail extends StatelessWidget {
                     ),
               ),
               const Spacer(),
+              IconButton(
+                tooltip: '折叠历史会话',
+                onPressed: onCollapse,
+                icon: const Icon(Icons.chevron_left_rounded, size: 20),
+              ),
               Text(
                 '${sessions.length}',
                 style: enjoyMonoStyle(context, size: 12, color: t.ink3),

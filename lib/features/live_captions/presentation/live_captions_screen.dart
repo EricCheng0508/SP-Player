@@ -114,6 +114,9 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
                     ref.read(liveCaptionsControllerProvider.notifier);
                 await notifier.beginNewSession();
                 await notifier.start();
+                // 直接跳进会话视图（用户点新会话就该立刻进入）。
+                ref.read(liveCaptionsViewingIdProvider.notifier).state =
+                    ref.read(liveCaptionsControllerProvider).session?.id;
                 await historyNotifier.reload();
               }(),
             );
@@ -916,7 +919,7 @@ final class _ChatBubble extends ConsumerWidget {
             : Offset.zero,
       ),
       child: Container(
-        constraints: const BoxConstraints(maxWidth: 560),
+        constraints: const BoxConstraints(maxWidth: 780),
         padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
         decoration: BoxDecoration(
           color: me
@@ -1494,7 +1497,7 @@ final class _HomeView extends ConsumerWidget {
 
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 560),
+        constraints: const BoxConstraints(maxWidth: 780),
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(vertical: 24),
           child: Column(

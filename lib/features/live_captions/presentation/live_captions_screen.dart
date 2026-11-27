@@ -29,9 +29,20 @@ class LiveCaptionsScreen extends ConsumerStatefulWidget {
 }
 
 class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
-  LiveCaptionSession? _viewing; // null = current/live session
   final _scroll = ScrollController();
   bool _railCollapsed = false;
+
+  LiveCaptionSession? _resolveShown(
+    LiveCaptionsState state,
+    List<LiveCaptionSession> history,
+  ) {
+    final id = ref.watch(liveCaptionsViewingIdProvider);
+    if (id == null || identical(state.session?.id, id)) return state.session;
+    for (final s in history) {
+      if (s.id == id) return s;
+    }
+    return state.session;
+  }
 
   @override
   void initState() {
@@ -83,14 +94,16 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
     final history =
         ref.watch(liveCaptionsHistoryProvider).asData?.value ?? const [];
 
-    final shown = _viewing ?? state.session;
+    final shown = _resolveShown(state, history);
 
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // History rail (collapsible: thin icon strip ↔ full rail).
+          // History rail (mockup 方案 B): hidden entirely while the app
+          // sidebar is collapsed — sessions live in the sidebar flyout.
+          if (!ref.watch(sidebarCollapsedProvider)) ...[
           if (_railCollapsed) ...[
             SizedBox(
               width: 44,
@@ -111,7 +124,9 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
                     child: IconButton(
                       tooltip: '新会话',
                       onPressed: () {
-                      setState(() => _viewing = null);
+                      ref
+                          .read(liveCaptionsViewingIdProvider.notifier)
+                          .state = null;
                       unawaited(
                         () async {
                           final notifier = ref
@@ -139,12 +154,16 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
               currentSession: state.session,
               listening: state.phase == LiveCaptionsPhase.listening ||
                   state.phase == LiveCaptionsPhase.starting,
-              viewingId: _viewing?.id,
-              onSelect: (session) => setState(() {
-                _viewing = identical(session, state.session) ? null : session;
-              }),
+              viewingId: ref.watch(liveCaptionsViewingIdProvider),
+              onSelect: (session) => ref
+                  .read(liveCaptionsViewingIdProvider.notifier)
+                  .state = identical(session, state.session)
+                  ? null
+                  : session.id,
               onNew: () {
-                setState(() => _viewing = null);
+                ref
+                    .read(liveCaptionsViewingIdProvider.notifier)
+                    .state = null;
                 unawaited(
                   () async {
                     final notifier = ref
@@ -165,8 +184,9 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
                     .read(liveCaptionsControllerProvider.notifier)
                     .deleteSession(session);
                 if (!mounted) return;
-                if (identical(_viewing, session)) {
-                  setState(() => _viewing = null);
+                if (ref.read(liveCaptionsViewingIdProvider) == session.id) {
+                  ref.read(liveCaptionsViewingIdProvider.notifier).state =
+                      null;
                 }
                 await historyNotifier.reload();
               },
@@ -183,6 +203,7 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
           ),
             const SizedBox(width: 16),
           ],
+          ],
 
           // Main surface.
           Expanded(
@@ -195,7 +216,9 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
               clipBehavior: Clip.antiAlias,
               child: shown == null
                   ? _EmptyGuide(onNew: () {
-                      setState(() => _viewing = null);
+                      ref
+                          .read(liveCaptionsViewingIdProvider.notifier)
+                          .state = null;
                       unawaited(
                         () async {
                           final notifier = ref

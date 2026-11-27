@@ -56,7 +56,6 @@ class _RootShellState extends ConsumerState<RootShell> {
   bool _dockVisible = true;
   bool _keyRevealHandlerActive = false;
   bool _pointerOverDock = false;
-  bool _sidebarCollapsed = false;
 
   /// While in video fullscreen, any key press reveals the dock (standard
   /// fullscreen UX: mouse move OR keyboard). Returns false so hotkeys and
@@ -349,11 +348,13 @@ class _RootShellState extends ConsumerState<RootShell> {
                                   container: true,
                                   label: l10n.navMainLabel,
                                   child: AppSidebar(
-                                    collapsed: _sidebarCollapsed,
-                                    onToggleCollapse: () => setState(
-                                      () => _sidebarCollapsed =
-                                          !_sidebarCollapsed,
-                                    ),
+                                    collapsed: ref.watch(
+                                        sidebarCollapsedProvider),
+                                    onToggleCollapse: () => ref
+                                        .read(sidebarCollapsedProvider
+                                            .notifier)
+                                        .state = !ref.watch(
+                                        sidebarCollapsedProvider),
                                   ),
                                 ),
                                 Expanded(child: widget.child),

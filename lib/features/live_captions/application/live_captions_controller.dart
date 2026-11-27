@@ -663,3 +663,12 @@ final floatCaptionsModeProvider = StateProvider<bool>((ref) => false);
 
 /// Window bounds saved before entering float mode, restored on exit.
 final floatWindowBoundsProvider = StateProvider<Rect?>((ref) => null);
+
+/// Which session the live-captions screen is viewing (null = the live one).
+/// Set by the history rail, the sidebar flyout, and page navigation.
+final liveCaptionsViewingIdProvider = StateProvider<String?>((ref) => null);
+
+/// Whether the app sidebar is collapsed (icon rail) — the live-captions
+/// page hides its history rail in that state (sessions live in the
+/// sidebar flyout instead).
+final sidebarCollapsedProvider = StateProvider<bool>((ref) => false);

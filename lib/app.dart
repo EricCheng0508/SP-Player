@@ -235,12 +235,15 @@ class _EnjoyAppState extends ConsumerState<EnjoyApp>
     _onLoadingBranch = false;
     if (!_windowRevealed) {
       _windowRevealed = true;
+      logNamed('boot-timing').info('[boot-timing] router-ready at build');
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         // Give the home page a couple of rasters before revealing, so the
         // window's first visible frame is real content (no blank white pop).
         await Future<void>.delayed(const Duration(milliseconds: 150));
         await windowManager.show();
         await windowManager.focus();
+        logNamed('boot-timing')
+            .info('[boot-timing] window-shown at show()+150ms');
       });
     }
     return _baseMaterialApp(
@@ -343,6 +346,7 @@ class _EnjoyAppState extends ConsumerState<EnjoyApp>
 
     if (prefsProj.isLoading && !hasResolved) {
       _onLoadingBranch = true;
+      logNamed('boot-timing').info('[boot-timing] loading-branch (prefs) at build');
       return _loadingBranch(lightTheme, darkTheme, themeMode);
     }
 
@@ -351,6 +355,7 @@ class _EnjoyAppState extends ConsumerState<EnjoyApp>
     );
     if (authBootstrapping) {
       _onLoadingBranch = true;
+      logNamed('boot-timing').info('[boot-timing] loading-branch (auth) at build');
       return _loadingBranch(lightTheme, darkTheme, themeMode);
     }
 

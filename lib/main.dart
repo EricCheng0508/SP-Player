@@ -30,7 +30,13 @@ Future<void> main() async {
 final Logger _bootstrapLog = logNamed('bootstrap');
 
 Future<void> _bootstrap() async {
+  final sw = Stopwatch()..start();
+  void mark(String label) {
+    _bootstrapLog.info('[boot-timing] $label at ${sw.elapsedMilliseconds}ms');
+  }
+
   WidgetsFlutterBinding.ensureInitialized();
+  mark('bindings');
   await _applyDeviceOrientationPolicy();
   if (!kDebugMode) {
     installReleaseWidgetErrorBuilder();
@@ -38,6 +44,7 @@ Future<void> _bootstrap() async {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
   GoogleFonts.config.allowRuntimeFetching = false;
   await setupAppLogging();
+  mark('logging');
   final proxyCoordinator = installSystemProxyOverrides();
   if (defaultTargetPlatform == TargetPlatform.windows) {
     unawaited(ensureWindowsWebViewEnvironment());
@@ -68,6 +75,7 @@ Future<void> _bootstrap() async {
     // the engine reports ready-to-show, and WindowOptions gives it the
     // correct size at creation.
     await _configureDesktopWindow();
+    mark('window-ready');
   }
 
   final root = ProviderScope(
@@ -81,6 +89,7 @@ Future<void> _bootstrap() async {
       (kDebugMode || kProfileMode)) {
     app = ExcludeSemantics(child: root);
   }
+  mark('runApp');
   runApp(app);
 }
 

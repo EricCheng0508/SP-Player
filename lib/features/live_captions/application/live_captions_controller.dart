@@ -25,6 +25,7 @@ import 'package:enjoy_player/features/ai/data/byok/byok_whisper_client.dart';
 import 'package:enjoy_player/features/ai/data/local_subgen_asr_service.dart';
 import 'package:enjoy_player/features/ai/domain/chat_message.dart';
 import 'package:enjoy_player/features/live_captions/data/audio_segmenter.dart';
+import 'package:enjoy_player/features/live_captions/data/sherpa_streaming_asr.dart';
 import 'package:enjoy_player/features/live_captions/data/live_captions_store.dart';
 import 'package:enjoy_player/features/live_captions/domain/live_caption_models.dart';
 
@@ -42,6 +43,7 @@ final class LiveCaptionsState {
     this.error,
     this.systemEnabled = true,
     this.micEnabled = false,
+    this.usingStreamingEngine = false,
     this.translate = true,
     this.lastError,
   });
@@ -51,6 +53,10 @@ final class LiveCaptionsState {
   final String? error;
   final bool systemEnabled;
   final bool micEnabled;
+
+  /// Live captions decode with the local streaming engine (sherpa-onnx)
+  /// instead of the Whisper server when the streaming model is installed.
+  final bool usingStreamingEngine;
   final bool translate;
 
   LiveCaptionsState copyWith({
@@ -60,6 +66,7 @@ final class LiveCaptionsState {
     bool? systemEnabled,
     bool? micEnabled,
     bool? translate,
+    bool? usingStreamingEngine,
   }) =>
       LiveCaptionsState(
         phase: phase ?? this.phase,
@@ -67,6 +74,8 @@ final class LiveCaptionsState {
         error: error,
         systemEnabled: systemEnabled ?? this.systemEnabled,
         micEnabled: micEnabled ?? this.micEnabled,
+        usingStreamingEngine:
+            usingStreamingEngine ?? this.usingStreamingEngine,
         translate: translate ?? this.translate,
         lastError: lastError,
       );
@@ -407,12 +416,18 @@ class LiveCaptionsController extends _$LiveCaptionsController {
     }
     final session = state.session;
     if (session == null) return;
+    // Prefer the local streaming engine when its model is installed.
+    final streaming = SherpaStreamingAsr.tryCreate();
+    if (streaming != null && !state.usingStreamingEngine) {
+      state = state.copyWith(usingStreamingEngine: true);
+    }
     final levelSink =
         source == LiveCaptionSource.system ? systemLevel : micLevel;
     final run = _CaptureRun(
       ref: ref,
       source: source,
       startedAt: DateTime.now().toLocal(),
+      streaming: streaming,
       onLine: (line) => _appendLine(line),
       onLevel: (rms) {
         // Smooth + map to a 0..1 bar (silence threshold ≈ 350 RMS).
@@ -485,6 +500,7 @@ final class _CaptureRun {
     required this.onLine,
     required this.onFatal,
     required this.onLevel,
+    required this.streaming,
   });
 
   final Ref ref;
@@ -493,6 +509,9 @@ final class _CaptureRun {
   final void Function(LiveCaptionLine) onLine;
   final void Function(String) onFatal;
   final void Function(double rms) onLevel;
+
+  /// Streaming sherpa engine (null = legacy whisper pipeline).
+  final SherpaStreamingAsr? streaming;
 
   Process? _process;
   final AudioSegmenter _segmenter = AudioSegmenter();
@@ -540,14 +559,52 @@ final class _CaptureRun {
       }
       onLevel(math.sqrt(sum / samples));
     }
+    if (streaming != null) {
+      _handlePcmStreaming(chunk);
+      return;
+    }
     for (final segment in _segmenter.feed(chunk)) {
       _enqueue(segment);
     }
   }
 
+  /// Streaming decode: audio flows into the recognizer continuously; the
+  /// recognizer's own trailing-silence endpoint rule closes utterances.
+  void _handlePcmStreaming(Uint8List chunk) {
+    final engine = streaming!;
+    engine.feedPcm(chunk);
+    engine.decodeAndGetText();
+    if (!engine.isEndpoint) return;
+    final text = engine.decodeAndGetText();
+    if (text.isNotEmpty) {
+      final offsetSeconds =
+          DateTime.now().difference(startedAt).inMilliseconds / 1000.0;
+      onLine(LiveCaptionLine(
+        offsetSeconds: offsetSeconds,
+        source: source,
+        text: text,
+      ));
+    }
+    engine.reset();
+  }
+
   Future<void> stop() async {
     if (_stopping) return;
     _stopping = true;
+    final engine = streaming;
+    if (engine != null) {
+      // Emit whatever the recognizer is still holding, then release it.
+      final text = engine.decodeAndGetText();
+      if (text.isNotEmpty) {
+        onLine(LiveCaptionLine(
+          offsetSeconds:
+              DateTime.now().difference(startedAt).inMilliseconds / 1000.0,
+          source: source,
+          text: text,
+        ));
+      }
+      engine.close();
+    }
     // Give the utterance in flight a chance to become a segment.
     final tail = _segmenter.flush();
     if (tail != null) _enqueue(tail);

@@ -1071,7 +1071,8 @@ final class _StatusBar extends ConsumerWidget {
             .copyWith(color: t.ink3, fontSize: 11.5),
         child: Row(
           children: [
-            const Text('识别：本地 Whisper'),
+            Text(
+                '识别：${state.usingStreamingEngine ? '流式引擎（sherpa）' : '本地 Whisper'}'),
             const SizedBox(width: 14),
             Text('翻译：${state.translate ? '已配置 LLM' : '已关闭'}'),
             const SizedBox(width: 14),

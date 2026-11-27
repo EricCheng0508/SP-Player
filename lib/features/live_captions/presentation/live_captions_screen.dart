@@ -93,20 +93,21 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
           // History rail (collapsible: thin icon strip ↔ full rail).
           if (_railCollapsed) ...[
             SizedBox(
-              width: 64,
+              width: 44,
               child: Column(
                 children: [
                   SizedBox(
-                    height: 40,
+                    height: 34,
                     child: IconButton(
                       tooltip: '展开历史会话',
                       onPressed: () => setState(() => _railCollapsed = false),
-                      icon: const Icon(Icons.chevron_right_rounded, size: 20),
+                      visualDensity: VisualDensity.compact,
+                      icon: const Icon(Icons.chevron_right_rounded, size: 18),
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 4),
                   SizedBox(
-                    height: 40,
+                    height: 34,
                     child: IconButton(
                       tooltip: '新会话',
                       onPressed: () {
@@ -121,7 +122,8 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
                         }(),
                       );
                     },
-                    icon: const Icon(Icons.add, size: 20),
+                    visualDensity: VisualDensity.compact,
+                    icon: const Icon(Icons.add, size: 18),
                     ),
                   ),
                 ],

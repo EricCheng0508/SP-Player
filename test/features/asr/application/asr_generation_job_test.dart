@@ -99,6 +99,7 @@ void main() {
         AsrGenerationPhase.extracting,
         AsrGenerationPhase.uploading,
         AsrGenerationPhase.recognizing,
+        AsrGenerationPhase.aligning,
         AsrGenerationPhase.polling,
         AsrGenerationPhase.persisting,
         AsrGenerationPhase.success,
@@ -106,6 +107,6 @@ void main() {
         AsrGenerationPhase.cancelled,
       ]),
     );
-    expect(phases.length, 9);
+    expect(phases.length, 10);
   });
 }

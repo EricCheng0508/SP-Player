@@ -138,13 +138,16 @@ void main() {
       TranscriptActionKind.importFile,
       TranscriptActionKind.embeddedSubtitles,
       TranscriptActionKind.aiTranscript,
+      // ADR-0106: manual full-video batch translation, gated on hasTranscript.
+      TranscriptActionKind.translateAll,
       TranscriptActionKind.wordTimings,
       TranscriptActionKind.refreshCloud,
       TranscriptActionKind.downloadTranscript,
     ]);
     expect(actions.first.label, 'Edit transcript');
     expect(actions[3].label, 'Transcribe again…');
-    expect(actions[4].label, 'Add word timings & IPA');
+    expect(actions[4].label, 'Translate full video');
+    expect(actions[5].label, 'Add word timings & IPA');
     expect(actions.last.label, 'Download transcript…');
   });
 

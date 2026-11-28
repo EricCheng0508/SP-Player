@@ -141,12 +141,6 @@ abstract class AppLocalizations {
   /// **'Good evening'**
   String get homeGreetingEvening;
 
-  /// Home header greeting with the signed-in user's name.
-  ///
-  /// In en, this message translates to:
-  /// **'{greeting}, {name}'**
-  String homeGreetingNamed(String greeting, String name);
-
   /// No description provided for @homeEmptyTitle.
   ///
   /// In en, this message translates to:
@@ -158,12 +152,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Continue practicing'**
   String get homeContinuePracticing;
-
-  /// No description provided for @homeContinueProgressSemantics.
-  ///
-  /// In en, this message translates to:
-  /// **'{percent} percent complete'**
-  String homeContinueProgressSemantics(int percent);
 
   /// No description provided for @homeContinueOpenSemantics.
   ///
@@ -314,12 +302,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Explain this sentence'**
   String get lookupSectionExplain;
-
-  /// No description provided for @lookupExplainRun.
-  ///
-  /// In en, this message translates to:
-  /// **'Explain'**
-  String get lookupExplainRun;
 
   /// No description provided for @libraryTabPlaylists.
   ///
@@ -525,12 +507,6 @@ abstract class AppLocalizations {
   /// **'Audio extraction isn\'t available on this device'**
   String get asrErrorFfmpegUnavailable;
 
-  /// No description provided for @asrErrorFfmpegUnavailableHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Install ffmpeg or use a different video file.'**
-  String get asrErrorFfmpegUnavailableHint;
-
   /// No description provided for @asrErrorNoAudioTrack.
   ///
   /// In en, this message translates to:
@@ -579,24 +555,6 @@ abstract class AppLocalizations {
   /// **'Set up your AI provider to generate a transcript'**
   String get asrErrorByokMissing;
 
-  /// No description provided for @asrErrorByokMissingHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Open Settings → AI Providers to add credentials.'**
-  String get asrErrorByokMissingHint;
-
-  /// No description provided for @asrErrorCreditsExhausted.
-  ///
-  /// In en, this message translates to:
-  /// **'You\'ve used all your Enjoy credits'**
-  String get asrErrorCreditsExhausted;
-
-  /// No description provided for @asrErrorCreditsExhaustedHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Upgrade your plan to keep generating transcripts.'**
-  String get asrErrorCreditsExhaustedHint;
-
   /// No description provided for @asrErrorNetwork.
   ///
   /// In en, this message translates to:
@@ -633,12 +591,6 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get asrLongMediaConfirmCancel;
 
-  /// No description provided for @actionOpenFiles.
-  ///
-  /// In en, this message translates to:
-  /// **'Open file(s)'**
-  String get actionOpenFiles;
-
   /// No description provided for @actionImport.
   ///
   /// In en, this message translates to:
@@ -674,18 +626,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Recommended'**
   String get discoverRecommendedHeading;
-
-  /// No description provided for @discoverSubscriptionsHeading.
-  ///
-  /// In en, this message translates to:
-  /// **'Subscriptions'**
-  String get discoverSubscriptionsHeading;
-
-  /// No description provided for @discoverTimelineHeading.
-  ///
-  /// In en, this message translates to:
-  /// **'Recent uploads'**
-  String get discoverTimelineHeading;
 
   /// No description provided for @discoverSubscribeTitle.
   ///
@@ -741,12 +681,6 @@ abstract class AppLocalizations {
   /// **'Unsubscribed from channel'**
   String get discoverUnsubscribed;
 
-  /// No description provided for @discoverViewFeed.
-  ///
-  /// In en, this message translates to:
-  /// **'View feed'**
-  String get discoverViewFeed;
-
   /// No description provided for @discoverAddToLibrary.
   ///
   /// In en, this message translates to:
@@ -770,12 +704,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'In library'**
   String get discoverInLibrary;
-
-  /// No description provided for @discoverPlay.
-  ///
-  /// In en, this message translates to:
-  /// **'Play'**
-  String get discoverPlay;
 
   /// No description provided for @discoverFeedEmptyTitle.
   ///
@@ -866,54 +794,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You are subscribed to all recommended channels.'**
   String get discoverRecommendedAllSubscribed;
-
-  /// No description provided for @discoverSourceNotFound.
-  ///
-  /// In en, this message translates to:
-  /// **'This YouTube source could not be found.'**
-  String get discoverSourceNotFound;
-
-  /// No description provided for @discoverSourceUnavailable.
-  ///
-  /// In en, this message translates to:
-  /// **'This source is no longer available (deleted or private).'**
-  String get discoverSourceUnavailable;
-
-  /// No description provided for @discoverNetworkError.
-  ///
-  /// In en, this message translates to:
-  /// **'No internet connection. Check your network and try again.'**
-  String get discoverNetworkError;
-
-  /// No description provided for @discoverWorkerError.
-  ///
-  /// In en, this message translates to:
-  /// **'Could not reach the feed server. Try again later.'**
-  String get discoverWorkerError;
-
-  /// No description provided for @discoverInvalidUrl.
-  ///
-  /// In en, this message translates to:
-  /// **'Could not read a valid YouTube URL. Try a channel, @handle, or playlist link.'**
-  String get discoverInvalidUrl;
-
-  /// No description provided for @discoverAlreadySubscribed.
-  ///
-  /// In en, this message translates to:
-  /// **'Already subscribed to this source.'**
-  String get discoverAlreadySubscribed;
-
-  /// No description provided for @discoverSourceTypeChannel.
-  ///
-  /// In en, this message translates to:
-  /// **'Channel'**
-  String get discoverSourceTypeChannel;
-
-  /// No description provided for @discoverSourceTypePlaylist.
-  ///
-  /// In en, this message translates to:
-  /// **'Playlist'**
-  String get discoverSourceTypePlaylist;
 
   /// No description provided for @youtubeImportTitle.
   ///
@@ -1017,18 +897,6 @@ abstract class AppLocalizations {
   /// **'This GPU cannot render YouTube video. Relaunch the app to restore video with software rendering.'**
   String get youtubeVideoStallRelaunch;
 
-  /// No description provided for @searchHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Search'**
-  String get searchHint;
-
-  /// No description provided for @transportRepeat.
-  ///
-  /// In en, this message translates to:
-  /// **'Repeat'**
-  String get transportRepeat;
-
   /// No description provided for @transportFullscreen.
   ///
   /// In en, this message translates to:
@@ -1040,18 +908,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Exit fullscreen'**
   String get transportExitFullscreen;
-
-  /// No description provided for @transportMore.
-  ///
-  /// In en, this message translates to:
-  /// **'More'**
-  String get transportMore;
-
-  /// No description provided for @transportCollapse.
-  ///
-  /// In en, this message translates to:
-  /// **'Collapse player'**
-  String get transportCollapse;
 
   /// No description provided for @settingsTitle.
   ///
@@ -1083,18 +939,6 @@ abstract class AppLocalizations {
   /// **'This file type isn’t supported. Choose an audio or video file.'**
   String get importUnsupportedFileType;
 
-  /// No description provided for @noMediaYet.
-  ///
-  /// In en, this message translates to:
-  /// **'No media yet'**
-  String get noMediaYet;
-
-  /// No description provided for @tapImportToAdd.
-  ///
-  /// In en, this message translates to:
-  /// **'Import audio or video from the toolbar.'**
-  String get tapImportToAdd;
-
   /// No description provided for @navMainLabel.
   ///
   /// In en, this message translates to:
@@ -1125,12 +969,6 @@ abstract class AppLocalizations {
   /// **'Appearance'**
   String get settingsSectionAppearance;
 
-  /// No description provided for @settingsAppearanceSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Theme follows your system settings.'**
-  String get settingsAppearanceSubtitle;
-
   /// No description provided for @settingsSectionAbout.
   ///
   /// In en, this message translates to:
@@ -1143,29 +981,11 @@ abstract class AppLocalizations {
   /// **'SP Player — local transcripts and shadow reading.'**
   String get settingsAboutSubtitle;
 
-  /// No description provided for @settingsThemeRowTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Theme'**
-  String get settingsThemeRowTitle;
-
   /// No description provided for @settingsThemeDarkLocked.
   ///
   /// In en, this message translates to:
   /// **'Follows your system appearance.'**
   String get settingsThemeDarkLocked;
-
-  /// No description provided for @settingsThemeSystem.
-  ///
-  /// In en, this message translates to:
-  /// **'System'**
-  String get settingsThemeSystem;
-
-  /// No description provided for @settingsThemeLight.
-  ///
-  /// In en, this message translates to:
-  /// **'Light'**
-  String get settingsThemeLight;
 
   /// No description provided for @settingsThemeDark.
   ///
@@ -1233,29 +1053,11 @@ abstract class AppLocalizations {
   /// **'· looping'**
   String get playerDockLooping;
 
-  /// Dock readout when the Echo loop spans several lines.
-  ///
-  /// In en, this message translates to:
-  /// **'Lines {start}–{end} of {total}'**
-  String playerDockLinesSpanPosition(int start, int end, int total);
-
-  /// No description provided for @exitEchoMode.
-  ///
-  /// In en, this message translates to:
-  /// **'Exit echo mode'**
-  String get exitEchoMode;
-
   /// No description provided for @transcript.
   ///
   /// In en, this message translates to:
   /// **'Transcript'**
   String get transcript;
-
-  /// No description provided for @transcriptNowReading.
-  ///
-  /// In en, this message translates to:
-  /// **'Now reading'**
-  String get transcriptNowReading;
 
   /// No description provided for @playerTranscriptResizeHint.
   ///
@@ -1280,30 +1082,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Transcript'**
   String get transcriptEmptyOverline;
-
-  /// Empty-state row description for the AI transcript action.
-  ///
-  /// In en, this message translates to:
-  /// **'Transcribe the speech in this item. Uses credits.'**
-  String get transcriptEmptyGenerateDesc;
-
-  /// Empty-state row description for the extract action.
-  ///
-  /// In en, this message translates to:
-  /// **'Use the subtitle tracks inside the file, if it has any.'**
-  String get transcriptEmptyExtractDesc;
-
-  /// Empty-state row description for the import action.
-  ///
-  /// In en, this message translates to:
-  /// **'Import an .srt or .vtt file and choose its language.'**
-  String get transcriptEmptyImportDesc;
-
-  /// No description provided for @importSrtOrVtt.
-  ///
-  /// In en, this message translates to:
-  /// **'Import an .srt or .vtt file.'**
-  String get importSrtOrVtt;
 
   /// No description provided for @loading.
   ///
@@ -1341,36 +1119,6 @@ abstract class AppLocalizations {
   /// **'Volume'**
   String get volume;
 
-  /// No description provided for @transportMute.
-  ///
-  /// In en, this message translates to:
-  /// **'Mute'**
-  String get transportMute;
-
-  /// No description provided for @transportUnmute.
-  ///
-  /// In en, this message translates to:
-  /// **'Unmute'**
-  String get transportUnmute;
-
-  /// No description provided for @repeatNone.
-  ///
-  /// In en, this message translates to:
-  /// **'Repeat off'**
-  String get repeatNone;
-
-  /// No description provided for @repeatSegment.
-  ///
-  /// In en, this message translates to:
-  /// **'Repeat segment'**
-  String get repeatSegment;
-
-  /// No description provided for @settingsPlaceholder.
-  ///
-  /// In en, this message translates to:
-  /// **'Player preferences will appear here.'**
-  String get settingsPlaceholder;
-
   /// No description provided for @subtitles.
   ///
   /// In en, this message translates to:
@@ -1400,12 +1148,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not selected'**
   String get subtitlesNotSelected;
-
-  /// No description provided for @subtitlesImportFile.
-  ///
-  /// In en, this message translates to:
-  /// **'Import subtitle file…'**
-  String get subtitlesImportFile;
 
   /// No description provided for @subtitlesDeleteTrack.
   ///
@@ -1467,30 +1209,6 @@ abstract class AppLocalizations {
   /// **'AI transcript'**
   String get transcriptEmptyGenerate;
 
-  /// No description provided for @subtitlesGenerate.
-  ///
-  /// In en, this message translates to:
-  /// **'AI transcript'**
-  String get subtitlesGenerate;
-
-  /// No description provided for @subtitlesRegenerate.
-  ///
-  /// In en, this message translates to:
-  /// **'Re-generate transcript'**
-  String get subtitlesRegenerate;
-
-  /// No description provided for @subtitlesExtractEmbedded.
-  ///
-  /// In en, this message translates to:
-  /// **'Extract embedded subtitles'**
-  String get subtitlesExtractEmbedded;
-
-  /// No description provided for @subtitlesRefreshCloud.
-  ///
-  /// In en, this message translates to:
-  /// **'Refresh transcripts from cloud'**
-  String get subtitlesRefreshCloud;
-
   /// No description provided for @subtitlesImportLanguageTitle.
   ///
   /// In en, this message translates to:
@@ -1544,48 +1262,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'To {language}'**
   String subtitlesAutoTranslateLanguageChip(String language);
-
-  /// No description provided for @subtitlesAutoTranslateRetranslateLine.
-  ///
-  /// In en, this message translates to:
-  /// **'Re-translate this line'**
-  String get subtitlesAutoTranslateRetranslateLine;
-
-  /// No description provided for @subtitlesAutoTranslateRetranslateAll.
-  ///
-  /// In en, this message translates to:
-  /// **'Re-translate'**
-  String get subtitlesAutoTranslateRetranslateAll;
-
-  /// No description provided for @subtitlesAutoTranslateBlockedStalePrimary.
-  ///
-  /// In en, this message translates to:
-  /// **'The primary subtitle changed. Auto translate will rebuild from the new primary.'**
-  String get subtitlesAutoTranslateBlockedStalePrimary;
-
-  /// No description provided for @subtitlesAutoTranslateLineFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Couldn’t translate this line'**
-  String get subtitlesAutoTranslateLineFailed;
-
-  /// No description provided for @subtitlesAutoTranslatePendingLine.
-  ///
-  /// In en, this message translates to:
-  /// **'Translating…'**
-  String get subtitlesAutoTranslatePendingLine;
-
-  /// No description provided for @subtitlesAutoTranslateBlockedSameLanguage.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto translate is not needed when your native language matches the primary subtitle.'**
-  String get subtitlesAutoTranslateBlockedSameLanguage;
-
-  /// No description provided for @subtitlesAutoTranslateBlockedNoPrimary.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose a primary subtitle first.'**
-  String get subtitlesAutoTranslateBlockedNoPrimary;
 
   /// No description provided for @subtitlesExtractNoTracks.
   ///
@@ -1677,23 +1353,11 @@ abstract class AppLocalizations {
   /// **'RECORDING TAKE {count}'**
   String echoLoopCaptionRecording(int count);
 
-  /// No description provided for @shadowReadingTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Shadow reading'**
-  String get shadowReadingTitle;
-
   /// No description provided for @shadowReadingHint.
   ///
   /// In en, this message translates to:
   /// **'Practice speaking along this segment. Record your voice and compare pitch with the reference.'**
   String get shadowReadingHint;
-
-  /// No description provided for @shadowReadingReferenceSnippet.
-  ///
-  /// In en, this message translates to:
-  /// **'Reference'**
-  String get shadowReadingReferenceSnippet;
 
   /// No description provided for @pitchContourTitle.
   ///
@@ -1731,12 +1395,6 @@ abstract class AppLocalizations {
   /// **'Analyzing pitch…'**
   String get pitchContourAnalyzing;
 
-  /// No description provided for @shadowRecordingExisting.
-  ///
-  /// In en, this message translates to:
-  /// **'Saved takes'**
-  String get shadowRecordingExisting;
-
   /// No description provided for @shadowRecordingEmpty.
   ///
   /// In en, this message translates to:
@@ -1748,12 +1406,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Take'**
   String get shadowRecordingTake;
-
-  /// No description provided for @shadowTakesLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Takes'**
-  String get shadowTakesLabel;
 
   /// No description provided for @shadowTakesEmptyPrefix.
   ///
@@ -1772,12 +1424,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Play'**
   String get shadowRecordingPlay;
-
-  /// No description provided for @shadowRecordingPause.
-  ///
-  /// In en, this message translates to:
-  /// **'Pause'**
-  String get shadowRecordingPause;
 
   /// No description provided for @shadowRecordingChooseTake.
   ///
@@ -1845,23 +1491,11 @@ abstract class AppLocalizations {
   /// **'AI providers'**
   String get settingsAiProvidersTileTitle;
 
-  /// Settings tile subtitle for AI provider configuration.
-  ///
-  /// In en, this message translates to:
-  /// **'Configure your own API keys per feature'**
-  String get settingsAiProvidersTileSubtitle;
-
   /// Screen title for AI provider settings.
   ///
   /// In en, this message translates to:
   /// **'AI providers'**
   String get settingsAiProvidersTitle;
-
-  /// Screen subtitle for AI provider settings.
-  ///
-  /// In en, this message translates to:
-  /// **'Configure how SP Player calls AI for each feature.'**
-  String get settingsAiProvidersSubtitle;
 
   /// Privacy notice on the AI providers settings screen.
   ///
@@ -1887,23 +1521,11 @@ abstract class AppLocalizations {
   /// **'Language models'**
   String get settingsAiProvidersModalityLlm;
 
-  /// Card subtitle for LLM modality.
-  ///
-  /// In en, this message translates to:
-  /// **'Chat, translation, dictionary, and contextual translation'**
-  String get settingsAiProvidersModalityLlmHint;
-
   /// Card title for ASR modality.
   ///
   /// In en, this message translates to:
   /// **'Speech recognition (subtitles)'**
   String get settingsAiProvidersModalityAsr;
-
-  /// Card subtitle for ASR modality.
-  ///
-  /// In en, this message translates to:
-  /// **'Transcribe audio to text'**
-  String get settingsAiProvidersModalityAsrHint;
 
   /// Card title for TTS modality.
   ///
@@ -1911,23 +1533,11 @@ abstract class AppLocalizations {
   /// **'Text-to-speech'**
   String get settingsAiProvidersModalityTts;
 
-  /// Card subtitle for TTS modality.
-  ///
-  /// In en, this message translates to:
-  /// **'Synthesize spoken audio from text'**
-  String get settingsAiProvidersModalityTtsHint;
-
   /// Card title for pronunciation assessment modality.
   ///
   /// In en, this message translates to:
   /// **'Pronunciation assessment'**
   String get settingsAiProvidersModalityAssessment;
-
-  /// Card subtitle for assessment modality.
-  ///
-  /// In en, this message translates to:
-  /// **'Score shadow-reading takes with Azure Speech'**
-  String get settingsAiProvidersModalityAssessmentHint;
 
   /// Label for LLM protocol spec selector.
   ///
@@ -2145,18 +1755,6 @@ abstract class AppLocalizations {
   /// **'Custom cloud'**
   String get settingsAiEngineCloud;
 
-  /// No description provided for @settingsAiProvidersTtsLocalHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Uses the built-in Windows speech synthesis — no download needed. Voices follow your installed system voice packs (Settings → Time & language → Speech).'**
-  String get settingsAiProvidersTtsLocalHint;
-
-  /// No description provided for @settingsAiProvidersAsrLocalHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Offline recognition via the local components; no network needed. First use guides you through the download.'**
-  String get settingsAiProvidersAsrLocalHint;
-
   /// Label for OpenAI-compatible TTS model field
   ///
   /// In en, this message translates to:
@@ -2253,23 +1851,11 @@ abstract class AppLocalizations {
   /// **'Enrich Craft word timings'**
   String get settingsTranscriptEnrichmentTitle;
 
-  /// Settings switch subtitle explaining Craft timeline enrichment.
-  ///
-  /// In en, this message translates to:
-  /// **'When on, Craft save stores word and phone times from on-device alignment. Off (default) keeps today’s synthesis line timings.'**
-  String get settingsTranscriptEnrichmentSubtitle;
-
   /// Settings switch title for opt-in karaoke word highlight in the transcript panel.
   ///
   /// In en, this message translates to:
   /// **'Highlight current word'**
   String get settingsTranscriptKaraokeTitle;
-
-  /// Settings switch subtitle explaining karaoke word highlight.
-  ///
-  /// In en, this message translates to:
-  /// **'Highlight the spoken word when word timings exist.'**
-  String get settingsTranscriptKaraokeSubtitle;
 
   /// Settings switch title for opt-in stored IPA overlay on transcript words.
   ///
@@ -2277,53 +1863,17 @@ abstract class AppLocalizations {
   /// **'Show pronunciation (IPA)'**
   String get settingsTranscriptIpaOverlayTitle;
 
-  /// Settings switch subtitle explaining stored IPA overlay.
-  ///
-  /// In en, this message translates to:
-  /// **'Show IPA under words; tap to play.'**
-  String get settingsTranscriptIpaOverlaySubtitle;
-
-  /// Section title for karaoke and IPA toggles in the subtitle track picker.
-  ///
-  /// In en, this message translates to:
-  /// **'Transcript display'**
-  String get transcriptDisplaySettingsTitle;
-
-  /// Hint when IPA toggle is unavailable because the transcript has no phones.
-  ///
-  /// In en, this message translates to:
-  /// **'Generate pronunciation first.'**
-  String get transcriptIpaUnavailableHint;
-
-  /// Hint when karaoke is off because the primary track has no timed words.
-  ///
-  /// In en, this message translates to:
-  /// **'Generate word timings first.'**
-  String get transcriptKaraokeUnavailableHint;
-
   /// Hint when karaoke stays off for YouTube or other non-extractable media.
   ///
   /// In en, this message translates to:
   /// **'Karaoke needs word timings from a local file.'**
   String get transcriptKaraokeUnavailableRemoteHint;
 
-  /// CC-sheet tile title to align words + IPA from this item's local audio.
-  ///
-  /// In en, this message translates to:
-  /// **'Generate word timings and pronunciation'**
-  String get transcriptEnrichOwnedTitle;
-
   /// CC-sheet tile subtitle for owned-media transcript enrichment.
   ///
   /// In en, this message translates to:
   /// **'Uses this item\'s audio. Playback stays available.'**
   String get transcriptEnrichOwnedSubtitle;
-
-  /// CC-sheet tile title to phonemize YouTube captions without downloading video.
-  ///
-  /// In en, this message translates to:
-  /// **'Generate pronunciation'**
-  String get transcriptEnrichYoutubeTitle;
 
   /// CC-sheet tile subtitle for YouTube IPA-only enrichment.
   ///
@@ -2348,12 +1898,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t generate. Tap to try again.'**
   String get transcriptEnrichFailed;
-
-  /// Busy enrich tile subtitle before the first cue reports progress.
-  ///
-  /// In en, this message translates to:
-  /// **'Generating…'**
-  String get transcriptEnrichWorking;
 
   /// Busy enrich tile subtitle while aligning cues on a long transcript.
   ///
@@ -2468,12 +2012,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Keyboard shortcuts'**
   String get hotkeysSectionKeyboard;
-
-  /// No description provided for @hotkeysResetBinding.
-  ///
-  /// In en, this message translates to:
-  /// **'Reset'**
-  String get hotkeysResetBinding;
 
   /// No description provided for @hotkeysResetAll.
   ///
@@ -2793,12 +2331,6 @@ abstract class AppLocalizations {
   /// **'Pronunciation analysis'**
   String get assessmentPronunciationAnalysis;
 
-  /// No description provided for @assessmentAccuracyScore.
-  ///
-  /// In en, this message translates to:
-  /// **'Accuracy score'**
-  String get assessmentAccuracyScore;
-
   /// No description provided for @assessmentSyllables.
   ///
   /// In en, this message translates to:
@@ -2925,1091 +2457,17 @@ abstract class AppLocalizations {
   /// **'Stored assessment data could not be read.'**
   String get assessmentInvalidStored;
 
-  /// No description provided for @authSignInTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Welcome to Enjoy'**
-  String get authSignInTitle;
-
-  /// No description provided for @authSignInSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign in to sync your library, track learning progress, and pick up where you left off.'**
-  String get authSignInSubtitle;
-
-  /// Sign-in brand panel headline (wide windows).
-  ///
-  /// In en, this message translates to:
-  /// **'First the original voice. Then yours.'**
-  String get authBrandHeadline;
-
-  /// Sign-in brand panel body (wide windows).
-  ///
-  /// In en, this message translates to:
-  /// **'Listen line by line, echo every sentence, and hear how close you are.'**
-  String get authBrandBody;
-
-  /// No description provided for @authSignInCta.
-  ///
-  /// In en, this message translates to:
-  /// **'Continue'**
-  String get authSignInCta;
-
-  /// No description provided for @authContinueWithGoogle.
-  ///
-  /// In en, this message translates to:
-  /// **'Continue with Google'**
-  String get authContinueWithGoogle;
-
-  /// No description provided for @authContinueWithApple.
-  ///
-  /// In en, this message translates to:
-  /// **'Continue with Apple'**
-  String get authContinueWithApple;
-
-  /// No description provided for @authContinueWithEmail.
-  ///
-  /// In en, this message translates to:
-  /// **'Continue with Email'**
-  String get authContinueWithEmail;
-
-  /// No description provided for @authOtherSignInOptions.
-  ///
-  /// In en, this message translates to:
-  /// **'Other sign-in options'**
-  String get authOtherSignInOptions;
-
-  /// No description provided for @authOrDivider.
-  ///
-  /// In en, this message translates to:
-  /// **'or'**
-  String get authOrDivider;
-
-  /// No description provided for @authEmailPrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'We will send a one-time code to your email.'**
-  String get authEmailPrompt;
-
-  /// No description provided for @authEmailLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Email'**
-  String get authEmailLabel;
-
-  /// No description provided for @authEmailInvalid.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter a valid email address.'**
-  String get authEmailInvalid;
-
-  /// No description provided for @authSendOtp.
-  ///
-  /// In en, this message translates to:
-  /// **'Send code'**
-  String get authSendOtp;
-
-  /// No description provided for @authOtpTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter verification code'**
-  String get authOtpTitle;
-
-  /// No description provided for @authOtpSentTo.
-  ///
-  /// In en, this message translates to:
-  /// **'Code sent to {email}'**
-  String authOtpSentTo(String email);
-
-  /// No description provided for @authOtpLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'6-digit code'**
-  String get authOtpLabel;
-
-  /// Accessibility label for the 6-digit OTP input field.
-  ///
-  /// In en, this message translates to:
-  /// **'One-time passcode'**
-  String get authOtpInputSemantics;
-
-  /// No description provided for @authVerifyOtp.
-  ///
-  /// In en, this message translates to:
-  /// **'Verify'**
-  String get authVerifyOtp;
-
-  /// No description provided for @authOtpResend.
-  ///
-  /// In en, this message translates to:
-  /// **'Resend code'**
-  String get authOtpResend;
-
-  /// No description provided for @authOtpResendIn.
-  ///
-  /// In en, this message translates to:
-  /// **'Resend in {seconds}s'**
-  String authOtpResendIn(int seconds);
-
-  /// No description provided for @authChangeEmail.
-  ///
-  /// In en, this message translates to:
-  /// **'Change email'**
-  String get authChangeEmail;
-
-  /// No description provided for @authOtpResumeTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Finish signing in'**
-  String get authOtpResumeTitle;
-
-  /// No description provided for @authOtpResumeSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter the verification code sent to {email}'**
-  String authOtpResumeSubtitle(String email);
-
-  /// No description provided for @authOtpResumeAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Continue verification'**
-  String get authOtpResumeAction;
-
-  /// No description provided for @authWebSignInWaiting.
-  ///
-  /// In en, this message translates to:
-  /// **'Complete sign-in in your browser…'**
-  String get authWebSignInWaiting;
-
-  /// No description provided for @authWaitingForApproval.
-  ///
-  /// In en, this message translates to:
-  /// **'Finishing sign-in…'**
-  String get authWaitingForApproval;
-
   /// No description provided for @authCancel.
   ///
   /// In en, this message translates to:
   /// **'Cancel'**
   String get authCancel;
 
-  /// No description provided for @authSignedInSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Signed in successfully'**
-  String get authSignedInSuccess;
-
-  /// No description provided for @authReloadSignInPage.
-  ///
-  /// In en, this message translates to:
-  /// **'Reload sign-in page'**
-  String get authReloadSignInPage;
-
-  /// No description provided for @authOpenInSystemBrowser.
-  ///
-  /// In en, this message translates to:
-  /// **'Open in system browser'**
-  String get authOpenInSystemBrowser;
-
-  /// No description provided for @authSignOut.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign out'**
-  String get authSignOut;
-
-  /// No description provided for @profileTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Profile'**
-  String get profileTitle;
-
-  /// No description provided for @profileRefreshTooltip.
-  ///
-  /// In en, this message translates to:
-  /// **'Refresh profile'**
-  String get profileRefreshTooltip;
-
-  /// No description provided for @profileFieldName.
-  ///
-  /// In en, this message translates to:
-  /// **'Username'**
-  String get profileFieldName;
-
-  /// No description provided for @profileFieldEmail.
-  ///
-  /// In en, this message translates to:
-  /// **'Email'**
-  String get profileFieldEmail;
-
-  /// No description provided for @profileFieldEnjoyId.
-  ///
-  /// In en, this message translates to:
-  /// **'Enjoy ID'**
-  String get profileFieldEnjoyId;
-
-  /// No description provided for @profileFieldMixinId.
-  ///
-  /// In en, this message translates to:
-  /// **'Mixin ID'**
-  String get profileFieldMixinId;
-
-  /// No description provided for @profileMixinNotLinked.
-  ///
-  /// In en, this message translates to:
-  /// **'Not linked'**
-  String get profileMixinNotLinked;
-
-  /// No description provided for @profileEditTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit profile'**
-  String get profileEditTitle;
-
-  /// No description provided for @profileEditEntry.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit profile'**
-  String get profileEditEntry;
-
-  /// No description provided for @profileEditEntryHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Username, avatar, and account IDs'**
-  String get profileEditEntryHint;
-
-  /// No description provided for @profileChangeAvatar.
-  ///
-  /// In en, this message translates to:
-  /// **'Change avatar'**
-  String get profileChangeAvatar;
-
-  /// No description provided for @profileAvatarTooLarge.
-  ///
-  /// In en, this message translates to:
-  /// **'Avatar must be 2 MB or smaller'**
-  String get profileAvatarTooLarge;
-
-  /// No description provided for @profileAvatarUnsupportedType.
-  ///
-  /// In en, this message translates to:
-  /// **'Avatar must be JPEG, PNG, or WebP'**
-  String get profileAvatarUnsupportedType;
-
-  /// No description provided for @profileAvatarEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose an image to upload'**
-  String get profileAvatarEmpty;
-
-  /// No description provided for @profileAvatarUploadFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Could not upload avatar. Try again.'**
-  String get profileAvatarUploadFailed;
-
-  /// No description provided for @profileCopied.
-  ///
-  /// In en, this message translates to:
-  /// **'Copied'**
-  String get profileCopied;
-
-  /// No description provided for @profileFieldGoal.
-  ///
-  /// In en, this message translates to:
-  /// **'Daily goal (minutes)'**
-  String get profileFieldGoal;
-
-  /// No description provided for @profileFieldLearningLanguage.
-  ///
-  /// In en, this message translates to:
-  /// **'Learning language'**
-  String get profileFieldLearningLanguage;
-
-  /// No description provided for @profileFieldNativeLanguage.
-  ///
-  /// In en, this message translates to:
-  /// **'Native language'**
-  String get profileFieldNativeLanguage;
-
-  /// No description provided for @profileFieldRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Required'**
-  String get profileFieldRequired;
-
-  /// No description provided for @profileSave.
-  ///
-  /// In en, this message translates to:
-  /// **'Save'**
-  String get profileSave;
-
-  /// No description provided for @profileSaveSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Profile saved'**
-  String get profileSaveSuccess;
-
-  /// No description provided for @profileSubscriptionFree.
-  ///
-  /// In en, this message translates to:
-  /// **'Free'**
-  String get profileSubscriptionFree;
-
-  /// No description provided for @profileSubscriptionPro.
-  ///
-  /// In en, this message translates to:
-  /// **'Pro'**
-  String get profileSubscriptionPro;
-
-  /// No description provided for @profileCreditsAvailable.
-  ///
-  /// In en, this message translates to:
-  /// **'Credits today: {available} / {limit}'**
-  String profileCreditsAvailable(String available, String limit);
-
-  /// No description provided for @profileStatTodayTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Today'**
-  String get profileStatTodayTitle;
-
-  /// No description provided for @profileStatWeekTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'This week'**
-  String get profileStatWeekTitle;
-
-  /// No description provided for @profileStatMonthTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'This month'**
-  String get profileStatMonthTitle;
-
-  /// No description provided for @profileSectionPractice.
-  ///
-  /// In en, this message translates to:
-  /// **'Practice'**
-  String get profileSectionPractice;
-
-  /// No description provided for @profileSectionPracticeHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Synced practice time from your account'**
-  String get profileSectionPracticeHint;
-
-  /// No description provided for @profileCreditsUsageTile.
-  ///
-  /// In en, this message translates to:
-  /// **'Credits usage'**
-  String get profileCreditsUsageTile;
-
-  /// No description provided for @profileCreditsUsageSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'View AI credits consumption from your account'**
-  String get profileCreditsUsageSubtitle;
-
-  /// No description provided for @profileSectionAccount.
-  ///
-  /// In en, this message translates to:
-  /// **'Account'**
-  String get profileSectionAccount;
-
-  /// No description provided for @profileSectionAccountHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Daily credits and usage history'**
-  String get profileSectionAccountHint;
-
-  /// No description provided for @profileSectionPreferences.
-  ///
-  /// In en, this message translates to:
-  /// **'Preferences'**
-  String get profileSectionPreferences;
-
-  /// No description provided for @profileSectionPreferencesHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Daily goal and language settings'**
-  String get profileSectionPreferencesHint;
-
-  /// No description provided for @profileSignOutConfirmTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign out?'**
-  String get profileSignOutConfirmTitle;
-
-  /// No description provided for @profileSignOutConfirmMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'You will need to sign in again to sync and use AI features.'**
-  String get profileSignOutConfirmMessage;
-
-  /// No description provided for @profileSubscriptionTile.
-  ///
-  /// In en, this message translates to:
-  /// **'Subscription'**
-  String get profileSubscriptionTile;
-
-  /// No description provided for @profileSubscriptionSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'View your plan and upgrade to Pro'**
-  String get profileSubscriptionSubtitle;
-
-  /// No description provided for @subscriptionTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Subscription'**
-  String get subscriptionTitle;
-
-  /// No description provided for @subscriptionDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Manage your subscription plan and Pro benefits.'**
-  String get subscriptionDescription;
-
-  /// No description provided for @subscriptionErrorLoading.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to load subscription status'**
-  String get subscriptionErrorLoading;
-
-  /// No description provided for @subscriptionStatusCardTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Subscription status'**
-  String get subscriptionStatusCardTitle;
-
-  /// No description provided for @subscriptionCurrentPlan.
-  ///
-  /// In en, this message translates to:
-  /// **'Current plan'**
-  String get subscriptionCurrentPlan;
-
-  /// No description provided for @subscriptionStatusTier.
-  ///
-  /// In en, this message translates to:
-  /// **'Tier'**
-  String get subscriptionStatusTier;
-
-  /// No description provided for @subscriptionStatusActive.
-  ///
-  /// In en, this message translates to:
-  /// **'Status'**
-  String get subscriptionStatusActive;
-
-  /// No description provided for @subscriptionActive.
-  ///
-  /// In en, this message translates to:
-  /// **'Active'**
-  String get subscriptionActive;
-
-  /// No description provided for @subscriptionInactive.
-  ///
-  /// In en, this message translates to:
-  /// **'Inactive'**
-  String get subscriptionInactive;
-
-  /// No description provided for @subscriptionStatusExpiration.
-  ///
-  /// In en, this message translates to:
-  /// **'Expiration'**
-  String get subscriptionStatusExpiration;
-
-  /// No description provided for @subscriptionNeverExpires.
-  ///
-  /// In en, this message translates to:
-  /// **'Never expires'**
-  String get subscriptionNeverExpires;
-
-  /// No description provided for @subscriptionExpiresOn.
-  ///
-  /// In en, this message translates to:
-  /// **'Expires on {date}'**
-  String subscriptionExpiresOn(String date);
-
-  /// No description provided for @subscriptionStatusCreditsLimit.
-  ///
-  /// In en, this message translates to:
-  /// **'Daily credits limit'**
-  String get subscriptionStatusCreditsLimit;
-
-  /// No description provided for @subscriptionDailyCredits.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} credits'**
-  String subscriptionDailyCredits(String count);
-
-  /// No description provided for @subscriptionTierComparisonTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose your plan'**
-  String get subscriptionTierComparisonTitle;
-
-  /// No description provided for @subscriptionTierFreeName.
-  ///
-  /// In en, this message translates to:
-  /// **'Free'**
-  String get subscriptionTierFreeName;
-
-  /// No description provided for @subscriptionTierFreeDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Perfect for light usage'**
-  String get subscriptionTierFreeDescription;
-
-  /// No description provided for @subscriptionTierFreePrice.
-  ///
-  /// In en, this message translates to:
-  /// **'Free'**
-  String get subscriptionTierFreePrice;
-
-  /// No description provided for @subscriptionTierFreeDailyCredits.
-  ///
-  /// In en, this message translates to:
-  /// **'1,000 credits/day'**
-  String get subscriptionTierFreeDailyCredits;
-
-  /// No description provided for @subscriptionTierLiteName.
-  ///
-  /// In en, this message translates to:
-  /// **'Lite'**
-  String get subscriptionTierLiteName;
-
-  /// No description provided for @subscriptionTierLiteDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'For daily learners'**
-  String get subscriptionTierLiteDescription;
-
-  /// No description provided for @subscriptionTierLitePrice.
-  ///
-  /// In en, this message translates to:
-  /// **'1.99 USD/month'**
-  String get subscriptionTierLitePrice;
-
-  /// No description provided for @subscriptionTierLiteDailyCredits.
-  ///
-  /// In en, this message translates to:
-  /// **'12,000 credits/day (12× Free)'**
-  String get subscriptionTierLiteDailyCredits;
-
-  /// No description provided for @subscriptionTierProName.
-  ///
-  /// In en, this message translates to:
-  /// **'Pro'**
-  String get subscriptionTierProName;
-
-  /// No description provided for @subscriptionTierProDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'For serious learners'**
-  String get subscriptionTierProDescription;
-
-  /// No description provided for @subscriptionTierProPrice.
-  ///
-  /// In en, this message translates to:
-  /// **'9.99 USD/month'**
-  String get subscriptionTierProPrice;
-
-  /// No description provided for @subscriptionTierProDailyCredits.
-  ///
-  /// In en, this message translates to:
-  /// **'60,000 credits/day (60× Free)'**
-  String get subscriptionTierProDailyCredits;
-
-  /// No description provided for @subscriptionFeatureTranslation.
-  ///
-  /// In en, this message translates to:
-  /// **'Translation'**
-  String get subscriptionFeatureTranslation;
-
-  /// No description provided for @subscriptionFeatureSmartTranslation.
-  ///
-  /// In en, this message translates to:
-  /// **'Smart translation'**
-  String get subscriptionFeatureSmartTranslation;
-
-  /// No description provided for @subscriptionFeatureDictionary.
-  ///
-  /// In en, this message translates to:
-  /// **'Dictionary'**
-  String get subscriptionFeatureDictionary;
-
-  /// No description provided for @subscriptionFeatureAsr.
-  ///
-  /// In en, this message translates to:
-  /// **'Speech recognition'**
-  String get subscriptionFeatureAsr;
-
-  /// No description provided for @subscriptionFeatureTts.
-  ///
-  /// In en, this message translates to:
-  /// **'Speech synthesis'**
-  String get subscriptionFeatureTts;
-
-  /// No description provided for @subscriptionFeatureAssessment.
-  ///
-  /// In en, this message translates to:
-  /// **'Pronunciation assessment'**
-  String get subscriptionFeatureAssessment;
-
-  /// No description provided for @subscriptionFeaturePaidFlashcards.
-  ///
-  /// In en, this message translates to:
-  /// **'Download vocabulary flashcards'**
-  String get subscriptionFeaturePaidFlashcards;
-
-  /// No description provided for @subscriptionFeaturePaidMoreComing.
-  ///
-  /// In en, this message translates to:
-  /// **'More features coming'**
-  String get subscriptionFeaturePaidMoreComing;
-
-  /// No description provided for @subscriptionUpgrade.
-  ///
-  /// In en, this message translates to:
-  /// **'Upgrade to Pro'**
-  String get subscriptionUpgrade;
-
-  /// No description provided for @subscriptionUpgradeShort.
-  ///
-  /// In en, this message translates to:
-  /// **'Upgrade'**
-  String get subscriptionUpgradeShort;
-
-  /// No description provided for @subscriptionRecommendedPlan.
-  ///
-  /// In en, this message translates to:
-  /// **'Recommended'**
-  String get subscriptionRecommendedPlan;
-
-  /// No description provided for @subscriptionExtend.
-  ///
-  /// In en, this message translates to:
-  /// **'Extend subscription'**
-  String get subscriptionExtend;
-
-  /// No description provided for @subscriptionPurchaseTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Purchase Pro subscription'**
-  String get subscriptionPurchaseTitle;
-
-  /// No description provided for @subscriptionPurchaseSelectDuration.
-  ///
-  /// In en, this message translates to:
-  /// **'Select duration'**
-  String get subscriptionPurchaseSelectDuration;
-
-  /// No description provided for @subscriptionPurchaseDuration.
-  ///
-  /// In en, this message translates to:
-  /// **'Duration'**
-  String get subscriptionPurchaseDuration;
-
-  /// No description provided for @subscriptionPurchaseOneMonth.
-  ///
-  /// In en, this message translates to:
-  /// **'1 month'**
-  String get subscriptionPurchaseOneMonth;
-
-  /// No description provided for @subscriptionPurchaseOneSeason.
-  ///
-  /// In en, this message translates to:
-  /// **'1 season'**
-  String get subscriptionPurchaseOneSeason;
-
-  /// No description provided for @subscriptionPurchaseOneYear.
-  ///
-  /// In en, this message translates to:
-  /// **'1 year'**
-  String get subscriptionPurchaseOneYear;
-
-  /// No description provided for @subscriptionPurchaseCustomDuration.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom'**
-  String get subscriptionPurchaseCustomDuration;
-
-  /// No description provided for @subscriptionPurchaseCustomMonthsLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Number of months'**
-  String get subscriptionPurchaseCustomMonthsLabel;
-
-  /// No description provided for @subscriptionPurchaseCustomMonthsHint.
-  ///
-  /// In en, this message translates to:
-  /// **'1–12'**
-  String get subscriptionPurchaseCustomMonthsHint;
-
-  /// No description provided for @subscriptionPurchaseCustomMonthsHelper.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter between 1 and 12 months'**
-  String get subscriptionPurchaseCustomMonthsHelper;
-
-  /// No description provided for @subscriptionPurchaseMonths.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} months'**
-  String subscriptionPurchaseMonths(int count);
-
-  /// No description provided for @subscriptionPurchasePaymentMethod.
-  ///
-  /// In en, this message translates to:
-  /// **'Payment method'**
-  String get subscriptionPurchasePaymentMethod;
-
-  /// No description provided for @subscriptionProcessorStripe.
-  ///
-  /// In en, this message translates to:
-  /// **'Stripe'**
-  String get subscriptionProcessorStripe;
-
-  /// No description provided for @subscriptionProcessorMixin.
-  ///
-  /// In en, this message translates to:
-  /// **'Cryptocurrency'**
-  String get subscriptionProcessorMixin;
-
-  /// No description provided for @subscriptionPaymentMethodCard.
-  ///
-  /// In en, this message translates to:
-  /// **'Card'**
-  String get subscriptionPaymentMethodCard;
-
-  /// No description provided for @subscriptionPaymentMethodWechat.
-  ///
-  /// In en, this message translates to:
-  /// **'WeChat'**
-  String get subscriptionPaymentMethodWechat;
-
-  /// No description provided for @subscriptionPaymentMethodAlipay.
-  ///
-  /// In en, this message translates to:
-  /// **'Alipay'**
-  String get subscriptionPaymentMethodAlipay;
-
-  /// No description provided for @subscriptionPaymentMethodGooglePay.
-  ///
-  /// In en, this message translates to:
-  /// **'Google Pay'**
-  String get subscriptionPaymentMethodGooglePay;
-
-  /// No description provided for @subscriptionPaymentMethodUsdt.
-  ///
-  /// In en, this message translates to:
-  /// **'USDT'**
-  String get subscriptionPaymentMethodUsdt;
-
-  /// No description provided for @subscriptionPaymentMethodUsdc.
-  ///
-  /// In en, this message translates to:
-  /// **'USDC'**
-  String get subscriptionPaymentMethodUsdc;
-
-  /// No description provided for @subscriptionPaymentMethodBtc.
-  ///
-  /// In en, this message translates to:
-  /// **'BTC'**
-  String get subscriptionPaymentMethodBtc;
-
-  /// No description provided for @subscriptionPaymentMethodEth.
-  ///
-  /// In en, this message translates to:
-  /// **'ETH'**
-  String get subscriptionPaymentMethodEth;
-
-  /// No description provided for @subscriptionPaymentMethodDoge.
-  ///
-  /// In en, this message translates to:
-  /// **'Doge'**
-  String get subscriptionPaymentMethodDoge;
-
-  /// No description provided for @subscriptionPaymentMethodAndMore.
-  ///
-  /// In en, this message translates to:
-  /// **'and more'**
-  String get subscriptionPaymentMethodAndMore;
-
-  /// No description provided for @subscriptionTotalPriceLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Total'**
-  String get subscriptionTotalPriceLabel;
-
-  /// No description provided for @subscriptionTotalPrice.
-  ///
-  /// In en, this message translates to:
-  /// **'{amount} USD'**
-  String subscriptionTotalPrice(String amount);
-
-  /// No description provided for @subscriptionContinueToPayment.
-  ///
-  /// In en, this message translates to:
-  /// **'Continue to payment'**
-  String get subscriptionContinueToPayment;
-
-  /// No description provided for @subscriptionRedirectingToPayment.
-  ///
-  /// In en, this message translates to:
-  /// **'Redirecting to payment…'**
-  String get subscriptionRedirectingToPayment;
-
-  /// No description provided for @subscriptionPaymentUrlMissing.
-  ///
-  /// In en, this message translates to:
-  /// **'Payment URL not available'**
-  String get subscriptionPaymentUrlMissing;
-
-  /// No description provided for @subscriptionPaymentLaunchFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Could not open payment page'**
-  String get subscriptionPaymentLaunchFailed;
-
-  /// No description provided for @subscriptionPurchaseFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Purchase failed'**
-  String get subscriptionPurchaseFailed;
-
-  /// No description provided for @subscriptionMobilePurchaseTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Mobile purchase coming soon'**
-  String get subscriptionMobilePurchaseTitle;
-
-  /// No description provided for @subscriptionMobilePurchaseMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'In-app purchase on iOS and Android is not available yet. If you already have Pro from the web or desktop app, your status appears above.'**
-  String get subscriptionMobilePurchaseMessage;
-
-  /// No description provided for @subscriptionCreditsLimitMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'AI credits limit reached. Upgrade for higher limits.'**
-  String get subscriptionCreditsLimitMessage;
-
   /// No description provided for @subscriptionViewPlans.
   ///
   /// In en, this message translates to:
   /// **'View plans'**
   String get subscriptionViewPlans;
-
-  /// Celebration snackbar shown when the tier flips from Free to Pro.
-  ///
-  /// In en, this message translates to:
-  /// **'You\'re now Pro — enjoy!'**
-  String get subscriptionUpgradedToPro;
-
-  /// Snackbars shown while polling for payment confirmation after returning from external checkout.
-  ///
-  /// In en, this message translates to:
-  /// **'Verifying your upgrade…'**
-  String get subscriptionVerifyingUpgrade;
-
-  /// Shown when eager purchase polling times out without confirming Pro.
-  ///
-  /// In en, this message translates to:
-  /// **'Couldn\'t confirm your upgrade yet — we\'ll keep checking in the background.'**
-  String get subscriptionVerifyTimeout;
-
-  /// No description provided for @creditsUsageTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Credits usage'**
-  String get creditsUsageTitle;
-
-  /// No description provided for @creditsUsageDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Records of credits checks on the Enjoy AI worker (UTC dates).'**
-  String get creditsUsageDescription;
-
-  /// No description provided for @creditsUsageStartDate.
-  ///
-  /// In en, this message translates to:
-  /// **'Start date'**
-  String get creditsUsageStartDate;
-
-  /// No description provided for @creditsUsageEndDate.
-  ///
-  /// In en, this message translates to:
-  /// **'End date'**
-  String get creditsUsageEndDate;
-
-  /// No description provided for @creditsUsageServiceType.
-  ///
-  /// In en, this message translates to:
-  /// **'Service'**
-  String get creditsUsageServiceType;
-
-  /// No description provided for @creditsUsageClearFilters.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear filters'**
-  String get creditsUsageClearFilters;
-
-  /// No description provided for @creditsUsageError.
-  ///
-  /// In en, this message translates to:
-  /// **'Could not load usage'**
-  String get creditsUsageError;
-
-  /// No description provided for @creditsUsageErrorDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Check your network and AI API base URL in Settings.'**
-  String get creditsUsageErrorDescription;
-
-  /// No description provided for @creditsUsageRetry.
-  ///
-  /// In en, this message translates to:
-  /// **'Retry'**
-  String get creditsUsageRetry;
-
-  /// No description provided for @creditsUsageNoRecords.
-  ///
-  /// In en, this message translates to:
-  /// **'No records'**
-  String get creditsUsageNoRecords;
-
-  /// No description provided for @creditsUsageNoRecordsWithFilters.
-  ///
-  /// In en, this message translates to:
-  /// **'Try changing or clearing filters.'**
-  String get creditsUsageNoRecordsWithFilters;
-
-  /// No description provided for @creditsUsageNoRecordsDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Usage will appear here after you use AI features while signed in.'**
-  String get creditsUsageNoRecordsDescription;
-
-  /// No description provided for @creditsUsageTableDate.
-  ///
-  /// In en, this message translates to:
-  /// **'Date'**
-  String get creditsUsageTableDate;
-
-  /// No description provided for @creditsUsageTableTime.
-  ///
-  /// In en, this message translates to:
-  /// **'Time'**
-  String get creditsUsageTableTime;
-
-  /// No description provided for @creditsUsageTableService.
-  ///
-  /// In en, this message translates to:
-  /// **'Service'**
-  String get creditsUsageTableService;
-
-  /// No description provided for @creditsUsageTableTier.
-  ///
-  /// In en, this message translates to:
-  /// **'Tier'**
-  String get creditsUsageTableTier;
-
-  /// No description provided for @creditsUsageTableRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Required'**
-  String get creditsUsageTableRequired;
-
-  /// No description provided for @creditsUsageTableUsedBefore.
-  ///
-  /// In en, this message translates to:
-  /// **'Used before'**
-  String get creditsUsageTableUsedBefore;
-
-  /// No description provided for @creditsUsageTableUsedAfter.
-  ///
-  /// In en, this message translates to:
-  /// **'Used after'**
-  String get creditsUsageTableUsedAfter;
-
-  /// No description provided for @creditsUsageTableStatus.
-  ///
-  /// In en, this message translates to:
-  /// **'Status'**
-  String get creditsUsageTableStatus;
-
-  /// No description provided for @creditsUsageAllowed.
-  ///
-  /// In en, this message translates to:
-  /// **'Allowed'**
-  String get creditsUsageAllowed;
-
-  /// No description provided for @creditsUsageDenied.
-  ///
-  /// In en, this message translates to:
-  /// **'Denied'**
-  String get creditsUsageDenied;
-
-  /// No description provided for @creditsUsagePageInfo.
-  ///
-  /// In en, this message translates to:
-  /// **'Page {page}'**
-  String creditsUsagePageInfo(int page);
-
-  /// No description provided for @creditsUsageTotalRecords.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} shown'**
-  String creditsUsageTotalRecords(int count);
-
-  /// No description provided for @creditsUsagePrevious.
-  ///
-  /// In en, this message translates to:
-  /// **'Previous'**
-  String get creditsUsagePrevious;
-
-  /// No description provided for @creditsUsageNext.
-  ///
-  /// In en, this message translates to:
-  /// **'Next'**
-  String get creditsUsageNext;
-
-  /// No description provided for @creditsServiceTypeAll.
-  ///
-  /// In en, this message translates to:
-  /// **'All'**
-  String get creditsServiceTypeAll;
-
-  /// No description provided for @creditsServiceTypeTts.
-  ///
-  /// In en, this message translates to:
-  /// **'TTS'**
-  String get creditsServiceTypeTts;
-
-  /// No description provided for @creditsServiceTypeAsr.
-  ///
-  /// In en, this message translates to:
-  /// **'ASR'**
-  String get creditsServiceTypeAsr;
-
-  /// No description provided for @creditsServiceTypeTranslation.
-  ///
-  /// In en, this message translates to:
-  /// **'Translation'**
-  String get creditsServiceTypeTranslation;
-
-  /// No description provided for @creditsServiceTypeLlm.
-  ///
-  /// In en, this message translates to:
-  /// **'LLM'**
-  String get creditsServiceTypeLlm;
-
-  /// No description provided for @creditsServiceTypeAssessment.
-  ///
-  /// In en, this message translates to:
-  /// **'Assessment'**
-  String get creditsServiceTypeAssessment;
 
   /// No description provided for @settingsSectionAppearanceLanguageHint.
   ///
@@ -4023,12 +2481,6 @@ abstract class AppLocalizations {
   /// **'Reference and customize shortcuts'**
   String get hotkeysSectionKeyboardHint;
 
-  /// No description provided for @settingsSectionAdvancedHint.
-  ///
-  /// In en, this message translates to:
-  /// **'API endpoints and experimental toggles'**
-  String get settingsSectionAdvancedHint;
-
   /// No description provided for @settingsSectionDeveloperHint.
   ///
   /// In en, this message translates to:
@@ -4041,215 +2493,11 @@ abstract class AppLocalizations {
   /// **'Version, licenses, and links'**
   String get settingsSectionAboutHint;
 
-  /// No description provided for @syncSettingsTileTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Sync status'**
-  String get syncSettingsTileTitle;
-
-  /// No description provided for @syncSettingsTileSubtitleSignedOut.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign in to sync library and recordings'**
-  String get syncSettingsTileSubtitleSignedOut;
-
-  /// No description provided for @syncSettingsTileSubtitleUpToDate.
-  ///
-  /// In en, this message translates to:
-  /// **'Up to date'**
-  String get syncSettingsTileSubtitleUpToDate;
-
-  /// Subtitle on Settings → Sync status when there are queue items.
-  ///
-  /// In en, this message translates to:
-  /// **'{retryable} waiting · {failed} failed'**
-  String syncSettingsTileSubtitleCounts(int retryable, int failed);
-
-  /// No description provided for @syncScreenTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Sync status'**
-  String get syncScreenTitle;
-
-  /// No description provided for @syncScreenLastSyncLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Last successful sync'**
-  String get syncScreenLastSyncLabel;
-
-  /// No description provided for @syncScreenLastSyncNever.
-  ///
-  /// In en, this message translates to:
-  /// **'Never'**
-  String get syncScreenLastSyncNever;
-
-  /// No description provided for @syncScreenStatRetryable.
-  ///
-  /// In en, this message translates to:
-  /// **'Waiting to upload'**
-  String get syncScreenStatRetryable;
-
-  /// No description provided for @syncScreenStatFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed permanently'**
-  String get syncScreenStatFailed;
-
-  /// No description provided for @syncScreenSyncNow.
-  ///
-  /// In en, this message translates to:
-  /// **'Sync now'**
-  String get syncScreenSyncNow;
-
-  /// No description provided for @syncScreenRetryFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Retry failed items'**
-  String get syncScreenRetryFailed;
-
-  /// No description provided for @syncScreenRepullVocabulary.
-  ///
-  /// In en, this message translates to:
-  /// **'Re-pull vocabulary'**
-  String get syncScreenRepullVocabulary;
-
-  /// No description provided for @syncScreenSignedOutBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign in with your Enjoy account to sync metadata across devices.'**
-  String get syncScreenSignedOutBody;
-
-  /// No description provided for @syncScreenGoSignIn.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign in'**
-  String get syncScreenGoSignIn;
-
-  /// No description provided for @cloudScreenTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Cloud'**
-  String get cloudScreenTitle;
-
-  /// No description provided for @cloudTabAudio.
-  ///
-  /// In en, this message translates to:
-  /// **'Audio'**
-  String get cloudTabAudio;
-
-  /// No description provided for @cloudTabVideo.
-  ///
-  /// In en, this message translates to:
-  /// **'Video'**
-  String get cloudTabVideo;
-
-  /// No description provided for @cloudSignedOutBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign in to browse media saved to your Enjoy account.'**
-  String get cloudSignedOutBody;
-
-  /// No description provided for @cloudAddToLibrary.
-  ///
-  /// In en, this message translates to:
-  /// **'Add to library'**
-  String get cloudAddToLibrary;
-
-  /// No description provided for @cloudAlreadyInLibrary.
-  ///
-  /// In en, this message translates to:
-  /// **'Already in library'**
-  String get cloudAlreadyInLibrary;
-
-  /// No description provided for @cloudAddedToLibrary.
-  ///
-  /// In en, this message translates to:
-  /// **'Added to your local library.'**
-  String get cloudAddedToLibrary;
-
-  /// No description provided for @cloudEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'No items in this list.'**
-  String get cloudEmpty;
-
-  /// No description provided for @cloudHasMediaUrlHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Streams from your saved URL when opened.'**
-  String get cloudHasMediaUrlHint;
-
-  /// No description provided for @cloudNoMediaUrlHint.
-  ///
-  /// In en, this message translates to:
-  /// **'No remote file URL — use Locate file in the player when you open this item.'**
-  String get cloudNoMediaUrlHint;
-
   /// No description provided for @cloudRefreshTooltip.
   ///
   /// In en, this message translates to:
   /// **'Refresh this tab'**
   String get cloudRefreshTooltip;
-
-  /// No description provided for @cloudAddToLibraryTooltip.
-  ///
-  /// In en, this message translates to:
-  /// **'Add to library'**
-  String get cloudAddToLibraryTooltip;
-
-  /// No description provided for @cloudEmptyAudioTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'No cloud audio yet'**
-  String get cloudEmptyAudioTitle;
-
-  /// No description provided for @cloudEmptyAudioSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Items you save while signed in will appear here.'**
-  String get cloudEmptyAudioSubtitle;
-
-  /// No description provided for @cloudEmptyVideoTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'No cloud video yet'**
-  String get cloudEmptyVideoTitle;
-
-  /// No description provided for @cloudEmptyVideoSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Items you save while signed in will appear here.'**
-  String get cloudEmptyVideoSubtitle;
-
-  /// No description provided for @syncSnackSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Sync finished successfully.'**
-  String get syncSnackSuccess;
-
-  /// No description provided for @syncSnackIssues.
-  ///
-  /// In en, this message translates to:
-  /// **'Sync finished: {synced} succeeded, {failed} failed.'**
-  String syncSnackIssues(int synced, int failed);
-
-  /// No description provided for @syncQueueDetails.
-  ///
-  /// In en, this message translates to:
-  /// **'Queue details'**
-  String get syncQueueDetails;
-
-  /// No description provided for @syncQueueEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'Nothing in the queue.'**
-  String get syncQueueEmpty;
-
-  /// No description provided for @settingsSectionAdvanced.
-  ///
-  /// In en, this message translates to:
-  /// **'Advanced'**
-  String get settingsSectionAdvanced;
 
   /// No description provided for @settingsApiBaseUrl.
   ///
@@ -4263,48 +2511,6 @@ abstract class AppLocalizations {
   /// **'Network error'**
   String get errorNetwork;
 
-  /// No description provided for @communityActivity.
-  ///
-  /// In en, this message translates to:
-  /// **'Community Activity'**
-  String get communityActivity;
-
-  /// No description provided for @communityToday.
-  ///
-  /// In en, this message translates to:
-  /// **'Community today'**
-  String get communityToday;
-
-  /// No description provided for @homeRecordingsToday.
-  ///
-  /// In en, this message translates to:
-  /// **'Recordings'**
-  String get homeRecordingsToday;
-
-  /// No description provided for @homePracticeTime.
-  ///
-  /// In en, this message translates to:
-  /// **'Practice time'**
-  String get homePracticeTime;
-
-  /// No description provided for @homeActiveLearners.
-  ///
-  /// In en, this message translates to:
-  /// **'Active Learners'**
-  String get homeActiveLearners;
-
-  /// Headline for how many people are learning in the community.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, one{{count} person learning} other{{count} people learning}}'**
-  String homePeopleLearning(int count);
-
-  /// No description provided for @homeNoActiveUsers.
-  ///
-  /// In en, this message translates to:
-  /// **'No active users'**
-  String get homeNoActiveUsers;
-
   /// No description provided for @homeTodaysGoal.
   ///
   /// In en, this message translates to:
@@ -4316,12 +2522,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'min'**
   String get homeMinutes;
-
-  /// No description provided for @homeCompleted.
-  ///
-  /// In en, this message translates to:
-  /// **'completed'**
-  String get homeCompleted;
 
   /// No description provided for @homeGoalCompleted.
   ///
@@ -4418,12 +2618,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Removed from library.'**
   String get libraryMediaDeleted;
-
-  /// No description provided for @libraryDeleteMediaFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Could not remove this item.'**
-  String get libraryDeleteMediaFailed;
 
   /// Tooltip/label shown on library items whose crafted audio is synced to cloud storage and playable from any signed-in device.
   ///
@@ -4635,12 +2829,6 @@ abstract class AppLocalizations {
   /// **'Paste'**
   String get youtubePasteFromClipboard;
 
-  /// No description provided for @settingsSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Tune Enjoy to fit how you study.'**
-  String get settingsSubtitle;
-
   /// No description provided for @settingsSectionAppearanceLanguage.
   ///
   /// In en, this message translates to:
@@ -4652,12 +2840,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Theme'**
   String get settingsAppearanceTheme;
-
-  /// No description provided for @settingsAppearanceThemeValue.
-  ///
-  /// In en, this message translates to:
-  /// **'Dark · Cinematic'**
-  String get settingsAppearanceThemeValue;
 
   /// No description provided for @settingsAppearanceThemeSystem.
   ///
@@ -4863,12 +3045,6 @@ abstract class AppLocalizations {
   /// **'Language'**
   String get discoverLanguageFilterLabel;
 
-  /// No description provided for @settingsNativeMustDifferHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Must differ from your learning language.'**
-  String get settingsNativeMustDifferHint;
-
   /// No description provided for @settingsLanguagePickerTitleDisplay.
   ///
   /// In en, this message translates to:
@@ -4880,18 +3056,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Native language'**
   String get settingsLanguagePickerTitleNative;
-
-  /// No description provided for @profileFieldDisplayLanguage.
-  ///
-  /// In en, this message translates to:
-  /// **'Display language'**
-  String get profileFieldDisplayLanguage;
-
-  /// No description provided for @profileLearningLanguageReadOnly.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose the language you are learning.'**
-  String get profileLearningLanguageReadOnly;
 
   /// No description provided for @settingsKeyboardOpenCheatsheet.
   ///
@@ -4910,12 +3074,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Customize shortcuts'**
   String get settingsKeyboardCustomizeTitle;
-
-  /// No description provided for @hotkeysHelpSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Press {key} anytime to open this list.'**
-  String hotkeysHelpSubtitle(String key);
 
   /// No description provided for @hotkeysHelpSearchHint.
   ///
@@ -5193,12 +3351,6 @@ abstract class AppLocalizations {
   /// **'Definition'**
   String get lookupSectionDictionary;
 
-  /// No description provided for @lookupLoading.
-  ///
-  /// In en, this message translates to:
-  /// **'Loading…'**
-  String get lookupLoading;
-
   /// No description provided for @lookupErrorRetry.
   ///
   /// In en, this message translates to:
@@ -5216,18 +3368,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Lemma'**
   String get lookupLemma;
-
-  /// No description provided for @lookupIpa.
-  ///
-  /// In en, this message translates to:
-  /// **'IPA'**
-  String get lookupIpa;
-
-  /// No description provided for @lookupExamples.
-  ///
-  /// In en, this message translates to:
-  /// **'Examples'**
-  String get lookupExamples;
 
   /// No description provided for @lookupClose.
   ///
@@ -5289,107 +3429,11 @@ abstract class AppLocalizations {
   /// **'Refresh'**
   String get lookupRefresh;
 
-  /// No description provided for @lookupLanguageEnUs.
-  ///
-  /// In en, this message translates to:
-  /// **'English'**
-  String get lookupLanguageEnUs;
-
-  /// No description provided for @lookupLanguageEnGb.
-  ///
-  /// In en, this message translates to:
-  /// **'English (UK)'**
-  String get lookupLanguageEnGb;
-
-  /// No description provided for @lookupLanguageZhCn.
-  ///
-  /// In en, this message translates to:
-  /// **'中文'**
-  String get lookupLanguageZhCn;
-
-  /// No description provided for @lookupLanguageJaJp.
-  ///
-  /// In en, this message translates to:
-  /// **'日本語'**
-  String get lookupLanguageJaJp;
-
-  /// No description provided for @lookupLanguageKoKr.
-  ///
-  /// In en, this message translates to:
-  /// **'한국어'**
-  String get lookupLanguageKoKr;
-
-  /// No description provided for @lookupLanguageEsEs.
-  ///
-  /// In en, this message translates to:
-  /// **'Español (España)'**
-  String get lookupLanguageEsEs;
-
-  /// No description provided for @lookupLanguageEsMx.
-  ///
-  /// In en, this message translates to:
-  /// **'Español (México)'**
-  String get lookupLanguageEsMx;
-
-  /// No description provided for @lookupLanguageFrFr.
-  ///
-  /// In en, this message translates to:
-  /// **'Français (France)'**
-  String get lookupLanguageFrFr;
-
-  /// No description provided for @lookupLanguageFrCa.
-  ///
-  /// In en, this message translates to:
-  /// **'Français (Canada)'**
-  String get lookupLanguageFrCa;
-
-  /// No description provided for @lookupLanguageDeDe.
-  ///
-  /// In en, this message translates to:
-  /// **'Deutsch'**
-  String get lookupLanguageDeDe;
-
-  /// No description provided for @lookupLanguageItIt.
-  ///
-  /// In en, this message translates to:
-  /// **'Italiano'**
-  String get lookupLanguageItIt;
-
-  /// No description provided for @lookupLanguagePtBr.
-  ///
-  /// In en, this message translates to:
-  /// **'Português (Brasil)'**
-  String get lookupLanguagePtBr;
-
-  /// No description provided for @lookupLanguagePtPt.
-  ///
-  /// In en, this message translates to:
-  /// **'Português (Portugal)'**
-  String get lookupLanguagePtPt;
-
-  /// No description provided for @lookupLanguageRuRu.
-  ///
-  /// In en, this message translates to:
-  /// **'Русский'**
-  String get lookupLanguageRuRu;
-
   /// No description provided for @lookupSourceResetToLearning.
   ///
   /// In en, this message translates to:
   /// **'Source language reset to learning default'**
   String get lookupSourceResetToLearning;
-
-  /// Lookup sheet credits chip: today's remaining AI credits.
-  ///
-  /// In en, this message translates to:
-  /// **'{n} left today'**
-  String lookupCreditsRemainingLabel(String n);
-
-  /// Lookup sheet credits chip once remaining credits pass the low threshold.
-  ///
-  /// In en, this message translates to:
-  /// **'Almost out — {n} left today'**
-  String lookupCreditsRunningLowLabel(String n);
 
   /// No description provided for @vocabularyAddToVocabulary.
   ///
@@ -5451,18 +3495,6 @@ abstract class AppLocalizations {
   /// **'Vocabulary'**
   String get vocabularyTitle;
 
-  /// No description provided for @vocabularyProfileEntry.
-  ///
-  /// In en, this message translates to:
-  /// **'Vocabulary'**
-  String get vocabularyProfileEntry;
-
-  /// No description provided for @vocabularyProfileEntryHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Review saved words and flashcards'**
-  String get vocabularyProfileEntryHint;
-
   /// No description provided for @vocabularyReview.
   ///
   /// In en, this message translates to:
@@ -5474,12 +3506,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All Words'**
   String get vocabularyAllWords;
-
-  /// No description provided for @vocabularyTotal.
-  ///
-  /// In en, this message translates to:
-  /// **'Total'**
-  String get vocabularyTotal;
 
   /// No description provided for @vocabularyDue.
   ///
@@ -5546,12 +3572,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Try a different search or clear the status and language filters.'**
   String get vocabularyNoMatchesDescription;
-
-  /// No description provided for @vocabularyListLoadFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Could not load your vocabulary.'**
-  String get vocabularyListLoadFailed;
 
   /// No description provided for @vocabularyCustomReview.
   ///
@@ -5655,12 +3675,6 @@ abstract class AppLocalizations {
   /// **'Exit review'**
   String get vocabularyExitReview;
 
-  /// No description provided for @vocabularyHowWellDoYouKnow.
-  ///
-  /// In en, this message translates to:
-  /// **'How well do you know this?'**
-  String get vocabularyHowWellDoYouKnow;
-
   /// No description provided for @vocabularyDontKnow.
   ///
   /// In en, this message translates to:
@@ -5696,18 +3710,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{current} / {total}'**
   String vocabularyProgress(int current, int total);
-
-  /// No description provided for @vocabularyRemaining.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} remaining'**
-  String vocabularyRemaining(int count);
-
-  /// No description provided for @vocabularyFlipBack.
-  ///
-  /// In en, this message translates to:
-  /// **'Flip back'**
-  String get vocabularyFlipBack;
 
   /// No description provided for @vocabularyReviewComplete.
   ///
@@ -5751,12 +3753,6 @@ abstract class AppLocalizations {
   /// **'All'**
   String get vocabularyFilterAll;
 
-  /// No description provided for @vocabularyFilters.
-  ///
-  /// In en, this message translates to:
-  /// **'Filters'**
-  String get vocabularyFilters;
-
   /// No description provided for @vocabularyContext.
   ///
   /// In en, this message translates to:
@@ -5768,18 +3764,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Dictionary'**
   String get vocabularyDictionary;
-
-  /// No description provided for @vocabularyNotes.
-  ///
-  /// In en, this message translates to:
-  /// **'Notes'**
-  String get vocabularyNotes;
-
-  /// No description provided for @vocabularyNotesPlaceholder.
-  ///
-  /// In en, this message translates to:
-  /// **'Notes coming soon'**
-  String get vocabularyNotesPlaceholder;
 
   /// No description provided for @vocabularyNoContextAvailable.
   ///
@@ -5817,24 +3801,6 @@ abstract class AppLocalizations {
   /// **'In {days} days'**
   String vocabularyInDays(int days);
 
-  /// No description provided for @vocabularyKeyboardShortcuts.
-  ///
-  /// In en, this message translates to:
-  /// **'Shortcuts: Space flip/back · 1/2/3 rate · ← previous · → skip · Esc exit'**
-  String get vocabularyKeyboardShortcuts;
-
-  /// No description provided for @vocabularyContextsCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} contexts'**
-  String vocabularyContextsCount(int count);
-
-  /// No description provided for @vocabularyReviewsCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} reviews'**
-  String vocabularyReviewsCount(int count);
-
   /// No description provided for @vocabularyFlipHint.
   ///
   /// In en, this message translates to:
@@ -5871,18 +3837,6 @@ abstract class AppLocalizations {
   /// **'Opening the player will end this review session. Your ratings so far are saved.'**
   String get vocabularyOpenInPlayerDescription;
 
-  /// No description provided for @vocabularyShadowReading.
-  ///
-  /// In en, this message translates to:
-  /// **'Shadow reading'**
-  String get vocabularyShadowReading;
-
-  /// No description provided for @vocabularyShadowReadingDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Continue to the player for shadow reading? This ends the review session. Your ratings so far are saved.'**
-  String get vocabularyShadowReadingDescription;
-
   /// No description provided for @vocabularyEchoReading.
   ///
   /// In en, this message translates to:
@@ -5900,18 +3854,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pause'**
   String get vocabularyPracticePause;
-
-  /// No description provided for @vocabularyStatsExpand.
-  ///
-  /// In en, this message translates to:
-  /// **'Show status breakdown'**
-  String get vocabularyStatsExpand;
-
-  /// No description provided for @vocabularyStatsCollapse.
-  ///
-  /// In en, this message translates to:
-  /// **'Hide status breakdown'**
-  String get vocabularyStatsCollapse;
 
   /// No description provided for @vocabularyPreviousContext.
   ///
@@ -5955,12 +3897,6 @@ abstract class AppLocalizations {
   /// **'Loading…'**
   String get vocabularyFetching;
 
-  /// No description provided for @vocabularyAiUnavailable.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign in to use AI lookup'**
-  String get vocabularyAiUnavailable;
-
   /// No description provided for @vocabularyAiFetchFailed.
   ///
   /// In en, this message translates to:
@@ -5991,12 +3927,6 @@ abstract class AppLocalizations {
   /// **'Continue'**
   String get vocabularyConfirmContinue;
 
-  /// No description provided for @vocabularySourceLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Source'**
-  String get vocabularySourceLabel;
-
   /// No description provided for @vocabularyUnknownSource.
   ///
   /// In en, this message translates to:
@@ -6015,77 +3945,11 @@ abstract class AppLocalizations {
   /// **'Export to Anki'**
   String get vocabularyExportToAnki;
 
-  /// No description provided for @vocabularyExportDialogTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Export to Anki'**
-  String get vocabularyExportDialogTitle;
-
   /// No description provided for @vocabularyExport.
   ///
   /// In en, this message translates to:
   /// **'Export'**
   String get vocabularyExport;
-
-  /// No description provided for @vocabularyNoItemsToExport.
-  ///
-  /// In en, this message translates to:
-  /// **'No items to export'**
-  String get vocabularyNoItemsToExport;
-
-  /// No description provided for @vocabularyProRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Pro required'**
-  String get vocabularyProRequired;
-
-  /// No description provided for @vocabularyProRequiredDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Anki export is available on Enjoy Pro. Upgrade to export your vocabulary as Anki CSV cards.'**
-  String get vocabularyProRequiredDescription;
-
-  /// No description provided for @vocabularyUpgradeToPro.
-  ///
-  /// In en, this message translates to:
-  /// **'Upgrade to Pro'**
-  String get vocabularyUpgradeToPro;
-
-  /// No description provided for @vocabularyExportSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Vocabulary exported.'**
-  String get vocabularyExportSuccess;
-
-  /// No description provided for @vocabularyExportError.
-  ///
-  /// In en, this message translates to:
-  /// **'Could not export vocabulary.'**
-  String get vocabularyExportError;
-
-  /// No description provided for @vocabularyExportCancelled.
-  ///
-  /// In en, this message translates to:
-  /// **'Export cancelled.'**
-  String get vocabularyExportCancelled;
-
-  /// No description provided for @vocabularyExportSparseCacheHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Card backs are richer when dictionary and contextual translations were saved during review.'**
-  String get vocabularyExportSparseCacheHint;
-
-  /// No description provided for @vocabularyExportProgress.
-  ///
-  /// In en, this message translates to:
-  /// **'Exporting…'**
-  String get vocabularyExportProgress;
-
-  /// No description provided for @authRequiredCloudFeaturesTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Account required'**
-  String get authRequiredCloudFeaturesTitle;
 
   /// No description provided for @practicePosterShareTooltip.
   ///
@@ -6303,18 +4167,6 @@ abstract class AppLocalizations {
   /// **'Clear search'**
   String get settingsSearchClear;
 
-  /// No description provided for @settingsSectionExpandSemantics.
-  ///
-  /// In en, this message translates to:
-  /// **'Expand section'**
-  String get settingsSectionExpandSemantics;
-
-  /// No description provided for @settingsSectionCollapseSemantics.
-  ///
-  /// In en, this message translates to:
-  /// **'Collapse section'**
-  String get settingsSectionCollapseSemantics;
-
   /// No description provided for @settingsSectionNeedsAttention.
   ///
   /// In en, this message translates to:
@@ -6326,42 +4178,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hide transcript text'**
   String get transcriptBlurDisplayTitle;
-
-  /// No description provided for @transcriptBlurToggleTooltip.
-  ///
-  /// In en, this message translates to:
-  /// **'Blur practice (focus on listening)'**
-  String get transcriptBlurToggleTooltip;
-
-  /// No description provided for @transcriptBlurToggleOn.
-  ///
-  /// In en, this message translates to:
-  /// **'Listening-focus mode on'**
-  String get transcriptBlurToggleOn;
-
-  /// No description provided for @transcriptBlurToggleOff.
-  ///
-  /// In en, this message translates to:
-  /// **'Listening-focus mode off'**
-  String get transcriptBlurToggleOff;
-
-  /// No description provided for @transcriptBlurEmptyTooltip.
-  ///
-  /// In en, this message translates to:
-  /// **'No transcript lines to practice with'**
-  String get transcriptBlurEmptyTooltip;
-
-  /// No description provided for @transcriptBlurSemanticsOn.
-  ///
-  /// In en, this message translates to:
-  /// **'Blur practice on. Tap or hover to reveal a line.'**
-  String get transcriptBlurSemanticsOn;
-
-  /// No description provided for @transcriptBlurSemanticsOff.
-  ///
-  /// In en, this message translates to:
-  /// **'Blur practice off.'**
-  String get transcriptBlurSemanticsOff;
 
   /// No description provided for @importCraftFromText.
   ///
@@ -6447,24 +4263,6 @@ abstract class AppLocalizations {
   /// **'This Craft item is no longer available.'**
   String get craftEditUnavailable;
 
-  /// No description provided for @craftSheetTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Craft audio from text'**
-  String get craftSheetTitle;
-
-  /// No description provided for @craftModeTranslateThenSpeak.
-  ///
-  /// In en, this message translates to:
-  /// **'Translate then speak'**
-  String get craftModeTranslateThenSpeak;
-
-  /// No description provided for @craftModeSpeakDirectly.
-  ///
-  /// In en, this message translates to:
-  /// **'Speak directly'**
-  String get craftModeSpeakDirectly;
-
   /// No description provided for @craftSourceLanguageLabel.
   ///
   /// In en, this message translates to:
@@ -6489,35 +4287,17 @@ abstract class AppLocalizations {
   /// **'Paste from clipboard'**
   String get craftPasteFromClipboard;
 
-  /// No description provided for @craftAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Craft'**
-  String get craftAction;
-
   /// No description provided for @craftCraftingProgress.
   ///
   /// In en, this message translates to:
   /// **'Crafting your audio…'**
   String get craftCraftingProgress;
 
-  /// No description provided for @craftEmptyTextHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter at least a sentence to craft.'**
-  String get craftEmptyTextHint;
-
   /// No description provided for @craftSameLanguageHint.
   ///
   /// In en, this message translates to:
   /// **'Looks like this is already in your learning language.'**
   String get craftSameLanguageHint;
-
-  /// No description provided for @craftSameLanguageSwitch.
-  ///
-  /// In en, this message translates to:
-  /// **'Speak directly'**
-  String get craftSameLanguageSwitch;
 
   /// No description provided for @craftOfflineBanner.
   ///
@@ -6555,18 +4335,6 @@ abstract class AppLocalizations {
   /// **'The audio was generated but couldn\'t be saved. Free up space and try again.'**
   String get craftFailureSave;
 
-  /// No description provided for @craftAlreadyInLibrary.
-  ///
-  /// In en, this message translates to:
-  /// **'Already in your library'**
-  String get craftAlreadyInLibrary;
-
-  /// No description provided for @craftOpenExisting.
-  ///
-  /// In en, this message translates to:
-  /// **'Open'**
-  String get craftOpenExisting;
-
   /// No description provided for @craftRetry.
   ///
   /// In en, this message translates to:
@@ -6579,23 +4347,11 @@ abstract class AppLocalizations {
   /// **'Open AI settings'**
   String get craftOpenAiSettings;
 
-  /// No description provided for @craftLengthCapNotice.
-  ///
-  /// In en, this message translates to:
-  /// **'Crafted the first 5000 characters; the rest was not synthesized.'**
-  String get craftLengthCapNotice;
-
   /// No description provided for @libraryProviderCraftBadge.
   ///
   /// In en, this message translates to:
   /// **'Craft'**
   String get libraryProviderCraftBadge;
-
-  /// No description provided for @craftTtsSettingsHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Craft uses the TTS provider below.'**
-  String get craftTtsSettingsHint;
 
   /// No description provided for @craftScreenTitle.
   ///
@@ -6746,12 +4502,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save to library'**
   String get craftSaveToLibrary;
-
-  /// No description provided for @craftSavingProgress.
-  ///
-  /// In en, this message translates to:
-  /// **'Saving to library…'**
-  String get craftSavingProgress;
 
   /// No description provided for @craftPreviewLabel.
   ///
@@ -6963,263 +4713,11 @@ abstract class AppLocalizations {
   /// **'Something went wrong. Please try again.'**
   String get errorGenericLoadFailed;
 
-  /// No description provided for @subscriptionAutoRenewTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto-renew Pro'**
-  String get subscriptionAutoRenewTitle;
-
-  /// No description provided for @subscriptionAutoRenewMonthly.
-  ///
-  /// In en, this message translates to:
-  /// **'Monthly'**
-  String get subscriptionAutoRenewMonthly;
-
-  /// No description provided for @subscriptionAutoRenewYearly.
-  ///
-  /// In en, this message translates to:
-  /// **'Yearly'**
-  String get subscriptionAutoRenewYearly;
-
-  /// No description provided for @subscriptionAutoRenewPriceMonth.
-  ///
-  /// In en, this message translates to:
-  /// **'{amount} USD/month'**
-  String subscriptionAutoRenewPriceMonth(String amount);
-
-  /// No description provided for @subscriptionAutoRenewPriceYear.
-  ///
-  /// In en, this message translates to:
-  /// **'{amount} USD/year'**
-  String subscriptionAutoRenewPriceYear(String amount);
-
-  /// No description provided for @subscriptionAutoRenewSubscribe.
-  ///
-  /// In en, this message translates to:
-  /// **'Subscribe with auto-renew'**
-  String get subscriptionAutoRenewSubscribe;
-
-  /// No description provided for @subscriptionAutoRenewOn.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto-renew on'**
-  String get subscriptionAutoRenewOn;
-
-  /// No description provided for @subscriptionAutoRenewOff.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto-renew off'**
-  String get subscriptionAutoRenewOff;
-
-  /// No description provided for @subscriptionAutoRenewIntervalMonth.
-  ///
-  /// In en, this message translates to:
-  /// **'Monthly plan'**
-  String get subscriptionAutoRenewIntervalMonth;
-
-  /// No description provided for @subscriptionAutoRenewIntervalYear.
-  ///
-  /// In en, this message translates to:
-  /// **'Yearly plan'**
-  String get subscriptionAutoRenewIntervalYear;
-
-  /// No description provided for @subscriptionAutoRenewProvider.
-  ///
-  /// In en, this message translates to:
-  /// **'Billed via {provider}'**
-  String subscriptionAutoRenewProvider(String provider);
-
-  /// No description provided for @subscriptionAutoRenewCancel.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel auto-renew'**
-  String get subscriptionAutoRenewCancel;
-
-  /// No description provided for @subscriptionAutoRenewCancelConfirmTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel auto-renew?'**
-  String get subscriptionAutoRenewCancelConfirmTitle;
-
-  /// No description provided for @subscriptionAutoRenewCancelConfirmMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'You keep Pro until {date}. You will not be charged again for this subscription.'**
-  String subscriptionAutoRenewCancelConfirmMessage(String date);
-
-  /// No description provided for @subscriptionAutoRenewCancelConfirmAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel auto-renew'**
-  String get subscriptionAutoRenewCancelConfirmAction;
-
-  /// No description provided for @subscriptionAutoRenewCancelKeep.
-  ///
-  /// In en, this message translates to:
-  /// **'Keep auto-renew'**
-  String get subscriptionAutoRenewCancelKeep;
-
-  /// No description provided for @subscriptionAutoRenewCancelSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto-renew canceled. Pro remains until {date}.'**
-  String subscriptionAutoRenewCancelSuccess(String date);
-
-  /// No description provided for @subscriptionAutoRenewCancelFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Could not cancel auto-renew. Try again.'**
-  String get subscriptionAutoRenewCancelFailed;
-
-  /// No description provided for @subscriptionAutoRenewConflict.
-  ///
-  /// In en, this message translates to:
-  /// **'You already have an active auto-renew subscription.'**
-  String get subscriptionAutoRenewConflict;
-
-  /// No description provided for @subscriptionAutoRenewPlansUnavailable.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto-renew plans are not available right now.'**
-  String get subscriptionAutoRenewPlansUnavailable;
-
-  /// No description provided for @subscriptionProMemberTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'You\'re on Pro'**
-  String get subscriptionProMemberTitle;
-
-  /// No description provided for @subscriptionRenewsOn.
-  ///
-  /// In en, this message translates to:
-  /// **'Renews on {date}'**
-  String subscriptionRenewsOn(String date);
-
-  /// No description provided for @subscriptionAccessUntil.
-  ///
-  /// In en, this message translates to:
-  /// **'Access until {date}'**
-  String subscriptionAccessUntil(String date);
-
-  /// No description provided for @subscriptionAutoRenewEndingSoon.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto-renew is off — Pro continues until the date above'**
-  String get subscriptionAutoRenewEndingSoon;
-
-  /// No description provided for @subscriptionIncludedWithPro.
-  ///
-  /// In en, this message translates to:
-  /// **'Included with Pro'**
-  String get subscriptionIncludedWithPro;
-
-  /// No description provided for @subscriptionPayOnceTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Pay for months once'**
-  String get subscriptionPayOnceTitle;
-
-  /// No description provided for @subscriptionPayOnceSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'One-time prepaid months (no auto-renew)'**
-  String get subscriptionPayOnceSubtitle;
-
-  /// No description provided for @creditsPackagesTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Credits packages'**
-  String get creditsPackagesTitle;
-
-  /// No description provided for @creditsPackagesSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'One-time permanent credits — not a subscription'**
-  String get creditsPackagesSubtitle;
-
-  /// No description provided for @creditsPackagePriceCredits.
-  ///
-  /// In en, this message translates to:
-  /// **'{price} USD · {credits} permanent credits'**
-  String creditsPackagePriceCredits(String price, String credits);
-
-  /// No description provided for @creditsPackageBuy.
-  ///
-  /// In en, this message translates to:
-  /// **'Buy credits'**
-  String get creditsPackageBuy;
-
-  /// No description provided for @creditsPackageConfirmTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Buy credits package?'**
-  String get creditsPackageConfirmTitle;
-
-  /// No description provided for @creditsPackageConfirmMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Pay {price} USD for {credits} permanent credits. This does not change your subscription.'**
-  String creditsPackageConfirmMessage(String price, String credits);
-
-  /// No description provided for @creditsPackageConfirmAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Continue to payment'**
-  String get creditsPackageConfirmAction;
-
-  /// No description provided for @creditsPackageVerifying.
-  ///
-  /// In en, this message translates to:
-  /// **'Verifying your credits purchase…'**
-  String get creditsPackageVerifying;
-
-  /// No description provided for @creditsPackageVerifyTimeout.
-  ///
-  /// In en, this message translates to:
-  /// **'Couldn\'t confirm credits yet — pull to refresh or check again shortly.'**
-  String get creditsPackageVerifyTimeout;
-
-  /// No description provided for @creditsPackagePurchaseSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Permanent credits updated.'**
-  String get creditsPackagePurchaseSuccess;
-
-  /// No description provided for @creditsPackagePurchaseFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Credits package purchase failed'**
-  String get creditsPackagePurchaseFailed;
-
-  /// No description provided for @creditsPermanentAvailable.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} permanent credits available'**
-  String creditsPermanentAvailable(String count);
-
-  /// No description provided for @subscriptionCreditsLimitMessageWithPackages.
-  ///
-  /// In en, this message translates to:
-  /// **'AI credits limit reached. Upgrade to Pro or buy a credits package to continue.'**
-  String get subscriptionCreditsLimitMessageWithPackages;
-
   /// No description provided for @subscriptionViewPlansAndPackages.
   ///
   /// In en, this message translates to:
   /// **'View plans & packages'**
   String get subscriptionViewPlansAndPackages;
-
-  /// No description provided for @creditsExhaustedDetailed.
-  ///
-  /// In en, this message translates to:
-  /// **'This action needs {required} credits, but only {remaining} are left today.'**
-  String creditsExhaustedDetailed(int required, int remaining);
-
-  /// No description provided for @creditsExhaustedResets.
-  ///
-  /// In en, this message translates to:
-  /// **'Credits reset at {time}.'**
-  String creditsExhaustedResets(String time);
 
   /// No description provided for @byokProviderBillingMessage.
   ///
@@ -7263,18 +4761,6 @@ abstract class AppLocalizations {
   /// **'Couldn\'t play pronunciation'**
   String get pronounceFailed;
 
-  /// No description provided for @pronounceCreditsExhausted.
-  ///
-  /// In en, this message translates to:
-  /// **'Not enough credits to generate pronunciation'**
-  String get pronounceCreditsExhausted;
-
-  /// No description provided for @pronounceSignInRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign in to hear pronunciation'**
-  String get pronounceSignInRequired;
-
   /// Tooltip for playing the full assessment take from the result dialog.
   ///
   /// In en, this message translates to:
@@ -7310,183 +4796,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No recording clip for this word'**
   String get assessmentClipUnavailable;
-
-  /// No description provided for @subscriptionTierCatalogTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose your plan'**
-  String get subscriptionTierCatalogTitle;
-
-  /// No description provided for @subscriptionTierCatalogDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'All tiers include the same AI features. Choose a credit allowance and billing cycle, then pick how you pay.'**
-  String get subscriptionTierCatalogDescription;
-
-  /// No description provided for @subscriptionTierCatalogRecommended.
-  ///
-  /// In en, this message translates to:
-  /// **'Recommended'**
-  String get subscriptionTierCatalogRecommended;
-
-  /// No description provided for @subscriptionTierCatalogChoosePro.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose Pro'**
-  String get subscriptionTierCatalogChoosePro;
-
-  /// No description provided for @subscriptionTierCatalogExtendPro.
-  ///
-  /// In en, this message translates to:
-  /// **'Extend Pro'**
-  String get subscriptionTierCatalogExtendPro;
-
-  /// No description provided for @subscriptionTierCatalogChooseLite.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose Lite'**
-  String get subscriptionTierCatalogChooseLite;
-
-  /// No description provided for @subscriptionTierCatalogExtendLite.
-  ///
-  /// In en, this message translates to:
-  /// **'Extend Lite'**
-  String get subscriptionTierCatalogExtendLite;
-
-  /// No description provided for @subscriptionTierCatalogNotSelected.
-  ///
-  /// In en, this message translates to:
-  /// **'Downgrade is not available'**
-  String get subscriptionTierCatalogNotSelected;
-
-  /// No description provided for @subscriptionUpgradedToLite.
-  ///
-  /// In en, this message translates to:
-  /// **'You\'re now Lite — enjoy!'**
-  String get subscriptionUpgradedToLite;
-
-  /// No description provided for @subscriptionTierCatalogSelectedInterval.
-  ///
-  /// In en, this message translates to:
-  /// **'{amount} / {unit} — billed via Stripe'**
-  String subscriptionTierCatalogSelectedInterval(String amount, String unit);
-
-  /// No description provided for @subscriptionTierCatalogIntervalYearSavings.
-  ///
-  /// In en, this message translates to:
-  /// **'Save {percent}%'**
-  String subscriptionTierCatalogIntervalYearSavings(String percent);
-
-  /// No description provided for @subscriptionTierCatalogPerMonth.
-  ///
-  /// In en, this message translates to:
-  /// **'month'**
-  String get subscriptionTierCatalogPerMonth;
-
-  /// No description provided for @subscriptionTierCatalogPerYear.
-  ///
-  /// In en, this message translates to:
-  /// **'year'**
-  String get subscriptionTierCatalogPerYear;
-
-  /// No description provided for @subscriptionPurchaseModalUnifiedTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose how to pay for {tier} · {interval}'**
-  String subscriptionPurchaseModalUnifiedTitle(String tier, String interval);
-
-  /// No description provided for @subscriptionPurchaseModalUnifiedDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto-renew keeps Pro access continuous and renews automatically. Pay once buys a fixed prepaid period with no auto-renew.'**
-  String get subscriptionPurchaseModalUnifiedDescription;
-
-  /// No description provided for @subscriptionPurchaseModalAutoRenewActiveWarning.
-  ///
-  /// In en, this message translates to:
-  /// **'You already have an active auto-renew subscription. Cancel it to switch billing options.'**
-  String get subscriptionPurchaseModalAutoRenewActiveWarning;
-
-  /// No description provided for @subscriptionPurchaseModalOptionAutoRenew.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto-renew'**
-  String get subscriptionPurchaseModalOptionAutoRenew;
-
-  /// No description provided for @subscriptionPurchaseModalOptionAutoRenewSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Recommended — renews automatically. Cancel anytime.'**
-  String get subscriptionPurchaseModalOptionAutoRenewSubtitle;
-
-  /// No description provided for @subscriptionPurchaseModalOptionAutoRenewFootnote.
-  ///
-  /// In en, this message translates to:
-  /// **'Billed via Stripe'**
-  String get subscriptionPurchaseModalOptionAutoRenewFootnote;
-
-  /// No description provided for @subscriptionPurchaseModalOptionPrepaid.
-  ///
-  /// In en, this message translates to:
-  /// **'Pay once'**
-  String get subscriptionPurchaseModalOptionPrepaid;
-
-  /// No description provided for @subscriptionPurchaseModalOptionPrepaidSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'No auto-renew. Pay for a fixed period up front.'**
-  String get subscriptionPurchaseModalOptionPrepaidSubtitle;
-
-  /// No description provided for @subscriptionPurchaseModalOptionPrepaidFootnote.
-  ///
-  /// In en, this message translates to:
-  /// **'One-time payment'**
-  String get subscriptionPurchaseModalOptionPrepaidFootnote;
-
-  /// No description provided for @subscriptionPurchaseModalSubscribeAutoRenewCta.
-  ///
-  /// In en, this message translates to:
-  /// **'Subscribe with auto-renew'**
-  String get subscriptionPurchaseModalSubscribeAutoRenewCta;
-
-  /// No description provided for @subscriptionBalanceToCreditsTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Convert balance to permanent credits'**
-  String get subscriptionBalanceToCreditsTitle;
-
-  /// No description provided for @subscriptionBalanceToCreditsDescriptionWithPreview.
-  ///
-  /// In en, this message translates to:
-  /// **'Move your {usd} legacy balance to ~{credits} permanent credits on the credits page.'**
-  String subscriptionBalanceToCreditsDescriptionWithPreview(
-    String usd,
-    String credits,
-  );
-
-  /// No description provided for @subscriptionBalanceToCreditsDescriptionEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'Once you have a balance from prior deposits, convert it to permanent credits here.'**
-  String get subscriptionBalanceToCreditsDescriptionEmpty;
-
-  /// No description provided for @subscriptionBalanceToCreditsCta.
-  ///
-  /// In en, this message translates to:
-  /// **'Convert to credits'**
-  String get subscriptionBalanceToCreditsCta;
-
-  /// No description provided for @subscriptionBalanceToCreditsComingSoonTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Balance transfer coming soon'**
-  String get subscriptionBalanceToCreditsComingSoonTitle;
-
-  /// No description provided for @subscriptionBalanceToCreditsComingSoonMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'You have {usd} in legacy balance. The transfer-to-credits flow is rolling out to the desktop app in a future update. Until then, manage your balance on the web app.'**
-  String subscriptionBalanceToCreditsComingSoonMessage(String usd);
 
   /// No description provided for @onboardingTipSkip.
   ///
@@ -7752,12 +5061,6 @@ abstract class AppLocalizations {
   /// **'More'**
   String get vocabularyMore;
 
-  /// Pro badge on the Export to Anki button.
-  ///
-  /// In en, this message translates to:
-  /// **'Pro'**
-  String get vocabularyProBadge;
-
   /// Overline above the Library title for local media.
   ///
   /// In en, this message translates to:
@@ -7775,66 +5078,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, one{1 match for “{query}”} other{{count} matches for “{query}”}}'**
   String librarySearchResults(int count, String query);
-
-  /// Caption on the Profile practice card.
-  ///
-  /// In en, this message translates to:
-  /// **'Synced from your account'**
-  String get profileSyncedFromAccount;
-
-  /// Overline of the Profile credits card.
-  ///
-  /// In en, this message translates to:
-  /// **'Credits today'**
-  String get profileCreditsToday;
-
-  /// Link from the Profile credits card to the credits log.
-  ///
-  /// In en, this message translates to:
-  /// **'Usage'**
-  String get profileCreditsUsageLink;
-
-  /// Profile credits card caption.
-  ///
-  /// In en, this message translates to:
-  /// **'Resets daily'**
-  String get profileCreditsResetsDaily;
-
-  /// Profile credits card caption when permanent credits exist (count is formatted).
-  ///
-  /// In en, this message translates to:
-  /// **'Resets daily · plus {count} permanent credits'**
-  String profileCreditsResetsWithPermanent(String count);
-
-  /// Profile credits card caption once usage passes the low threshold.
-  ///
-  /// In en, this message translates to:
-  /// **'Today\'s credits are almost used up'**
-  String get profileCreditsRunningLow;
-
-  /// Profile practice card hint while every stat is zero.
-  ///
-  /// In en, this message translates to:
-  /// **'Start your first echo session to fill these in'**
-  String get profilePracticeEmptyHint;
-
-  /// Unit after a minute figure on the Profile practice card.
-  ///
-  /// In en, this message translates to:
-  /// **'min'**
-  String get profileMinutesUnit;
-
-  /// Profile list: Settings row hint.
-  ///
-  /// In en, this message translates to:
-  /// **'Appearance, AI providers, recording, shortcuts'**
-  String get profileSettingsHint;
-
-  /// Profile list: due words value beside Vocabulary.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} due'**
-  String vocabularyReviewDueValue(int count);
 
   /// Overline above the Discover title.
   ///
@@ -7890,48 +5133,6 @@ abstract class AppLocalizations {
   /// **'Subscribe'**
   String get discoverStripSubscribe;
 
-  /// Subscription summary strip cell.
-  ///
-  /// In en, this message translates to:
-  /// **'Current plan'**
-  String get subscriptionSummaryCurrentPlan;
-
-  /// Subscription summary strip cell.
-  ///
-  /// In en, this message translates to:
-  /// **'Status'**
-  String get subscriptionSummaryStatus;
-
-  /// Subscription summary strip cell.
-  ///
-  /// In en, this message translates to:
-  /// **'Expiration'**
-  String get subscriptionSummaryExpiration;
-
-  /// Subscription summary strip cell.
-  ///
-  /// In en, this message translates to:
-  /// **'Daily credits limit'**
-  String get subscriptionSummaryDailyCredits;
-
-  /// Heading above the plan catalog.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose your plan'**
-  String get subscriptionChoosePlan;
-
-  /// Caption at the trailing edge of the credits filter row.
-  ///
-  /// In en, this message translates to:
-  /// **'UTC dates'**
-  String get creditsUsageUtcDates;
-
-  /// Subscription link card to the Credits screen.
-  ///
-  /// In en, this message translates to:
-  /// **'Credits packages'**
-  String get subscriptionPackagesLink;
-
   /// Short label for the Echo mode segment in the player top bar.
   ///
   /// In en, this message translates to:
@@ -7943,48 +5144,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Line {line} of {total}'**
   String playerLineOfTotal(Object line, Object total);
-
-  /// No description provided for @syncLastSyncToday.
-  ///
-  /// In en, this message translates to:
-  /// **'Today, {time}'**
-  String syncLastSyncToday(String time);
-
-  /// No description provided for @syncRowWaiting.
-  ///
-  /// In en, this message translates to:
-  /// **'Waiting'**
-  String get syncRowWaiting;
-
-  /// No description provided for @syncRowFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed'**
-  String get syncRowFailed;
-
-  /// No description provided for @syncRowRetries.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} attempts'**
-  String syncRowRetries(int count);
-
-  /// No description provided for @syncEntityRecording.
-  ///
-  /// In en, this message translates to:
-  /// **'Recording'**
-  String get syncEntityRecording;
-
-  /// No description provided for @syncEntityVocabulary.
-  ///
-  /// In en, this message translates to:
-  /// **'Vocabulary item'**
-  String get syncEntityVocabulary;
-
-  /// No description provided for @assessmentWordsSection.
-  ///
-  /// In en, this message translates to:
-  /// **'Words'**
-  String get assessmentWordsSection;
 
   /// No description provided for @assessmentMarginOverline.
   ///
@@ -8700,12 +5859,6 @@ abstract class AppLocalizations {
   /// **'Testing...'**
   String get settingsNetworkTestRunning;
 
-  /// No description provided for @settingsNetworkTestApi.
-  ///
-  /// In en, this message translates to:
-  /// **'Enjoy API'**
-  String get settingsNetworkTestApi;
-
   /// No description provided for @settingsNetworkTestYoutube.
   ///
   /// In en, this message translates to:
@@ -8867,12 +6020,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'DICTATION — CHECKED'**
   String get playerDictationHeaderChecked;
-
-  /// No description provided for @playerDictationNoSpeechDetected.
-  ///
-  /// In en, this message translates to:
-  /// **'No speech detected'**
-  String get playerDictationNoSpeechDetected;
 
   /// No description provided for @settingsSectionLocalComponents.
   ///

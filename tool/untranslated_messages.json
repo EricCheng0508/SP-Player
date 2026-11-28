@@ -18,7 +18,6 @@
     "asrBannerEngine",
     "asrErrorGeneric",
     "asrErrorFfmpegUnavailable",
-    "asrErrorFfmpegUnavailableHint",
     "asrErrorNoAudioTrack",
     "asrErrorExtractionFailed",
     "asrErrorFileTooLarge",
@@ -27,39 +26,11 @@
     "asrErrorProviderTimeout",
     "asrErrorProviderRetryable",
     "asrErrorByokMissing",
-    "asrErrorByokMissingHint",
-    "asrErrorCreditsExhausted",
-    "asrErrorCreditsExhaustedHint",
     "asrErrorNetwork",
     "asrErrorNoSpeech",
     "asrLongMediaConfirmTitle",
     "asrLongMediaConfirmBody",
     "asrLongMediaConfirmContinue",
-    "asrLongMediaConfirmCancel",
-    "discoverSourceNotFound",
-    "discoverSourceUnavailable",
-    "discoverNetworkError",
-    "discoverWorkerError",
-    "discoverInvalidUrl",
-    "discoverAlreadySubscribed",
-    "discoverSourceTypeChannel",
-    "discoverSourceTypePlaylist",
-    "transcriptBlurToggleTooltip",
-    "transcriptBlurToggleOn",
-    "transcriptBlurToggleOff",
-    "transcriptBlurEmptyTooltip",
-    "transcriptBlurSemanticsOn",
-    "transcriptBlurSemanticsOff"
-  ],
-
-  "zh_CN": [
-    "discoverSourceNotFound",
-    "discoverSourceUnavailable",
-    "discoverNetworkError",
-    "discoverWorkerError",
-    "discoverInvalidUrl",
-    "discoverAlreadySubscribed",
-    "discoverSourceTypeChannel",
-    "discoverSourceTypePlaylist"
+    "asrLongMediaConfirmCancel"
   ]
 }

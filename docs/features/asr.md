@@ -77,3 +77,25 @@ The no-transcript state renders left-aligned: a `TRANSCRIPT` overline,
 a Literata 38 title, copy in ink2, and the AI / extract / import actions
 as paper option rows with 44px icon tiles. The onboarding anchors and
 busy states are unchanged.
+
+## Local streaming component cleanup
+
+Desktop bootstrap starts `ComponentStore.sweepLegacyFiles()` without awaiting
+it. Once every file in the current Nemotron-3.5 `live-asr` component meets its
+installation size floor, the sweep deletes only the superseded zipformer files:
+
+- `encoder-epoch-99-avg-1.int8.onnx`
+- `decoder-epoch-99-avg-1.int8.onnx`
+- `joiner-epoch-99-avg-1.int8.onnx`
+
+The shared `tokens.txt`, current model files, and other components are untouched.
+Missing or incomplete replacement installations keep all legacy files. The
+sweep is idempotent; IO failures are logged and do not fail startup. It checks
+file metadata rather than reading model contents and stays off the awaited
+startup path.
+
+`test/features/local_components/data/component_store_sweep_test.dart` covers
+complete and incomplete installations, an absent directory, and shared-token
+preservation. Fullscreen provider tests pin Windows per test and mock the
+`window_manager` channel's `{'isFullScreen': bool}` argument contract, restoring
+the platform override and channel handler during teardown.

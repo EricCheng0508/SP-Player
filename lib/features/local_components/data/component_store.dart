@@ -14,6 +14,7 @@ import 'dart:io';
 import 'package:archive/archive_io.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:enjoy_player/core/logging/log.dart';
 import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/data/db/settings_keys.dart';
@@ -112,6 +113,31 @@ final class ComponentStore {
 
   Directory installDir(ComponentSpec spec) =>
       Directory('$root\\${spec.installDirName}');
+
+  /// Deletes superseded model files only when the replacement is installed.
+  /// IO failures are logged without propagating to the caller.
+  Future<void> sweepLegacyFiles() async {
+    const legacyNames = <String>[
+      'encoder-epoch-99-avg-1.int8.onnx',
+      'decoder-epoch-99-avg-1.int8.onnx',
+      'joiner-epoch-99-avg-1.int8.onnx',
+    ];
+    try {
+      final spec = specOf(ComponentKind.liveAsr);
+      if (!isInstalled(spec)) return;
+      final dir = installDir(spec);
+      for (final name in legacyNames) {
+        final f = File('${dir.path}\\$name');
+        if (f.existsSync()) {
+          await f.delete();
+        }
+      }
+    } on Object catch (e, st) {
+      logNamed(
+        'components.sweep',
+      ).warning('legacy component sweep failed: $e\n$st');
+    }
+  }
 
   /// Whether [spec] is installed: all files present above their size floor
   /// (archives: the entry exe must exist after extraction).

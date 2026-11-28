@@ -1,9 +1,38 @@
 import 'package:enjoy_player/core/window/window_fullscreen_provider.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  TargetPlatform? previousPlatform;
+  var mockFullScreen = false;
+  setUp(() {
+    previousPlatform = debugDefaultTargetPlatformOverride;
+    debugDefaultTargetPlatformOverride = TargetPlatform.windows;
+    mockFullScreen = false;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          const MethodChannel('window_manager'),
+          (call) async => switch (call.method) {
+            'isFullScreen' => mockFullScreen,
+            'isMaximized' => false,
+            'setFullScreen' => () {
+              mockFullScreen = (call.arguments as Map)['isFullScreen'] as bool;
+              return null;
+            }(),
+            _ => null,
+          },
+        );
+  });
+
+  tearDown(() {
+    debugDefaultTargetPlatformOverride = previousPlatform;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(const MethodChannel('window_manager'), null);
+  });
 
   test('initial state defaults to false', () {
     final container = ProviderContainer();

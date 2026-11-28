@@ -30,20 +30,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeGreetingEvening => 'Good evening';
 
   @override
-  String homeGreetingNamed(String greeting, String name) {
-    return '$greeting, $name';
-  }
-
-  @override
   String get homeEmptyTitle => 'No recent media';
 
   @override
   String get homeContinuePracticing => 'Continue practicing';
-
-  @override
-  String homeContinueProgressSemantics(int percent) {
-    return '$percent percent complete';
-  }
 
   @override
   String homeContinueOpenSemantics(String title) {
@@ -135,9 +125,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lookupSectionExplain => 'Explain this sentence';
-
-  @override
-  String get lookupExplainRun => 'Explain';
 
   @override
   String get libraryTabPlaylists => 'Playlists';
@@ -248,10 +235,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Audio extraction isn\'t available on this device';
 
   @override
-  String get asrErrorFfmpegUnavailableHint =>
-      'Install ffmpeg or use a different video file.';
-
-  @override
   String get asrErrorNoAudioTrack => 'This file has no audio to transcribe';
 
   @override
@@ -281,17 +264,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Set up your AI provider to generate a transcript';
 
   @override
-  String get asrErrorByokMissingHint =>
-      'Open Settings → AI Providers to add credentials.';
-
-  @override
-  String get asrErrorCreditsExhausted => 'You\'ve used all your Enjoy credits';
-
-  @override
-  String get asrErrorCreditsExhaustedHint =>
-      'Upgrade your plan to keep generating transcripts.';
-
-  @override
   String get asrErrorNetwork =>
       'Network error. Please check your connection and retry.';
 
@@ -313,9 +285,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get asrLongMediaConfirmCancel => 'Cancel';
 
   @override
-  String get actionOpenFiles => 'Open file(s)';
-
-  @override
   String get actionImport => 'Import';
 
   @override
@@ -332,12 +301,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get discoverRecommendedHeading => 'Recommended';
-
-  @override
-  String get discoverSubscriptionsHeading => 'Subscriptions';
-
-  @override
-  String get discoverTimelineHeading => 'Recent uploads';
 
   @override
   String get discoverSubscribeTitle => 'Subscribe to channel';
@@ -367,9 +330,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get discoverUnsubscribed => 'Unsubscribed from channel';
 
   @override
-  String get discoverViewFeed => 'View feed';
-
-  @override
   String get discoverAddToLibrary => 'Add to library';
 
   @override
@@ -380,9 +340,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get discoverInLibrary => 'In library';
-
-  @override
-  String get discoverPlay => 'Play';
 
   @override
   String get discoverFeedEmptyTitle => 'No videos in feed yet';
@@ -445,35 +402,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'You are subscribed to all recommended channels.';
 
   @override
-  String get discoverSourceNotFound =>
-      'This YouTube source could not be found.';
-
-  @override
-  String get discoverSourceUnavailable =>
-      'This source is no longer available (deleted or private).';
-
-  @override
-  String get discoverNetworkError =>
-      'No internet connection. Check your network and try again.';
-
-  @override
-  String get discoverWorkerError =>
-      'Could not reach the feed server. Try again later.';
-
-  @override
-  String get discoverInvalidUrl =>
-      'Could not read a valid YouTube URL. Try a channel, @handle, or playlist link.';
-
-  @override
-  String get discoverAlreadySubscribed => 'Already subscribed to this source.';
-
-  @override
-  String get discoverSourceTypeChannel => 'Channel';
-
-  @override
-  String get discoverSourceTypePlaylist => 'Playlist';
-
-  @override
   String get youtubeImportTitle => 'Import YouTube video';
 
   @override
@@ -531,22 +459,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'This GPU cannot render YouTube video. Relaunch the app to restore video with software rendering.';
 
   @override
-  String get searchHint => 'Search';
-
-  @override
-  String get transportRepeat => 'Repeat';
-
-  @override
   String get transportFullscreen => 'Fullscreen';
 
   @override
   String get transportExitFullscreen => 'Exit fullscreen';
-
-  @override
-  String get transportMore => 'More';
-
-  @override
-  String get transportCollapse => 'Collapse player';
 
   @override
   String get settingsTitle => 'Settings';
@@ -565,12 +481,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'This file type isn’t supported. Choose an audio or video file.';
 
   @override
-  String get noMediaYet => 'No media yet';
-
-  @override
-  String get tapImportToAdd => 'Import audio or video from the toolbar.';
-
-  @override
   String get navMainLabel => 'Primary navigation';
 
   @override
@@ -586,10 +496,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsSectionAppearance => 'Appearance';
 
   @override
-  String get settingsAppearanceSubtitle =>
-      'Theme follows your system settings.';
-
-  @override
   String get settingsSectionAbout => 'About';
 
   @override
@@ -597,16 +503,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'SP Player — local transcripts and shadow reading.';
 
   @override
-  String get settingsThemeRowTitle => 'Theme';
-
-  @override
   String get settingsThemeDarkLocked => 'Follows your system appearance.';
-
-  @override
-  String get settingsThemeSystem => 'System';
-
-  @override
-  String get settingsThemeLight => 'Light';
 
   @override
   String get settingsThemeDark => 'Dark';
@@ -644,18 +541,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get playerDockLooping => '· looping';
 
   @override
-  String playerDockLinesSpanPosition(int start, int end, int total) {
-    return 'Lines $start–$end of $total';
-  }
-
-  @override
-  String get exitEchoMode => 'Exit echo mode';
-
-  @override
   String get transcript => 'Transcript';
-
-  @override
-  String get transcriptNowReading => 'Now reading';
 
   @override
   String get playerTranscriptResizeHint =>
@@ -669,21 +555,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transcriptEmptyOverline => 'Transcript';
-
-  @override
-  String get transcriptEmptyGenerateDesc =>
-      'Transcribe the speech in this item. Uses credits.';
-
-  @override
-  String get transcriptEmptyExtractDesc =>
-      'Use the subtitle tracks inside the file, if it has any.';
-
-  @override
-  String get transcriptEmptyImportDesc =>
-      'Import an .srt or .vtt file and choose its language.';
-
-  @override
-  String get importSrtOrVtt => 'Import an .srt or .vtt file.';
 
   @override
   String get loading => 'Loading…';
@@ -706,21 +577,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get volume => 'Volume';
 
   @override
-  String get transportMute => 'Mute';
-
-  @override
-  String get transportUnmute => 'Unmute';
-
-  @override
-  String get repeatNone => 'Repeat off';
-
-  @override
-  String get repeatSegment => 'Repeat segment';
-
-  @override
-  String get settingsPlaceholder => 'Player preferences will appear here.';
-
-  @override
   String get subtitles => 'Subtitles';
 
   @override
@@ -734,9 +590,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subtitlesNotSelected => 'Not selected';
-
-  @override
-  String get subtitlesImportFile => 'Import subtitle file…';
 
   @override
   String get subtitlesDeleteTrack => 'Delete track';
@@ -773,18 +626,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transcriptEmptyGenerate => 'AI transcript';
 
   @override
-  String get subtitlesGenerate => 'AI transcript';
-
-  @override
-  String get subtitlesRegenerate => 'Re-generate transcript';
-
-  @override
-  String get subtitlesExtractEmbedded => 'Extract embedded subtitles';
-
-  @override
-  String get subtitlesRefreshCloud => 'Refresh transcripts from cloud';
-
-  @override
   String get subtitlesImportLanguageTitle => 'Subtitle language';
 
   @override
@@ -813,30 +654,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String subtitlesAutoTranslateLanguageChip(String language) {
     return 'To $language';
   }
-
-  @override
-  String get subtitlesAutoTranslateRetranslateLine => 'Re-translate this line';
-
-  @override
-  String get subtitlesAutoTranslateRetranslateAll => 'Re-translate';
-
-  @override
-  String get subtitlesAutoTranslateBlockedStalePrimary =>
-      'The primary subtitle changed. Auto translate will rebuild from the new primary.';
-
-  @override
-  String get subtitlesAutoTranslateLineFailed => 'Couldn’t translate this line';
-
-  @override
-  String get subtitlesAutoTranslatePendingLine => 'Translating…';
-
-  @override
-  String get subtitlesAutoTranslateBlockedSameLanguage =>
-      'Auto translate is not needed when your native language matches the primary subtitle.';
-
-  @override
-  String get subtitlesAutoTranslateBlockedNoPrimary =>
-      'Choose a primary subtitle first.';
 
   @override
   String get subtitlesExtractNoTracks =>
@@ -894,14 +711,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get shadowReadingTitle => 'Shadow reading';
-
-  @override
   String get shadowReadingHint =>
       'Practice speaking along this segment. Record your voice and compare pitch with the reference.';
-
-  @override
-  String get shadowReadingReferenceSnippet => 'Reference';
 
   @override
   String get pitchContourTitle => 'Pitch contour';
@@ -922,16 +733,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pitchContourAnalyzing => 'Analyzing pitch…';
 
   @override
-  String get shadowRecordingExisting => 'Saved takes';
-
-  @override
   String get shadowRecordingEmpty => 'No recordings for this segment yet.';
 
   @override
   String get shadowRecordingTake => 'Take';
-
-  @override
-  String get shadowTakesLabel => 'Takes';
 
   @override
   String get shadowTakesEmptyPrefix =>
@@ -942,9 +747,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shadowRecordingPlay => 'Play';
-
-  @override
-  String get shadowRecordingPause => 'Pause';
 
   @override
   String get shadowRecordingChooseTake => 'Switch take';
@@ -986,15 +788,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAiProvidersTileTitle => 'AI providers';
 
   @override
-  String get settingsAiProvidersTileSubtitle =>
-      'Configure your own API keys per feature';
-
-  @override
   String get settingsAiProvidersTitle => 'AI providers';
-
-  @override
-  String get settingsAiProvidersSubtitle =>
-      'Configure how SP Player calls AI for each feature.';
 
   @override
   String get settingsAiProvidersPrivacyNotice =>
@@ -1010,29 +804,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAiProvidersModalityLlm => 'Language models';
 
   @override
-  String get settingsAiProvidersModalityLlmHint =>
-      'Chat, translation, dictionary, and contextual translation';
-
-  @override
   String get settingsAiProvidersModalityAsr => 'Speech recognition (subtitles)';
-
-  @override
-  String get settingsAiProvidersModalityAsrHint => 'Transcribe audio to text';
 
   @override
   String get settingsAiProvidersModalityTts => 'Text-to-speech';
 
   @override
-  String get settingsAiProvidersModalityTtsHint =>
-      'Synthesize spoken audio from text';
-
-  @override
   String get settingsAiProvidersModalityAssessment =>
       'Pronunciation assessment';
-
-  @override
-  String get settingsAiProvidersModalityAssessmentHint =>
-      'Score shadow-reading takes with Azure Speech';
 
   @override
   String get settingsAiProvidersLlmSpecLabel => 'Protocol';
@@ -1151,14 +930,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAiEngineCloud => 'Custom cloud';
 
   @override
-  String get settingsAiProvidersTtsLocalHint =>
-      'Uses the built-in Windows speech synthesis — no download needed. Voices follow your installed system voice packs (Settings → Time & language → Speech).';
-
-  @override
-  String get settingsAiProvidersAsrLocalHint =>
-      'Offline recognition via the local components; no network needed. First use guides you through the download.';
-
-  @override
   String get settingsAiProvidersSpeechTtsModelLabel => 'TTS model';
 
   @override
@@ -1214,46 +985,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsTranscriptEnrichmentTitle => 'Enrich Craft word timings';
 
   @override
-  String get settingsTranscriptEnrichmentSubtitle =>
-      'When on, Craft save stores word and phone times from on-device alignment. Off (default) keeps today’s synthesis line timings.';
-
-  @override
   String get settingsTranscriptKaraokeTitle => 'Highlight current word';
 
   @override
-  String get settingsTranscriptKaraokeSubtitle =>
-      'Highlight the spoken word when word timings exist.';
-
-  @override
   String get settingsTranscriptIpaOverlayTitle => 'Show pronunciation (IPA)';
-
-  @override
-  String get settingsTranscriptIpaOverlaySubtitle =>
-      'Show IPA under words; tap to play.';
-
-  @override
-  String get transcriptDisplaySettingsTitle => 'Transcript display';
-
-  @override
-  String get transcriptIpaUnavailableHint => 'Generate pronunciation first.';
-
-  @override
-  String get transcriptKaraokeUnavailableHint => 'Generate word timings first.';
 
   @override
   String get transcriptKaraokeUnavailableRemoteHint =>
       'Karaoke needs word timings from a local file.';
 
   @override
-  String get transcriptEnrichOwnedTitle =>
-      'Generate word timings and pronunciation';
-
-  @override
   String get transcriptEnrichOwnedSubtitle =>
       'Uses this item\'s audio. Playback stays available.';
-
-  @override
-  String get transcriptEnrichYoutubeTitle => 'Generate pronunciation';
 
   @override
   String get transcriptEnrichYoutubeSubtitle =>
@@ -1267,9 +1010,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transcriptEnrichFailed => 'Couldn\'t generate. Tap to try again.';
-
-  @override
-  String get transcriptEnrichWorking => 'Generating…';
 
   @override
   String transcriptEnrichProgress(int completed, int total) {
@@ -1340,9 +1080,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hotkeysSectionKeyboard => 'Keyboard shortcuts';
-
-  @override
-  String get hotkeysResetBinding => 'Reset';
 
   @override
   String get hotkeysResetAll => 'Reset all shortcuts';
@@ -1507,9 +1244,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assessmentPronunciationAnalysis => 'Pronunciation analysis';
 
   @override
-  String get assessmentAccuracyScore => 'Accuracy score';
-
-  @override
   String get assessmentSyllables => 'Syllables';
 
   @override
@@ -1583,585 +1317,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Stored assessment data could not be read.';
 
   @override
-  String get authSignInTitle => 'Welcome to Enjoy';
-
-  @override
-  String get authSignInSubtitle =>
-      'Sign in to sync your library, track learning progress, and pick up where you left off.';
-
-  @override
-  String get authBrandHeadline => 'First the original voice. Then yours.';
-
-  @override
-  String get authBrandBody =>
-      'Listen line by line, echo every sentence, and hear how close you are.';
-
-  @override
-  String get authSignInCta => 'Continue';
-
-  @override
-  String get authContinueWithGoogle => 'Continue with Google';
-
-  @override
-  String get authContinueWithApple => 'Continue with Apple';
-
-  @override
-  String get authContinueWithEmail => 'Continue with Email';
-
-  @override
-  String get authOtherSignInOptions => 'Other sign-in options';
-
-  @override
-  String get authOrDivider => 'or';
-
-  @override
-  String get authEmailPrompt => 'We will send a one-time code to your email.';
-
-  @override
-  String get authEmailLabel => 'Email';
-
-  @override
-  String get authEmailInvalid => 'Enter a valid email address.';
-
-  @override
-  String get authSendOtp => 'Send code';
-
-  @override
-  String get authOtpTitle => 'Enter verification code';
-
-  @override
-  String authOtpSentTo(String email) {
-    return 'Code sent to $email';
-  }
-
-  @override
-  String get authOtpLabel => '6-digit code';
-
-  @override
-  String get authOtpInputSemantics => 'One-time passcode';
-
-  @override
-  String get authVerifyOtp => 'Verify';
-
-  @override
-  String get authOtpResend => 'Resend code';
-
-  @override
-  String authOtpResendIn(int seconds) {
-    return 'Resend in ${seconds}s';
-  }
-
-  @override
-  String get authChangeEmail => 'Change email';
-
-  @override
-  String get authOtpResumeTitle => 'Finish signing in';
-
-  @override
-  String authOtpResumeSubtitle(String email) {
-    return 'Enter the verification code sent to $email';
-  }
-
-  @override
-  String get authOtpResumeAction => 'Continue verification';
-
-  @override
-  String get authWebSignInWaiting => 'Complete sign-in in your browser…';
-
-  @override
-  String get authWaitingForApproval => 'Finishing sign-in…';
-
-  @override
   String get authCancel => 'Cancel';
 
   @override
-  String get authSignedInSuccess => 'Signed in successfully';
-
-  @override
-  String get authReloadSignInPage => 'Reload sign-in page';
-
-  @override
-  String get authOpenInSystemBrowser => 'Open in system browser';
-
-  @override
-  String get authSignOut => 'Sign out';
-
-  @override
-  String get profileTitle => 'Profile';
-
-  @override
-  String get profileRefreshTooltip => 'Refresh profile';
-
-  @override
-  String get profileFieldName => 'Username';
-
-  @override
-  String get profileFieldEmail => 'Email';
-
-  @override
-  String get profileFieldEnjoyId => 'Enjoy ID';
-
-  @override
-  String get profileFieldMixinId => 'Mixin ID';
-
-  @override
-  String get profileMixinNotLinked => 'Not linked';
-
-  @override
-  String get profileEditTitle => 'Edit profile';
-
-  @override
-  String get profileEditEntry => 'Edit profile';
-
-  @override
-  String get profileEditEntryHint => 'Username, avatar, and account IDs';
-
-  @override
-  String get profileChangeAvatar => 'Change avatar';
-
-  @override
-  String get profileAvatarTooLarge => 'Avatar must be 2 MB or smaller';
-
-  @override
-  String get profileAvatarUnsupportedType =>
-      'Avatar must be JPEG, PNG, or WebP';
-
-  @override
-  String get profileAvatarEmpty => 'Choose an image to upload';
-
-  @override
-  String get profileAvatarUploadFailed => 'Could not upload avatar. Try again.';
-
-  @override
-  String get profileCopied => 'Copied';
-
-  @override
-  String get profileFieldGoal => 'Daily goal (minutes)';
-
-  @override
-  String get profileFieldLearningLanguage => 'Learning language';
-
-  @override
-  String get profileFieldNativeLanguage => 'Native language';
-
-  @override
-  String get profileFieldRequired => 'Required';
-
-  @override
-  String get profileSave => 'Save';
-
-  @override
-  String get profileSaveSuccess => 'Profile saved';
-
-  @override
-  String get profileSubscriptionFree => 'Free';
-
-  @override
-  String get profileSubscriptionPro => 'Pro';
-
-  @override
-  String profileCreditsAvailable(String available, String limit) {
-    return 'Credits today: $available / $limit';
-  }
-
-  @override
-  String get profileStatTodayTitle => 'Today';
-
-  @override
-  String get profileStatWeekTitle => 'This week';
-
-  @override
-  String get profileStatMonthTitle => 'This month';
-
-  @override
-  String get profileSectionPractice => 'Practice';
-
-  @override
-  String get profileSectionPracticeHint =>
-      'Synced practice time from your account';
-
-  @override
-  String get profileCreditsUsageTile => 'Credits usage';
-
-  @override
-  String get profileCreditsUsageSubtitle =>
-      'View AI credits consumption from your account';
-
-  @override
-  String get profileSectionAccount => 'Account';
-
-  @override
-  String get profileSectionAccountHint => 'Daily credits and usage history';
-
-  @override
-  String get profileSectionPreferences => 'Preferences';
-
-  @override
-  String get profileSectionPreferencesHint =>
-      'Daily goal and language settings';
-
-  @override
-  String get profileSignOutConfirmTitle => 'Sign out?';
-
-  @override
-  String get profileSignOutConfirmMessage =>
-      'You will need to sign in again to sync and use AI features.';
-
-  @override
-  String get profileSubscriptionTile => 'Subscription';
-
-  @override
-  String get profileSubscriptionSubtitle => 'View your plan and upgrade to Pro';
-
-  @override
-  String get subscriptionTitle => 'Subscription';
-
-  @override
-  String get subscriptionDescription =>
-      'Manage your subscription plan and Pro benefits.';
-
-  @override
-  String get subscriptionErrorLoading => 'Failed to load subscription status';
-
-  @override
-  String get subscriptionStatusCardTitle => 'Subscription status';
-
-  @override
-  String get subscriptionCurrentPlan => 'Current plan';
-
-  @override
-  String get subscriptionStatusTier => 'Tier';
-
-  @override
-  String get subscriptionStatusActive => 'Status';
-
-  @override
-  String get subscriptionActive => 'Active';
-
-  @override
-  String get subscriptionInactive => 'Inactive';
-
-  @override
-  String get subscriptionStatusExpiration => 'Expiration';
-
-  @override
-  String get subscriptionNeverExpires => 'Never expires';
-
-  @override
-  String subscriptionExpiresOn(String date) {
-    return 'Expires on $date';
-  }
-
-  @override
-  String get subscriptionStatusCreditsLimit => 'Daily credits limit';
-
-  @override
-  String subscriptionDailyCredits(String count) {
-    return '$count credits';
-  }
-
-  @override
-  String get subscriptionTierComparisonTitle => 'Choose your plan';
-
-  @override
-  String get subscriptionTierFreeName => 'Free';
-
-  @override
-  String get subscriptionTierFreeDescription => 'Perfect for light usage';
-
-  @override
-  String get subscriptionTierFreePrice => 'Free';
-
-  @override
-  String get subscriptionTierFreeDailyCredits => '1,000 credits/day';
-
-  @override
-  String get subscriptionTierLiteName => 'Lite';
-
-  @override
-  String get subscriptionTierLiteDescription => 'For daily learners';
-
-  @override
-  String get subscriptionTierLitePrice => '1.99 USD/month';
-
-  @override
-  String get subscriptionTierLiteDailyCredits =>
-      '12,000 credits/day (12× Free)';
-
-  @override
-  String get subscriptionTierProName => 'Pro';
-
-  @override
-  String get subscriptionTierProDescription => 'For serious learners';
-
-  @override
-  String get subscriptionTierProPrice => '9.99 USD/month';
-
-  @override
-  String get subscriptionTierProDailyCredits => '60,000 credits/day (60× Free)';
-
-  @override
-  String get subscriptionFeatureTranslation => 'Translation';
-
-  @override
-  String get subscriptionFeatureSmartTranslation => 'Smart translation';
-
-  @override
-  String get subscriptionFeatureDictionary => 'Dictionary';
-
-  @override
-  String get subscriptionFeatureAsr => 'Speech recognition';
-
-  @override
-  String get subscriptionFeatureTts => 'Speech synthesis';
-
-  @override
-  String get subscriptionFeatureAssessment => 'Pronunciation assessment';
-
-  @override
-  String get subscriptionFeaturePaidFlashcards =>
-      'Download vocabulary flashcards';
-
-  @override
-  String get subscriptionFeaturePaidMoreComing => 'More features coming';
-
-  @override
-  String get subscriptionUpgrade => 'Upgrade to Pro';
-
-  @override
-  String get subscriptionUpgradeShort => 'Upgrade';
-
-  @override
-  String get subscriptionRecommendedPlan => 'Recommended';
-
-  @override
-  String get subscriptionExtend => 'Extend subscription';
-
-  @override
-  String get subscriptionPurchaseTitle => 'Purchase Pro subscription';
-
-  @override
-  String get subscriptionPurchaseSelectDuration => 'Select duration';
-
-  @override
-  String get subscriptionPurchaseDuration => 'Duration';
-
-  @override
-  String get subscriptionPurchaseOneMonth => '1 month';
-
-  @override
-  String get subscriptionPurchaseOneSeason => '1 season';
-
-  @override
-  String get subscriptionPurchaseOneYear => '1 year';
-
-  @override
-  String get subscriptionPurchaseCustomDuration => 'Custom';
-
-  @override
-  String get subscriptionPurchaseCustomMonthsLabel => 'Number of months';
-
-  @override
-  String get subscriptionPurchaseCustomMonthsHint => '1–12';
-
-  @override
-  String get subscriptionPurchaseCustomMonthsHelper =>
-      'Enter between 1 and 12 months';
-
-  @override
-  String subscriptionPurchaseMonths(int count) {
-    return '$count months';
-  }
-
-  @override
-  String get subscriptionPurchasePaymentMethod => 'Payment method';
-
-  @override
-  String get subscriptionProcessorStripe => 'Stripe';
-
-  @override
-  String get subscriptionProcessorMixin => 'Cryptocurrency';
-
-  @override
-  String get subscriptionPaymentMethodCard => 'Card';
-
-  @override
-  String get subscriptionPaymentMethodWechat => 'WeChat';
-
-  @override
-  String get subscriptionPaymentMethodAlipay => 'Alipay';
-
-  @override
-  String get subscriptionPaymentMethodGooglePay => 'Google Pay';
-
-  @override
-  String get subscriptionPaymentMethodUsdt => 'USDT';
-
-  @override
-  String get subscriptionPaymentMethodUsdc => 'USDC';
-
-  @override
-  String get subscriptionPaymentMethodBtc => 'BTC';
-
-  @override
-  String get subscriptionPaymentMethodEth => 'ETH';
-
-  @override
-  String get subscriptionPaymentMethodDoge => 'Doge';
-
-  @override
-  String get subscriptionPaymentMethodAndMore => 'and more';
-
-  @override
-  String get subscriptionTotalPriceLabel => 'Total';
-
-  @override
-  String subscriptionTotalPrice(String amount) {
-    return '$amount USD';
-  }
-
-  @override
-  String get subscriptionContinueToPayment => 'Continue to payment';
-
-  @override
-  String get subscriptionRedirectingToPayment => 'Redirecting to payment…';
-
-  @override
-  String get subscriptionPaymentUrlMissing => 'Payment URL not available';
-
-  @override
-  String get subscriptionPaymentLaunchFailed => 'Could not open payment page';
-
-  @override
-  String get subscriptionPurchaseFailed => 'Purchase failed';
-
-  @override
-  String get subscriptionMobilePurchaseTitle => 'Mobile purchase coming soon';
-
-  @override
-  String get subscriptionMobilePurchaseMessage =>
-      'In-app purchase on iOS and Android is not available yet. If you already have Pro from the web or desktop app, your status appears above.';
-
-  @override
-  String get subscriptionCreditsLimitMessage =>
-      'AI credits limit reached. Upgrade for higher limits.';
-
-  @override
   String get subscriptionViewPlans => 'View plans';
-
-  @override
-  String get subscriptionUpgradedToPro => 'You\'re now Pro — enjoy!';
-
-  @override
-  String get subscriptionVerifyingUpgrade => 'Verifying your upgrade…';
-
-  @override
-  String get subscriptionVerifyTimeout =>
-      'Couldn\'t confirm your upgrade yet — we\'ll keep checking in the background.';
-
-  @override
-  String get creditsUsageTitle => 'Credits usage';
-
-  @override
-  String get creditsUsageDescription =>
-      'Records of credits checks on the Enjoy AI worker (UTC dates).';
-
-  @override
-  String get creditsUsageStartDate => 'Start date';
-
-  @override
-  String get creditsUsageEndDate => 'End date';
-
-  @override
-  String get creditsUsageServiceType => 'Service';
-
-  @override
-  String get creditsUsageClearFilters => 'Clear filters';
-
-  @override
-  String get creditsUsageError => 'Could not load usage';
-
-  @override
-  String get creditsUsageErrorDescription =>
-      'Check your network and AI API base URL in Settings.';
-
-  @override
-  String get creditsUsageRetry => 'Retry';
-
-  @override
-  String get creditsUsageNoRecords => 'No records';
-
-  @override
-  String get creditsUsageNoRecordsWithFilters =>
-      'Try changing or clearing filters.';
-
-  @override
-  String get creditsUsageNoRecordsDescription =>
-      'Usage will appear here after you use AI features while signed in.';
-
-  @override
-  String get creditsUsageTableDate => 'Date';
-
-  @override
-  String get creditsUsageTableTime => 'Time';
-
-  @override
-  String get creditsUsageTableService => 'Service';
-
-  @override
-  String get creditsUsageTableTier => 'Tier';
-
-  @override
-  String get creditsUsageTableRequired => 'Required';
-
-  @override
-  String get creditsUsageTableUsedBefore => 'Used before';
-
-  @override
-  String get creditsUsageTableUsedAfter => 'Used after';
-
-  @override
-  String get creditsUsageTableStatus => 'Status';
-
-  @override
-  String get creditsUsageAllowed => 'Allowed';
-
-  @override
-  String get creditsUsageDenied => 'Denied';
-
-  @override
-  String creditsUsagePageInfo(int page) {
-    return 'Page $page';
-  }
-
-  @override
-  String creditsUsageTotalRecords(int count) {
-    return '$count shown';
-  }
-
-  @override
-  String get creditsUsagePrevious => 'Previous';
-
-  @override
-  String get creditsUsageNext => 'Next';
-
-  @override
-  String get creditsServiceTypeAll => 'All';
-
-  @override
-  String get creditsServiceTypeTts => 'TTS';
-
-  @override
-  String get creditsServiceTypeAsr => 'ASR';
-
-  @override
-  String get creditsServiceTypeTranslation => 'Translation';
-
-  @override
-  String get creditsServiceTypeLlm => 'LLM';
-
-  @override
-  String get creditsServiceTypeAssessment => 'Assessment';
 
   @override
   String get settingsSectionAppearanceLanguageHint =>
@@ -2171,129 +1330,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hotkeysSectionKeyboardHint => 'Reference and customize shortcuts';
 
   @override
-  String get settingsSectionAdvancedHint =>
-      'API endpoints and experimental toggles';
-
-  @override
   String get settingsSectionDeveloperHint => 'Diagnostics and internal tooling';
 
   @override
   String get settingsSectionAboutHint => 'Version, licenses, and links';
 
   @override
-  String get syncSettingsTileTitle => 'Sync status';
-
-  @override
-  String get syncSettingsTileSubtitleSignedOut =>
-      'Sign in to sync library and recordings';
-
-  @override
-  String get syncSettingsTileSubtitleUpToDate => 'Up to date';
-
-  @override
-  String syncSettingsTileSubtitleCounts(int retryable, int failed) {
-    return '$retryable waiting · $failed failed';
-  }
-
-  @override
-  String get syncScreenTitle => 'Sync status';
-
-  @override
-  String get syncScreenLastSyncLabel => 'Last successful sync';
-
-  @override
-  String get syncScreenLastSyncNever => 'Never';
-
-  @override
-  String get syncScreenStatRetryable => 'Waiting to upload';
-
-  @override
-  String get syncScreenStatFailed => 'Failed permanently';
-
-  @override
-  String get syncScreenSyncNow => 'Sync now';
-
-  @override
-  String get syncScreenRetryFailed => 'Retry failed items';
-
-  @override
-  String get syncScreenRepullVocabulary => 'Re-pull vocabulary';
-
-  @override
-  String get syncScreenSignedOutBody =>
-      'Sign in with your Enjoy account to sync metadata across devices.';
-
-  @override
-  String get syncScreenGoSignIn => 'Sign in';
-
-  @override
-  String get cloudScreenTitle => 'Cloud';
-
-  @override
-  String get cloudTabAudio => 'Audio';
-
-  @override
-  String get cloudTabVideo => 'Video';
-
-  @override
-  String get cloudSignedOutBody =>
-      'Sign in to browse media saved to your Enjoy account.';
-
-  @override
-  String get cloudAddToLibrary => 'Add to library';
-
-  @override
-  String get cloudAlreadyInLibrary => 'Already in library';
-
-  @override
-  String get cloudAddedToLibrary => 'Added to your local library.';
-
-  @override
-  String get cloudEmpty => 'No items in this list.';
-
-  @override
-  String get cloudHasMediaUrlHint => 'Streams from your saved URL when opened.';
-
-  @override
-  String get cloudNoMediaUrlHint =>
-      'No remote file URL — use Locate file in the player when you open this item.';
-
-  @override
   String get cloudRefreshTooltip => 'Refresh this tab';
-
-  @override
-  String get cloudAddToLibraryTooltip => 'Add to library';
-
-  @override
-  String get cloudEmptyAudioTitle => 'No cloud audio yet';
-
-  @override
-  String get cloudEmptyAudioSubtitle =>
-      'Items you save while signed in will appear here.';
-
-  @override
-  String get cloudEmptyVideoTitle => 'No cloud video yet';
-
-  @override
-  String get cloudEmptyVideoSubtitle =>
-      'Items you save while signed in will appear here.';
-
-  @override
-  String get syncSnackSuccess => 'Sync finished successfully.';
-
-  @override
-  String syncSnackIssues(int synced, int failed) {
-    return 'Sync finished: $synced succeeded, $failed failed.';
-  }
-
-  @override
-  String get syncQueueDetails => 'Queue details';
-
-  @override
-  String get syncQueueEmpty => 'Nothing in the queue.';
-
-  @override
-  String get settingsSectionAdvanced => 'Advanced';
 
   @override
   String get settingsApiBaseUrl => 'API base URL';
@@ -2302,42 +1345,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorNetwork => 'Network error';
 
   @override
-  String get communityActivity => 'Community Activity';
-
-  @override
-  String get communityToday => 'Community today';
-
-  @override
-  String get homeRecordingsToday => 'Recordings';
-
-  @override
-  String get homePracticeTime => 'Practice time';
-
-  @override
-  String get homeActiveLearners => 'Active Learners';
-
-  @override
-  String homePeopleLearning(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count people learning',
-      one: '$count person learning',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get homeNoActiveUsers => 'No active users';
-
-  @override
   String get homeTodaysGoal => 'Today\'s Goal';
 
   @override
   String get homeMinutes => 'min';
-
-  @override
-  String get homeCompleted => 'completed';
 
   @override
   String get homeGoalCompleted => 'Goal completed! Great job!';
@@ -2392,9 +1403,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get libraryMediaDeleted => 'Removed from library.';
-
-  @override
-  String get libraryDeleteMediaFailed => 'Could not remove this item.';
 
   @override
   String get cloudSyncBadgeSynced => 'Synced to cloud';
@@ -2508,16 +1516,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get youtubePasteFromClipboard => 'Paste';
 
   @override
-  String get settingsSubtitle => 'Tune Enjoy to fit how you study.';
-
-  @override
   String get settingsSectionAppearanceLanguage => 'Appearance & Language';
 
   @override
   String get settingsAppearanceTheme => 'Theme';
-
-  @override
-  String get settingsAppearanceThemeValue => 'Dark · Cinematic';
 
   @override
   String get settingsAppearanceThemeSystem => 'System';
@@ -2626,21 +1628,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get discoverLanguageFilterLabel => 'Language';
 
   @override
-  String get settingsNativeMustDifferHint =>
-      'Must differ from your learning language.';
-
-  @override
   String get settingsLanguagePickerTitleDisplay => 'Display language';
 
   @override
   String get settingsLanguagePickerTitleNative => 'Native language';
-
-  @override
-  String get profileFieldDisplayLanguage => 'Display language';
-
-  @override
-  String get profileLearningLanguageReadOnly =>
-      'Choose the language you are learning.';
 
   @override
   String get settingsKeyboardOpenCheatsheet => 'Open shortcuts cheatsheet';
@@ -2651,11 +1642,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsKeyboardCustomizeTitle => 'Customize shortcuts';
-
-  @override
-  String hotkeysHelpSubtitle(String key) {
-    return 'Press $key anytime to open this list.';
-  }
 
   @override
   String get hotkeysHelpSearchHint => 'Search shortcuts';
@@ -2817,9 +1803,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lookupSectionDictionary => 'Definition';
 
   @override
-  String get lookupLoading => 'Loading…';
-
-  @override
   String get lookupErrorRetry => 'Retry';
 
   @override
@@ -2827,12 +1810,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lookupLemma => 'Lemma';
-
-  @override
-  String get lookupIpa => 'IPA';
-
-  @override
-  String get lookupExamples => 'Examples';
 
   @override
   String get lookupClose => 'Close';
@@ -2865,60 +1842,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lookupRefresh => 'Refresh';
 
   @override
-  String get lookupLanguageEnUs => 'English';
-
-  @override
-  String get lookupLanguageEnGb => 'English (UK)';
-
-  @override
-  String get lookupLanguageZhCn => '中文';
-
-  @override
-  String get lookupLanguageJaJp => '日本語';
-
-  @override
-  String get lookupLanguageKoKr => '한국어';
-
-  @override
-  String get lookupLanguageEsEs => 'Español (España)';
-
-  @override
-  String get lookupLanguageEsMx => 'Español (México)';
-
-  @override
-  String get lookupLanguageFrFr => 'Français (France)';
-
-  @override
-  String get lookupLanguageFrCa => 'Français (Canada)';
-
-  @override
-  String get lookupLanguageDeDe => 'Deutsch';
-
-  @override
-  String get lookupLanguageItIt => 'Italiano';
-
-  @override
-  String get lookupLanguagePtBr => 'Português (Brasil)';
-
-  @override
-  String get lookupLanguagePtPt => 'Português (Portugal)';
-
-  @override
-  String get lookupLanguageRuRu => 'Русский';
-
-  @override
   String get lookupSourceResetToLearning =>
       'Source language reset to learning default';
-
-  @override
-  String lookupCreditsRemainingLabel(String n) {
-    return '$n left today';
-  }
-
-  @override
-  String lookupCreditsRunningLowLabel(String n) {
-    return 'Almost out — $n left today';
-  }
 
   @override
   String get vocabularyAddToVocabulary => 'Add to Vocabulary';
@@ -2952,19 +1877,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vocabularyTitle => 'Vocabulary';
 
   @override
-  String get vocabularyProfileEntry => 'Vocabulary';
-
-  @override
-  String get vocabularyProfileEntryHint => 'Review saved words and flashcards';
-
-  @override
   String get vocabularyReview => 'Review';
 
   @override
   String get vocabularyAllWords => 'All Words';
-
-  @override
-  String get vocabularyTotal => 'Total';
 
   @override
   String get vocabularyDue => 'Due';
@@ -3001,9 +1917,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get vocabularyNoMatchesDescription =>
       'Try a different search or clear the status and language filters.';
-
-  @override
-  String get vocabularyListLoadFailed => 'Could not load your vocabulary.';
 
   @override
   String get vocabularyCustomReview => 'Custom review';
@@ -3062,9 +1975,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vocabularyExitReview => 'Exit review';
 
   @override
-  String get vocabularyHowWellDoYouKnow => 'How well do you know this?';
-
-  @override
   String get vocabularyDontKnow => 'Don\'t Know';
 
   @override
@@ -3083,14 +1993,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String vocabularyProgress(int current, int total) {
     return '$current / $total';
   }
-
-  @override
-  String vocabularyRemaining(int count) {
-    return '$count remaining';
-  }
-
-  @override
-  String get vocabularyFlipBack => 'Flip back';
 
   @override
   String get vocabularyReviewComplete => 'Review complete';
@@ -3115,19 +2017,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vocabularyFilterAll => 'All';
 
   @override
-  String get vocabularyFilters => 'Filters';
-
-  @override
   String get vocabularyContext => 'Context';
 
   @override
   String get vocabularyDictionary => 'Dictionary';
-
-  @override
-  String get vocabularyNotes => 'Notes';
-
-  @override
-  String get vocabularyNotesPlaceholder => 'Notes coming soon';
 
   @override
   String get vocabularyNoContextAvailable => 'No context available';
@@ -3151,20 +2044,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get vocabularyKeyboardShortcuts =>
-      'Shortcuts: Space flip/back · 1/2/3 rate · ← previous · → skip · Esc exit';
-
-  @override
-  String vocabularyContextsCount(int count) {
-    return '$count contexts';
-  }
-
-  @override
-  String vocabularyReviewsCount(int count) {
-    return '$count reviews';
-  }
-
-  @override
   String get vocabularyFlipHint => 'Tap to flip';
 
   @override
@@ -3184,13 +2063,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Opening the player will end this review session. Your ratings so far are saved.';
 
   @override
-  String get vocabularyShadowReading => 'Shadow reading';
-
-  @override
-  String get vocabularyShadowReadingDescription =>
-      'Continue to the player for shadow reading? This ends the review session. Your ratings so far are saved.';
-
-  @override
   String get vocabularyEchoReading => 'Echo reading';
 
   @override
@@ -3198,12 +2070,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vocabularyPracticePause => 'Pause';
-
-  @override
-  String get vocabularyStatsExpand => 'Show status breakdown';
-
-  @override
-  String get vocabularyStatsCollapse => 'Hide status breakdown';
 
   @override
   String get vocabularyPreviousContext => 'Previous context';
@@ -3229,9 +2095,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vocabularyFetching => 'Loading…';
 
   @override
-  String get vocabularyAiUnavailable => 'Sign in to use AI lookup';
-
-  @override
   String get vocabularyAiFetchFailed =>
       'Could not load. Try again when online.';
 
@@ -3249,9 +2112,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vocabularyConfirmContinue => 'Continue';
 
   @override
-  String get vocabularySourceLabel => 'Source';
-
-  @override
   String get vocabularyUnknownSource => 'Unknown source';
 
   @override
@@ -3263,42 +2123,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vocabularyExportToAnki => 'Export to Anki';
 
   @override
-  String get vocabularyExportDialogTitle => 'Export to Anki';
-
-  @override
   String get vocabularyExport => 'Export';
-
-  @override
-  String get vocabularyNoItemsToExport => 'No items to export';
-
-  @override
-  String get vocabularyProRequired => 'Pro required';
-
-  @override
-  String get vocabularyProRequiredDescription =>
-      'Anki export is available on Enjoy Pro. Upgrade to export your vocabulary as Anki CSV cards.';
-
-  @override
-  String get vocabularyUpgradeToPro => 'Upgrade to Pro';
-
-  @override
-  String get vocabularyExportSuccess => 'Vocabulary exported.';
-
-  @override
-  String get vocabularyExportError => 'Could not export vocabulary.';
-
-  @override
-  String get vocabularyExportCancelled => 'Export cancelled.';
-
-  @override
-  String get vocabularyExportSparseCacheHint =>
-      'Card backs are richer when dictionary and contextual translations were saved during review.';
-
-  @override
-  String get vocabularyExportProgress => 'Exporting…';
-
-  @override
-  String get authRequiredCloudFeaturesTitle => 'Account required';
 
   @override
   String get practicePosterShareTooltip => 'Share practice poster';
@@ -3420,37 +2245,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsSearchClear => 'Clear search';
 
   @override
-  String get settingsSectionExpandSemantics => 'Expand section';
-
-  @override
-  String get settingsSectionCollapseSemantics => 'Collapse section';
-
-  @override
   String get settingsSectionNeedsAttention => 'Needs attention';
 
   @override
   String get transcriptBlurDisplayTitle => 'Hide transcript text';
-
-  @override
-  String get transcriptBlurToggleTooltip =>
-      'Blur practice (focus on listening)';
-
-  @override
-  String get transcriptBlurToggleOn => 'Listening-focus mode on';
-
-  @override
-  String get transcriptBlurToggleOff => 'Listening-focus mode off';
-
-  @override
-  String get transcriptBlurEmptyTooltip =>
-      'No transcript lines to practice with';
-
-  @override
-  String get transcriptBlurSemanticsOn =>
-      'Blur practice on. Tap or hover to reveal a line.';
-
-  @override
-  String get transcriptBlurSemanticsOff => 'Blur practice off.';
 
   @override
   String get importCraftFromText => 'Craft…';
@@ -3498,15 +2296,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get craftEditUnavailable => 'This Craft item is no longer available.';
 
   @override
-  String get craftSheetTitle => 'Craft audio from text';
-
-  @override
-  String get craftModeTranslateThenSpeak => 'Translate then speak';
-
-  @override
-  String get craftModeSpeakDirectly => 'Speak directly';
-
-  @override
   String get craftSourceLanguageLabel => 'Source language';
 
   @override
@@ -3519,20 +2308,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get craftPasteFromClipboard => 'Paste from clipboard';
 
   @override
-  String get craftAction => 'Craft';
-
-  @override
   String get craftCraftingProgress => 'Crafting your audio…';
-
-  @override
-  String get craftEmptyTextHint => 'Enter at least a sentence to craft.';
 
   @override
   String get craftSameLanguageHint =>
       'Looks like this is already in your learning language.';
-
-  @override
-  String get craftSameLanguageSwitch => 'Speak directly';
 
   @override
   String get craftOfflineBanner =>
@@ -3557,26 +2337,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'The audio was generated but couldn\'t be saved. Free up space and try again.';
 
   @override
-  String get craftAlreadyInLibrary => 'Already in your library';
-
-  @override
-  String get craftOpenExisting => 'Open';
-
-  @override
   String get craftRetry => 'Retry';
 
   @override
   String get craftOpenAiSettings => 'Open AI settings';
 
   @override
-  String get craftLengthCapNotice =>
-      'Crafted the first 5000 characters; the rest was not synthesized.';
-
-  @override
   String get libraryProviderCraftBadge => 'Craft';
-
-  @override
-  String get craftTtsSettingsHint => 'Craft uses the TTS provider below.';
 
   @override
   String get craftScreenTitle => 'Craft';
@@ -3653,9 +2420,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get craftSaveToLibrary => 'Save to library';
-
-  @override
-  String get craftSavingProgress => 'Saving to library…';
 
   @override
   String get craftPreviewLabel => 'Preview';
@@ -3771,165 +2535,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Something went wrong. Please try again.';
 
   @override
-  String get subscriptionAutoRenewTitle => 'Auto-renew Pro';
-
-  @override
-  String get subscriptionAutoRenewMonthly => 'Monthly';
-
-  @override
-  String get subscriptionAutoRenewYearly => 'Yearly';
-
-  @override
-  String subscriptionAutoRenewPriceMonth(String amount) {
-    return '$amount USD/month';
-  }
-
-  @override
-  String subscriptionAutoRenewPriceYear(String amount) {
-    return '$amount USD/year';
-  }
-
-  @override
-  String get subscriptionAutoRenewSubscribe => 'Subscribe with auto-renew';
-
-  @override
-  String get subscriptionAutoRenewOn => 'Auto-renew on';
-
-  @override
-  String get subscriptionAutoRenewOff => 'Auto-renew off';
-
-  @override
-  String get subscriptionAutoRenewIntervalMonth => 'Monthly plan';
-
-  @override
-  String get subscriptionAutoRenewIntervalYear => 'Yearly plan';
-
-  @override
-  String subscriptionAutoRenewProvider(String provider) {
-    return 'Billed via $provider';
-  }
-
-  @override
-  String get subscriptionAutoRenewCancel => 'Cancel auto-renew';
-
-  @override
-  String get subscriptionAutoRenewCancelConfirmTitle => 'Cancel auto-renew?';
-
-  @override
-  String subscriptionAutoRenewCancelConfirmMessage(String date) {
-    return 'You keep Pro until $date. You will not be charged again for this subscription.';
-  }
-
-  @override
-  String get subscriptionAutoRenewCancelConfirmAction => 'Cancel auto-renew';
-
-  @override
-  String get subscriptionAutoRenewCancelKeep => 'Keep auto-renew';
-
-  @override
-  String subscriptionAutoRenewCancelSuccess(String date) {
-    return 'Auto-renew canceled. Pro remains until $date.';
-  }
-
-  @override
-  String get subscriptionAutoRenewCancelFailed =>
-      'Could not cancel auto-renew. Try again.';
-
-  @override
-  String get subscriptionAutoRenewConflict =>
-      'You already have an active auto-renew subscription.';
-
-  @override
-  String get subscriptionAutoRenewPlansUnavailable =>
-      'Auto-renew plans are not available right now.';
-
-  @override
-  String get subscriptionProMemberTitle => 'You\'re on Pro';
-
-  @override
-  String subscriptionRenewsOn(String date) {
-    return 'Renews on $date';
-  }
-
-  @override
-  String subscriptionAccessUntil(String date) {
-    return 'Access until $date';
-  }
-
-  @override
-  String get subscriptionAutoRenewEndingSoon =>
-      'Auto-renew is off — Pro continues until the date above';
-
-  @override
-  String get subscriptionIncludedWithPro => 'Included with Pro';
-
-  @override
-  String get subscriptionPayOnceTitle => 'Pay for months once';
-
-  @override
-  String get subscriptionPayOnceSubtitle =>
-      'One-time prepaid months (no auto-renew)';
-
-  @override
-  String get creditsPackagesTitle => 'Credits packages';
-
-  @override
-  String get creditsPackagesSubtitle =>
-      'One-time permanent credits — not a subscription';
-
-  @override
-  String creditsPackagePriceCredits(String price, String credits) {
-    return '$price USD · $credits permanent credits';
-  }
-
-  @override
-  String get creditsPackageBuy => 'Buy credits';
-
-  @override
-  String get creditsPackageConfirmTitle => 'Buy credits package?';
-
-  @override
-  String creditsPackageConfirmMessage(String price, String credits) {
-    return 'Pay $price USD for $credits permanent credits. This does not change your subscription.';
-  }
-
-  @override
-  String get creditsPackageConfirmAction => 'Continue to payment';
-
-  @override
-  String get creditsPackageVerifying => 'Verifying your credits purchase…';
-
-  @override
-  String get creditsPackageVerifyTimeout =>
-      'Couldn\'t confirm credits yet — pull to refresh or check again shortly.';
-
-  @override
-  String get creditsPackagePurchaseSuccess => 'Permanent credits updated.';
-
-  @override
-  String get creditsPackagePurchaseFailed => 'Credits package purchase failed';
-
-  @override
-  String creditsPermanentAvailable(String count) {
-    return '$count permanent credits available';
-  }
-
-  @override
-  String get subscriptionCreditsLimitMessageWithPackages =>
-      'AI credits limit reached. Upgrade to Pro or buy a credits package to continue.';
-
-  @override
   String get subscriptionViewPlansAndPackages => 'View plans & packages';
-
-  @override
-  String creditsExhaustedDetailed(int required, int remaining) {
-    return 'This action needs $required credits, but only $remaining are left today.';
-  }
-
-  @override
-  String creditsExhaustedResets(String time) {
-    return 'Credits reset at $time.';
-  }
 
   @override
   String get byokProviderBillingMessage =>
@@ -3955,13 +2561,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pronounceFailed => 'Couldn\'t play pronunciation';
 
   @override
-  String get pronounceCreditsExhausted =>
-      'Not enough credits to generate pronunciation';
-
-  @override
-  String get pronounceSignInRequired => 'Sign in to hear pronunciation';
-
-  @override
   String get assessmentPlayMyRecording => 'Play my recording';
 
   @override
@@ -3978,117 +2577,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get assessmentClipUnavailable => 'No recording clip for this word';
-
-  @override
-  String get subscriptionTierCatalogTitle => 'Choose your plan';
-
-  @override
-  String get subscriptionTierCatalogDescription =>
-      'All tiers include the same AI features. Choose a credit allowance and billing cycle, then pick how you pay.';
-
-  @override
-  String get subscriptionTierCatalogRecommended => 'Recommended';
-
-  @override
-  String get subscriptionTierCatalogChoosePro => 'Choose Pro';
-
-  @override
-  String get subscriptionTierCatalogExtendPro => 'Extend Pro';
-
-  @override
-  String get subscriptionTierCatalogChooseLite => 'Choose Lite';
-
-  @override
-  String get subscriptionTierCatalogExtendLite => 'Extend Lite';
-
-  @override
-  String get subscriptionTierCatalogNotSelected => 'Downgrade is not available';
-
-  @override
-  String get subscriptionUpgradedToLite => 'You\'re now Lite — enjoy!';
-
-  @override
-  String subscriptionTierCatalogSelectedInterval(String amount, String unit) {
-    return '$amount / $unit — billed via Stripe';
-  }
-
-  @override
-  String subscriptionTierCatalogIntervalYearSavings(String percent) {
-    return 'Save $percent%';
-  }
-
-  @override
-  String get subscriptionTierCatalogPerMonth => 'month';
-
-  @override
-  String get subscriptionTierCatalogPerYear => 'year';
-
-  @override
-  String subscriptionPurchaseModalUnifiedTitle(String tier, String interval) {
-    return 'Choose how to pay for $tier · $interval';
-  }
-
-  @override
-  String get subscriptionPurchaseModalUnifiedDescription =>
-      'Auto-renew keeps Pro access continuous and renews automatically. Pay once buys a fixed prepaid period with no auto-renew.';
-
-  @override
-  String get subscriptionPurchaseModalAutoRenewActiveWarning =>
-      'You already have an active auto-renew subscription. Cancel it to switch billing options.';
-
-  @override
-  String get subscriptionPurchaseModalOptionAutoRenew => 'Auto-renew';
-
-  @override
-  String get subscriptionPurchaseModalOptionAutoRenewSubtitle =>
-      'Recommended — renews automatically. Cancel anytime.';
-
-  @override
-  String get subscriptionPurchaseModalOptionAutoRenewFootnote =>
-      'Billed via Stripe';
-
-  @override
-  String get subscriptionPurchaseModalOptionPrepaid => 'Pay once';
-
-  @override
-  String get subscriptionPurchaseModalOptionPrepaidSubtitle =>
-      'No auto-renew. Pay for a fixed period up front.';
-
-  @override
-  String get subscriptionPurchaseModalOptionPrepaidFootnote =>
-      'One-time payment';
-
-  @override
-  String get subscriptionPurchaseModalSubscribeAutoRenewCta =>
-      'Subscribe with auto-renew';
-
-  @override
-  String get subscriptionBalanceToCreditsTitle =>
-      'Convert balance to permanent credits';
-
-  @override
-  String subscriptionBalanceToCreditsDescriptionWithPreview(
-    String usd,
-    String credits,
-  ) {
-    return 'Move your $usd legacy balance to ~$credits permanent credits on the credits page.';
-  }
-
-  @override
-  String get subscriptionBalanceToCreditsDescriptionEmpty =>
-      'Once you have a balance from prior deposits, convert it to permanent credits here.';
-
-  @override
-  String get subscriptionBalanceToCreditsCta => 'Convert to credits';
-
-  @override
-  String get subscriptionBalanceToCreditsComingSoonTitle =>
-      'Balance transfer coming soon';
-
-  @override
-  String subscriptionBalanceToCreditsComingSoonMessage(String usd) {
-    return 'You have $usd in legacy balance. The transfer-to-credits flow is rolling out to the desktop app in a future update. Until then, manage your balance on the web app.';
-  }
 
   @override
   String get onboardingTipSkip => 'Skip';
@@ -4258,9 +2746,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vocabularyMore => 'More';
 
   @override
-  String get vocabularyProBadge => 'Pro';
-
-  @override
   String get libraryOverlineLocal => 'On this device';
 
   @override
@@ -4275,42 +2760,6 @@ class AppLocalizationsEn extends AppLocalizations {
       one: '1 match for “$query”',
     );
     return '$_temp0';
-  }
-
-  @override
-  String get profileSyncedFromAccount => 'Synced from your account';
-
-  @override
-  String get profileCreditsToday => 'Credits today';
-
-  @override
-  String get profileCreditsUsageLink => 'Usage';
-
-  @override
-  String get profileCreditsResetsDaily => 'Resets daily';
-
-  @override
-  String profileCreditsResetsWithPermanent(String count) {
-    return 'Resets daily · plus $count permanent credits';
-  }
-
-  @override
-  String get profileCreditsRunningLow => 'Today\'s credits are almost used up';
-
-  @override
-  String get profilePracticeEmptyHint =>
-      'Start your first echo session to fill these in';
-
-  @override
-  String get profileMinutesUnit => 'min';
-
-  @override
-  String get profileSettingsHint =>
-      'Appearance, AI providers, recording, shortcuts';
-
-  @override
-  String vocabularyReviewDueValue(int count) {
-    return '$count due';
   }
 
   @override
@@ -4349,58 +2798,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get discoverStripSubscribe => 'Subscribe';
 
   @override
-  String get subscriptionSummaryCurrentPlan => 'Current plan';
-
-  @override
-  String get subscriptionSummaryStatus => 'Status';
-
-  @override
-  String get subscriptionSummaryExpiration => 'Expiration';
-
-  @override
-  String get subscriptionSummaryDailyCredits => 'Daily credits limit';
-
-  @override
-  String get subscriptionChoosePlan => 'Choose your plan';
-
-  @override
-  String get creditsUsageUtcDates => 'UTC dates';
-
-  @override
-  String get subscriptionPackagesLink => 'Credits packages';
-
-  @override
   String get playerEchoShort => 'Echo';
 
   @override
   String playerLineOfTotal(Object line, Object total) {
     return 'Line $line of $total';
   }
-
-  @override
-  String syncLastSyncToday(String time) {
-    return 'Today, $time';
-  }
-
-  @override
-  String get syncRowWaiting => 'Waiting';
-
-  @override
-  String get syncRowFailed => 'Failed';
-
-  @override
-  String syncRowRetries(int count) {
-    return '$count attempts';
-  }
-
-  @override
-  String get syncEntityRecording => 'Recording';
-
-  @override
-  String get syncEntityVocabulary => 'Vocabulary item';
-
-  @override
-  String get assessmentWordsSection => 'Words';
 
   @override
   String get assessmentMarginOverline => 'Pronunciation';
@@ -4837,9 +3240,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsNetworkTestRunning => 'Testing...';
 
   @override
-  String get settingsNetworkTestApi => 'Enjoy API';
-
-  @override
   String get settingsNetworkTestYoutube => 'YouTube';
 
   @override
@@ -4937,9 +3337,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get playerDictationHeaderChecked => 'DICTATION — CHECKED';
-
-  @override
-  String get playerDictationNoSpeechDetected => 'No speech detected';
 
   @override
   String get settingsSectionLocalComponents => 'Local components';

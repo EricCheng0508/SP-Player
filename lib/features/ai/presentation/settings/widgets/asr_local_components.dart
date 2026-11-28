@@ -28,9 +28,34 @@ class AsrLocalComponents extends ConsumerStatefulWidget {
 class _AsrLocalComponentsState extends ConsumerState<AsrLocalComponents> {
   int _generation = 0;
 
+  /// Specs to render, ordered as passed in [AsrLocalComponents.kinds].
   List<ComponentSpec> get _specs => kComponentSpecs
       .where((s) => widget.kinds.contains(s.kind))
       .toList();
+
+  /// Merge specs sharing a [ComponentSpec.uiGroupId] into one display row —
+  /// e.g. the qwen runtime+model pair shows as a single engine row. Groups
+  /// keep catalog order; singles pass through untouched.
+  List<_ComponentUnit> get _units {
+    final units = <_ComponentUnit>[];
+    final byId = <String, _ComponentUnit>{};
+    for (final spec in _specs) {
+      final id = spec.uiGroupId;
+      if (id == null) {
+        units.add(_ComponentUnit(specs: [spec]));
+        continue;
+      }
+      final existing = byId[id];
+      if (existing == null) {
+        final unit = _ComponentUnit(specs: [spec]);
+        byId[id] = unit;
+        units.add(unit);
+      } else {
+        existing.specs.add(spec);
+      }
+    }
+    return units;
+  }
 
   Future<void> _install(ComponentSpec spec) async {
     final store = ref.read(componentStoreProvider);
@@ -56,6 +81,14 @@ class _AsrLocalComponentsState extends ConsumerState<AsrLocalComponents> {
     }
   }
 
+  /// Installs every missing spec of a merged group row, in order.
+  Future<void> _installUnit(_ComponentUnit unit) async {
+    for (final spec in unit.specs) {
+      if (ref.read(componentStoreProvider).isInstalled(spec)) continue;
+      await _install(spec);
+    }
+  }
+
   void _cancel(ComponentSpec spec) {
     ref.read(componentStoreProvider).cancel(spec.kind);
     ref.read(componentProgressProvider.notifier).update(
@@ -65,6 +98,12 @@ class _AsrLocalComponentsState extends ConsumerState<AsrLocalComponents> {
             error: '已取消',
           ),
         );
+  }
+
+  void _cancelUnit(_ComponentUnit unit) {
+    for (final spec in unit.specs) {
+      _cancel(spec);
+    }
   }
 
   Future<void> _delete(ComponentSpec spec) async {
@@ -103,6 +142,23 @@ class _AsrLocalComponentsState extends ConsumerState<AsrLocalComponents> {
     }
   }
 
+  /// Deletes every installed spec of a merged group row after one confirm.
+  Future<void> _deleteUnit(_ComponentUnit unit) async {
+    final store = ref.read(componentStoreProvider);
+    final installedSpecs =
+        unit.specs.where(store.isInstalled).toList(growable: false);
+    if (installedSpecs.isEmpty) return;
+    await _delete(installedSpecs.first);
+    for (final spec in installedSpecs.skip(1)) {
+      try {
+        await ref.read(componentStoreProvider).remove(spec);
+      } on Object {
+        break;
+      }
+    }
+    if (mounted) setState(() => _generation++);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -114,15 +170,19 @@ class _AsrLocalComponentsState extends ConsumerState<AsrLocalComponents> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        for (final spec in _specs)
+        for (final unit in _units)
           _AsrComponentTile(
-            key: ValueKey('${spec.kind.name}-$_generation'),
-            spec: spec,
-            installed: store.isInstalled(spec),
-            progress: progressMap[spec.kind],
-            onInstall: () => _install(spec),
-            onCancel: () => _cancel(spec),
-            onDelete: () => _delete(spec),
+            key: ValueKey(
+              '${unit.specs.first.kind.name}-$_generation',
+            ),
+            label: unit.label,
+            sizeHint: unit.sizeHint,
+            note: unit.note,
+            installed: unit.specs.every(store.isInstalled),
+            progress: unit.progressOf(progressMap),
+            onInstall: () => _installUnit(unit),
+            onCancel: () => _cancelUnit(unit),
+            onDelete: () => _deleteUnit(unit),
             theme: theme,
           ),
       ],
@@ -130,19 +190,56 @@ class _AsrLocalComponentsState extends ConsumerState<AsrLocalComponents> {
   }
 }
 
+/// One display row: a single spec, or several specs merged by [uiGroupId].
+class _ComponentUnit {
+  _ComponentUnit({required this.specs});
+
+  final List<ComponentSpec> specs;
+
+  /// Group label when merged; the single spec's own name otherwise.
+  String get label =>
+      specs.first.uiGroupLabel ?? specs.first.displayName;
+
+  /// Combined group size hint when merged; the spec hint otherwise.
+  String get sizeHint =>
+      specs.first.uiGroupSizeHint ?? specs.first.sizeHint;
+
+  /// Capability note for merged rows; null for plain singles.
+  String? get note => specs.first.uiGroupNote;
+
+  /// Progress of whichever spec is currently downloading (if any).
+  ComponentProgress? progressOf(Map<ComponentKind, ComponentProgress> map) {
+    for (final spec in specs) {
+      final p = map[spec.kind];
+      if (p != null &&
+          (p.phase == ComponentDownloadPhase.downloading ||
+              p.phase == ComponentDownloadPhase.extracting)) {
+        return p;
+      }
+    }
+    return null;
+  }
+}
+
 class _AsrComponentTile extends StatelessWidget {
   const _AsrComponentTile({
     super.key,
-    required this.spec,
+    required this.label,
+    required this.sizeHint,
     required this.installed,
     required this.progress,
     required this.onInstall,
     required this.onCancel,
     required this.onDelete,
     required this.theme,
+    this.note,
   });
 
-  final ComponentSpec spec;
+  final String label;
+  final String sizeHint;
+
+  /// Optional one-line capability note (merged engine rows only).
+  final String? note;
   final bool installed;
   final ComponentProgress? progress;
   final VoidCallback onInstall;
@@ -174,12 +271,21 @@ class _AsrComponentTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(spec.displayName, style: theme.textTheme.bodyMedium),
+                Text(label, style: theme.textTheme.bodyMedium),
+                if (note != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    note!,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 2),
                 Text(
                   installed
-                      ? '已安装 · ${spec.sizeHint}'
-                      : '未安装 · ${spec.sizeHint}',
+                      ? '已安装 · $sizeHint'
+                      : '未安装 · $sizeHint',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),

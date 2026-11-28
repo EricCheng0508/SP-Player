@@ -72,6 +72,10 @@ final class ComponentSpec {
     this.extract = false,
     required this.sizeHint,
     this.optional = false,
+    this.uiGroupId,
+    this.uiGroupLabel,
+    this.uiGroupSizeHint,
+    this.uiGroupNote,
   });
 
   final ComponentKind kind;
@@ -99,6 +103,20 @@ final class ComponentSpec {
   /// Optional components can be skipped at install time (download later in
   /// Settings) — e.g. the local translation model.
   final bool optional;
+
+  /// Settings-UI grouping key: specs sharing a group render as ONE row
+  /// (e.g. the qwen runtime+model pair shows as a single "识别引擎" row).
+  /// Null renders the spec as its own row.
+  final String? uiGroupId;
+
+  /// Row title for the merged group row (first spec's value wins).
+  final String? uiGroupLabel;
+
+  /// Combined size hint for the merged group row, e.g. `约 1.7 GB`.
+  final String? uiGroupSizeHint;
+
+  /// One-line capability note shown under the merged group row title.
+  final String? uiGroupNote;
 }
 
 /// GitHub Release that hosts SP Player's own runtime packs (the frozen ASR
@@ -191,6 +209,11 @@ const kComponentSpecs = <ComponentSpec>[
     extract: true,
     archiveEntry: 'sp-qwen-asr-server.exe',
     optional: true,
+    uiGroupId: 'qwenAsr',
+    uiGroupLabel: '千问识别引擎 Qwen3-ASR',
+    uiGroupSizeHint: '约 1.7 GB',
+    uiGroupNote: '运行时 0.1 GB + 模型 1.6 GB · qwen3-asr-wgpu 原生组件（Rust，秒开）'
+        '· 英语词错率 8.9% · 速度约快 8 倍 · 仅用于「生成字幕」，实时字幕用流式引擎',
     files: [
       ComponentFile(
         remotePath: 'sp-qwen-asr-server-windows-x64.zip',
@@ -207,6 +230,11 @@ const kComponentSpecs = <ComponentSpec>[
     installDirName: 'asr-models/qwen3-asr-0.6b',
     host: kModelScope,
     optional: true,
+    uiGroupId: 'qwenAsr',
+    uiGroupLabel: '千问识别引擎 Qwen3-ASR',
+    uiGroupSizeHint: '约 1.7 GB',
+    uiGroupNote: '运行时 0.1 GB + 模型 1.6 GB · qwen3-asr-wgpu 原生组件（Rust，秒开）'
+        '· 英语词错率 8.9% · 速度约快 8 倍 · 仅用于「生成字幕」，实时字幕用流式引擎',
     files: [
       // TODO(components-v2): pin the exact ModelScope repo path and ONNX file
       // names when the sidecar build freezes its loading layout.
@@ -255,6 +283,10 @@ const kComponentSpecs = <ComponentSpec>[
     extract: true,
     archiveEntry: 'sp-ctc-aligner.exe',
     optional: true,
+    uiGroupId: 'ctcAligner',
+    uiGroupLabel: '台本对齐',
+    uiGroupSizeHint: '约 1.4 GB',
+    uiGroupNote: '已有校对稿的 SRT/TXT 直接对齐出词级时间轴，文字 100% 准确',
     files: [
       // TODO(components-v2): ctc-forced-aligner-wgpu engine pack.
       ComponentFile(
@@ -271,6 +303,10 @@ const kComponentSpecs = <ComponentSpec>[
     installDirName: 'asr-models/omniasr-ctc-300m',
     host: kModelScope,
     optional: true,
+    uiGroupId: 'ctcAligner',
+    uiGroupLabel: '台本对齐',
+    uiGroupSizeHint: '约 1.4 GB',
+    uiGroupNote: '已有校对稿的 SRT/TXT 直接对齐出词级时间轴，文字 100% 准确',
     files: [
       // TODO(components-v2): pin the exact ModelScope repo path at build time.
       ComponentFile(
@@ -321,10 +357,15 @@ const kComponentSpecs = <ComponentSpec>[
   ),
   ComponentSpec(
     kind: ComponentKind.liveAsr,
-    displayName: '流式识别引擎（实时字幕）',
+    // ADR-0106 P1: the streaming swap lands with components-v2 — same
+    // transducer protocol, only the files below get repinned to the
+    // Nemotron-3.5 streaming ONNX set. The label states the target engine.
+    displayName: '流式识别引擎 Nemotron-3.5 0.6B',
     installDirName: 'live-asr',
     host: kHfOfficial,
     files: [
+      // TODO(components-v2): swap these zipformer files for the
+      // NVIDIA Nemotron-3.5-ASR-Streaming 0.6B int8 set (~682 MB).
       ComponentFile(
         remotePath:
             'csukuangfj/sherpa-onnx-streaming-zipformer-bilingual-zh-en-2023-02-20/resolve/main/encoder-epoch-99-avg-1.int8.onnx',
@@ -350,7 +391,7 @@ const kComponentSpecs = <ComponentSpec>[
         minBytes: 1024,
       ),
     ],
-    sizeHint: '约 200 MB',
+    sizeHint: '约 0.7 GB',
     optional: true,
   ),
 ];

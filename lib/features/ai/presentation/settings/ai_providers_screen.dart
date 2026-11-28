@@ -17,7 +17,6 @@ import 'package:enjoy_player/features/ai/domain/cloud_profile.dart';
 import 'package:enjoy_player/features/ai/domain/llm_api_spec.dart';
 import 'package:enjoy_player/features/ai/domain/modality_byok_config.dart';
 import 'package:enjoy_player/features/ai/domain/modality_kind.dart';
-import 'package:enjoy_player/features/ai/domain/speech_byok_kind.dart';
 import 'package:enjoy_player/features/ai/presentation/settings/widgets/asr_local_components.dart';
 import 'package:enjoy_player/features/ai/presentation/settings/widgets/cloud_profile_dialog.dart';
 import 'package:enjoy_player/features/local_components/data/managed_llama_server.dart';
@@ -40,10 +39,8 @@ class AiEnginesBody extends ConsumerStatefulWidget {
 
 class _AiEnginesBodyState extends ConsumerState<AiEnginesBody> {
   bool _mtCloud = true; // translation defaults to cloud (recommended)
-  bool _speechLocal = true;
 
   CloudLlmProfile? _llmProfile;
-  CloudSpeechProfile? _speechProfile;
   bool _applying = false;
 
   @override
@@ -63,10 +60,6 @@ class _AiEnginesBodyState extends ConsumerState<AiEnginesBody> {
     // endpoint (127.0.0.1:8760) switches this to local; no config at all keeps
     // the cloud pane visible (its box then says 未配置).
     _mtCloud = llm == null || !isLocalLlm;
-
-    final asr = configs.asr.speechByok;
-    final tts = configs.tts.speechByok;
-    _speechLocal = asr == null && tts == null;
 
     final profiles = ref.read(cloudProfilesProvider).value;
     if (profiles != null) {
@@ -88,19 +81,6 @@ class _AiEnginesBodyState extends ConsumerState<AiEnginesBody> {
       for (final p in profiles.llm) {
         if (_endpointMatches(p.endpoint, p.region, llm.baseUrl)) {
           _llmProfile = p;
-          break;
-        }
-      }
-    }
-    if (!_speechLocal) {
-      final speech = configs.asr.speechByok ?? configs.tts.speechByok;
-      for (final p in profiles.speech) {
-        if (_endpointMatches(
-          p.endpoint,
-          p.region,
-          speech?.baseUrl ?? '',
-        )) {
-          _speechProfile = p;
           break;
         }
       }
@@ -161,72 +141,6 @@ class _AiEnginesBodyState extends ConsumerState<AiEnginesBody> {
     }
   }
 
-  Future<void> _pickSpeech() async {
-    final selection = await showCloudProfileDialog(
-      context: context,
-      ref: ref,
-      speech: true,
-      selectedId: _speechProfile?.id,
-    );
-    if (!mounted) return;
-    final picked = selection?.speech;
-    if (picked == null) return;
-    await _applySpeech(picked, selection!.apiKey);
-  }
-
-  Future<void> _applySpeech(CloudSpeechProfile p, String? key) async {
-    setState(() => _applying = true);
-    try {
-      final secrets = ref.read(byokSecretStoreProvider);
-      if (key != null && key.isNotEmpty) {
-        await secrets.writeApiKey(ModalityKind.asr, key);
-        await secrets.writeApiKey(ModalityKind.tts, key);
-      }
-      final kind = p.vendor == CloudVendor.azure
-          ? SpeechByokKind.azureSpeech
-          : SpeechByokKind.openAiCompatible;
-      final ctrl = ref.read(aiModalityConfigCtrlProvider.notifier);
-      final r1 = await ctrl.saveModality(
-        modality: ModalityKind.asr,
-        config: AIServiceConfig(
-          provider: AIProvider.byok,
-          speechByok: SpeechByokConfig(
-            kind: kind,
-            baseUrl: p.endpoint.isEmpty ? null : p.endpoint,
-            region: p.region.isEmpty ? null : p.region,
-            model: p.asrModel,
-          ),
-        ),
-        apiKey: key,
-      );
-      final r2 = await ctrl.saveModality(
-        modality: ModalityKind.tts,
-        config: AIServiceConfig(
-          provider: AIProvider.byok,
-          speechByok: SpeechByokConfig(
-            kind: kind,
-            baseUrl: p.endpoint.isEmpty ? null : p.endpoint,
-            region: p.region.isEmpty ? null : p.region,
-            model: p.ttsModel,
-          ),
-        ),
-        apiKey: key,
-      );
-      if (!mounted) return;
-      if (!r1.isValid || !r2.isValid) {
-        AppNotice.error(context, '该配置缺少密钥，请点「编辑」补充密钥后再试');
-        return;
-      }
-      setState(() {
-        _speechProfile = p;
-        _speechLocal = false;
-      });
-      AppNotice.success(context, '已启用：${p.name}');
-    } finally {
-      if (mounted) setState(() => _applying = false);
-    }
-  }
-
   Future<void> _useLocalTranslation() async {
     await ref
         .read(aiModalityConfigCtrlProvider.notifier)
@@ -246,17 +160,6 @@ class _AiEnginesBodyState extends ConsumerState<AiEnginesBody> {
     setState(() {
       _mtCloud = false;
       _llmProfile = null;
-    });
-  }
-
-  Future<void> _useLocalSpeech() async {
-    final ctrl = ref.read(aiModalityConfigCtrlProvider.notifier);
-    await ctrl.removeByok(ModalityKind.asr);
-    await ctrl.removeByok(ModalityKind.tts);
-    if (!mounted) return;
-    setState(() {
-      _speechLocal = true;
-      _speechProfile = null;
     });
   }
 
@@ -321,29 +224,24 @@ class _AiEnginesBodyState extends ConsumerState<AiEnginesBody> {
             ),
           ),
           Divider(height: t.space24 + 16, color: t.line),
-          // ② 语音服务（识别 + 合成）
-          _EngineSection(
+          // ② 语音服务（识别 + 合成）— 本地-only：Azure 云端区块已按
+          // ADR-0106 移除，Whisper 过渡对不在界面出现（代码内兜底）。
+          _LocalOnlySection(
             icon: EnjoyIcons.waveform,
             title: '语音服务（识别与合成）',
             subtitle: '识别视频语音生成字幕；Craft 用它把文本合成练习音频',
-            isLocal: _speechLocal,
-            onChanged: (local) async {
-              if (local) {
-                await _useLocalSpeech();
-              } else {
-                setState(() => _speechLocal = false);
-              }
-            },
-            localBody: Column(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // Qwen 运行时+模型合并为一行（uiGroup）；Whisper 对不再展示。
                 const AsrLocalComponents(
                   kinds: [
-                    ComponentKind.asrRuntime,
-                    ComponentKind.asrModel,
+                    ComponentKind.qwenAsrRuntime,
+                    ComponentKind.qwenAsrModel,
                     ComponentKind.liveAsr,
                   ],
                 ),
+                const _OptionalComponentsGroup(),
                 const SizedBox(height: 6),
                 Text(
                   '合成使用 Windows 系统自带语音，无需下载；音色跟随系统语音包。',
@@ -353,14 +251,6 @@ class _AiEnginesBodyState extends ConsumerState<AiEnginesBody> {
                   ),
                 ),
               ],
-            ),
-            cloudBody: _CloudBox(
-              title: '云端语音服务',
-              meta:
-                  _speechProfile?.summary ??
-                  '未配置 · 点击设置（识别与合成共用一个端点）',
-              configured: _speechProfile != null,
-              onTap: _applying ? null : _pickSpeech,
             ),
           ),
           SizedBox(height: t.space16),
@@ -378,6 +268,190 @@ class _AiEnginesBodyState extends ConsumerState<AiEnginesBody> {
               ),
             ],
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Header + body without the local/cloud toggle — for the speech card, which
+/// is local-only since ADR-0106 dropped the Azure cloud speech block.
+class _LocalOnlySection extends StatelessWidget {
+  const _LocalOnlySection({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.child,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = EnjoyThemeTokens.of(context);
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              alignment: Alignment.center,
+              decoration: ShapeDecoration(
+                color: cs.surfaceContainerHighest.withValues(alpha: 0.55),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: Icon(icon, size: 19, color: cs.onSurfaceVariant),
+            ),
+            SizedBox(width: t.space12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: tt.titleSmall?.copyWith(
+                      fontSize: 14.5,
+                      fontWeight: FontWeight.w600,
+                      color: t.ink,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: tt.bodySmall?.copyWith(
+                      color: t.ink3,
+                      height: 1.35,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: t.space12),
+        child,
+      ],
+    );
+  }
+}
+
+/// Collapsible "可选增强组件" group — optional engines (vocal separation,
+/// transcript matching) that don't affect recognition when absent. Collapsed
+/// by default so the required rows stay the visual focus.
+class _OptionalComponentsGroup extends StatefulWidget {
+  const _OptionalComponentsGroup();
+
+  @override
+  State<_OptionalComponentsGroup> createState() =>
+      _OptionalComponentsGroupState();
+}
+
+class _OptionalComponentsGroupState extends State<_OptionalComponentsGroup> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = EnjoyThemeTokens.of(context);
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+
+    return Container(
+      margin: const EdgeInsets.only(top: 4),
+      decoration: ShapeDecoration(
+        color: cs.surfaceContainerHighest.withValues(alpha: 0.35),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(t.radiusTile),
+          side: BorderSide(
+            color: cs.outlineVariant.withValues(alpha: 0.5),
+          ),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          InkWell(
+            onTap: () => setState(() => _expanded = !_expanded),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              child: Row(
+                children: [
+                  AnimatedRotation(
+                    turns: _expanded ? 0.25 : 0,
+                    duration: const Duration(milliseconds: 180),
+                    child: Icon(
+                      EnjoyIcons.chevronRight,
+                      size: 16,
+                      color: t.ink3,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '可选增强组件',
+                    style: tt.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: t.ink,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 7,
+                      vertical: 1,
+                    ),
+                    decoration: BoxDecoration(
+                      color: cs.primaryContainer.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      '2',
+                      style: tt.labelSmall?.copyWith(
+                        fontSize: 11,
+                        color: cs.onPrimaryContainer,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '人声分离 · 台本对齐——不装不影响识别，需要时再下载',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: tt.bodySmall?.copyWith(color: t.ink3),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (_expanded)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Divider(height: 1, color: t.line),
+                  // CTC 引擎+模型合并为一行（uiGroup）。
+                  const AsrLocalComponents(
+                    kinds: [
+                      ComponentKind.vocalSeparation,
+                      ComponentKind.ctcAlignerRuntime,
+                      ComponentKind.ctcAlignerModel,
+                    ],
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );

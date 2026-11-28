@@ -53,16 +53,6 @@ final class _SavedExport {
   final String dialogTitle;
 }
 
-class _FormatPickSpy {
-  SubtitleExportFormat? result;
-  int calls = 0;
-
-  Future<SubtitleExportFormat?> pick(BuildContext context) {
-    calls++;
-    return Future.value(result);
-  }
-}
-
 late BuildContext hostContext;
 late WidgetRef hostRef;
 late Future<void> pendingDownload;
@@ -107,7 +97,6 @@ Widget _harness(List<TranscriptLine> lines) {
 void main() {
   Future<List<_SavedExport>> startDownload(
     WidgetTester tester, {
-    _FormatPickSpy? pick,
     FileShareOutcome Function()? saveResult,
     List<TranscriptLine> lines = _lines,
   }) async {
@@ -118,7 +107,6 @@ void main() {
       hostContext,
       hostRef,
       _mediaId,
-      pickFormat: pick?.pick,
       saveFile:
           ({
             required bytes,
@@ -137,14 +125,11 @@ void main() {
     return saved;
   }
 
-  testWidgets('saves the serialized transcript named after the media title', (
+  testWidgets('saves SRT directly — no format picker, no extra dialog step', (
     tester,
   ) async {
-    final pick = _FormatPickSpy()..result = SubtitleExportFormat.srt;
+    final saved = await startDownload(tester);
 
-    final saved = await startDownload(tester, pick: pick);
-
-    expect(pick.calls, 1);
     expect(saved, hasLength(1));
     expect(saved.single.fileName, 'The Ferry at Six.srt');
     expect(saved.single.mimeType, 'application/x-subrip');
@@ -153,22 +138,9 @@ void main() {
     expect(find.text('Transcript downloaded.'), findsOneWidget);
   });
 
-  testWidgets('serializes VTT when that format is picked', (tester) async {
-    final pick = _FormatPickSpy()..result = SubtitleExportFormat.vtt;
-
-    final saved = await startDownload(tester, pick: pick);
-
-    expect(saved.single.fileName, 'The Ferry at Six.vtt');
-    expect(saved.single.mimeType, 'text/vtt');
-    expect(utf8.decode(saved.single.bytes), serializeVtt(_lines));
-  });
-
   testWidgets('cancelled save shows no notice', (tester) async {
-    final pick = _FormatPickSpy()..result = SubtitleExportFormat.srt;
-
     final saved = await startDownload(
       tester,
-      pick: pick,
       saveResult: () => FileShareOutcome.cancelled,
     );
 
@@ -178,25 +150,16 @@ void main() {
   });
 
   testWidgets('failed save shows the error notice', (tester) async {
-    final pick = _FormatPickSpy()..result = SubtitleExportFormat.srt;
-
-    await startDownload(
-      tester,
-      pick: pick,
-      saveResult: () => FileShareOutcome.failed,
-    );
+    await startDownload(tester, saveResult: () => FileShareOutcome.failed);
 
     expect(find.text('Could not download the transcript.'), findsOneWidget);
   });
 
-  testWidgets('empty transcript shows the empty notice and skips the dialog', (
+  testWidgets('empty transcript shows the empty notice and skips saving', (
     tester,
   ) async {
-    final pick = _FormatPickSpy()..result = SubtitleExportFormat.srt;
+    final saved = await startDownload(tester, lines: const []);
 
-    final saved = await startDownload(tester, pick: pick, lines: const []);
-
-    expect(pick.calls, 0);
     expect(saved, isEmpty);
     expect(find.text('No transcript to download yet.'), findsOneWidget);
   });

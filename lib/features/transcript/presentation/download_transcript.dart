@@ -1,6 +1,6 @@
 /// The Download transcript… flow shared by the player's ⋯ More menu and the
-/// phone Subtitles & display sheet: pick SRT / VTT, then save or share the
-/// active primary transcript.
+/// phone Subtitles & display sheet: SRT is the only format (ADR-0106 — no
+/// VTT, no picker), so tapping the menu item saves the file directly.
 library;
 
 import 'dart:convert';
@@ -21,14 +21,9 @@ import 'package:enjoy_player/l10n/app_localizations.dart';
 import '../application/active_transcript_provider.dart';
 import '../application/all_transcripts_provider.dart';
 import '../application/transcript_lines_provider.dart';
-import 'download_transcript_format_dialog.dart';
 
 /// Resolves the lines of the active primary transcript for a media id.
 typedef TranscriptLinesLoad = Future<List<TranscriptLine>> Function();
-
-/// Opens the format dialog against a mounted [BuildContext].
-typedef TranscriptFormatPick =
-    Future<SubtitleExportFormat?> Function(BuildContext context);
 
 /// Writes the serialized bytes via the platform save / share surface.
 typedef TranscriptExportSave =
@@ -39,17 +34,16 @@ typedef TranscriptExportSave =
       required String dialogTitle,
     });
 
-/// Downloads the active primary transcript of [mediaId] as an SRT / VTT file.
+/// Downloads the active primary transcript of [mediaId] directly as SRT.
 ///
-/// Shows the empty notice when no primary transcript is active, then lets the
-/// user pick a format, then hands the bytes to the platform save dialog
-/// (desktop) or share sheet (mobile).
+/// Shows the empty notice when no primary transcript is active, then hands
+/// the serialized bytes to the platform save dialog (desktop) or share sheet
+/// (mobile) — no intermediate format picker.
 Future<void> downloadActiveTranscript(
   BuildContext context,
   WidgetRef ref,
   String mediaId, {
   TranscriptLinesLoad? loadLines,
-  TranscriptFormatPick? pickFormat,
   TranscriptExportSave? saveFile,
 }) async {
   final l10n = AppLocalizations.of(context)!;
@@ -80,11 +74,8 @@ Future<void> downloadActiveTranscript(
     }
   }
 
-  final pick = pickFormat ?? showTranscriptExportFormatDialog;
+  const format = SubtitleExportFormat.srt;
   final title = ref.read(playerControllerProvider)?.mediaTitle ?? '';
-  final format = await pick(context);
-  if (format == null || !context.mounted) return;
-
   final fileName = '${transcriptExportBaseName(title)}.${format.fileExtension}';
   final bytes = utf8.encode(format.serialize(lines));
 

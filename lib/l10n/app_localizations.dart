@@ -111,42 +111,6 @@ abstract class AppLocalizations {
   /// **'Library'**
   String get libraryTitle;
 
-  /// No description provided for @librarySourceLocal.
-  ///
-  /// In en, this message translates to:
-  /// **'Local'**
-  String get librarySourceLocal;
-
-  /// No description provided for @librarySourceCloud.
-  ///
-  /// In en, this message translates to:
-  /// **'Cloud'**
-  String get librarySourceCloud;
-
-  /// No description provided for @librarySourceCloudEyebrow.
-  ///
-  /// In en, this message translates to:
-  /// **'Cloud'**
-  String get librarySourceCloudEyebrow;
-
-  /// No description provided for @librarySourceSwitchSemantics.
-  ///
-  /// In en, this message translates to:
-  /// **'Library source'**
-  String get librarySourceSwitchSemantics;
-
-  /// No description provided for @librarySourceToggleToCloud.
-  ///
-  /// In en, this message translates to:
-  /// **'Switch to cloud'**
-  String get librarySourceToggleToCloud;
-
-  /// No description provided for @librarySourceToggleToLocal.
-  ///
-  /// In en, this message translates to:
-  /// **'Switch to local'**
-  String get librarySourceToggleToLocal;
-
   /// No description provided for @homeTitle.
   ///
   /// In en, this message translates to:
@@ -1611,12 +1575,6 @@ abstract class AppLocalizations {
   /// **'Translating…'**
   String get subtitlesAutoTranslatePendingLine;
 
-  /// No description provided for @subtitlesAutoTranslateBlockedSignedOut.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign in to use auto translate.'**
-  String get subtitlesAutoTranslateBlockedSignedOut;
-
   /// No description provided for @subtitlesAutoTranslateBlockedSameLanguage.
   ///
   /// In en, this message translates to:
@@ -1628,12 +1586,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose a primary subtitle first.'**
   String get subtitlesAutoTranslateBlockedNoPrimary;
-
-  /// No description provided for @subtitlesAutoTranslateBlockedCredits.
-  ///
-  /// In en, this message translates to:
-  /// **'Not enough credits to translate. Check your subscription.'**
-  String get subtitlesAutoTranslateBlockedCredits;
 
   /// No description provided for @subtitlesExtractNoTracks.
   ///
@@ -1658,30 +1610,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Download transcript'**
   String get transcriptDownloadDialogTitle;
-
-  /// SubRip format choice in the transcript download dialog.
-  ///
-  /// In en, this message translates to:
-  /// **'SRT'**
-  String get transcriptDownloadFormatSrtLabel;
-
-  /// Hint under the SRT choice in the transcript download dialog.
-  ///
-  /// In en, this message translates to:
-  /// **'SubRip subtitle file (.srt)'**
-  String get transcriptDownloadFormatSrtHint;
-
-  /// WebVTT format choice in the transcript download dialog.
-  ///
-  /// In en, this message translates to:
-  /// **'VTT'**
-  String get transcriptDownloadFormatVttLabel;
-
-  /// Hint under the VTT choice in the transcript download dialog.
-  ///
-  /// In en, this message translates to:
-  /// **'WebVTT subtitle file (.vtt)'**
-  String get transcriptDownloadFormatVttHint;
 
   /// Notice when the download is triggered with no active transcript.
   ///
@@ -4083,12 +4011,6 @@ abstract class AppLocalizations {
   /// **'Assessment'**
   String get creditsServiceTypeAssessment;
 
-  /// No description provided for @settingsSectionSyncHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Upload queue, offline state, and manual sync'**
-  String get settingsSectionSyncHint;
-
   /// No description provided for @settingsSectionAppearanceLanguageHint.
   ///
   /// In en, this message translates to:
@@ -4118,12 +4040,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Version, licenses, and links'**
   String get settingsSectionAboutHint;
-
-  /// No description provided for @settingsSectionSync.
-  ///
-  /// In en, this message translates to:
-  /// **'Cloud sync'**
-  String get settingsSectionSync;
 
   /// No description provided for @syncSettingsTileTitle.
   ///
@@ -4341,83 +4257,11 @@ abstract class AppLocalizations {
   /// **'API base URL'**
   String get settingsApiBaseUrl;
 
-  /// No description provided for @settingsApiBaseUrlHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Example: https://enjoy.bot'**
-  String get settingsApiBaseUrlHint;
-
-  /// No description provided for @settingsApiBaseUrlSave.
-  ///
-  /// In en, this message translates to:
-  /// **'Save API URL'**
-  String get settingsApiBaseUrlSave;
-
-  /// No description provided for @settingsAiApiBaseUrl.
-  ///
-  /// In en, this message translates to:
-  /// **'AI API base URL'**
-  String get settingsAiApiBaseUrl;
-
-  /// No description provided for @settingsAiApiBaseUrlHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Example: http://127.0.0.1:3425/v1'**
-  String get settingsAiApiBaseUrlHint;
-
-  /// No description provided for @settingsAiApiBaseUrlSave.
-  ///
-  /// In en, this message translates to:
-  /// **'Save AI API URL'**
-  String get settingsAiApiBaseUrlSave;
-
-  /// No description provided for @settingsAiApiBaseUrlUseDefault.
-  ///
-  /// In en, this message translates to:
-  /// **'Use API URL'**
-  String get settingsAiApiBaseUrlUseDefault;
-
-  /// No description provided for @settingsAiApiBaseUrlCleared.
-  ///
-  /// In en, this message translates to:
-  /// **'AI API now follows the main API URL.'**
-  String get settingsAiApiBaseUrlCleared;
-
-  /// No description provided for @settingsAccountSignedOut.
-  ///
-  /// In en, this message translates to:
-  /// **'Not signed in'**
-  String get settingsAccountSignedOut;
-
-  /// No description provided for @settingsAccountOpenProfile.
-  ///
-  /// In en, this message translates to:
-  /// **'Open profile'**
-  String get settingsAccountOpenProfile;
-
-  /// Sidebar account chip subtitle naming the subscription tier.
-  ///
-  /// In en, this message translates to:
-  /// **'{tier} plan'**
-  String sidebarPlanSubtitle(String tier);
-
-  /// No description provided for @settingsAccountSignIn.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign in'**
-  String get settingsAccountSignIn;
-
   /// No description provided for @errorNetwork.
   ///
   /// In en, this message translates to:
   /// **'Network error'**
   String get errorNetwork;
-
-  /// No description provided for @errorUnauthorized.
-  ///
-  /// In en, this message translates to:
-  /// **'Session expired — please sign in again'**
-  String get errorUnauthorized;
 
   /// No description provided for @communityActivity.
   ///
@@ -4797,12 +4641,6 @@ abstract class AppLocalizations {
   /// **'Tune Enjoy to fit how you study.'**
   String get settingsSubtitle;
 
-  /// No description provided for @settingsAuthLoadFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'We couldn\'t refresh your account. Check your connection and try again.'**
-  String get settingsAuthLoadFailed;
-
   /// No description provided for @settingsSectionAppearanceLanguage.
   ///
   /// In en, this message translates to:
@@ -4856,18 +4694,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Native language'**
   String get settingsAppearanceNativeLanguage;
-
-  /// No description provided for @settingsAppearanceSyncedFromProfile.
-  ///
-  /// In en, this message translates to:
-  /// **'Synced from your account profile'**
-  String get settingsAppearanceSyncedFromProfile;
-
-  /// No description provided for @settingsLanguageSubtitleSignedIn.
-  ///
-  /// In en, this message translates to:
-  /// **'Also updates your Enjoy profile when online.'**
-  String get settingsLanguageSubtitleSignedIn;
 
   /// No description provided for @settingsLanguageSubtitleDeviceOnly.
   ///
@@ -5510,12 +5336,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Refresh'**
   String get lookupRefresh;
-
-  /// No description provided for @lookupCloudRequiresSignIn.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign in under Settings to use cloud dictionary, translation, and contextual translation.'**
-  String get lookupCloudRequiresSignIn;
 
   /// No description provided for @lookupLanguageEnUs.
   ///
@@ -8063,24 +7883,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} due'**
   String vocabularyReviewDueValue(int count);
-
-  /// Settings rail/section: the account section.
-  ///
-  /// In en, this message translates to:
-  /// **'Account'**
-  String get settingsSectionAccount;
-
-  /// Settings account section hint.
-  ///
-  /// In en, this message translates to:
-  /// **'Your Enjoy identity and sign-out'**
-  String get settingsSectionAccountHint;
-
-  /// Settings → Account: credits used today out of the daily limit, beside Credits usage.
-  ///
-  /// In en, this message translates to:
-  /// **'{used} / {limit} today'**
-  String settingsAccountCreditsTodayValue(String used, String limit);
 
   /// Overline above the Discover title.
   ///

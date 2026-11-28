@@ -15,24 +15,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get libraryTitle => '资料库';
 
   @override
-  String get librarySourceLocal => '本地';
-
-  @override
-  String get librarySourceCloud => '云端';
-
-  @override
-  String get librarySourceCloudEyebrow => '云端';
-
-  @override
-  String get librarySourceSwitchSemantics => '资料库来源';
-
-  @override
-  String get librarySourceToggleToCloud => '切换到云端';
-
-  @override
-  String get librarySourceToggleToLocal => '切换到本地';
-
-  @override
   String get homeTitle => '首页';
 
   @override
@@ -817,16 +799,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get subtitlesAutoTranslatePendingLine => '翻译中…';
 
   @override
-  String get subtitlesAutoTranslateBlockedSignedOut => '请登录后使用自动翻译。';
-
-  @override
   String get subtitlesAutoTranslateBlockedSameLanguage => '母语与主字幕相同时无需自动翻译。';
 
   @override
   String get subtitlesAutoTranslateBlockedNoPrimary => '请先选择主字幕。';
-
-  @override
-  String get subtitlesAutoTranslateBlockedCredits => '积分不足，无法翻译。请查看订阅。';
 
   @override
   String get subtitlesExtractNoTracks =>
@@ -842,18 +818,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get transcriptDownloadDialogTitle => '下载字幕稿';
-
-  @override
-  String get transcriptDownloadFormatSrtLabel => 'SRT';
-
-  @override
-  String get transcriptDownloadFormatSrtHint => 'SubRip 字幕文件（.srt）';
-
-  @override
-  String get transcriptDownloadFormatVttLabel => 'VTT';
-
-  @override
-  String get transcriptDownloadFormatVttHint => 'WebVTT 字幕文件（.vtt）';
 
   @override
   String get transcriptDownloadEmpty => '还没有可下载的字幕稿。';
@@ -2110,9 +2074,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get creditsServiceTypeAssessment => '发音评估';
 
   @override
-  String get settingsSectionSyncHint => '上传队列、离线状态与手动同步';
-
-  @override
   String get settingsSectionAppearanceLanguageHint => '主题，以及界面、学习与母语语言';
 
   @override
@@ -2126,9 +2087,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingsSectionAboutHint => '版本、许可与链接';
-
-  @override
-  String get settingsSectionSync => '云端同步';
 
   @override
   String get syncSettingsTileTitle => '同步状态';
@@ -2243,45 +2201,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsApiBaseUrl => 'API 基础地址';
 
   @override
-  String get settingsApiBaseUrlHint => '示例：https://enjoy.bot';
-
-  @override
-  String get settingsApiBaseUrlSave => '保存 API 地址';
-
-  @override
-  String get settingsAiApiBaseUrl => 'AI API 基础地址';
-
-  @override
-  String get settingsAiApiBaseUrlHint => '示例：http://127.0.0.1:3425/v1';
-
-  @override
-  String get settingsAiApiBaseUrlSave => '保存 AI API 地址';
-
-  @override
-  String get settingsAiApiBaseUrlUseDefault => '使用主 API 地址';
-
-  @override
-  String get settingsAiApiBaseUrlCleared => 'AI API 现在跟随主 API 地址。';
-
-  @override
-  String get settingsAccountSignedOut => '未登录';
-
-  @override
-  String get settingsAccountOpenProfile => '打开个人资料';
-
-  @override
-  String sidebarPlanSubtitle(String tier) {
-    return '$tier方案';
-  }
-
-  @override
-  String get settingsAccountSignIn => '登录';
-
-  @override
   String get errorNetwork => '网络错误';
-
-  @override
-  String get errorUnauthorized => '会话已过期 — 请重新登录';
 
   @override
   String get communityActivity => '社区动态';
@@ -2489,9 +2409,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsSubtitle => '按你的学习方式调整 Enjoy。';
 
   @override
-  String get settingsAuthLoadFailed => '无法刷新账户信息，请检查网络后重试。';
-
-  @override
   String get settingsSectionAppearanceLanguage => '外观与语言';
 
   @override
@@ -2517,12 +2434,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingsAppearanceNativeLanguage => '母语';
-
-  @override
-  String get settingsAppearanceSyncedFromProfile => '与账号个人资料同步';
-
-  @override
-  String get settingsLanguageSubtitleSignedIn => '联网时会同步到你的 Enjoy 账号。';
 
   @override
   String get settingsLanguageSubtitleDeviceOnly => '保存在本机，登录账号后可同步。';
@@ -2855,9 +2766,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get lookupRefresh => '刷新';
-
-  @override
-  String get lookupCloudRequiresSignIn => '请在「设置」中登录后使用云端词典、翻译与语境翻译。';
 
   @override
   String get lookupLanguageEnUs => '英语';
@@ -4236,17 +4144,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get settingsSectionAccount => '账户';
-
-  @override
-  String get settingsSectionAccountHint => '你的 Enjoy 身份与退出登录';
-
-  @override
-  String settingsAccountCreditsTodayValue(String used, String limit) {
-    return '今日 $used / $limit';
-  }
-
-  @override
   String get discoverOverline => '你订阅的 YouTube 频道';
 
   @override
@@ -4865,24 +4762,6 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get libraryTitle => '资料库';
-
-  @override
-  String get librarySourceLocal => '本地';
-
-  @override
-  String get librarySourceCloud => '云端';
-
-  @override
-  String get librarySourceCloudEyebrow => '云端';
-
-  @override
-  String get librarySourceSwitchSemantics => '资料库来源';
-
-  @override
-  String get librarySourceToggleToCloud => '切换到云端';
-
-  @override
-  String get librarySourceToggleToLocal => '切换到本地';
 
   @override
   String get homeTitle => '首页';
@@ -5630,16 +5509,10 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String get subtitlesAutoTranslatePendingLine => '翻译中…';
 
   @override
-  String get subtitlesAutoTranslateBlockedSignedOut => '请登录后使用自动翻译。';
-
-  @override
   String get subtitlesAutoTranslateBlockedSameLanguage => '母语与主字幕相同，无需自动翻译。';
 
   @override
   String get subtitlesAutoTranslateBlockedNoPrimary => '请先选择主字幕。';
-
-  @override
-  String get subtitlesAutoTranslateBlockedCredits => '积分不足，无法翻译。请查看订阅。';
 
   @override
   String get subtitlesExtractNoTracks =>
@@ -5655,18 +5528,6 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get transcriptDownloadDialogTitle => '下载字幕稿';
-
-  @override
-  String get transcriptDownloadFormatSrtLabel => 'SRT';
-
-  @override
-  String get transcriptDownloadFormatSrtHint => 'SubRip 字幕文件（.srt）';
-
-  @override
-  String get transcriptDownloadFormatVttLabel => 'VTT';
-
-  @override
-  String get transcriptDownloadFormatVttHint => 'WebVTT 字幕文件（.vtt）';
 
   @override
   String get transcriptDownloadEmpty => '还没有可下载的字幕稿。';
@@ -6490,9 +6351,6 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String get creditsServiceTypeAssessment => '发音评估';
 
   @override
-  String get settingsSectionSyncHint => '上传队列、离线状态与手动同步';
-
-  @override
   String get settingsSectionAppearanceLanguageHint => '主题，以及界面、学习与母语语言';
 
   @override
@@ -6506,9 +6364,6 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get settingsSectionAboutHint => '版本、许可与链接';
-
-  @override
-  String get settingsSectionSync => '云端同步';
 
   @override
   String get syncSettingsTileTitle => '同步状态';
@@ -6623,45 +6478,7 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String get settingsApiBaseUrl => 'API 基础地址';
 
   @override
-  String get settingsApiBaseUrlHint => '示例：https://enjoy.bot';
-
-  @override
-  String get settingsApiBaseUrlSave => '保存 API 地址';
-
-  @override
-  String get settingsAiApiBaseUrl => 'AI API 基础地址';
-
-  @override
-  String get settingsAiApiBaseUrlHint => '示例：http://127.0.0.1:3425/v1';
-
-  @override
-  String get settingsAiApiBaseUrlSave => '保存 AI API 地址';
-
-  @override
-  String get settingsAiApiBaseUrlUseDefault => '使用主 API 地址';
-
-  @override
-  String get settingsAiApiBaseUrlCleared => 'AI API 现已跟随主 API 地址。';
-
-  @override
-  String get settingsAccountSignedOut => '未登录';
-
-  @override
-  String get settingsAccountOpenProfile => '打开个人资料';
-
-  @override
-  String sidebarPlanSubtitle(String tier) {
-    return '$tier方案';
-  }
-
-  @override
-  String get settingsAccountSignIn => '登录';
-
-  @override
   String get errorNetwork => '网络错误';
-
-  @override
-  String get errorUnauthorized => '会话已过期 — 请重新登录';
 
   @override
   String get communityActivity => '社区动态';
@@ -6861,9 +6678,6 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String get settingsSubtitle => '按你的学习方式调整 Enjoy。';
 
   @override
-  String get settingsAuthLoadFailed => '无法刷新账户信息，请检查网络后重试。';
-
-  @override
   String get settingsSectionAppearanceLanguage => '外观与语言';
 
   @override
@@ -6889,12 +6703,6 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get settingsAppearanceNativeLanguage => '母语';
-
-  @override
-  String get settingsAppearanceSyncedFromProfile => '与账号个人资料同步';
-
-  @override
-  String get settingsLanguageSubtitleSignedIn => '联网时会同步到你的 Enjoy 账号。';
 
   @override
   String get settingsLanguageSubtitleDeviceOnly => '保存在本机，登录账号后可同步。';
@@ -7227,9 +7035,6 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get lookupRefresh => '刷新';
-
-  @override
-  String get lookupCloudRequiresSignIn => '请在「设置」中登录后使用云端词典、翻译与语境翻译。';
 
   @override
   String get lookupLanguageEnUs => '英语';
@@ -8406,17 +8211,6 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   @override
   String vocabularyReviewDueValue(int count) {
     return '$count 个到期';
-  }
-
-  @override
-  String get settingsSectionAccount => '账户';
-
-  @override
-  String get settingsSectionAccountHint => '你的 Enjoy 身份与退出登录';
-
-  @override
-  String settingsAccountCreditsTodayValue(String used, String limit) {
-    return '今日 $used / $limit';
   }
 
   @override

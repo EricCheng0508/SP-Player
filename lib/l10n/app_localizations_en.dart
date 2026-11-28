@@ -15,24 +15,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get libraryTitle => 'Library';
 
   @override
-  String get librarySourceLocal => 'Local';
-
-  @override
-  String get librarySourceCloud => 'Cloud';
-
-  @override
-  String get librarySourceCloudEyebrow => 'Cloud';
-
-  @override
-  String get librarySourceSwitchSemantics => 'Library source';
-
-  @override
-  String get librarySourceToggleToCloud => 'Switch to cloud';
-
-  @override
-  String get librarySourceToggleToLocal => 'Switch to local';
-
-  @override
   String get homeTitle => 'Home';
 
   @override
@@ -849,20 +831,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subtitlesAutoTranslatePendingLine => 'Translating…';
 
   @override
-  String get subtitlesAutoTranslateBlockedSignedOut =>
-      'Sign in to use auto translate.';
-
-  @override
   String get subtitlesAutoTranslateBlockedSameLanguage =>
       'Auto translate is not needed when your native language matches the primary subtitle.';
 
   @override
   String get subtitlesAutoTranslateBlockedNoPrimary =>
       'Choose a primary subtitle first.';
-
-  @override
-  String get subtitlesAutoTranslateBlockedCredits =>
-      'Not enough credits to translate. Check your subscription.';
 
   @override
   String get subtitlesExtractNoTracks =>
@@ -878,18 +852,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transcriptDownloadDialogTitle => 'Download transcript';
-
-  @override
-  String get transcriptDownloadFormatSrtLabel => 'SRT';
-
-  @override
-  String get transcriptDownloadFormatSrtHint => 'SubRip subtitle file (.srt)';
-
-  @override
-  String get transcriptDownloadFormatVttLabel => 'VTT';
-
-  @override
-  String get transcriptDownloadFormatVttHint => 'WebVTT subtitle file (.vtt)';
 
   @override
   String get transcriptDownloadEmpty => 'No transcript to download yet.';
@@ -2202,10 +2164,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get creditsServiceTypeAssessment => 'Assessment';
 
   @override
-  String get settingsSectionSyncHint =>
-      'Upload queue, offline state, and manual sync';
-
-  @override
   String get settingsSectionAppearanceLanguageHint =>
       'Theme, and the languages you read, learn, and speak';
 
@@ -2221,9 +2179,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsSectionAboutHint => 'Version, licenses, and links';
-
-  @override
-  String get settingsSectionSync => 'Cloud sync';
 
   @override
   String get syncSettingsTileTitle => 'Sync status';
@@ -2344,46 +2299,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsApiBaseUrl => 'API base URL';
 
   @override
-  String get settingsApiBaseUrlHint => 'Example: https://enjoy.bot';
-
-  @override
-  String get settingsApiBaseUrlSave => 'Save API URL';
-
-  @override
-  String get settingsAiApiBaseUrl => 'AI API base URL';
-
-  @override
-  String get settingsAiApiBaseUrlHint => 'Example: http://127.0.0.1:3425/v1';
-
-  @override
-  String get settingsAiApiBaseUrlSave => 'Save AI API URL';
-
-  @override
-  String get settingsAiApiBaseUrlUseDefault => 'Use API URL';
-
-  @override
-  String get settingsAiApiBaseUrlCleared =>
-      'AI API now follows the main API URL.';
-
-  @override
-  String get settingsAccountSignedOut => 'Not signed in';
-
-  @override
-  String get settingsAccountOpenProfile => 'Open profile';
-
-  @override
-  String sidebarPlanSubtitle(String tier) {
-    return '$tier plan';
-  }
-
-  @override
-  String get settingsAccountSignIn => 'Sign in';
-
-  @override
   String get errorNetwork => 'Network error';
-
-  @override
-  String get errorUnauthorized => 'Session expired — please sign in again';
 
   @override
   String get communityActivity => 'Community Activity';
@@ -2595,10 +2511,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsSubtitle => 'Tune Enjoy to fit how you study.';
 
   @override
-  String get settingsAuthLoadFailed =>
-      'We couldn\'t refresh your account. Check your connection and try again.';
-
-  @override
   String get settingsSectionAppearanceLanguage => 'Appearance & Language';
 
   @override
@@ -2624,14 +2536,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsAppearanceNativeLanguage => 'Native language';
-
-  @override
-  String get settingsAppearanceSyncedFromProfile =>
-      'Synced from your account profile';
-
-  @override
-  String get settingsLanguageSubtitleSignedIn =>
-      'Also updates your Enjoy profile when online.';
 
   @override
   String get settingsLanguageSubtitleDeviceOnly =>
@@ -2985,10 +2889,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lookupRefresh => 'Refresh';
-
-  @override
-  String get lookupCloudRequiresSignIn =>
-      'Sign in under Settings to use cloud dictionary, translation, and contextual translation.';
 
   @override
   String get lookupLanguageEnUs => 'English';
@@ -4437,17 +4337,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String vocabularyReviewDueValue(int count) {
     return '$count due';
-  }
-
-  @override
-  String get settingsSectionAccount => 'Account';
-
-  @override
-  String get settingsSectionAccountHint => 'Your Enjoy identity and sign-out';
-
-  @override
-  String settingsAccountCreditsTodayValue(String used, String limit) {
-    return '$used / $limit today';
   }
 
   @override

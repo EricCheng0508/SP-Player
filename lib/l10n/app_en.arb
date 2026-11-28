@@ -2,12 +2,6 @@
   "@@locale": "en",
   "appTitle": "SP Player",
   "libraryTitle": "Library",
-  "librarySourceLocal": "Local",
-  "librarySourceCloud": "Cloud",
-  "librarySourceCloudEyebrow": "Cloud",
-  "librarySourceSwitchSemantics": "Library source",
-  "librarySourceToggleToCloud": "Switch to cloud",
-  "librarySourceToggleToLocal": "Switch to local",
   "homeTitle": "Home",
   "homeRecentMedia": "Recent media",
   "homeGreetingMorning": "Good morning",
@@ -94,7 +88,13 @@
   "playlistEmptyTitle": "No playlists yet",
   "playlistEmptyHint": "Create a playlist to group media and play them in order.",
   "playlistItemCount": "{count} items",
-  "@playlistItemCount": { "placeholders": { "count": { "type": "int" } } },
+  "@playlistItemCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "playlistAddMedia": "Add media",
   "playlistPlayAll": "Play all",
   "playlistRemoveItem": "Remove from playlist",
@@ -121,7 +121,9 @@
   "@asrBannerEngine": {
     "description": "Generation banner info line: which local ASR engine is running.",
     "placeholders": {
-      "engine": { "type": "String" }
+      "engine": {
+        "type": "String"
+      }
     }
   },
   "asrErrorGeneric": "Couldn't generate transcript",
@@ -354,7 +356,7 @@
   "noTranscriptHint": "Add a subtitle file, extract embedded captions, or create an AI transcript.",
   "noTranscriptHintRemote": "Cloud captions load automatically when available. Open the CC menu to refresh.",
   "transcriptEmptyExtract": "Extract",
-    "transcriptEmptyAlign": "Align existing subtitles / script",
+  "transcriptEmptyAlign": "Align existing subtitles / script",
   "@transcriptEmptyAlign": {
     "description": "Empty state: align an already-correct SRT/TXT to this media's timeline instead of re-recognizing (ADR-0106)."
   },
@@ -366,7 +368,7 @@
   "@transcriptAlignPipelinePending": {
     "description": "Align entry placeholder while the CTC pipeline ships (P1)."
   },
-"transcriptEmptyAddSubtitle": "Add subtitle",
+  "transcriptEmptyAddSubtitle": "Add subtitle",
   "transcriptEmptyGenerate": "AI transcript",
   "subtitlesGenerate": "AI transcript",
   "subtitlesRegenerate": "Re-generate transcript",
@@ -393,10 +395,8 @@
   "subtitlesAutoTranslateBlockedStalePrimary": "The primary subtitle changed. Auto translate will rebuild from the new primary.",
   "subtitlesAutoTranslateLineFailed": "Couldn’t translate this line",
   "subtitlesAutoTranslatePendingLine": "Translating…",
-  "subtitlesAutoTranslateBlockedSignedOut": "Sign in to use auto translate.",
   "subtitlesAutoTranslateBlockedSameLanguage": "Auto translate is not needed when your native language matches the primary subtitle.",
   "subtitlesAutoTranslateBlockedNoPrimary": "Choose a primary subtitle first.",
-  "subtitlesAutoTranslateBlockedCredits": "Not enough credits to translate. Check your subscription.",
   "subtitlesExtractNoTracks": "No embedded subtitle tracks in this file (only video and audio). If you have a separate .srt or .vtt, use Import file.",
   "subtitlesExtractedCount": "Extracted {count} subtitle track(s).",
   "@subtitlesExtractedCount": {
@@ -410,22 +410,6 @@
   "transcriptDownloadDialogTitle": "Download transcript",
   "@transcriptDownloadDialogTitle": {
     "description": "Title of the dialog that picks the subtitle format for a transcript download."
-  },
-  "transcriptDownloadFormatSrtLabel": "SRT",
-  "@transcriptDownloadFormatSrtLabel": {
-    "description": "SubRip format choice in the transcript download dialog."
-  },
-  "transcriptDownloadFormatSrtHint": "SubRip subtitle file (.srt)",
-  "@transcriptDownloadFormatSrtHint": {
-    "description": "Hint under the SRT choice in the transcript download dialog."
-  },
-  "transcriptDownloadFormatVttLabel": "VTT",
-  "@transcriptDownloadFormatVttLabel": {
-    "description": "WebVTT format choice in the transcript download dialog."
-  },
-  "transcriptDownloadFormatVttHint": "WebVTT subtitle file (.vtt)",
-  "@transcriptDownloadFormatVttHint": {
-    "description": "Hint under the VTT choice in the transcript download dialog."
   },
   "transcriptDownloadEmpty": "No transcript to download yet.",
   "@transcriptDownloadEmpty": {
@@ -1328,13 +1312,11 @@
   "creditsServiceTypeTranslation": "Translation",
   "creditsServiceTypeLlm": "LLM",
   "creditsServiceTypeAssessment": "Assessment",
-  "settingsSectionSyncHint": "Upload queue, offline state, and manual sync",
   "settingsSectionAppearanceLanguageHint": "Theme, and the languages you read, learn, and speak",
   "hotkeysSectionKeyboardHint": "Reference and customize shortcuts",
   "settingsSectionAdvancedHint": "API endpoints and experimental toggles",
   "settingsSectionDeveloperHint": "Diagnostics and internal tooling",
   "settingsSectionAboutHint": "Version, licenses, and links",
-  "settingsSectionSync": "Cloud sync",
   "syncSettingsTileTitle": "Sync status",
   "syncSettingsTileSubtitleSignedOut": "Sign in to sync library and recordings",
   "syncSettingsTileSubtitleUpToDate": "Up to date",
@@ -1392,27 +1374,7 @@
   "syncQueueEmpty": "Nothing in the queue.",
   "settingsSectionAdvanced": "Advanced",
   "settingsApiBaseUrl": "API base URL",
-  "settingsApiBaseUrlHint": "Example: https://enjoy.bot",
-  "settingsApiBaseUrlSave": "Save API URL",
-  "settingsAiApiBaseUrl": "AI API base URL",
-  "settingsAiApiBaseUrlHint": "Example: http://127.0.0.1:3425/v1",
-  "settingsAiApiBaseUrlSave": "Save AI API URL",
-  "settingsAiApiBaseUrlUseDefault": "Use API URL",
-  "settingsAiApiBaseUrlCleared": "AI API now follows the main API URL.",
-  "settingsAccountSignedOut": "Not signed in",
-  "settingsAccountOpenProfile": "Open profile",
-  "sidebarPlanSubtitle": "{tier} plan",
-  "@sidebarPlanSubtitle": {
-    "description": "Sidebar account chip subtitle naming the subscription tier.",
-    "placeholders": {
-      "tier": {
-        "type": "String"
-      }
-    }
-  },
-  "settingsAccountSignIn": "Sign in",
   "errorNetwork": "Network error",
-  "errorUnauthorized": "Session expired — please sign in again",
   "communityActivity": "Community Activity",
   "communityToday": "Community today",
   "homeRecordingsToday": "Recordings",
@@ -1516,7 +1478,6 @@
   "aiPlaygroundSectionTtsAssessment": "TTS / Assessment",
   "youtubePasteFromClipboard": "Paste",
   "settingsSubtitle": "Tune Enjoy to fit how you study.",
-  "settingsAuthLoadFailed": "We couldn't refresh your account. Check your connection and try again.",
   "settingsSectionAppearanceLanguage": "Appearance & Language",
   "settingsAppearanceTheme": "Theme",
   "settingsAppearanceThemeValue": "Dark · Cinematic",
@@ -1526,8 +1487,6 @@
   "settingsAppearanceDisplayLanguage": "Display language",
   "settingsAppearanceLearningLanguage": "Learning language",
   "settingsAppearanceNativeLanguage": "Native language",
-  "settingsAppearanceSyncedFromProfile": "Synced from your account profile",
-  "settingsLanguageSubtitleSignedIn": "Also updates your Enjoy profile when online.",
   "settingsLanguageSubtitleDeviceOnly": "Stored on this device until you sign in.",
   "settingsNativeLanguageGateSubtitle": "Only one native language is available for your learning language.",
   "settingsLanguageOptionEnUs": "English (US)",
@@ -1693,7 +1652,6 @@
   "lookupPickSourceTitle": "Choose source language",
   "lookupPickTargetTitle": "Choose target language",
   "lookupRefresh": "Refresh",
-  "lookupCloudRequiresSignIn": "Sign in under Settings to use cloud dictionary, translation, and contextual translation.",
   "lookupLanguageEnUs": "English",
   "lookupLanguageEnGb": "English (UK)",
   "lookupLanguageZhCn": "中文",
@@ -2584,26 +2542,6 @@
       }
     }
   },
-  "settingsSectionAccount": "Account",
-  "@settingsSectionAccount": {
-    "description": "Settings rail/section: the account section."
-  },
-  "settingsSectionAccountHint": "Your Enjoy identity and sign-out",
-  "settingsAccountCreditsTodayValue": "{used} / {limit} today",
-  "@settingsAccountCreditsTodayValue": {
-    "description": "Settings → Account: credits used today out of the daily limit, beside Credits usage.",
-    "placeholders": {
-      "used": {
-        "type": "String"
-      },
-      "limit": {
-        "type": "String"
-      }
-    }
-  },
-  "@settingsSectionAccountHint": {
-    "description": "Settings account section hint."
-  },
   "discoverOverline": "YouTube channels you follow",
   "@discoverOverline": {
     "description": "Overline above the Discover title."
@@ -2871,41 +2809,53 @@
   "@fullTranslateBannerRunningTitle": {
     "description": "Translation banner title while batches are in flight.",
     "placeholders": {
-      "translated": { "type": "int" },
-      "total": { "type": "int" }
+      "translated": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "fullTranslateBannerCachedProgress": "Cached {translated} / {total} lines",
   "@fullTranslateBannerCachedProgress": {
     "description": "Translation banner idle readout of persisted translations.",
     "placeholders": {
-      "translated": { "type": "int" },
-      "total": { "type": "int" }
+      "translated": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "fullTranslateBannerReachedMinute": "translated up to minute {minutes}",
   "@fullTranslateBannerReachedMinute": {
     "description": "Translation banner meta: furthest translated playback minute.",
     "placeholders": {
-      "minutes": { "type": "int" }
+      "minutes": {
+        "type": "int"
+      }
     }
   },
   "fullTranslateBannerPausedFailure": "{failed} lines failed — continue translation to retry",
   "@fullTranslateBannerPausedFailure": {
     "description": "Translation banner message when some batches failed.",
     "placeholders": {
-      "failed": { "type": "int" }
+      "failed": {
+        "type": "int"
+      }
     }
   },
   "fullTranslateBannerPausedStopped": "Stopped — continue translation to resume",
   "@fullTranslateBannerPausedStopped": {
     "description": "Translation banner message after a manual stop."
   },
-    "fullTranslateBannerErrorGeneric": "Cannot start translation — check the transcript and language settings",
+  "fullTranslateBannerErrorGeneric": "Cannot start translation — check the transcript and language settings",
   "@fullTranslateBannerErrorGeneric": {
     "description": "Translation banner blocked message for guard failures (no native language, no primary track, same language, signed out)."
   },
-"fullTranslateBannerErrorConfig": "Configure a language model in Settings → AI first",
+  "fullTranslateBannerErrorConfig": "Configure a language model in Settings → AI first",
   "@fullTranslateBannerErrorConfig": {
     "description": "Translation banner blocked message when no LLM is configured."
   },
@@ -2913,7 +2863,9 @@
   "@fullTranslateExportIncomplete": {
     "description": "Export gate: bilingual SRT export requires the full-video translation to be complete.",
     "placeholders": {
-      "remaining": { "type": "int" }
+      "remaining": {
+        "type": "int"
+      }
     }
   },
   "playerMoreMediaSection": "Media",

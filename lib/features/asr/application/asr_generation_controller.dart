@@ -428,9 +428,7 @@ class AsrGenerationController extends _$AsrGenerationController {
 
   void _setPhase(AsrGenerationPhase phase, {bool clearProgress = false}) {
     if (_cancelToken?.isCompleted ?? false) return;
-    _updateJob(
-      (j) => j.copyWith(phase: phase, clearProgress: clearProgress),
-    );
+    _updateJob((j) => j.copyWith(phase: phase, clearProgress: clearProgress));
   }
 
   /// Enters [AsrGenerationPhase.recognizing] and, when the audio length is

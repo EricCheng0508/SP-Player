@@ -89,7 +89,9 @@ final class LookupExplainParams extends LookupTextParams {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is LookupExplainParams && super == other && context == other.context;
+      other is LookupExplainParams &&
+          super == other &&
+          context == other.context;
 
   @override
   int get hashCode => Object.hash(super.hashCode, context);

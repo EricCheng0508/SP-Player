@@ -48,7 +48,8 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
   }
 
   // 本地版只有本地媒体库，云端来源已下线。
-  TabController _kindControllerFor(LibrarySource source) => _localKindController;
+  TabController _kindControllerFor(LibrarySource source) =>
+      _localKindController;
 
   void _setKindIndex(int index) {
     if (_localKindController.index != index) {

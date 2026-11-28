@@ -1,6 +1,8 @@
+import 'package:enjoy_player/core/theme/widgets/enjoy_segmented_control.dart';
 import 'dart:async';
 
 import 'package:enjoy_player/core/theme/enjoy_icons.dart';
+import 'package:enjoy_player/core/interaction/enjoy_pressable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -216,9 +218,7 @@ class _AiEnginesBodyState extends ConsumerState<AiEnginesBody> {
             ),
             cloudBody: _CloudBox(
               title: '云端语言模型',
-              meta:
-                  _llmProfile?.summary ??
-                  '未配置 · 点击设置（推荐，显著提升翻译质量）',
+              meta: _llmProfile?.summary ?? '未配置 · 点击设置（推荐，显著提升翻译质量）',
               configured: _llmProfile != null,
               onTap: _applying ? null : _pickLlm,
             ),
@@ -328,10 +328,7 @@ class _LocalOnlySection extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: tt.bodySmall?.copyWith(
-                      color: t.ink3,
-                      height: 1.35,
-                    ),
+                    style: tt.bodySmall?.copyWith(color: t.ink3, height: 1.35),
                   ),
                 ],
               ),
@@ -371,16 +368,14 @@ class _OptionalComponentsGroupState extends State<_OptionalComponentsGroup> {
         color: cs.surfaceContainerHighest.withValues(alpha: 0.35),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(t.radiusTile),
-          side: BorderSide(
-            color: cs.outlineVariant.withValues(alpha: 0.5),
-          ),
+          side: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.5)),
         ),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          InkWell(
+          EnjoyPressable(
             onTap: () => setState(() => _expanded = !_expanded),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -486,13 +481,13 @@ class _EngineSection extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
 
-    final localSeg = ButtonSegment<bool>(
+    final localSeg = EnjoySegment<bool>(
       value: true,
-      label: Text(cloudFirst ? '本地' : '本地（默认）'),
+      label: cloudFirst ? '本地' : '本地（默认）',
     );
-    final cloudSeg = ButtonSegment<bool>(
+    final cloudSeg = EnjoySegment<bool>(
       value: false,
-      label: Text(cloudFirst ? '云端 · 推荐' : '自定义云端'),
+      label: cloudFirst ? '云端 · 推荐' : '自定义云端',
     );
 
     return Column(
@@ -528,10 +523,7 @@ class _EngineSection extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: tt.bodySmall?.copyWith(
-                      color: t.ink3,
-                      height: 1.35,
-                    ),
+                    style: tt.bodySmall?.copyWith(color: t.ink3, height: 1.35),
                   ),
                 ],
               ),
@@ -539,11 +531,11 @@ class _EngineSection extends StatelessWidget {
           ],
         ),
         SizedBox(height: t.space12),
-        SegmentedButton<bool>(
+        EnjoySegmentedControl<bool>(
           segments: cloudFirst ? [cloudSeg, localSeg] : [localSeg, cloudSeg],
-          selected: {isLocal},
-          onSelectionChanged: (sel) => onChanged(sel.first),
-          style: const ButtonStyle(visualDensity: VisualDensity.compact),
+          value: isLocal,
+          onChanged: onChanged,
+          compact: true,
         ),
         SizedBox(height: t.space12),
         SizedBox(
@@ -580,7 +572,7 @@ class _CloudBox extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
 
-    return InkWell(
+    return EnjoyPressable(
       onTap: onTap,
       borderRadius: BorderRadius.circular(t.radiusTile),
       child: Container(
@@ -602,9 +594,7 @@ class _CloudBox extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: tt.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: tt.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 2),
                   Text(
@@ -634,7 +624,7 @@ class _CloudBox extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 6),
-            Icon(Icons.unfold_more, size: 18, color: cs.onSurfaceVariant),
+            Icon(EnjoyIcons.caretUpDown, size: 18, color: cs.onSurfaceVariant),
           ],
         ),
       ),

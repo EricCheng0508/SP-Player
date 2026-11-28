@@ -2,8 +2,6 @@
 /// [TranscriptVirtualItem] into exactly one list row.
 library;
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -12,45 +10,14 @@ import 'package:enjoy_player/data/subtitle/transcript_line.dart';
 import 'package:enjoy_player/features/lookup/application/transcript_lookup_open.dart';
 import 'package:enjoy_player/features/player/application/echo_mode_provider.dart';
 import 'package:enjoy_player/features/player/application/player_interactions.dart';
-import 'package:enjoy_player/features/transcript/application/auto_translate_controller.dart';
-import 'package:enjoy_player/features/transcript/application/auto_translate_line_request_policy.dart';
 import 'package:enjoy_player/features/transcript/application/auto_translate_resolved_text.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_line_alignment.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_playback_highlight_provider.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_virtual_items.dart';
-import 'package:enjoy_player/features/transcript/domain/auto_translate.dart';
 import 'package:enjoy_player/features/transcript/presentation/transcript_auto_scroll_controller.dart';
 import 'package:enjoy_player/features/transcript/presentation/transcript_echo_loop_edge_row.dart';
 import 'package:enjoy_player/features/transcript/presentation/transcript_echo_region_merged_card.dart';
 import 'package:enjoy_player/features/transcript/presentation/transcript_line_tile.dart';
-import 'package:enjoy_player/l10n/app_localizations.dart';
-
-/// Whether the cue at [lineIndex] is worth requesting a translation for,
-/// given an [anchor] cue index.
-///
-/// A top-level function rather than a closure built inside the item builder:
-/// that builder runs once per row, so a local function there allocated a fresh
-/// closure per row on every scroll-driven rebuild (issue #764 review).
-/// [alternateAnchorLineIndex] stays a resolver so the policy can short-circuit
-/// on eligibility before it reads the scroll controller.
-bool requestableAutoTranslate({
-  required int Function() alternateAnchorLineIndex,
-  required int lineIndex,
-  required int anchor,
-  required bool isAutoTranslateActive,
-  required bool hasSecondaryText,
-  required bool isLineFailed,
-}) {
-  return shouldRequestAutoTranslateLine(
-    lineIndex: lineIndex,
-    anchorLineIndex: anchor,
-    alternateAnchorLineIndex: alternateAnchorLineIndex,
-    scope: AutoTranslateRequestScope.viewport,
-    isAutoTranslateActive: isAutoTranslateActive,
-    hasSecondaryText: hasSecondaryText,
-    isLineFailed: isLineFailed,
-  );
-}
 
 /// Values the per-row builder reads that are stable for one list build, so the
 /// [ListView.builder] closure allocates one scope per build instead of
@@ -69,8 +36,6 @@ final class TranscriptListItemScope {
     required this.autoTranslateActive,
     required this.sourceLanguage,
     required this.targetLanguage,
-    required this.autoTranslateCtrl,
-    required this.l10n,
     required this.lineRecordingCounts,
     required this.density,
   });
@@ -87,8 +52,6 @@ final class TranscriptListItemScope {
   final bool autoTranslateActive;
   final String? sourceLanguage;
   final String? targetLanguage;
-  final AutoTranslateUiState autoTranslateCtrl;
-  final AppLocalizations? l10n;
   final Map<int, int>? lineRecordingCounts;
   final TranscriptDensity density;
 }
@@ -192,7 +155,7 @@ class _TranscriptLineListSlot extends ConsumerWidget {
         scope.echo.active &&
         lineIndex >= scope.echo.startLineIndex &&
         lineIndex <= scope.echo.endLineIndex;
-    final resolved = resolveAutoTranslateTextForDisplay(
+    final secondaryText = resolveAutoTranslateTextForDisplay(
       autoTranslateActive: scope.autoTranslateActive,
       primaryLines: scope.lines,
       aiLines: scope.secondaryLines,
@@ -201,45 +164,7 @@ class _TranscriptLineListSlot extends ConsumerWidget {
       targetLanguage: scope.targetLanguage,
       matcher: scope.secondaryMatcher,
       line: line,
-      isLineFailed: scope.autoTranslateCtrl.isLineFailed,
-      isLineInFlight: scope.autoTranslateCtrl.isLineInFlight,
-      l10nLineFailed: scope.l10n?.subtitlesAutoTranslateLineFailed,
-      l10nLinePending: scope.l10n?.subtitlesAutoTranslatePendingLine,
     );
-    final secondaryText = resolved.secondaryText;
-    final canRetranslateLine = resolved.canRetranslate;
-    final lineFailed = resolved.isFailed;
-
-    final hasSecondary =
-        secondaryText != null && secondaryText.trim().isNotEmpty;
-    if (scope.autoTranslateActive &&
-        requestableAutoTranslate(
-          alternateAnchorLineIndex: scope.scroll.scrollFocusLineIndex,
-          lineIndex: lineIndex,
-          anchor: ref
-              .read(transcriptPlaybackHighlightProvider(scope.mediaId))
-              .cueIndex,
-          isAutoTranslateActive: scope.autoTranslateActive,
-          hasSecondaryText: hasSecondary,
-          isLineFailed: lineFailed,
-        )) {
-      scheduleAutoTranslateLineRequest(
-        isMounted: scope.scroll.isMounted,
-        shouldRequest: () => requestableAutoTranslate(
-          alternateAnchorLineIndex: scope.scroll.scrollFocusLineIndex,
-          lineIndex: lineIndex,
-          anchor: scope.ref
-              .read(transcriptPlaybackHighlightProvider(scope.mediaId))
-              .cueIndex,
-          isAutoTranslateActive: scope.autoTranslateActive,
-          hasSecondaryText: hasSecondary,
-          isLineFailed: lineFailed,
-        ),
-        request: () => scope.ref
-            .read(autoTranslateCtrlProvider(scope.mediaId).notifier)
-            .requestTranslateLine(lineIndex),
-      );
-    }
 
     final lensDistance = !scope.echo.active || inEcho
         ? 0
@@ -266,13 +191,6 @@ class _TranscriptLineListSlot extends ConsumerWidget {
               selectedText: t,
               lines: scope.lines,
               lineIndex: lineIndex,
-            )
-          : null,
-      onRetranslateSecondary: canRetranslateLine && (isActive || inEcho)
-          ? () => unawaited(
-              scope.ref
-                  .read(autoTranslateCtrlProvider(scope.mediaId).notifier)
-                  .retranslateLine(lineIndex),
             )
           : null,
       onTap: () => scope.ref

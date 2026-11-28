@@ -14,8 +14,6 @@ import 'package:enjoy_player/features/player/application/player_engine_test_doub
 import 'package:enjoy_player/features/player/application/player_state_providers.dart';
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
 import 'package:enjoy_player/features/player/presentation/root_shell.dart';
-import 'package:enjoy_player/features/subscription/application/subscription_status_provider.dart';
-import 'package:enjoy_player/features/subscription/domain/subscription_status.dart';
 import 'package:enjoy_player/features/sync/application/sync_controller.dart';
 import 'package:enjoy_player/features/transcript/application/all_transcripts_provider.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_blur_mode_provider.dart';
@@ -215,12 +213,6 @@ void main() {
         syncCtrlProvider.overrideWithValue(0),
         discoverFeedRefreshSchedulerProvider.overrideWithValue(0),
         updateAvailableBadgeProvider.overrideWithValue(false),
-        subscriptionStatusProvider.overrideWith(
-          (ref) async => const SubscriptionStatus(
-            subscriptionActive: false,
-            subscriptionTier: SubscriptionTier.free,
-          ),
-        ),
         vocabularyReviewSessionProvider.overrideWith(_FakeVocabSession.new),
         playerEngineTestDoubleProvider.overrideWithValue(fakeEngine),
         playerControllerProvider.overrideWith(

@@ -13,12 +13,9 @@ import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/editorial_header.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_button.dart';
 import 'package:enjoy_player/core/theme/widgets/skeleton.dart';
-import 'package:enjoy_player/core/errors/ai_failure_messages.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 import '../application/all_transcripts_provider.dart';
-import '../application/auto_translate_controller.dart';
 import '../application/transcript_repository_provider.dart';
-import '../domain/auto_translate.dart';
 import '../domain/transcript_track.dart';
 import 'package:enjoy_player/data/subtitle/transcript_display_readiness.dart';
 import 'subtitle_track_picker_actions.dart';
@@ -29,31 +26,6 @@ import 'subtitle_track_picker_sections.dart';
 import 'subtitle_track_picker_sheet_action_handlers.dart';
 import 'subtitle_track_picker_tiles.dart';
 import 'transcript_display_settings_sheet.dart';
-
-String? _autoTranslateBlockedMessage(
-  AppLocalizations l10n,
-  AutoTranslateUiState state,
-) {
-  return switch (state.blockReason) {
-    AutoTranslateBlockReason.signedOut =>
-      l10n.subtitlesAutoTranslateBlockedSignedOut,
-    AutoTranslateBlockReason.sameLanguage =>
-      l10n.subtitlesAutoTranslateBlockedSameLanguage,
-    AutoTranslateBlockReason.noPrimary =>
-      l10n.subtitlesAutoTranslateBlockedNoPrimary,
-    AutoTranslateBlockReason.credits =>
-      state.creditsFailure != null
-          ? creditsFailureMessage(state.creditsFailure!, l10n)
-          : l10n.subtitlesAutoTranslateBlockedCredits,
-    AutoTranslateBlockReason.auth =>
-      l10n.subtitlesAutoTranslateBlockedSignedOut,
-    AutoTranslateBlockReason.stalePrimary =>
-      l10n.subtitlesAutoTranslateBlockedStalePrimary,
-    AutoTranslateBlockReason.byokNotConfigured =>
-      l10n.byokNotConfiguredOpenSettings,
-    null => null,
-  };
-}
 
 List<Widget> buildTrackListBody({
   required BuildContext context,
@@ -68,8 +40,6 @@ List<Widget> buildTrackListBody({
   required bool inlineExpandedLists,
   required String? autoSelectionId,
   required String targetLanguage,
-  required AutoTranslateUiState autoTranslateState,
-  required bool signedIn,
   required TranscriptDisplayReadiness readiness,
   required PickerSection? expandedSection,
   required ValueChanged<PickerSection> onToggleSection,
@@ -82,7 +52,6 @@ List<Widget> buildTrackListBody({
       .toList();
   final autoTranslateSelected =
       autoSelectionId != null && secondaryId == autoSelectionId;
-  final blockedMessage = _autoTranslateBlockedMessage(l10n, autoTranslateState);
 
   return [
     Padding(
@@ -204,37 +173,6 @@ List<Widget> buildTrackListBody({
                   targetLanguage: targetLanguage,
                   enabled: primaryId != null,
                 ),
-              if (autoTranslateSelected && blockedMessage == null)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: EnjoyButton.ghost(
-                      size: EnjoyButtonSize.small,
-                      icon: EnjoyIcons.refresh,
-                      onPressed: () => unawaited(
-                        ref
-                            .read(
-                              autoTranslateCtrlProvider(
-                                mediaId,
-                              ).notifier,
-                            )
-                            .retranslateAll(),
-                      ),
-                      child: Text(l10n.subtitlesAutoTranslateRetranslateAll),
-                    ),
-                  ),
-                ),
-              if (blockedMessage != null)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
-                  child: Text(
-                    blockedMessage,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.error,
-                    ),
-                  ),
-                ),
               ...translationTracks.map(
                 (track) => TrackOptionTile<String?>(
                   value: track.id,
@@ -317,8 +255,6 @@ Widget buildTracksContent({
   required String? secondaryId,
   required String? autoSelectionId,
   required String targetLanguage,
-  required AutoTranslateUiState autoTranslateState,
-  required bool signedIn,
   required TranscriptDisplayReadiness readiness,
   required PickerSection? expandedSection,
   required ValueChanged<PickerSection> onToggleSection,
@@ -341,8 +277,6 @@ Widget buildTracksContent({
       inlineExpandedLists: isDialog,
       autoSelectionId: autoSelectionId,
       targetLanguage: targetLanguage,
-      autoTranslateState: autoTranslateState,
-      signedIn: signedIn,
       readiness: readiness,
       expandedSection: expandedSection,
       onToggleSection: onToggleSection,

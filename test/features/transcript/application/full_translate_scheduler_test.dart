@@ -6,10 +6,15 @@ import 'package:enjoy_player/features/transcript/domain/auto_translate.dart';
 void main() {
   group('chunkTranslateBatches', () {
     test('splits ordered indexes into consecutive groups', () {
-      final batches = chunkTranslateBatches(
-        [0, 1, 2, 3, 4, 5, 6],
-        kFullTranslateBatchSize,
-      );
+      final batches = chunkTranslateBatches([
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+      ], kFullTranslateBatchSize);
       // 7 lines < batch size → one batch covering all.
       expect(batches.length, 1);
       expect(batches.single, [0, 1, 2, 3, 4, 5, 6]);
@@ -31,57 +36,67 @@ void main() {
   });
 
   group('FullTranslateScheduler', () {
-    test('runs batches up to the concurrency limit and reports success', () async {
-      var inFlight = 0;
-      var maxInFlight = 0;
-      final persisted = <int>[];
-      final failed = <int>[];
+    test(
+      'runs batches up to the concurrency limit and reports success',
+      () async {
+        var inFlight = 0;
+        var maxInFlight = 0;
+        final persisted = <int>[];
+        final failed = <int>[];
 
-      // Twelve single-line batches: enough work to saturate the pool.
-      final batches = [for (var i = 0; i < 12; i++) [i]];
-      final scheduler = FullTranslateScheduler(
-        batches: batches,
-        translateBatch: (indexes, texts) async {
-          inFlight++;
-          maxInFlight = maxInFlight > inFlight ? maxInFlight : inFlight;
-          await Future<void>.delayed(const Duration(milliseconds: 5));
-          inFlight--;
-          return [for (final _ in indexes) '译文'];
-        },
-        onBatchTranslated: (indexes, _) => persisted.addAll(indexes),
-        onBatchFailed: failed.addAll,
-      );
+        // Twelve single-line batches: enough work to saturate the pool.
+        final batches = [
+          for (var i = 0; i < 12; i++) [i],
+        ];
+        final scheduler = FullTranslateScheduler(
+          batches: batches,
+          translateBatch: (indexes, texts) async {
+            inFlight++;
+            maxInFlight = maxInFlight > inFlight ? maxInFlight : inFlight;
+            await Future<void>.delayed(const Duration(milliseconds: 5));
+            inFlight--;
+            return [for (final _ in indexes) '译文'];
+          },
+          onBatchTranslated: (indexes, _) => persisted.addAll(indexes),
+          onBatchFailed: failed.addAll,
+        );
 
-      await scheduler.run(textsFor: (indexes) async {
-        return [for (final _ in indexes) 'text'];
-      });
+        await scheduler.run(
+          textsFor: (indexes) async {
+            return [for (final _ in indexes) 'text'];
+          },
+        );
 
-      expect(persisted, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
-      expect(failed, isEmpty);
-      expect(maxInFlight, kFullTranslateConcurrency);
-    });
+        expect(persisted, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+        expect(failed, isEmpty);
+        expect(maxInFlight, kFullTranslateConcurrency);
+      },
+    );
 
-    test('failed batches do not stop the run and report their indexes', () async {
-      final persisted = <int>[];
-      final failed = <int>[];
-      final scheduler = FullTranslateScheduler(
-        batches: [
-          [0, 1],
-          [2, 3],
-        ],
-        translateBatch: (indexes, texts) async {
-          if (indexes.first == 0) return null; // unparseable reply
-          throw StateError('transport down');
-        },
-        onBatchTranslated: (indexes, _) => persisted.addAll(indexes),
-        onBatchFailed: failed.addAll,
-      );
+    test(
+      'failed batches do not stop the run and report their indexes',
+      () async {
+        final persisted = <int>[];
+        final failed = <int>[];
+        final scheduler = FullTranslateScheduler(
+          batches: [
+            [0, 1],
+            [2, 3],
+          ],
+          translateBatch: (indexes, texts) async {
+            if (indexes.first == 0) return null; // unparseable reply
+            throw StateError('transport down');
+          },
+          onBatchTranslated: (indexes, _) => persisted.addAll(indexes),
+          onBatchFailed: failed.addAll,
+        );
 
-      await scheduler.run(textsFor: (indexes) async => ['a', 'b']);
+        await scheduler.run(textsFor: (indexes) async => ['a', 'b']);
 
-      expect(persisted, isEmpty);
-      expect(failed, [0, 1, 2, 3]);
-    });
+        expect(persisted, isEmpty);
+        expect(failed, [0, 1, 2, 3]);
+      },
+    );
 
     test('cancel stops NEW batches but finishes in-flight ones', () async {
       final persisted = <int>[];
@@ -90,7 +105,9 @@ void main() {
       final started = <int>[];
 
       final scheduler = FullTranslateScheduler(
-        batches: [for (var i = 0; i < 12; i++) [i]],
+        batches: [
+          for (var i = 0; i < 12; i++) [i],
+        ],
         shouldCancel: () => cancel,
         translateBatch: (indexes, texts) async {
           started.add(indexes.first);

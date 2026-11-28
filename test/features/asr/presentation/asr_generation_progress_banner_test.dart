@@ -17,8 +17,7 @@ class _PinnedAsrGenerationCtrl extends AsrGenerationController {
   final AsrGenerationJob? job;
 
   @override
-  AsyncValue<AsrGenerationJob?> build(String mediaId) =>
-      AsyncValue.data(job);
+  AsyncValue<AsrGenerationJob?> build(String mediaId) => AsyncValue.data(job);
 }
 
 /// Local Whisper sidecar stub → banner shows the transitional engine label.
@@ -49,44 +48,45 @@ Widget _wrap({
 }
 
 ProviderContainer _container(AsrGenerationJob job) => ProviderContainer(
-      overrides: [
-        asrCapabilityProvider.overrideWithValue(_whisperStub),
-        asrGenerationControllerProvider(
-          'm1',
-        ).overrideWith(() => _PinnedAsrGenerationCtrl(job)),
-      ],
-    );
+  overrides: [
+    asrCapabilityProvider.overrideWithValue(_whisperStub),
+    asrGenerationControllerProvider(
+      'm1',
+    ).overrideWith(() => _PinnedAsrGenerationCtrl(job)),
+  ],
+);
 
 void main() {
-  testWidgets('recognizing → breadcrumb shows 提取音频 done + 识别 active, engine info',
-      (tester) async {
-    final job = AsrGenerationJob(
-      mediaId: 'm1',
-      language: 'en',
-      phase: AsrGenerationPhase.recognizing,
-      startedAt: DateTime.now(),
-    );
-    final container = _container(job);
-    addTearDown(container.dispose);
-    await tester.pumpWidget(_wrap(
-      container: container,
-      job: job,
-      alignInstalled: false,
-    ));
+  testWidgets(
+    'recognizing → breadcrumb shows 提取音频 done + 识别 active, engine info',
+    (tester) async {
+      final job = AsrGenerationJob(
+        mediaId: 'm1',
+        language: 'en',
+        phase: AsrGenerationPhase.recognizing,
+        startedAt: DateTime.now(),
+      );
+      final container = _container(job);
+      addTearDown(container.dispose);
+      await tester.pumpWidget(
+        _wrap(container: container, job: job, alignInstalled: false),
+      );
 
-    expect(find.text('Extract audio'), findsOneWidget);
-    expect(find.text('Recognize'), findsOneWidget);
-    expect(find.text('Segment'), findsOneWidget);
-    // Aligner not installed → align chip hidden entirely.
-    expect(find.text('Align'), findsNothing);
-    // Info line: engine label of the transitional Whisper fallback.
-    expect(find.textContaining('Whisper large-v3-turbo'), findsOneWidget);
-    // Cancel affordance present.
-    expect(find.byIcon(EnjoyIcons.close), findsOneWidget);
-  });
+      expect(find.text('Extract audio'), findsOneWidget);
+      expect(find.text('Recognize'), findsOneWidget);
+      expect(find.text('Segment'), findsOneWidget);
+      // Aligner not installed → align chip hidden entirely.
+      expect(find.text('Align'), findsNothing);
+      // Info line: engine label of the transitional Whisper fallback.
+      expect(find.textContaining('Whisper large-v3-turbo'), findsOneWidget);
+      // Cancel affordance present.
+      expect(find.byIcon(EnjoyIcons.close), findsOneWidget);
+    },
+  );
 
-  testWidgets('persisting with aligner installed → 对齐 chip shown as done',
-      (tester) async {
+  testWidgets('persisting with aligner installed → 对齐 chip shown as done', (
+    tester,
+  ) async {
     final job = AsrGenerationJob(
       mediaId: 'm1',
       language: 'en',
@@ -95,11 +95,9 @@ void main() {
     );
     final container = _container(job);
     addTearDown(container.dispose);
-    await tester.pumpWidget(_wrap(
-      container: container,
-      job: job,
-      alignInstalled: true,
-    ));
+    await tester.pumpWidget(
+      _wrap(container: container, job: job, alignInstalled: true),
+    );
 
     expect(find.text('Align'), findsOneWidget);
     expect(find.text('Segment'), findsOneWidget);
@@ -116,11 +114,9 @@ void main() {
     );
     final container = _container(job);
     addTearDown(container.dispose);
-    await tester.pumpWidget(_wrap(
-      container: container,
-      job: job,
-      alignInstalled: true,
-    ));
+    await tester.pumpWidget(
+      _wrap(container: container, job: job, alignInstalled: true),
+    );
 
     expect(find.text('Recognize'), findsNothing);
   });

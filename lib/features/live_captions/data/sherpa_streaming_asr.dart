@@ -1,15 +1,15 @@
 /// sherpa-onnx streaming (real-time) ASR engine for live captions.
 ///
-/// Uses the bilingual zh-en streaming zipformer transducer (int8) — a few
-/// hundred MB on disk, sub-second decode latency, no server process. The
-/// recognizer consumes the same 16 kHz mono PCM that `sp_audio_capture`
-/// produces; the segmenter stays as the utterance-endpoint detector while
-/// the recognizer accumulates text continuously.
+/// Uses the NVIDIA Nemotron-3.5 streaming transducer (int8, 560 ms chunks,
+/// ~682 MB on disk, CPU-only decode, no server process). The recognizer
+/// consumes the same 16 kHz mono PCM that `sp_audio_capture` produces; the
+/// segmenter stays as the utterance-endpoint detector while the recognizer
+/// accumulates text continuously.
 ///
 /// Model layout under `<exe>/components/live-asr/`:
-///   encoder-epoch-99-avg-1.int8.onnx
-///   decoder-epoch-99-avg-1.int8.onnx
-///   joiner-epoch-99-avg-1.int8.onnx
+///   encoder.int8.onnx
+///   decoder.int8.onnx
+///   joiner.int8.onnx
 ///   tokens.txt
 library;
 
@@ -28,8 +28,10 @@ final Logger _log = Logger('sherpa-streaming');
 Directory? streamingModelDir() {
   final exe = Platform.resolvedExecutable;
   final dir = exe.substring(0, exe.lastIndexOf(Platform.pathSeparator));
-  final d = Directory('$dir${Platform.pathSeparator}components'
-      '${Platform.pathSeparator}live-asr');
+  final d = Directory(
+    '$dir${Platform.pathSeparator}components'
+    '${Platform.pathSeparator}live-asr',
+  );
   return d.existsSync() &&
           File('${d.path}${Platform.pathSeparator}tokens.txt').existsSync()
       ? d
@@ -60,9 +62,9 @@ final class SherpaStreamingAsr {
         sherpa.OnlineRecognizerConfig(
           model: sherpa.OnlineModelConfig(
             transducer: sherpa.OnlineTransducerModelConfig(
-              encoder: '${p}encoder-epoch-99-avg-1.int8.onnx',
-              decoder: '${p}decoder-epoch-99-avg-1.int8.onnx',
-              joiner: '${p}joiner-epoch-99-avg-1.int8.onnx',
+              encoder: '${p}encoder.int8.onnx',
+              decoder: '${p}decoder.int8.onnx',
+              joiner: '${p}joiner.int8.onnx',
             ),
             tokens: '${p}tokens.txt',
             debug: false,

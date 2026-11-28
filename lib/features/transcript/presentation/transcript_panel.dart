@@ -110,133 +110,145 @@ class _TranscriptPanelState extends ConsumerState<TranscriptPanel> {
         if (searchOpen) TranscriptSearchBar(mediaId: mediaId),
         Expanded(
           child: linesAsync.when(
-      data: (lines) {
-        if (lines.isEmpty) {
-          if (fetchState.status == TranscriptFetchStatus.loading) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+            data: (lines) {
+              if (lines.isEmpty) {
+                if (fetchState.status == TranscriptFetchStatus.loading) {
+                  return Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const CircularProgressIndicator(),
+                        const SizedBox(height: 16),
+                        Text(
+                          l10n.transcriptFetchingSubtitles,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                if (fetchState.status == TranscriptFetchStatus.error) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            EnjoyIcons.error,
+                            size: 40,
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            l10n.transcriptErrorFriendlyTitle,
+                            style: Theme.of(context).textTheme.titleMedium,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            l10n.transcriptErrorFriendlyHint,
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
+                          ),
+                          const SizedBox(height: 16),
+                          EnjoyButton.tonal(
+                            onPressed: () => ref
+                                .read(
+                                  transcriptFetchCtrlProvider(mediaId).notifier,
+                                )
+                                .refreshFromCloud(signedIn: signedIn),
+                            child: Text(l10n.retry),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+                return TranscriptEmptyState(
+                  onImport: () =>
+                      pickAndImportSubtitleFile(context, ref, mediaId),
+                  onExtract: showExtractButton
+                      ? () => runEmbeddedSubtitleExtract(
+                          context: context,
+                          ref: ref,
+                          mediaId: mediaId,
+                        )
+                      : null,
+                  onGenerate: showLocalActions
+                      ? () =>
+                            launchAsrGeneration(context, ref, mediaId: mediaId)
+                      : null,
+                  onFetchYoutube: isYoutube
+                      ? () => ref
+                            .read(transcriptFetchCtrlProvider(mediaId).notifier)
+                            .refreshFromCloud(signedIn: signedIn)
+                      : null,
+                  onAlign: showLocalActions
+                      ? () => alignExistingScript(context, ref, mediaId)
+                      : null,
+                  showImportButton: showLocalActions,
+                  showExtractButton: showExtractButton,
+                  showGenerateButton: showLocalActions,
+                  showFetchYoutubeButton: isYoutube,
+                  showAlignButton: showLocalActions,
+                );
+              }
+              final list = TranscriptTypefaceScope(
+                child: TranscriptScrollableList(mediaId: mediaId, lines: lines),
+              );
+              if (searchOpen && searchQuery.isNotEmpty) {
+                return TranscriptSearchResults(mediaId: mediaId);
+              }
+              if (!ref.watch(transcriptBlurModeProvider)) return list;
+              return Stack(
                 children: [
-                  const CircularProgressIndicator(),
-                  const SizedBox(height: 16),
-                  Text(
-                    l10n.transcriptFetchingSubtitles,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  list,
+                  const Positioned(
+                    top: 14,
+                    left: 16,
+                    right: 16,
+                    child: IgnorePointer(
+                      child: Center(child: DictateHintPill()),
                     ),
                   ),
                 ],
-              ),
-            );
-          }
-          if (fetchState.status == TranscriptFetchStatus.error) {
-            return Center(
+              );
+            },
+            loading: () => const SkeletonTranscript(),
+            error: (e, _) => Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      EnjoyIcons.error,
-                      size: 40,
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                    const SizedBox(height: 12),
                     Text(
                       l10n.transcriptErrorFriendlyTitle,
                       style: Theme.of(context).textTheme.titleMedium,
-                      textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
                     Text(
                       l10n.transcriptErrorFriendlyHint,
                       textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    EnjoyButton.tonal(
-                      onPressed: () => ref
-                          .read(transcriptFetchCtrlProvider(mediaId).notifier)
-                          .refreshFromCloud(signedIn: signedIn),
-                      child: Text(l10n.retry),
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
                 ),
               ),
-            );
-          }
-          return TranscriptEmptyState(
-            onImport: () => pickAndImportSubtitleFile(context, ref, mediaId),
-            onExtract: showExtractButton
-                ? () => runEmbeddedSubtitleExtract(
-                    context: context,
-                    ref: ref,
-                    mediaId: mediaId,
-                  )
-                : null,
-            onGenerate: showLocalActions
-                ? () => launchAsrGeneration(context, ref, mediaId: mediaId)
-                : null,
-            onFetchYoutube: isYoutube
-                ? () => ref
-                      .read(transcriptFetchCtrlProvider(mediaId).notifier)
-                      .refreshFromCloud(signedIn: signedIn)
-                : null,
-            onAlign: showLocalActions
-                ? () => alignExistingScript(context, ref, mediaId)
-                : null,
-            showImportButton: showLocalActions,
-            showExtractButton: showExtractButton,
-            showGenerateButton: showLocalActions,
-            showFetchYoutubeButton: isYoutube,
-            showAlignButton: showLocalActions,
-          );
-        }
-        final list = TranscriptTypefaceScope(
-          child: TranscriptScrollableList(mediaId: mediaId, lines: lines),
-        );
-        if (searchOpen && searchQuery.isNotEmpty) {
-          return TranscriptSearchResults(mediaId: mediaId);
-        }
-        if (!ref.watch(transcriptBlurModeProvider)) return list;
-        return Stack(
-          children: [
-            list,
-            const Positioned(
-              top: 14,
-              left: 16,
-              right: 16,
-              child: IgnorePointer(child: Center(child: DictateHintPill())),
             ),
-          ],
-        );
-      },
-      loading: () => const SkeletonTranscript(),
-      error: (e, _) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                l10n.transcriptErrorFriendlyTitle,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                l10n.transcriptErrorFriendlyHint,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
           ),
         ),
-      ),
-        ),
-      ),
-    ],
+      ],
     );
   }
 }

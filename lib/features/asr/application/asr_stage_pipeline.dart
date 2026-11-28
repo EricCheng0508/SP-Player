@@ -30,8 +30,12 @@ List<AsrStageView> asrStageViews(
   AsrGenerationPhase phase, {
   required bool alignInstalled,
 }) {
-  List<AsrStageView> all(AsrStageState extract, AsrStageState recognize,
-      AsrStageState align, AsrStageState segment) {
+  List<AsrStageView> all(
+    AsrStageState extract,
+    AsrStageState recognize,
+    AsrStageState align,
+    AsrStageState segment,
+  ) {
     final views = <AsrStageView>[
       AsrStageView(AsrStage.extract, extract),
       AsrStageView(AsrStage.recognize, recognize),
@@ -43,18 +47,30 @@ List<AsrStageView> asrStageViews(
 
   switch (phase) {
     case AsrGenerationPhase.extracting:
-      return all(AsrStageState.active, AsrStageState.pending,
-          AsrStageState.pending, AsrStageState.pending);
+      return all(
+        AsrStageState.active,
+        AsrStageState.pending,
+        AsrStageState.pending,
+        AsrStageState.pending,
+      );
     case AsrGenerationPhase.uploading:
     case AsrGenerationPhase.polling:
     case AsrGenerationPhase.recognizing:
       // Uploading/polling are transport sub-phases of recognition — the
       // breadcrumb pins on the recognition stage while they run.
-      return all(AsrStageState.done, AsrStageState.active,
-          AsrStageState.pending, AsrStageState.pending);
+      return all(
+        AsrStageState.done,
+        AsrStageState.active,
+        AsrStageState.pending,
+        AsrStageState.pending,
+      );
     case AsrGenerationPhase.aligning:
-      return all(AsrStageState.done, AsrStageState.done, AsrStageState.active,
-          AsrStageState.pending);
+      return all(
+        AsrStageState.done,
+        AsrStageState.done,
+        AsrStageState.active,
+        AsrStageState.pending,
+      );
     case AsrGenerationPhase.persisting:
       // 断句 + 落库 share the final stage (buildAsrTranscriptLines runs
       // right before the upsert).
@@ -70,9 +86,12 @@ List<AsrStageView> asrStageViews(
     case AsrGenerationPhase.cancelled:
       // Terminal states never render the banner; return a fully-done row
       // so callers without the active-phase guard still get a sane row.
-      return all(AsrStageState.done, AsrStageState.done,
-          alignInstalled ? AsrStageState.done : AsrStageState.pending,
-          AsrStageState.done);
+      return all(
+        AsrStageState.done,
+        AsrStageState.done,
+        alignInstalled ? AsrStageState.done : AsrStageState.pending,
+        AsrStageState.done,
+      );
   }
 }
 

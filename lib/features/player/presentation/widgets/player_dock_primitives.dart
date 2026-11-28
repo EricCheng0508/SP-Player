@@ -486,11 +486,7 @@ class DockPlayPausePill extends StatelessWidget {
 /// playback-rate picker. [onOpen] receives this button's own [BuildContext]
 /// so desktop can anchor the popup menu right at the button.
 class DockSpeedButton extends StatelessWidget {
-  const DockSpeedButton({
-    required this.rate,
-    required this.onOpen,
-    super.key,
-  });
+  const DockSpeedButton({required this.rate, required this.onOpen, super.key});
 
   final double rate;
   final void Function(BuildContext anchor) onOpen;

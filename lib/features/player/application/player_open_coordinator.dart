@@ -327,9 +327,7 @@ Future<void> runPlayerOpen(
     final startAtMs = options.restorePosition
         ? (persistedEarly?.currentTimeMs ?? 0)
         : 0;
-    final startAt = startAtMs > 0
-        ? Duration(milliseconds: startAtMs)
-        : null;
+    final startAt = startAtMs > 0 ? Duration(milliseconds: startAtMs) : null;
 
     await steps.run(
       'open engine with retry',
@@ -374,21 +372,15 @@ Future<void> runPlayerOpen(
 
     final posMs = options.restorePosition ? (persisted?.currentTimeMs ?? 0) : 0;
     if (posMs > 0) {
-      await steps.runBounded(
-        'position restore seek',
-        () async {
-          // media_kit's open() resolves when loadfile is issued, not loaded;
-          // seeking before the demuxer is ready is silently dropped by mpv
-          // and playback restarts from 0. Wait (bounded by this step's own
-          // timeout) for the first non-zero duration, then seek. On timeout
-          // we still seek as a best effort.
-          await engine.waitForMediaReady(
-            timeout: const Duration(seconds: 4),
-          );
-          await engine.seek(Duration(milliseconds: posMs));
-        },
-        limit: engineCommandTimeout,
-      );
+      await steps.runBounded('position restore seek', () async {
+        // media_kit's open() resolves when loadfile is issued, not loaded;
+        // seeking before the demuxer is ready is silently dropped by mpv
+        // and playback restarts from 0. Wait (bounded by this step's own
+        // timeout) for the first non-zero duration, then seek. On timeout
+        // we still seek as a best effort.
+        await engine.waitForMediaReady(timeout: const Duration(seconds: 4));
+        await engine.seek(Duration(milliseconds: posMs));
+      }, limit: engineCommandTimeout);
     }
 
     if (options.restoreEcho && persisted != null && persisted.echoActive) {

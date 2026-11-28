@@ -22,7 +22,8 @@ final Logger _log = logNamed('local.subgen');
 
 final class LocalSubgenAsrCapability
     implements AsrCapability, AsrThroughputHint {
-  LocalSubgenAsrCapability({http.Client? httpClient}) : _httpClient = httpClient;
+  LocalSubgenAsrCapability({http.Client? httpClient})
+    : _httpClient = httpClient;
 
   static const baseUrl = 'http://127.0.0.1:8000/v1';
   static const model = 'large-v3-turbo';

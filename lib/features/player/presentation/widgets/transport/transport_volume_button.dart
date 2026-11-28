@@ -97,75 +97,73 @@ class _TransportVolumeButtonState extends ConsumerState<TransportVolumeButton> {
   Widget _sliderCard(BuildContext overlayCtx) {
     final t = EnjoyThemeTokens.of(context);
     final dark = ref.read(windowFullscreenProvider);
-    final surfaceColor = dark
-        ? Colors.black.withValues(alpha: 0.88)
-        : t.raised;
-    final borderColor = dark
-        ? Colors.white.withValues(alpha: 0.14)
-        : t.line;
+    final surfaceColor = dark ? Colors.black.withValues(alpha: 0.88) : t.raised;
+    final borderColor = dark ? Colors.white.withValues(alpha: 0.14) : t.line;
     return MouseRegion(
       onEnter: (_) => _onPointerInside(true),
       onExit: (_) => _onPointerInside(false),
       child: Material(
-      color: surfaceColor,
-      shape: RoundedSuperellipseBorder(
-        borderRadius: BorderRadius.circular(t.radiusMd),
-        side: BorderSide(color: borderColor),
-      ),
-      clipBehavior: Clip.antiAlias,
-      elevation: 10,
-      shadowColor: Colors.black.withValues(alpha: 0.5),
-      child: SizedBox(
-        width: _popupW,
-        height: _popupH,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          child: RotatedBox(
-            quarterTurns: 3,
-            child: SliderTheme(
-              data: SliderTheme.of(overlayCtx).copyWith(
-                trackHeight: 3,
-                thumbShape: const RoundSliderThumbShape(
-                  enabledThumbRadius: 6,
+        color: surfaceColor,
+        shape: RoundedSuperellipseBorder(
+          borderRadius: BorderRadius.circular(t.radiusMd),
+          side: BorderSide(color: borderColor),
+        ),
+        clipBehavior: Clip.antiAlias,
+        elevation: 10,
+        shadowColor: Colors.black.withValues(alpha: 0.5),
+        child: SizedBox(
+          width: _popupW,
+          height: _popupH,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            child: RotatedBox(
+              quarterTurns: 3,
+              child: SliderTheme(
+                data: SliderTheme.of(overlayCtx).copyWith(
+                  trackHeight: 3,
+                  thumbShape: const RoundSliderThumbShape(
+                    enabledThumbRadius: 6,
+                  ),
+                  overlayShape: const RoundSliderOverlayShape(
+                    overlayRadius: 12,
+                  ),
+                  // White monochrome on the dark surface, matching the bar.
+                  activeTrackColor: dark ? Colors.white : null,
+                  inactiveTrackColor: dark
+                      ? Colors.white.withValues(alpha: 0.24)
+                      : null,
+                  thumbColor: dark ? Colors.white : null,
+                  overlayColor: dark
+                      ? Colors.white.withValues(alpha: 0.12)
+                      : null,
                 ),
-                overlayShape: const RoundSliderOverlayShape(
-                  overlayRadius: 12,
+                child: Consumer(
+                  builder: (_, ref, _) {
+                    final vol = ref
+                        .watch(
+                          playerPreferencesCtrlProvider.select((p) => p.volume),
+                        )
+                        .clamp(0.0, 1.0)
+                        .toDouble();
+                    return Slider(
+                      value: vol,
+                      onChanged: (v) => unawaited(
+                        ref
+                            .read(playerPreferencesCtrlProvider.notifier)
+                            .setVolumeTransient(v),
+                      ),
+                      onChangeEnd: (v) => unawaited(
+                        ref
+                            .read(playerPreferencesCtrlProvider.notifier)
+                            .setVolume(v),
+                      ),
+                    );
+                  },
                 ),
-                // White monochrome on the dark surface, matching the bar.
-                activeTrackColor: dark ? Colors.white : null,
-                inactiveTrackColor:
-                    dark ? Colors.white.withValues(alpha: 0.24) : null,
-                thumbColor: dark ? Colors.white : null,
-                overlayColor:
-                    dark ? Colors.white.withValues(alpha: 0.12) : null,
-              ),
-              child: Consumer(
-                builder: (_, ref, _) {
-                  final vol = ref
-                      .watch(
-                        playerPreferencesCtrlProvider.select((p) => p.volume),
-                      )
-                      .clamp(0.0, 1.0)
-                      .toDouble();
-                  return Slider(
-                    value: vol,
-                    onChanged: (v) => unawaited(
-                      ref
-                          .read(playerPreferencesCtrlProvider.notifier)
-                          .setVolumeTransient(v),
-                    ),
-                    onChangeEnd: (v) => unawaited(
-                      ref
-                          .read(playerPreferencesCtrlProvider.notifier)
-                          .setVolume(v),
-                    ),
-                  );
-                },
               ),
             ),
           ),
         ),
-      ),
       ),
     );
   }

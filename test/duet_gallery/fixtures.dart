@@ -8,8 +8,6 @@ import 'package:enjoy_player/data/files/file_storage.dart';
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/auth/domain/user_profile.dart';
-import 'package:enjoy_player/features/community/application/active_users_provider.dart';
-import 'package:enjoy_player/features/community/domain/active_user.dart';
 import 'package:enjoy_player/features/discover/application/discover_feed_join.dart';
 import 'package:enjoy_player/features/discover/application/discover_providers.dart';
 import 'package:enjoy_player/features/discover/data/discover_repository.dart';
@@ -26,8 +24,6 @@ import 'package:enjoy_player/features/onboarding/application/onboarding_controll
 import 'package:enjoy_player/features/onboarding/domain/tip_eligibility.dart';
 import 'package:enjoy_player/features/player/application/player_controller.dart';
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
-import 'package:enjoy_player/features/subscription/application/subscription_status_provider.dart';
-import 'package:enjoy_player/features/subscription/domain/subscription_status.dart';
 import 'package:enjoy_player/features/sync/application/sync_controller.dart';
 import 'package:enjoy_player/features/update/application/update_controller.dart';
 import 'package:enjoy_player/features/vocabulary/application/vocabulary_review_session.dart';
@@ -131,7 +127,6 @@ List<Media> sampleRecents() => [
 List<Override> baseOverrides(
   AppDatabase db, {
   List<Media>? recents,
-  bool subscription = true,
   PlayerController Function()? playerController,
   AuthCtrl Function()? auth,
   PracticeResume? resume,
@@ -147,13 +142,6 @@ List<Override> baseOverrides(
   syncCtrlProvider.overrideWithValue(0),
   discoverFeedRefreshSchedulerProvider.overrideWithValue(0),
   updateAvailableBadgeProvider.overrideWithValue(false),
-  if (subscription)
-    subscriptionStatusProvider.overrideWith(
-      (ref) async => const SubscriptionStatus(
-        subscriptionActive: true,
-        subscriptionTier: SubscriptionTier.pro,
-      ),
-    ),
   vocabularyReviewSessionProvider.overrideWith(
     reviewSession ?? _FakeVocabSession.new,
   ),
@@ -171,18 +159,6 @@ List<Override> baseOverrides(
           week: PeriodStats(recordingDurationMs: 2400000, recordingCount: 88),
           month: PeriodStats(recordingDurationMs: 9400000, recordingCount: 301),
         ),
-  ),
-  activeUsersProvider.overrideWith(
-    (ref) async => const ActiveUsersResponse(
-      users: [
-        ActiveUser(id: '1', name: 'Mia'),
-        ActiveUser(id: '2', name: 'Kenji'),
-        ActiveUser(id: '3', name: 'Lucía'),
-      ],
-      count: 3,
-      recordingsCountToday: 1703,
-      recordingsDurationToday: 9060000,
-    ),
   ),
 ];
 

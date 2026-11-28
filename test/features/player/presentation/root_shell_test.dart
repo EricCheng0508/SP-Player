@@ -15,8 +15,6 @@ import 'package:enjoy_player/features/player/presentation/root_shell.dart';
 import 'package:enjoy_player/features/player/presentation/widgets/player_dock.dart';
 import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 import 'package:enjoy_player/features/discover/application/discover_providers.dart';
-import 'package:enjoy_player/features/subscription/application/subscription_status_provider.dart';
-import 'package:enjoy_player/features/subscription/domain/subscription_status.dart';
 import 'package:enjoy_player/features/sync/application/sync_controller.dart';
 import 'package:enjoy_player/features/transcript/application/all_transcripts_provider.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_blur_mode_provider.dart';
@@ -173,12 +171,6 @@ List<Override> _shellOverrides(
     syncCtrlProvider.overrideWithValue(0),
     discoverFeedRefreshSchedulerProvider.overrideWithValue(0),
     updateAvailableBadgeProvider.overrideWithValue(updateBadge),
-    subscriptionStatusProvider.overrideWith(
-      (ref) async => const SubscriptionStatus(
-        subscriptionActive: false,
-        subscriptionTier: SubscriptionTier.free,
-      ),
-    ),
     vocabularyReviewSessionProvider.overrideWith(
       () => _FakeVocabSession(initial: vocab),
     ),

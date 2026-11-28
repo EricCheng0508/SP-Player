@@ -5,6 +5,10 @@
 /// "listening" placeholder, and a compact engine/latency status bar.
 library;
 
+import 'package:enjoy_player/core/theme/live_captions_panel_colors.dart';
+
+import 'package:enjoy_player/core/interaction/enjoy_pressable.dart';
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -24,8 +28,7 @@ class LiveCaptionsScreen extends ConsumerStatefulWidget {
   const LiveCaptionsScreen({super.key});
 
   @override
-  ConsumerState<LiveCaptionsScreen> createState() =>
-      _LiveCaptionsScreenState();
+  ConsumerState<LiveCaptionsScreen> createState() => _LiveCaptionsScreenState();
 }
 
 class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
@@ -97,7 +100,8 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
 
     final shown = _resolveShown(state, history);
     final viewingId = ref.watch(liveCaptionsViewingIdProvider);
-    final listening = state.phase == LiveCaptionsPhase.listening ||
+    final listening =
+        state.phase == LiveCaptionsPhase.listening ||
         state.phase == LiveCaptionsPhase.starting;
     final inSessionView = viewingId != null && shown != null;
 
@@ -130,8 +134,8 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
               ...history.map((s) => s.id),
             ];
             setState(() {
-              final allSelected = allIds.isNotEmpty &&
-                  allIds.every(_selectedIds.contains);
+              final allSelected =
+                  allIds.isNotEmpty && allIds.every(_selectedIds.contains);
               if (allSelected) {
                 _selectedIds.clear();
               } else {
@@ -147,8 +151,7 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
               context: context,
               builder: (dialogContext) => AlertDialog(
                 title: Text('删除 ${_selectedIds.length} 条会话'),
-                content:
-                    const Text('确定删除选中的会话及其全部字幕记录吗？此操作不可恢复。'),
+                content: const Text('确定删除选中的会话及其全部字幕记录吗？此操作不可恢复。'),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -166,8 +169,7 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
               ),
             );
             if (confirmed != true) return;
-            final notifier =
-                ref.read(liveCaptionsControllerProvider.notifier);
+            final notifier = ref.read(liveCaptionsControllerProvider.notifier);
             final targets = history
                 .where((s) => _selectedIds.contains(s.id))
                 .toList();
@@ -182,22 +184,23 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
           },
           onNew: () {
             ref.read(liveCaptionsViewingIdProvider.notifier).state = null;
-            unawaited(
-              () async {
-                final notifier =
-                    ref.read(liveCaptionsControllerProvider.notifier);
-                await notifier.beginNewSession();
-                await notifier.start();
-                // 直接跳进会话视图（用户点新会话就该立刻进入）。
-                ref.read(liveCaptionsViewingIdProvider.notifier).state =
-                    ref.read(liveCaptionsControllerProvider).session?.id;
-                await historyNotifier.reload();
-              }(),
-            );
+            unawaited(() async {
+              final notifier = ref.read(
+                liveCaptionsControllerProvider.notifier,
+              );
+              await notifier.beginNewSession();
+              await notifier.start();
+              // 直接跳进会话视图（用户点新会话就该立刻进入）。
+              ref.read(liveCaptionsViewingIdProvider.notifier).state = ref
+                  .read(liveCaptionsControllerProvider)
+                  .session
+                  ?.id;
+              await historyNotifier.reload();
+            }());
           },
-          onSelect: (session) => ref
-              .read(liveCaptionsViewingIdProvider.notifier)
-              .state = session.id,
+          onSelect: (session) =>
+              ref.read(liveCaptionsViewingIdProvider.notifier).state =
+                  session.id,
           onDelete: (session) async {
             final confirmed = await _confirmDelete(context);
             if (!confirmed) return;
@@ -211,9 +214,9 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
                 .read(liveCaptionsStoreProvider)
                 .exportText(session);
             if (!mounted) return;
-            ScaffoldMessenger.of(this.context).showSnackBar(
-              SnackBar(content: Text('已导出到 $path')),
-            );
+            ScaffoldMessenger.of(
+              this.context,
+            ).showSnackBar(SnackBar(content: Text('已导出到 $path')));
           },
         ),
       );
@@ -236,12 +239,10 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
               session: shown,
               live: identical(shown, state.session),
               listening: listening,
-              onBack: () => ref
-                  .read(liveCaptionsViewingIdProvider.notifier)
-                  .state = null,
+              onBack: () =>
+                  ref.read(liveCaptionsViewingIdProvider.notifier).state = null,
             ),
-            if (identical(shown, state.session))
-              _ControlsRow(),
+            if (identical(shown, state.session)) _ControlsRow(),
             Expanded(
               child: _CaptionStream(
                 session: shown,
@@ -249,8 +250,8 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
                 scroll: _scroll,
                 onRetryTranslation: identical(shown, state.session)
                     ? (line) => ref
-                        .read(liveCaptionsControllerProvider.notifier)
-                        .retryTranslation(line)
+                          .read(liveCaptionsControllerProvider.notifier)
+                          .retryTranslation(line)
                     : null,
               ),
             ),
@@ -283,13 +284,11 @@ final class _SessionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = EnjoyThemeTokens.of(context);
-    final preview = session.lines.isEmpty
-        ? '（暂无内容）'
-        : session.lines.first.text;
+    final preview = session.lines.isEmpty ? '（暂无内容）' : session.lines.first.text;
     return Material(
       color: selected ? t.sunk : Colors.transparent,
       borderRadius: BorderRadius.circular(10),
-      child: InkWell(
+      child: EnjoyPressable(
         onTap: onTap,
         borderRadius: BorderRadius.circular(10),
         child: Container(
@@ -318,7 +317,9 @@ final class _SessionCard extends StatelessWidget {
                   if (inProgress)
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 1),
+                        horizontal: 6,
+                        vertical: 1,
+                      ),
                       decoration: ShapeDecoration(
                         color: t.youSoft,
                         shape: const StadiumBorder(),
@@ -333,10 +334,7 @@ final class _SessionCard extends StatelessWidget {
                       ),
                     ),
                   const Spacer(),
-                  _CardMenu(
-                    onDelete: onDelete,
-                    onExport: onExport,
-                  ),
+                  _CardMenu(onDelete: onDelete, onExport: onExport),
                 ],
               ),
               const SizedBox(height: 4),
@@ -344,10 +342,9 @@ final class _SessionCard extends StatelessWidget {
                 preview,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(color: t.ink2),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: t.ink2),
               ),
               const SizedBox(height: 4),
               Text(
@@ -392,7 +389,6 @@ final class _CardMenu extends StatelessWidget {
   }
 }
 
-
 // ---------------------------------------------------------------------------
 // Controls row: source chips + translate toggle (always visible)
 // ---------------------------------------------------------------------------
@@ -434,10 +430,9 @@ final class _ControlsRow extends ConsumerWidget {
               const SizedBox(width: 6),
               Text(
                 '关闭后仅显示原文',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(color: t.ink3),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: t.ink3),
               ),
             ],
           ),
@@ -461,13 +456,15 @@ final class _SourceChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = EnjoyThemeTokens.of(context);
-    return InkWell(
+    return EnjoyPressable(
       onTap: onTap,
       borderRadius: BorderRadius.circular(18),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: ShapeDecoration(
-          color: checked ? t.brandInk.withValues(alpha: 0.10) : Colors.transparent,
+          color: checked
+              ? t.brandInk.withValues(alpha: 0.10)
+              : Colors.transparent,
           shape: StadiumBorder(
             side: BorderSide(color: checked ? t.brandInk : t.line),
           ),
@@ -478,7 +475,7 @@ final class _SourceChip extends StatelessWidget {
             if (checked)
               Padding(
                 padding: const EdgeInsets.only(right: 6),
-                child: Icon(Icons.check, size: 14, color: t.brandInk),
+                child: Icon(EnjoyIcons.check, size: 14, color: t.brandInk),
               ),
             Text(
               label,
@@ -547,11 +544,13 @@ class _CaptionStreamState extends ConsumerState<_CaptionStream> {
 
   void _jumpToBottom() {
     if (!_scroll.hasClients) return;
-    unawaited(_scroll.animateTo(
-      _scroll.position.maxScrollExtent,
-      duration: const Duration(milliseconds: 220),
-      curve: Curves.easeOutCubic,
-    ));
+    unawaited(
+      _scroll.animateTo(
+        _scroll.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOutCubic,
+      ),
+    );
     if (mounted) setState(() => _follow = true);
   }
 
@@ -562,7 +561,8 @@ class _CaptionStreamState extends ConsumerState<_CaptionStream> {
   Widget build(BuildContext context) {
     final controllerState = ref.watch(liveCaptionsControllerProvider);
     final translate = controllerState.translate;
-    final listening = controllerState.phase == LiveCaptionsPhase.listening ||
+    final listening =
+        controllerState.phase == LiveCaptionsPhase.listening ||
         controllerState.phase == LiveCaptionsPhase.starting;
     final lines = widget.session.lines;
     final items = _buildItems(lines);
@@ -594,8 +594,8 @@ class _CaptionStreamState extends ConsumerState<_CaptionStream> {
                   : ListView.builder(
                       controller: _scroll,
                       padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
-                      itemCount: items.length +
-                          (widget.live && listening ? 1 : 0),
+                      itemCount:
+                          items.length + (widget.live && listening ? 1 : 0),
                       itemBuilder: (context, index) {
                         if (index == items.length) {
                           return const _ListeningPlaceholder();
@@ -623,7 +623,7 @@ class _CaptionStreamState extends ConsumerState<_CaptionStream> {
             bottom: 16,
             child: FilledButton.tonalIcon(
               onPressed: _jumpToBottom,
-              icon: const Icon(Icons.arrow_downward_rounded, size: 16),
+              icon: const Icon(EnjoyIcons.arrowDown, size: 16),
               label: const Text('回到最新'),
               style: FilledButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.surface,
@@ -710,16 +710,16 @@ final class _EventDivider extends StatelessWidget {
           ),
           child: Text(
             line.event ?? line.text,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: t.ink3,
-                  fontSize: 11.5,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: t.ink3, fontSize: 11.5),
           ),
         ),
       ),
     );
   }
 }
+
 final class _EmptyState extends StatelessWidget {
   const _EmptyState({
     required this.listening,
@@ -747,17 +747,16 @@ final class _EmptyState extends StatelessWidget {
             const SizedBox(height: 14),
             FilledButton.icon(
               onPressed: onStart,
-              icon: const Icon(Icons.play_arrow_rounded, size: 20),
+              icon: const Icon(EnjoyIcons.play, size: 20),
               label: const Text('开始监听'),
             ),
           ],
           const SizedBox(height: 8),
           Text(
             '字幕会比说话晚 1~3 秒出现（本地识别的自然延迟）',
-            style: Theme.of(context)
-                .textTheme
-                .bodySmall
-                ?.copyWith(color: t.ink3),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: t.ink3),
           ),
         ],
       ),
@@ -807,8 +806,11 @@ class _ListeningPlaceholderState extends State<_ListeningPlaceholder>
                 opacity: Tween(begin: 0.25, end: 1.0).animate(
                   CurvedAnimation(
                     parent: _wave,
-                    curve: Interval(i * 0.12, i * 0.12 + 0.4,
-                        curve: Curves.easeInOut),
+                    curve: Interval(
+                      i * 0.12,
+                      i * 0.12 + 0.4,
+                      curve: Curves.easeInOut,
+                    ),
                   ),
                 ),
                 child: Container(
@@ -824,10 +826,9 @@ class _ListeningPlaceholderState extends State<_ListeningPlaceholder>
           const SizedBox(width: 10),
           Text(
             '正在聆听…',
-            style: Theme.of(context)
-                .textTheme
-                .bodySmall
-                ?.copyWith(color: t.ink3),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: t.ink3),
           ),
         ],
       ),
@@ -873,7 +874,11 @@ final class _ChatBubble extends ConsumerWidget {
     showMenu<String>(
       context: context,
       position: RelativeRect.fromLTRB(
-        position.dx, position.dy, position.dx + 8, position.dy + 8),
+        position.dx,
+        position.dy,
+        position.dx + 8,
+        position.dy + 8,
+      ),
       items: [
         const PopupMenuItem(value: 'copyEn', child: Text('复制原文')),
         if (showTranslation && item.translation != null)
@@ -916,9 +921,9 @@ final class _ChatBubble extends ConsumerWidget {
       zhWidget = Text(
         '翻译中…',
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: t.ink3,
-              fontStyle: FontStyle.italic,
-            ),
+          color: t.ink3,
+          fontStyle: FontStyle.italic,
+        ),
       );
     } else if (item.failed) {
       zhWidget = Row(
@@ -926,9 +931,9 @@ final class _ChatBubble extends ConsumerWidget {
         children: [
           Text(
             '翻译失败',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.red.shade700,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: Colors.red.shade700),
           ),
           if (onRetryLine != null && failedLine != null)
             TextButton(
@@ -947,33 +952,29 @@ final class _ChatBubble extends ConsumerWidget {
         onTap: () => _copy(context, item.translation!),
         child: Text(
           item.translation!,
-          style: Theme.of(context)
-              .textTheme
-              .bodySmall
-              ?.copyWith(color: t.ink2, fontSize: 12.5),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: t.ink2, fontSize: 12.5),
         ),
       );
     }
 
-    final bubble = InkWell(
+    final bubble = EnjoyPressable(
       borderRadius: BorderRadius.circular(14),
-      onSecondaryTapUp: (details) =>
-          _openMenu(context, ref, details.globalPosition),
       onLongPress: () => _openMenu(
         context,
         ref,
         context.findRenderObject() != null
-            ? ((context.findRenderObject()! as RenderBox)
-                .localToGlobal(Offset.zero))
+            ? ((context.findRenderObject()! as RenderBox).localToGlobal(
+                Offset.zero,
+              ))
             : Offset.zero,
       ),
       child: Container(
         constraints: const BoxConstraints(maxWidth: 780),
         padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
         decoration: BoxDecoration(
-          color: me
-              ? t.youSoft.withValues(alpha: 0.85)
-              : t.paper,
+          color: me ? t.youSoft.withValues(alpha: 0.85) : t.paper,
           borderRadius: BorderRadius.only(
             topLeft: me ? const Radius.circular(14) : const Radius.circular(4),
             topRight: me ? const Radius.circular(4) : const Radius.circular(14),
@@ -981,14 +982,13 @@ final class _ChatBubble extends ConsumerWidget {
             bottomRight: const Radius.circular(14),
           ),
           border: Border.all(
-            color: me
-                ? Colors.green.shade300.withValues(alpha: 0.5)
-                : t.line,
+            color: me ? Colors.green.shade300.withValues(alpha: 0.5) : t.line,
           ),
         ),
         child: Column(
-          crossAxisAlignment:
-              me ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          crossAxisAlignment: me
+              ? CrossAxisAlignment.end
+              : CrossAxisAlignment.start,
           children: [
             Row(
               mainAxisSize: MainAxisSize.min,
@@ -996,17 +996,17 @@ final class _ChatBubble extends ConsumerWidget {
                 if (item.starred)
                   Padding(
                     padding: const EdgeInsets.only(right: 4),
-                    child: Icon(Icons.star_rounded,
-                        size: 14, color: Colors.amber.shade700),
+                    child: Icon(
+                      EnjoyIcons.premium,
+                      size: 14,
+                      color: Colors.amber.shade700,
+                    ),
                   ),
                 Flexible(child: enText),
               ],
             ),
             if (showTranslation)
-              Padding(
-                padding: const EdgeInsets.only(top: 3),
-                child: zhWidget,
-              ),
+              Padding(padding: const EdgeInsets.only(top: 3), child: zhWidget),
           ],
         ),
       ),
@@ -1035,7 +1035,10 @@ final class _ChatBubble extends ConsumerWidget {
                       : cs(context).outlineVariant,
                 ),
               ),
-              child: Text(me ? '🎤' : '🔊', style: const TextStyle(fontSize: 14)),
+              child: Text(
+                me ? '🎤' : '🔊',
+                style: const TextStyle(fontSize: 14),
+              ),
             ),
             const SizedBox(width: 8),
             Flexible(child: bubble),
@@ -1045,8 +1048,7 @@ final class _ChatBubble extends ConsumerWidget {
     );
   }
 
-  static ColorScheme cs(BuildContext context) =>
-      Theme.of(context).colorScheme;
+  static ColorScheme cs(BuildContext context) => Theme.of(context).colorScheme;
 }
 
 // ---------------------------------------------------------------------------
@@ -1068,30 +1070,30 @@ final class _StatusBar extends ConsumerWidget {
         border: Border(top: BorderSide(color: t.line)),
       ),
       child: DefaultTextStyle(
-        style: Theme.of(context)
-            .textTheme
-            .bodySmall!
-            .copyWith(color: t.ink3, fontSize: 11.5),
+        style: Theme.of(
+          context,
+        ).textTheme.bodySmall!.copyWith(color: t.ink3, fontSize: 11.5),
         child: Row(
           children: [
             Text(
-                '识别：${state.usingStreamingEngine ? '流式引擎（sherpa）' : '本地 Whisper'}'),
+              '识别：${state.usingStreamingEngine ? '流式引擎（sherpa）' : '本地 Whisper'}',
+            ),
             const SizedBox(width: 14),
             Text('翻译：${state.translate ? '已配置 LLM' : '已关闭'}'),
             const SizedBox(width: 14),
             const Text('延迟约 1~3 秒'),
             const Spacer(),
             _LevelMeter(
-                label: '扬声器',
-                level: ref
-                    .read(liveCaptionsControllerProvider.notifier)
-                    .systemLevel),
+              label: '扬声器',
+              level: ref
+                  .read(liveCaptionsControllerProvider.notifier)
+                  .systemLevel,
+            ),
             const SizedBox(width: 10),
             _LevelMeter(
-                label: '麦克风',
-                level: ref
-                    .read(liveCaptionsControllerProvider.notifier)
-                    .micLevel),
+              label: '麦克风',
+              level: ref.read(liveCaptionsControllerProvider.notifier).micLevel,
+            ),
             const SizedBox(width: 12),
             if (listening && state.session != null)
               Text('${state.session!.lines.length} 句'),
@@ -1101,7 +1103,6 @@ final class _StatusBar extends ConsumerWidget {
     );
   }
 }
-
 
 /// Tiny live input-level bar driven by a ValueNotifier<double> (RMS 0..1).
 final class _LevelMeter extends StatelessWidget {
@@ -1149,7 +1150,6 @@ final class _LevelMeter extends StatelessWidget {
   }
 }
 
-
 // ---------------------------------------------------------------------------
 // Floating captions window (形态三): the app window becomes a small dark
 // frameless always-on-top card. Drag the header to move; drag the bottom-right
@@ -1182,8 +1182,7 @@ final class FloatCaptionsHost extends ConsumerStatefulWidget {
   const FloatCaptionsHost({super.key});
 
   @override
-  ConsumerState<FloatCaptionsHost> createState() =>
-      _FloatCaptionsHostState();
+  ConsumerState<FloatCaptionsHost> createState() => _FloatCaptionsHostState();
 }
 
 class _FloatCaptionsHostState extends ConsumerState<FloatCaptionsHost> {
@@ -1223,7 +1222,8 @@ class _FloatCaptionsHostState extends ConsumerState<FloatCaptionsHost> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(liveCaptionsControllerProvider);
-    final listening = state.phase == LiveCaptionsPhase.listening ||
+    final listening =
+        state.phase == LiveCaptionsPhase.listening ||
         state.phase == LiveCaptionsPhase.starting;
     final session = state.session;
     final items = session == null
@@ -1231,7 +1231,7 @@ class _FloatCaptionsHostState extends ConsumerState<FloatCaptionsHost> {
         : buildLiveStreamItems(session.lines);
 
     return Material(
-      color: const Color(0xFF1C1C20),
+      color: liveCaptionsPanelSurface,
       child: Stack(
         children: [
           Column(
@@ -1242,14 +1242,13 @@ class _FloatCaptionsHostState extends ConsumerState<FloatCaptionsHost> {
                 child: Container(
                   height: 40,
                   padding: const EdgeInsets.symmetric(horizontal: 12),
-                  color: const Color(0xFF232328),
+                  color: liveCaptionsPanelHeader,
                   child: Row(
                     children: [
                       FadeTransition(
-                        opacity: AlwaysStoppedAnimation(
-                            listening ? 1.0 : 0.5),
+                        opacity: AlwaysStoppedAnimation(listening ? 1.0 : 0.5),
                         child: Icon(
-                          Icons.fiber_manual_record,
+                          EnjoyIcons.dot,
                           size: 9,
                           color: listening
                               ? Colors.green.shade600
@@ -1261,18 +1260,18 @@ class _FloatCaptionsHostState extends ConsumerState<FloatCaptionsHost> {
                         '实时字幕 · ${_pinned ? '置顶' : '普通'}',
                         style: const TextStyle(
                           fontSize: 12.5,
-                          color: Color(0xFFBBBBBB),
+                          color: liveCaptionsPanelTextFaint,
                         ),
                       ),
                       const Spacer(),
                       _FloatIconBtn(
-                        icon: Icons.push_pin_rounded,
+                        icon: EnjoyIcons.bookmarkFill,
                         tooltip: _pinned ? '取消置顶' : '置顶',
                         active: _pinned,
                         onTap: _togglePin,
                       ),
                       _FloatIconBtn(
-                        icon: Icons.close_rounded,
+                        icon: EnjoyIcons.close,
                         tooltip: '退出悬浮 (Esc)',
                         onTap: () => unawaited(exitFloatMode(ref)),
                       ),
@@ -1286,17 +1285,15 @@ class _FloatCaptionsHostState extends ConsumerState<FloatCaptionsHost> {
                         child: Text(
                           listening ? '正在聆听…' : '会话未开始',
                           style: const TextStyle(
-                            color: Color(0xFF888888),
+                            color: liveCaptionsPanelTextSoft,
                             fontSize: 13,
                           ),
                         ),
                       )
                     : ListView.builder(
                         controller: _scroll,
-                        padding:
-                            const EdgeInsets.fromLTRB(14, 10, 14, 10),
-                        itemCount: items.length +
-                            (listening ? 1 : 0),
+                        padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+                        itemCount: items.length + (listening ? 1 : 0),
                         itemBuilder: (context, index) {
                           if (index == items.length) {
                             return const Padding(
@@ -1304,7 +1301,9 @@ class _FloatCaptionsHostState extends ConsumerState<FloatCaptionsHost> {
                               child: Center(
                                 child: Text(
                                   '…',
-                                  style: TextStyle(color: Color(0xFF666666)),
+                                  style: TextStyle(
+                                    color: liveCaptionsPanelTextDim,
+                                  ),
                                 ),
                               ),
                             );
@@ -1312,21 +1311,22 @@ class _FloatCaptionsHostState extends ConsumerState<FloatCaptionsHost> {
                           final item = items[index];
                           if (item is _DividerItem) {
                             return Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 5),
+                              padding: const EdgeInsets.symmetric(vertical: 5),
                               child: Center(
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 3),
+                                    horizontal: 10,
+                                    vertical: 3,
+                                  ),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF2A2A30),
+                                    color: liveCaptionsPanelLine,
                                     borderRadius: BorderRadius.circular(99),
                                   ),
                                   child: Text(
                                     item.line.event ?? item.line.text,
                                     style: const TextStyle(
                                       fontSize: 11,
-                                      color: Color(0xFF888888),
+                                      color: liveCaptionsPanelTextSoft,
                                     ),
                                   ),
                                 ),
@@ -1343,11 +1343,14 @@ class _FloatCaptionsHostState extends ConsumerState<FloatCaptionsHost> {
               Container(
                 height: 26,
                 padding: const EdgeInsets.symmetric(horizontal: 14),
-                color: const Color(0xFF232328),
+                color: liveCaptionsPanelHeader,
                 alignment: Alignment.centerLeft,
                 child: const Text(
                   'Esc 退出 · 拖标题移动 · 右下角缩放',
-                  style: TextStyle(fontSize: 10.5, color: Color(0xFF777777)),
+                  style: TextStyle(
+                    fontSize: 10.5,
+                    color: liveCaptionsPanelTextDim2,
+                  ),
                 ),
               ),
             ],
@@ -1372,18 +1375,18 @@ class _FloatCaptionsHostState extends ConsumerState<FloatCaptionsHost> {
                   // Absolute global-position based sizing: immune to the
                   // window reflow feedback loop that shakes accumulated
                   // local deltas.
-                  final dx =
-                      details.globalPosition.dx - startGlobal.dx;
-                  final dy =
-                      details.globalPosition.dy - startGlobal.dy;
-                  await windowManager.setSize(Size(
-                    (start.width + dx).clamp(320, 900).toDouble(),
-                    (start.height + dy).clamp(220, 700).toDouble(),
-                  ));
+                  final dx = details.globalPosition.dx - startGlobal.dx;
+                  final dy = details.globalPosition.dy - startGlobal.dy;
+                  await windowManager.setSize(
+                    Size(
+                      (start.width + dx).clamp(320, 900).toDouble(),
+                      (start.height + dy).clamp(220, 700).toDouble(),
+                    ),
+                  );
                 },
                 onPanEnd: (_) => _resizeStartGlobal = null,
                 child: Icon(
-                  Icons.open_in_full_rounded,
+                  EnjoyIcons.expand,
                   size: 13,
                   color: Colors.grey.shade600,
                 ),
@@ -1417,23 +1420,19 @@ final class _FloatBubble extends StatelessWidget {
             height: 22,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: me
-                  ? const Color(0xFF2E5E46)
-                  : const Color(0xFF33333A),
+              color: me ? liveCaptionsPanelBubbleMe : liveCaptionsPanelBubble,
               shape: BoxShape.circle,
             ),
-            child: Text(me ? '🎤' : '🔊',
-                style: const TextStyle(fontSize: 10)),
+            child: Text(me ? '🎤' : '🔊', style: const TextStyle(fontSize: 10)),
           ),
           const SizedBox(width: 8),
           Flexible(
             child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
                 color: me
-                    ? const Color(0xFF2E5E46).withValues(alpha: 0.55)
-                    : const Color(0xFF33333A).withValues(alpha: 0.9),
+                    ? liveCaptionsPanelBubbleMe.withValues(alpha: 0.55)
+                    : liveCaptionsPanelBubble.withValues(alpha: 0.9),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Column(
@@ -1455,8 +1454,8 @@ final class _FloatBubble extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 11.5,
                           color: me
-                              ? const Color(0xFFBFE0CF)
-                              : const Color(0xFFB9BDC7),
+                              ? liveCaptionsPanelTranslationMe
+                              : liveCaptionsPanelTranslation,
                         ),
                       ),
                     ),
@@ -1488,7 +1487,7 @@ final class _FloatIconBtn extends StatelessWidget {
   Widget build(BuildContext context) {
     return Tooltip(
       message: tooltip,
-      child: InkWell(
+      child: EnjoyPressable(
         onTap: onTap,
         borderRadius: BorderRadius.circular(8),
         child: Container(
@@ -1504,7 +1503,7 @@ final class _FloatIconBtn extends StatelessWidget {
           child: Icon(
             icon,
             size: 15,
-            color: active ? Colors.white : const Color(0xFFAAAAAA),
+            color: active ? Colors.white : liveCaptionsPanelTextMuted,
           ),
         ),
       ),
@@ -1554,10 +1553,9 @@ final class _HomeView extends ConsumerWidget {
     final t = EnjoyThemeTokens.of(context);
     final current = currentSession;
     // History rows exclude the live session (pinned separately).
-    final rows = history
-        .where((s) => current == null || s.id != current.id)
-        .toList()
-      ..sort((a, b) => b.startedAt.compareTo(a.startedAt));
+    final rows =
+        history.where((s) => current == null || s.id != current.id).toList()
+          ..sort((a, b) => b.startedAt.compareTo(a.startedAt));
 
     return Center(
       child: ConstrainedBox(
@@ -1574,24 +1572,23 @@ final class _HomeView extends ConsumerWidget {
                     const SizedBox(height: 10),
                     Text(
                       '实时字幕',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium
-                          ?.copyWith(fontWeight: FontWeight.w600),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       '开始监听系统声音或麦克风，\n实时生成中英双语字幕。',
                       textAlign: TextAlign.center,
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodySmall
-                          ?.copyWith(color: t.ink3, height: 1.6),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: t.ink3,
+                        height: 1.6,
+                      ),
                     ),
                     const SizedBox(height: 18),
                     FilledButton.icon(
                       onPressed: onNew,
-                      icon: const Icon(Icons.add, size: 18),
+                      icon: const Icon(EnjoyIcons.add, size: 18),
                       label: const Text('新会话'),
                     ),
                     if (!streamingAsrInstalled) ...[
@@ -1599,10 +1596,10 @@ final class _HomeView extends ConsumerWidget {
                       Text(
                         '提示：设置 → 本地组件 可安装流式识别引擎（约 200 MB），\n实时字幕更快更准。',
                         textAlign: TextAlign.center,
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodySmall
-                            ?.copyWith(color: t.ink3, height: 1.5),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: t.ink3,
+                          height: 1.5,
+                        ),
                       ),
                     ],
                   ],
@@ -1612,23 +1609,22 @@ final class _HomeView extends ConsumerWidget {
               Row(
                 children: [
                   Text(
-                    selectionMode
-                        ? '已选 ${selectedIds.length} 项'
-                        : '历史会话',
+                    selectionMode ? '已选 ${selectedIds.length} 项' : '历史会话',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const Spacer(),
                   if (selectionMode) ...[
                     TextButton(
                       onPressed: onSelectAll,
                       child: Text(
-                          selectedIds.length >=
-                                  (current != null ? 1 : 0) + rows.length &&
-                              selectedIds.isNotEmpty
-                              ? '全不选'
-                              : '全选'),
+                        selectedIds.length >=
+                                    (current != null ? 1 : 0) + rows.length &&
+                                selectedIds.isNotEmpty
+                            ? '全不选'
+                            : '全选',
+                      ),
                     ),
                     TextButton(
                       onPressed: onExitSelection,
@@ -1636,10 +1632,11 @@ final class _HomeView extends ConsumerWidget {
                     ),
                     const SizedBox(width: 4),
                     FilledButton.icon(
-                      onPressed:
-                          selectedIds.isEmpty ? null : onDeleteSelected,
-                      icon: const Icon(Icons.delete_outline, size: 16),
-                      label: Text('删除${selectedIds.isEmpty ? '' : ' ${selectedIds.length} 项'}'),
+                      onPressed: selectedIds.isEmpty ? null : onDeleteSelected,
+                      icon: const Icon(EnjoyIcons.delete, size: 16),
+                      label: Text(
+                        '删除${selectedIds.isEmpty ? '' : ' ${selectedIds.length} 项'}',
+                      ),
                       style: FilledButton.styleFrom(
                         foregroundColor: Colors.white,
                         backgroundColor: Colors.red.shade600,
@@ -1648,7 +1645,7 @@ final class _HomeView extends ConsumerWidget {
                   ] else
                     TextButton.icon(
                       onPressed: onEnterSelection,
-                      icon: const Icon(Icons.checklist_rounded, size: 16),
+                      icon: const Icon(EnjoyIcons.list, size: 16),
                       label: const Text('管理'),
                     ),
                 ],
@@ -1719,17 +1716,19 @@ final class _SessionTopBar extends ConsumerWidget {
     final sub = session.sources.isEmpty
         ? (listening ? '监听中' : '未监听')
         : session.sources
-            .map((s) => s == LiveCaptionSource.system ? '扬声器' : '麦克风')
-            .join(' + ');
+              .map((s) => s == LiveCaptionSource.system ? '扬声器' : '麦克风')
+              .join(' + ');
     return Container(
       padding: const EdgeInsets.fromLTRB(10, 8, 14, 8),
-      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: t.line))),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: t.line)),
+      ),
       child: Row(
         children: [
           IconButton(
             tooltip: '返回',
             onPressed: onBack,
-            icon: const Icon(Icons.arrow_back_rounded, size: 20),
+            icon: const Icon(EnjoyIcons.back, size: 20),
           ),
           const SizedBox(width: 6),
           Expanded(
@@ -1738,19 +1737,17 @@ final class _SessionTopBar extends ConsumerWidget {
               children: [
                 Text(
                   session.title,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleSmall
-                      ?.copyWith(fontWeight: FontWeight.w600),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
                 ),
                 Text(
                   listening
                       ? '监听中 · $sub'
                       : '${session.duration.inMinutes} 分 · ${session.lines.length} 句',
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodySmall
-                      ?.copyWith(color: t.ink3, fontSize: 11),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: t.ink3, fontSize: 11),
                 ),
               ],
             ),
@@ -1759,8 +1756,7 @@ final class _SessionTopBar extends ConsumerWidget {
             IconButton(
               tooltip: '悬浮字幕（置顶小窗，Esc 退出）',
               onPressed: () => unawaited(enterFloatMode(ref)),
-              icon: const Icon(Icons.picture_in_picture_alt_rounded,
-                  size: 18),
+              icon: const Icon(EnjoyIcons.fullscreenExit, size: 18),
               color: t.brandInk,
             ),
           if (live && listening)
@@ -1775,10 +1771,8 @@ final class _SessionTopBar extends ConsumerWidget {
                       ),
                 );
               },
-              icon: Icon(Icons.stop_rounded,
-                  size: 16, color: Colors.red.shade700),
-              label: Text('停止',
-                  style: TextStyle(color: Colors.red.shade700)),
+              icon: Icon(EnjoyIcons.stop, size: 16, color: Colors.red.shade700),
+              label: Text('停止', style: TextStyle(color: Colors.red.shade700)),
               style: OutlinedButton.styleFrom(
                 side: BorderSide(color: Colors.red.shade200),
               ),
@@ -1817,7 +1811,7 @@ final class _HomeSessionCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = EnjoyThemeTokens.of(context);
     final isLive = highlighted && listening;
-    return InkWell(
+    return EnjoyPressable(
       onTap: onTap,
       borderRadius: BorderRadius.circular(11),
       child: Container(
@@ -1840,9 +1834,7 @@ final class _HomeSessionCard extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.only(right: 10),
                 child: Icon(
-                  checked
-                      ? Icons.check_box_rounded
-                      : Icons.check_box_outline_blank_rounded,
+                  checked ? EnjoyIcons.checkCircleFill : EnjoyIcons.checkCircle,
                   size: 20,
                   color: checked ? t.brandInk : t.ink3,
                 ),
@@ -1855,15 +1847,17 @@ final class _HomeSessionCard extends ConsumerWidget {
                     children: [
                       Text(
                         session.title,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleSmall
-                            ?.copyWith(fontWeight: FontWeight.w600),
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       if (isLive) ...[
                         const SizedBox(width: 8),
-                        Icon(Icons.fiber_manual_record,
-                            size: 9, color: Colors.green.shade600),
+                        Icon(
+                          EnjoyIcons.dot,
+                          size: 9,
+                          color: Colors.green.shade600,
+                        ),
                         const SizedBox(width: 3),
                         Text(
                           '监听中',
@@ -1880,10 +1874,10 @@ final class _HomeSessionCard extends ConsumerWidget {
                   Text(
                     '${session.duration.inMinutes} 分 ${session.duration.inSeconds % 60} 秒 · '
                     '${session.lines.length} 句 · ${session.translated ? '已译' : '未译'}',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(color: t.ink3, fontSize: 11),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: t.ink3,
+                      fontSize: 11,
+                    ),
                   ),
                 ],
               ),

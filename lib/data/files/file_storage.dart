@@ -169,9 +169,7 @@ class FileStorage {
       final title = p.basenameWithoutExtension(file.name);
       final linkExternally = await canLinkExternally(path);
       final sw = Stopwatch()..start();
-      _importLog.info(
-        'import start: link=$linkExternally path=$path',
-      );
+      _importLog.info('import start: link=$linkExternally path=$path');
 
       final bookmarkData = linkExternally
           ? await SecurityScopedBookmarkChannel.createBookmark(path)

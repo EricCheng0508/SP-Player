@@ -43,8 +43,7 @@ const double kDockControlsHeight = 64;
 /// keeps one geometry from the first frame — a dock that appears late resizes
 /// a *playing* video (the "flash on open" report). Keep in sync with the
 /// paddings in [PlayerDock.build].
-const double kDockPlaceholderHeight =
-    1 + 8 + 34 + 4 + kDockControlsHeight + 12;
+const double kDockPlaceholderHeight = 1 + 8 + 34 + 4 + kDockControlsHeight + 12;
 
 /// The Duet dock. Mounted by [RootShell] on `/player/:id` while a session is
 /// active.
@@ -246,9 +245,7 @@ class PlayerDockSkeleton extends StatelessWidget {
                 children: [
                   Text('0:00', style: timeStyle),
                   const SizedBox(width: 10),
-                  Expanded(
-                    child: Skeleton.line(width: 200, height: 6),
-                  ),
+                  Expanded(child: Skeleton.line(width: 200, height: 6)),
                   const SizedBox(width: 10),
                   Text('0:00', style: timeStyle),
                 ],

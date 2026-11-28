@@ -2,6 +2,8 @@
 /// hover menu.
 library;
 
+import 'package:enjoy_player/core/interaction/enjoy_pressable.dart';
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -228,9 +230,7 @@ class _RateMenuPanel extends StatelessWidget {
     // 88% opaque: translucent panels read as washed grey over bright video
     // content; near-solid keeps the popover uniform over any background.
     final color = dark ? Colors.black.withValues(alpha: 0.88) : t.paper;
-    final borderColor = dark
-        ? Colors.white.withValues(alpha: 0.14)
-        : t.line;
+    final borderColor = dark ? Colors.white.withValues(alpha: 0.14) : t.line;
     return MouseRegion(
       onEnter: (_) => onHover(true),
       onExit: (_) => onHover(false),
@@ -290,11 +290,9 @@ class _RateMenuEntry extends StatelessWidget {
     // translucent black. Paper variant keeps brand ink on paper.
     final checkColor = dark ? Colors.white : t.brandInk;
     final labelColor = dark
-        ? (selected
-              ? Colors.white
-              : Colors.white.withValues(alpha: 0.78))
+        ? (selected ? Colors.white : Colors.white.withValues(alpha: 0.78))
         : (selected ? t.ink : t.ink2);
-    return InkWell(
+    return EnjoyPressable(
       onTap: () => onPick(option),
       child: SizedBox(
         height: 24,

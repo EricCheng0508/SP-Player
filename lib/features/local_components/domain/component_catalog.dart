@@ -37,9 +37,8 @@ enum ComponentKind {
   /// omniASR-CTC-300M-v2 weights for transcript matching (P1).
   ctcAlignerModel,
 
-  /// sherpa-onnx streaming zipformer (bilingual zh-en, int8) for the live
-  /// captions real-time engine — sub-second latency, no server process.
-  /// ADR-0106 P1 plans an upgrade to Nemotron-3.5-ASR-Streaming 0.6B.
+  /// NVIDIA Nemotron-3.5 streaming transducer (int8) for the live captions
+  /// real-time engine — sub-second latency, CPU-only decode, no server.
   liveAsr,
 }
 
@@ -212,7 +211,8 @@ const kComponentSpecs = <ComponentSpec>[
     uiGroupId: 'qwenAsr',
     uiGroupLabel: '千问识别引擎 Qwen3-ASR',
     uiGroupSizeHint: '约 1.7 GB',
-    uiGroupNote: '运行时 0.1 GB + 模型 1.6 GB · qwen3-asr-wgpu 原生组件（Rust，秒开）'
+    uiGroupNote:
+        '运行时 0.1 GB + 模型 1.6 GB · qwen3-asr-wgpu 原生组件（Rust，秒开）'
         '· 英语词错率 8.9% · 速度约快 8 倍 · 仅用于「生成字幕」，实时字幕用流式引擎',
     files: [
       ComponentFile(
@@ -233,7 +233,8 @@ const kComponentSpecs = <ComponentSpec>[
     uiGroupId: 'qwenAsr',
     uiGroupLabel: '千问识别引擎 Qwen3-ASR',
     uiGroupSizeHint: '约 1.7 GB',
-    uiGroupNote: '运行时 0.1 GB + 模型 1.6 GB · qwen3-asr-wgpu 原生组件（Rust，秒开）'
+    uiGroupNote:
+        '运行时 0.1 GB + 模型 1.6 GB · qwen3-asr-wgpu 原生组件（Rust，秒开）'
         '· 英语词错率 8.9% · 速度约快 8 倍 · 仅用于「生成字幕」，实时字幕用流式引擎',
     files: [
       // TODO(components-v2): pin the exact ModelScope repo path and ONNX file
@@ -357,38 +358,33 @@ const kComponentSpecs = <ComponentSpec>[
   ),
   ComponentSpec(
     kind: ComponentKind.liveAsr,
-    // ADR-0106 P1: the streaming swap lands with components-v2 — same
-    // transducer protocol, only the files below get repinned to the
-    // Nemotron-3.5 streaming ONNX set. The label states the target engine.
     displayName: '流式识别引擎 Nemotron-3.5 0.6B',
     installDirName: 'live-asr',
     host: kHfOfficial,
     files: [
-      // TODO(components-v2): swap these zipformer files for the
-      // NVIDIA Nemotron-3.5-ASR-Streaming 0.6B int8 set (~682 MB).
       ComponentFile(
         remotePath:
-            'csukuangfj/sherpa-onnx-streaming-zipformer-bilingual-zh-en-2023-02-20/resolve/main/encoder-epoch-99-avg-1.int8.onnx',
-        relativePath: 'encoder-epoch-99-avg-1.int8.onnx',
-        minBytes: 150 * 1024 * 1024,
+            'csukuangfj2/sherpa-onnx-nemotron-3.5-asr-streaming-0.6b-560ms-int8-2026-06-11/resolve/main/encoder.int8.onnx',
+        relativePath: 'encoder.int8.onnx',
+        minBytes: 650 * 1024 * 1024,
       ),
       ComponentFile(
         remotePath:
-            'csukuangfj/sherpa-onnx-streaming-zipformer-bilingual-zh-en-2023-02-20/resolve/main/decoder-epoch-99-avg-1.int8.onnx',
-        relativePath: 'decoder-epoch-99-avg-1.int8.onnx',
-        minBytes: 10 * 1024 * 1024,
+            'csukuangfj2/sherpa-onnx-nemotron-3.5-asr-streaming-0.6b-560ms-int8-2026-06-11/resolve/main/decoder.int8.onnx',
+        relativePath: 'decoder.int8.onnx',
+        minBytes: 13 * 1024 * 1024,
       ),
       ComponentFile(
         remotePath:
-            'csukuangfj/sherpa-onnx-streaming-zipformer-bilingual-zh-en-2023-02-20/resolve/main/joiner-epoch-99-avg-1.int8.onnx',
-        relativePath: 'joiner-epoch-99-avg-1.int8.onnx',
-        minBytes: 3 * 1024 * 1024,
+            'csukuangfj2/sherpa-onnx-nemotron-3.5-asr-streaming-0.6b-560ms-int8-2026-06-11/resolve/main/joiner.int8.onnx',
+        relativePath: 'joiner.int8.onnx',
+        minBytes: 8 * 1024 * 1024,
       ),
       ComponentFile(
         remotePath:
-            'csukuangfj/sherpa-onnx-streaming-zipformer-bilingual-zh-en-2023-02-20/resolve/main/tokens.txt',
+            'csukuangfj2/sherpa-onnx-nemotron-3.5-asr-streaming-0.6b-560ms-int8-2026-06-11/resolve/main/tokens.txt',
         relativePath: 'tokens.txt',
-        minBytes: 1024,
+        minBytes: 128 * 1024,
       ),
     ],
     sizeHint: '约 0.7 GB',
@@ -410,5 +406,8 @@ String applyHfMirror(String url, String? endpoint) {
 }
 
 /// Full download URL for [file] of [spec], honoring the HF mirror endpoint.
-String componentFileUrl(ComponentSpec spec, ComponentFile file, String? hfEndpoint) =>
-    applyHfMirror('${spec.host}/${file.remotePath}', hfEndpoint);
+String componentFileUrl(
+  ComponentSpec spec,
+  ComponentFile file,
+  String? hfEndpoint,
+) => applyHfMirror('${spec.host}/${file.remotePath}', hfEndpoint);

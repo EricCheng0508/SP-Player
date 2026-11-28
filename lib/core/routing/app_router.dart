@@ -14,8 +14,6 @@ import 'package:enjoy_player/core/analytics/analytics_provider.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/player/player_surface_overlay_coordinator.dart';
 import 'package:enjoy_player/core/player/player_surface_overlay_navigator_observer.dart';
-import 'package:enjoy_player/core/routing/auth_redirect.dart';
-import 'package:enjoy_player/core/routing/auth_router_tick.dart';
 import 'package:enjoy_player/core/routing/not_found_screen.dart';
 import 'package:enjoy_player/core/window/desktop_window.dart';
 import 'package:enjoy_player/features/ai/presentation/ai_playground_screen.dart';
@@ -91,7 +89,6 @@ CustomTransitionPage<void> _shellPage({
 
 @Riverpod(keepAlive: true)
 GoRouter appRouter(Ref ref) {
-  final authTick = ref.watch(authRouterTickProvider);
   PlayerSurfaceOverlayCoordinator coordinator() =>
       ref.read(playerSurfaceOverlayCoordinatorProvider.notifier);
   final rootOverlayObserver = PlayerSurfaceOverlayNavigatorObserver(
@@ -115,20 +112,10 @@ GoRouter appRouter(Ref ref) {
   );
   final router = GoRouter(
     initialLocation: '/',
-    refreshListenable: authTick,
     observers: [rootOverlayObserver, rootScreenObserver],
     errorBuilder: (context, state) => NotFoundScreen(uri: state.uri),
     redirect: (context, state) {
-      final checkoutRedirect = resolveCheckoutReturnRedirect(
-        matchedLocation: state.matchedLocation,
-        uri: state.uri,
-        auth: ref.read(authCtrlProvider),
-      );
-      if (checkoutRedirect != null) return checkoutRedirect;
-
-      final loc = isNativeAuthCallbackArtifact(state.matchedLocation)
-          ? '/'
-          : state.matchedLocation;
+      final loc = state.matchedLocation;
 
       if (kReleaseMode && loc.startsWith('/settings/ai-playground')) {
         return '/settings';
@@ -139,16 +126,12 @@ GoRouter appRouter(Ref ref) {
       if (loc.startsWith('/settings/keyboard') && !isDesktop) {
         return '/settings';
       }
-      if (loc == '/cloud' || loc.startsWith('/cloud/')) {
-        return libraryRouteForSource(LibrarySource.cloud);
-      }
       if (loc == '/settings' &&
           state.uri.queryParameters['section'] == 'keyboard') {
         return isDesktop ? '/settings/keyboard' : null;
       }
 
-      final auth = ref.read(authCtrlProvider);
-      return resolveAuthRedirect(matchedLocation: loc, auth: auth);
+      return null;
     },
     routes: [
       ShellRoute(

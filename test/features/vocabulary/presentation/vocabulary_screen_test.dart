@@ -9,7 +9,6 @@ import 'package:http/testing.dart';
 
 import 'package:enjoy_player/core/theme/app_theme.dart';
 import 'package:enjoy_player/data/api/api_client.dart';
-import 'package:enjoy_player/data/api/services/ai/youtube_transcripts_api.dart';
 import 'package:enjoy_player/data/api/services/audio_api.dart';
 import 'package:enjoy_player/data/api/services/recording_api.dart';
 import 'package:enjoy_player/data/api/services/video_api.dart';
@@ -42,27 +41,6 @@ class _SignedOutAuthCtrl extends AuthCtrl {
   Future<AuthState> build() async => const AuthSignedOut();
 }
 
-class _FakeTranscriptsApi implements YoutubeTranscriptsClient {
-  @override
-  Future<Map<String, dynamic>?> getCachedTranscript({
-    required String videoId,
-    required String language,
-  }) async => null;
-
-  @override
-  Future<bool> uploadTranscript({
-    required String videoId,
-    required String language,
-    required String source,
-    required List<Map<String, dynamic>> timeline,
-    Map<String, dynamic>? metadata,
-  }) async => true;
-
-  @override
-  Future<List<Map<String, dynamic>>> fetchClientProfiles() async =>
-      <Map<String, dynamic>>[];
-}
-
 class _FakeSyncEngine extends SyncEngine {
   _FakeSyncEngine(AppDatabase db)
     : super(
@@ -82,7 +60,6 @@ class _FakeSyncEngine extends SyncEngine {
           recordingApi: RecordingApi(_idleClient()),
           vocabularyApi: VocabularyApi(_idleClient()),
         ),
-        youtubeTranscripts: _FakeTranscriptsApi(),
       );
 
   static ApiClient _idleClient() => ApiClient(

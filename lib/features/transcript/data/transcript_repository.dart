@@ -57,11 +57,7 @@ part 'transcript_repository_youtube_fetch.dart';
 /// primary transcript on open, fetching cloud / YouTube transcripts,
 /// importing subtitles, and managing active tracks.
 class TranscriptRepository {
-  TranscriptRepository(
-    this._db, {
-    this._transcriptApi,
-    this._youtubeFetcher,
-  });
+  TranscriptRepository(this._db, {this._transcriptApi, this._youtubeFetcher});
 
   final AppDatabase _db;
   final TranscriptApi? _transcriptApi;

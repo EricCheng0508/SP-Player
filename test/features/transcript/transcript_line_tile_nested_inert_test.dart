@@ -142,9 +142,11 @@ void main() {
       ProviderScope(
         overrides: [
           transcriptBlurModeProvider.overrideWith(() => _BlurMode(false)),
-          transcriptPlaybackHighlightProvider(
-            'test',
-          ).overrideWithValue((cueIndex: 0, visibleCueIndex: 0, wordIndex: null)),
+          transcriptPlaybackHighlightProvider('test').overrideWithValue((
+            cueIndex: 0,
+            visibleCueIndex: 0,
+            wordIndex: null,
+          )),
           ...transcriptWordPracticeOffOverrides(),
         ],
         child: MaterialApp(

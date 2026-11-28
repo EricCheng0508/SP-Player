@@ -27,7 +27,9 @@ class LiveCaptionsStore {
     final root = _root;
     if (root != null) return root;
     final support = await getApplicationSupportDirectory();
-    final dir = Directory('${support.path}${Platform.pathSeparator}live_captions');
+    final dir = Directory(
+      '${support.path}${Platform.pathSeparator}live_captions',
+    );
     if (!dir.existsSync()) dir.createSync(recursive: true);
     return _root = dir;
   }
@@ -77,7 +79,9 @@ class LiveCaptionsStore {
   Future<String> exportText(LiveCaptionSession session) async {
     final root = await _dir();
     final file = File('${root.path}${Platform.pathSeparator}${session.id}.txt');
-    final buffer = StringBuffer('${session.title}  ${session.sources.map((s) => s.name).join(' + ')}\n');
+    final buffer = StringBuffer(
+      '${session.title}  ${session.sources.map((s) => s.name).join(' + ')}\n',
+    );
     for (final line in session.lines) {
       final offset = Duration(seconds: line.offsetSeconds.round());
       final mm = offset.inMinutes.toString().padLeft(2, '0');

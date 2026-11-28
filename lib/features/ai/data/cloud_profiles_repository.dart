@@ -59,10 +59,7 @@ final cloudProfilesProvider = FutureProvider<CloudProfiles>((ref) async {
   }
 });
 
-Future<void> writeCloudProfiles(
-  WidgetRef ref,
-  CloudProfiles profiles,
-) async {
+Future<void> writeCloudProfiles(WidgetRef ref, CloudProfiles profiles) async {
   final db = ref.read(appDatabaseProvider);
   await db.settingsDao.writeSetting(
     SettingsKeys.aiCloudProfilesV1,

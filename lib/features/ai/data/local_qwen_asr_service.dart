@@ -38,9 +38,7 @@ Future<bool> isQwenAsrUp({
 }) async {
   try {
     final client = _probeClient ??= http.Client();
-    final response = await client
-        .get(Uri.parse(_healthUrl))
-        .timeout(timeout);
+    final response = await client.get(Uri.parse(_healthUrl)).timeout(timeout);
     return response.statusCode == 200;
   } on Object {
     return false;
@@ -101,7 +99,9 @@ Future<bool> _spawnManaged() async {
   );
   final args = <String>['--port', '$kQwenAsrPort'];
   if (modelDir.existsSync()) {
-    args..add('--model')..add(modelDir.path);
+    args
+      ..add('--model')
+      ..add(modelDir.path);
   }
 
   try {

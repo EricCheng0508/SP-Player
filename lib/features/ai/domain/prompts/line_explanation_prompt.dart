@@ -21,10 +21,7 @@ String buildExplainSystemPrompt({
       'Be concise and concrete. No preamble, no closing remarks.';
 }
 
-String buildExplainUserPrompt({
-  required String sentence,
-  String? context,
-}) {
+String buildExplainUserPrompt({required String sentence, String? context}) {
   final ctx = context?.trim();
   if (ctx == null || ctx.isEmpty || ctx == sentence) {
     return 'Explain this sentence:\n\n$sentence';

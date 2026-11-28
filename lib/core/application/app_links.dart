@@ -2,7 +2,8 @@
 library;
 
 /// Canonical open-source repository.
-const String kEnjoyPlayerGitHubUrl = 'https://github.com/EricCheng0508/SP-Player';
+const String kEnjoyPlayerGitHubUrl =
+    'https://github.com/EricCheng0508/SP-Player';
 
 /// Base URL for SP Player release artifacts and update feeds (no trailing slash).
 const String kEnjoyPlayerDownloadBaseUrl = 'https://dl.enjoy.bot/player';

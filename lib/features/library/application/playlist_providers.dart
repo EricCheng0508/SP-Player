@@ -19,9 +19,11 @@ final playlistsProvider = StreamProvider<List<PlaylistWithCount>>(
   (ref) => ref.watch(playlistDaoProvider).watchPlaylists(),
 );
 
-final playlistItemsProvider = StreamProvider.family<List<PlaylistItemRow>, String>(
-  (ref, playlistId) => ref.watch(playlistDaoProvider).watchItems(playlistId),
-);
+final playlistItemsProvider =
+    StreamProvider.family<List<PlaylistItemRow>, String>(
+      (ref, playlistId) =>
+          ref.watch(playlistDaoProvider).watchItems(playlistId),
+    );
 
 /// Title lookup for playlist items: resolves `(targetType, targetId)` against
 /// the media registry; deleted media resolve to null.

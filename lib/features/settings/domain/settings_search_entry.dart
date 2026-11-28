@@ -13,7 +13,6 @@ library;
 /// Stable section identifiers, in Settings hub display order.
 abstract final class SettingsSectionIds {
   // 本地版：账号分区已下线，id 一并移除。
-  static const cloudSync = 'cloudSync';
   static const appearanceLanguage = 'appearanceLanguage';
   static const aiProviders = 'aiProviders';
   static const localComponents = 'localComponents';
@@ -98,14 +97,6 @@ List<SettingsSearchEntry> filterSettingsEntries(
 /// presentation layer (FR-005/FR-006), not by this registry.
 const List<SettingsEntryDescriptor> kSettingsRegistry = [
   // 本地版：账号分区已整体下线，不再注册。
-  SettingsEntryDescriptor(
-    sectionId: SettingsSectionIds.cloudSync,
-    collapsedByDefault: true,
-  ),
-  SettingsEntryDescriptor(
-    sectionId: SettingsSectionIds.cloudSync,
-    rowId: 'syncStatus',
-  ),
   SettingsEntryDescriptor(
     sectionId: SettingsSectionIds.appearanceLanguage,
     collapsedByDefault: true,

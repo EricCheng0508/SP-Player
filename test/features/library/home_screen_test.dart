@@ -5,8 +5,6 @@ import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/auth/domain/user_profile.dart';
-import 'package:enjoy_player/features/community/application/active_users_provider.dart';
-import 'package:enjoy_player/features/community/domain/active_user.dart';
 import 'package:enjoy_player/features/library/application/library_media_provider.dart';
 import 'package:enjoy_player/features/library/application/learning_statistics_provider.dart';
 import 'package:enjoy_player/features/library/domain/learning_statistics.dart';
@@ -73,9 +71,6 @@ List<Override> _homeOverrides({
     learningStatisticsProvider.overrideWith(
       (ref) async => LearningStatistics.empty(),
     ),
-    activeUsersProvider.overrideWith(
-      (ref) async => const ActiveUsersResponse(users: [], count: 0),
-    ),
   ];
 }
 
@@ -102,29 +97,6 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('HomeScreen', () {
-    testWidgets(
-      "shows Today's Goal + Community cards even when recents is empty",
-      (tester) async {
-        final router = GoRouter(
-          initialLocation: '/',
-          routes: [
-            GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
-          ],
-        );
-        await tester.pumpWidget(
-          _themedHomeWithRouter(router, overrides: _homeOverrides()),
-        );
-        await tester.pumpAndSettle();
-
-        final l10n = await AppLocalizations.delegate.load(const Locale('en'));
-
-        expect(find.text(l10n.homeEmptyTitle), findsOneWidget);
-
-        expect(find.text(l10n.homeTodaysGoal.toUpperCase()), findsOneWidget);
-        expect(find.text(l10n.communityToday.toUpperCase()), findsOneWidget);
-      },
-    );
-
     testWidgets('header overline renders the fresh long-date format', (
       tester,
     ) async {

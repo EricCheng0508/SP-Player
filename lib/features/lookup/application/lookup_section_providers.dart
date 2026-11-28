@@ -134,4 +134,3 @@ Future<DictionaryResult> lookupSheetDictionary(
       );
   return result;
 }
-

@@ -44,7 +44,6 @@ class TranscriptLineTile extends ConsumerStatefulWidget {
     this.wavyWordIndexes,
     this.lensDistance = 0,
     this.onLookupRequested,
-    this.onRetranslateSecondary,
     this.dimWhenInactive = false,
     super.key,
   });
@@ -81,10 +80,6 @@ class TranscriptLineTile extends ConsumerStatefulWidget {
   /// Invoked when the user chooses **Look up** in the text selection toolbar
   /// (1–100 characters after trim).
   final ValueChanged<String>? onLookupRequested;
-
-  /// When set (auto-translate active), shows an inline refresh control on the
-  /// secondary translation line.
-  final VoidCallback? onRetranslateSecondary;
 
   final VoidCallback onTap;
 
@@ -242,7 +237,6 @@ class _TranscriptLineTileState extends ConsumerState<TranscriptLineTile> {
             onIpaTap: _onIpaTap,
             onRevealHoldOnly: _revealHoldOnly,
             onLookupRequested: widget.onLookupRequested,
-            onRetranslateSecondary: widget.onRetranslateSecondary,
           ),
         );
       },

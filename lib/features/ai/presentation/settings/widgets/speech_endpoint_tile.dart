@@ -6,6 +6,8 @@
 /// same list is reused by every section that needs the shared endpoint.
 library;
 
+import 'package:enjoy_player/core/interaction/enjoy_pressable.dart';
+
 import 'dart:convert';
 
 import 'package:enjoy_player/core/theme/enjoy_icons.dart';
@@ -35,14 +37,8 @@ class SpeechEndpoint {
 
 /// Built-in endpoints offered before any custom ones.
 const List<SpeechEndpoint> kBuiltinSpeechEndpoints = [
-  SpeechEndpoint(
-    label: 'OpenAI 官方',
-    baseUrl: 'https://api.openai.com/v1',
-  ),
-  SpeechEndpoint(
-    label: '本地 OpenAI 兼容服务',
-    baseUrl: 'http://127.0.0.1:8080/v1',
-  ),
+  SpeechEndpoint(label: 'OpenAI 官方', baseUrl: 'https://api.openai.com/v1'),
+  SpeechEndpoint(label: '本地 OpenAI 兼容服务', baseUrl: 'http://127.0.0.1:8080/v1'),
 ];
 
 /// Persisted custom endpoints (device-scoped settings row).
@@ -107,11 +103,9 @@ class SpeechEndpointTile extends ConsumerWidget {
       children: [
         Text('端点', style: tt.bodySmall?.copyWith(color: t.ink3)),
         const SizedBox(height: 6),
-        InkWell(
+        EnjoyPressable(
           borderRadius: BorderRadius.circular(t.radiusTile),
-          onTap: enabled
-              ? () => _openPicker(context, ref)
-              : null,
+          onTap: enabled ? () => _openPicker(context, ref) : null,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: ShapeDecoration(
@@ -144,7 +138,7 @@ class SpeechEndpointTile extends ConsumerWidget {
                   ),
                 ),
                 Icon(
-                  Icons.unfold_more,
+                  EnjoyIcons.caretUpDown,
                   size: 18,
                   color: cs.onSurfaceVariant,
                 ),
@@ -194,7 +188,7 @@ class SpeechEndpointTile extends ConsumerWidget {
             pick(SpeechEndpoint(label: label, baseUrl: url));
           }
 
-          Widget option(SpeechEndpoint e) => InkWell(
+          Widget option(SpeechEndpoint e) => EnjoyPressable(
             borderRadius: BorderRadius.circular(t.radiusTile),
             onTap: () => pick(e),
             child: Padding(
@@ -218,7 +212,7 @@ class SpeechEndpointTile extends ConsumerWidget {
                     ),
                   ),
                   if (controller.text.trim() == e.baseUrl)
-                    Icon(Icons.check, size: 18, color: cs.primary),
+                    Icon(EnjoyIcons.check, size: 18, color: cs.primary),
                 ],
               ),
             ),
@@ -234,7 +228,10 @@ class SpeechEndpointTile extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     if (saved.isNotEmpty) ...[
-                      Text('已保存', style: tt.labelMedium?.copyWith(color: t.ink3)),
+                      Text(
+                        '已保存',
+                        style: tt.labelMedium?.copyWith(color: t.ink3),
+                      ),
                       const SizedBox(height: 4),
                       for (final e in saved) option(e),
                       const SizedBox(height: 8),
@@ -250,7 +247,7 @@ class SpeechEndpointTile extends ConsumerWidget {
                         child: TextButton.icon(
                           onPressed: () =>
                               setDialogState(() => showManual = true),
-                          icon: const Icon(Icons.add, size: 18),
+                          icon: const Icon(EnjoyIcons.add, size: 18),
                           label: const Text('新建端点'),
                         ),
                       )

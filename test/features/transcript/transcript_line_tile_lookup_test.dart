@@ -1,4 +1,8 @@
 import 'package:enjoy_player/core/interaction/enjoy_pressable.dart';
+import 'package:drift/native.dart';
+import 'package:enjoy_player/data/db/app_database.dart';
+import 'package:enjoy_player/data/db/app_database_provider.dart';
+import 'package:enjoy_player/features/transcript/application/active_transcript_provider.dart';
 import 'package:enjoy_player/core/theme/enjoy_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,6 +21,15 @@ import '../../helpers/transcript_settings_overrides.dart';
 Widget transcriptTileHarness(Widget child) {
   return ProviderScope(
     overrides: [
+      secondaryTranscriptIdProvider(
+        'test',
+      ).overrideWith((ref) => Stream.value(null)),
+      appDatabaseProvider.overrideWith((ref) {
+        final db = AppDatabase(executor: NativeDatabase.memory());
+        ref.onDispose(db.close);
+        return db;
+      }),
+
       transcriptBlurModeProvider.overrideWith(() => _BlurMode(false)),
       karaokeHighlightSettingsProvider.overrideWith(_KaraokeHighlightOff.new),
       ...transcriptWordPracticeOffOverrides(),
@@ -303,6 +316,15 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            secondaryTranscriptIdProvider(
+              'test',
+            ).overrideWith((ref) => Stream.value(null)),
+            appDatabaseProvider.overrideWith((ref) {
+              final db = AppDatabase(executor: NativeDatabase.memory());
+              ref.onDispose(db.close);
+              return db;
+            }),
+
             transcriptBlurModeProvider.overrideWith(() => _BlurMode(false)),
             karaokeHighlightSettingsProvider.overrideWith(
               _KaraokeHighlightOff.new,

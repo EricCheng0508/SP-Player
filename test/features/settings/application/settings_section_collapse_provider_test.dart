@@ -14,7 +14,6 @@ void main() {
 
       expect(state[SettingsSectionIds.developer], isTrue);
       expect(state[SettingsSectionIds.about], isTrue);
-      expect(state[SettingsSectionIds.cloudSync], isTrue);
       expect(state[SettingsSectionIds.appearanceLanguage], isTrue);
       expect(
         state.keys,

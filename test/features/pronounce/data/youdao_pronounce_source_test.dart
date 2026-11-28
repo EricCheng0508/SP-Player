@@ -18,30 +18,40 @@ void main() {
 
     test('其他语种用 le 参数', () {
       expect(
-        buildYoudaoAudioUri(text: 'こんにちは', resolvedLocale: 'ja-JP')!
-            .queryParameters['le'],
+        buildYoudaoAudioUri(
+          text: 'こんにちは',
+          resolvedLocale: 'ja-JP',
+        )!.queryParameters['le'],
         'ja',
       );
       expect(
-        buildYoudaoAudioUri(text: '안녕하세요', resolvedLocale: 'ko-KR')!
-            .queryParameters['le'],
+        buildYoudaoAudioUri(
+          text: '안녕하세요',
+          resolvedLocale: 'ko-KR',
+        )!.queryParameters['le'],
         'ko',
       );
       expect(
-        buildYoudaoAudioUri(text: '你好', resolvedLocale: 'zh-CN')!
-            .queryParameters['le'],
+        buildYoudaoAudioUri(
+          text: '你好',
+          resolvedLocale: 'zh-CN',
+        )!.queryParameters['le'],
         'zh',
       );
       // 挪威语：有道只认 no，不认 nb。
       expect(
-        buildYoudaoAudioUri(text: 'hei', resolvedLocale: 'nb-NO')!
-            .queryParameters['le'],
+        buildYoudaoAudioUri(
+          text: 'hei',
+          resolvedLocale: 'nb-NO',
+        )!.queryParameters['le'],
         'no',
       );
       // 同主语言的不同地区变体共用一个 le。
       expect(
-        buildYoudaoAudioUri(text: 'hola', resolvedLocale: 'es-MX')!
-            .queryParameters['le'],
+        buildYoudaoAudioUri(
+          text: 'hola',
+          resolvedLocale: 'es-MX',
+        )!.queryParameters['le'],
         'es',
       );
     });

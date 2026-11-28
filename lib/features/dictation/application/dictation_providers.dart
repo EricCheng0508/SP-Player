@@ -258,8 +258,7 @@ String _friendlyAiError(Object e) {
     return switch (e.modality) {
       ModalityKind.asr =>
         '语音识别未配置：请先在 设置 → AI 服务商 中填写语音识别的接口地址、模型和 API Key，然后点「重试识别」。',
-      ModalityKind.llm =>
-        'AI 未配置：请先在 设置 → AI 服务商 中填写语言模型的接口地址、模型和 API Key。',
+      ModalityKind.llm => 'AI 未配置：请先在 设置 → AI 服务商 中填写语言模型的接口地址、模型和 API Key。',
       _ => 'AI 服务未配置：请先在 设置 → AI 服务商 中完成配置。',
     };
   }

@@ -4,24 +4,12 @@ import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/auth/application/profile_practice_stats_provider.dart';
 import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/auth/domain/user_profile.dart';
-import 'package:enjoy_player/features/credits/application/credits_packages_provider.dart';
-import 'package:enjoy_player/features/credits/application/credits_summary_provider.dart';
-import 'package:enjoy_player/features/credits/application/credits_usage_provider.dart';
-import 'package:enjoy_player/features/credits/application/todays_credits_provider.dart';
-import 'package:enjoy_player/features/credits/domain/credits_package.dart';
-import 'package:enjoy_player/features/credits/domain/credits_summary.dart';
-import 'package:enjoy_player/features/credits/domain/credits_usage_log.dart';
-import 'package:enjoy_player/features/credits/domain/credits_usage_page.dart';
 import 'package:enjoy_player/features/discover/domain/discover_channel.dart';
 import 'package:enjoy_player/features/discover/domain/feed_entry.dart';
 import 'package:enjoy_player/features/library/application/library_media_provider.dart';
 import 'package:enjoy_player/features/library/domain/learning_statistics.dart';
 import 'package:enjoy_player/features/library/domain/media.dart';
 import 'package:enjoy_player/features/library/domain/practice_resume.dart';
-import 'package:enjoy_player/features/subscription/application/subscription_plans_provider.dart';
-import 'package:enjoy_player/features/subscription/application/subscription_status_provider.dart';
-import 'package:enjoy_player/features/subscription/domain/subscription_plan.dart';
-import 'package:enjoy_player/features/subscription/domain/subscription_status.dart';
 import 'package:enjoy_player/features/sync/application/sync_providers.dart';
 import 'package:enjoy_player/features/sync/data/sync_queue_repository.dart';
 import 'package:enjoy_player/data/subtitle/transcript_line.dart';
@@ -371,54 +359,6 @@ Future<void> seedBoardData(AppDatabase db) async {
   }
 }
 
-final _creditLog = [
-  ('2026-10-01', '13:04', 'assessment', 60, 640, true),
-  ('2026-10-01', '12:58', 'translation', 24, 580, true),
-  ('2026-10-01', '12:57', 'llm', 120, 556, true),
-  ('2026-10-01', '09:12', 'asr', 380, 436, true),
-  ('2026-09-30', '22:40', 'tts', 90, 1000, true),
-  ('2026-09-30', '22:31', 'assessment', 60, 910, true),
-  ('2026-09-30', '22:30', 'assessment', 60, 850, true),
-  ('2026-09-29', '23:55', 'asr', 1400, 1000, false),
-  ('2026-09-29', '21:10', 'translation', 30, 970, true),
-  ('2026-09-29', '21:09', 'llm', 140, 830, true),
-];
-
-final boardCreditsPage = CreditsUsagePage(
-  hasMore: true,
-  logs: [
-    for (final (i, (date, time, service, required, after, allowed))
-        in _creditLog.indexed)
-      CreditsUsageLog.fromJson({
-        'id': 'cl$i',
-        'userId': '10482231',
-        'date': date,
-        'timestamp': DateTime.parse('${date}T$time:00Z').millisecondsSinceEpoch,
-        'serviceType': service,
-        'tier': 'free',
-        'required': required,
-        'usedBefore': after - required,
-        'usedAfter': after,
-        'allowed': allowed,
-      }),
-  ],
-);
-
-final boardCreditPackages = [
-  for (final (i, (usd, credits)) in [
-    (2, 200000),
-    (5, 500000),
-    (50, 5000000),
-  ].indexed)
-    CreditsPackage.fromJson({
-      'id': 'pk$i',
-      'amount': usd,
-      'currency': 'USD',
-      'credits': credits,
-      'rate': {'usd': 1, 'credits': 100000},
-    }),
-];
-
 final boardSyncQueue = SyncQueueSnapshot(
   retryablePending: 3,
   permanentlyFailed: 1,
@@ -498,7 +438,6 @@ List<Override> boardOverrides(AppDatabase db, {AuthCtrl Function()? auth}) => [
   ...baseOverrides(
     db,
     recents: boardRecents(),
-    subscription: false,
     auth: auth ?? BoardAuthCtrl.new,
     statistics: _boardStatistics,
     reviewSession: BoardReviewSession.new,
@@ -515,12 +454,6 @@ List<Override> boardOverrides(AppDatabase db, {AuthCtrl Function()? auth}) => [
     channels: boardChannels,
     feed: boardFeed,
     inLibrary: const {'bv1', 'bv4'},
-  ),
-  subscriptionStatusProvider.overrideWith(
-    (ref) async => const SubscriptionStatus(
-      subscriptionActive: true,
-      subscriptionTier: SubscriptionTier.free,
-    ),
   ),
   libraryFilteredListsProvider.overrideWith(
     (ref) => Stream.value((audio: boardAudios, video: boardVideos)),
@@ -540,35 +473,6 @@ List<Override> boardOverrides(AppDatabase db, {AuthCtrl Function()? auth}) => [
     ]),
   ),
   vocabularyStatsProvider.overrideWithValue(boardVocabularyStats),
-  todaysCreditsUsedProvider.overrideWith((ref) async => 640),
-  creditsSummaryProvider.overrideWith(
-    (ref) async => const CreditsSummary(
-      tier: 'free',
-      dailyUsed: 640,
-      dailyLimit: 1000,
-      dailyRemaining: 360,
-      permanentAvailable: 2400,
-      resetAt: 0,
-    ),
-  ),
-  creditsPackagesProvider.overrideWith((ref) async => boardCreditPackages),
-  creditsUsagePageProvider.overrideWith((ref) async => boardCreditsPage),
-  subscriptionPlansProvider.overrideWith(
-    (ref) async => const [
-      SubscriptionPlan(
-        id: 'lite-m',
-        tier: 'lite',
-        interval: 'month',
-        amount: 1.99,
-      ),
-      SubscriptionPlan(
-        id: 'pro-m',
-        tier: 'pro',
-        interval: 'month',
-        amount: 9.99,
-      ),
-    ],
-  ),
   syncQueueSnapshotProvider.overrideWith((ref) => Stream.value(boardSyncQueue)),
   syncLastFullSyncAtProvider.overrideWith(
     (ref) async => _now.toUtc().toIso8601String(),

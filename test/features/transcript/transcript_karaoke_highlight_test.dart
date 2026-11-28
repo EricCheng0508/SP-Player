@@ -132,9 +132,11 @@ void main() {
       await tester.pumpWidget(
         _harness(
           extraOverrides: [
-            transcriptPlaybackHighlightProvider(
-              'test',
-            ).overrideWithValue((cueIndex: 0, visibleCueIndex: 0, wordIndex: 0)),
+            transcriptPlaybackHighlightProvider('test').overrideWithValue((
+              cueIndex: 0,
+              visibleCueIndex: 0,
+              wordIndex: 0,
+            )),
           ],
           child: Column(
             children: [
@@ -245,7 +247,11 @@ void main() {
       _harness(
         extraOverrides: [
           transcriptPlaybackHighlightProvider('test').overrideWith(
-            (ref) => (cueIndex: 0, visibleCueIndex: 0, wordIndex: ref.watch(_wordIndexProvider)),
+            (ref) => (
+              cueIndex: 0,
+              visibleCueIndex: 0,
+              wordIndex: ref.watch(_wordIndexProvider),
+            ),
           ),
         ],
         child: Builder(
@@ -292,7 +298,11 @@ void main() {
           ipaOverlayOn: true,
           extraOverrides: [
             transcriptPlaybackHighlightProvider('test').overrideWith(
-              (ref) => (cueIndex: 0, visibleCueIndex: 0, wordIndex: ref.watch(_wordIndexProvider)),
+              (ref) => (
+                cueIndex: 0,
+                visibleCueIndex: 0,
+                wordIndex: ref.watch(_wordIndexProvider),
+              ),
             ),
           ],
           child: Builder(

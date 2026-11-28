@@ -16,7 +16,6 @@ import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 import '../application/active_transcript_provider.dart';
 import '../application/all_transcripts_provider.dart';
-import '../application/auto_translate_controller.dart';
 import '../application/auto_translate_selection_providers.dart';
 import '../application/transcript_display_readiness_provider.dart';
 import '../application/transcript_fetch_controller.dart';
@@ -101,21 +100,29 @@ class _SubtitleTrackPickerSheetState
   Future<void> _onSecondarySelectionChanged(
     String? id,
     String? autoSelectionId,
+    String targetLanguage,
   ) async {
-    final ctrl = ref.read(autoTranslateCtrlProvider(widget.mediaId).notifier);
+    final repo = ref.read(transcriptRepositoryProvider);
     if (id == null) {
-      await ref
-          .read(transcriptRepositoryProvider)
-          .setSecondaryTranscript(widget.mediaId, null);
+      await repo.setSecondaryTranscript(widget.mediaId, null);
       return;
     }
     if (autoSelectionId != null && id == autoSelectionId) {
-      await ctrl.selectAutoTranslate();
+      final primaryRow = await repo.primaryTranscriptRowForMedia(
+        widget.mediaId,
+      );
+      if (primaryRow == null || targetLanguage.isEmpty) return;
+      final aiId = await repo.ensureAutoTranslateTrack(
+        mediaId: widget.mediaId,
+        primaryTranscriptId: primaryRow.id,
+        targetLanguage: targetLanguage,
+        primaryLines: repo.linesForRow(primaryRow),
+      );
+      if (aiId == null) return;
+      await repo.setSecondaryTranscript(widget.mediaId, aiId);
       return;
     }
-    await ref
-        .read(transcriptRepositoryProvider)
-        .setSecondaryTranscript(widget.mediaId, id);
+    await repo.setSecondaryTranscript(widget.mediaId, id);
   }
 
   @override
@@ -136,9 +143,6 @@ class _SubtitleTrackPickerSheetState
     final secondaryId = secondaryIdAsync.value;
     final fetchState = ref.watch(transcriptFetchStatusProvider(widget.mediaId));
     final isFetching = fetchState.status == TranscriptFetchStatus.loading;
-    final autoTranslateState = ref.watch(
-      autoTranslateCtrlProvider(widget.mediaId),
-    );
     final autoSelectionAsync = ref.watch(
       autoTranslateSelectionIdProvider(widget.mediaId),
     );
@@ -149,7 +153,6 @@ class _SubtitleTrackPickerSheetState
             .valueOrNull
             ?.effectiveNativeLanguage ??
         '';
-    final signedIn = ref.watch(authIsSignedInProvider);
     final readiness = ref.watch(
       transcriptDisplayReadinessForMediaProvider(widget.mediaId),
     );
@@ -172,14 +175,13 @@ class _SubtitleTrackPickerSheetState
         secondaryId: secondaryId,
         autoSelectionId: autoSelectionId,
         targetLanguage: targetLanguage,
-        autoTranslateState: autoTranslateState,
-        signedIn: signedIn,
         readiness: readiness,
         expandedSection: _expandedSection,
         onToggleSection: _toggleSection,
         onCollapseSection: _collapseSection,
-        onSecondarySelected: (id) =>
-            unawaited(_onSecondarySelectionChanged(id, autoSelectionId)),
+        onSecondarySelected: (id) => unawaited(
+          _onSecondarySelectionChanged(id, autoSelectionId, targetLanguage),
+        ),
       );
 
       if (isDialog) {

@@ -25,10 +25,7 @@ void main() {
     });
 
     test('tolerates blank lines and missing trailing lines order', () {
-      final parsed = parseBatchTranslationReply(
-        '\n2. 乙\n\n1. 甲\n',
-        2,
-      );
+      final parsed = parseBatchTranslationReply('\n2. 乙\n\n1. 甲\n', 2);
       expect(parsed, ['甲', '乙']);
     });
 

@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:enjoy_player/features/transcript/presentation/transcript_echo_loop_edge_row.dart';
 
 import 'package:enjoy_player/core/echo/echo_region_key.dart';
+import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/typography.dart';
 import 'package:enjoy_player/core/transcript/transcript_density.dart';
@@ -99,7 +100,9 @@ class _EchoRegionMergedCardState extends ConsumerState<EchoRegionMergedCard> {
     final lineRecordingCounts = ref.watch(
       transcriptLineRecordingCountsProvider(mediaId),
     );
-    final autoTranslate = ref.watch(autoTranslateDisplayStateProvider(mediaId));
+    final autoTranslate =
+        ref.watch(autoTranslateDisplayStateProvider(mediaId)).valueOrNull ??
+        (active: false, sourceLanguage: null, targetLanguage: null);
     final autoTranslateActive = autoTranslate.active;
 
     final showShadow = echo.startTimeSeconds >= 0 && echo.endTimeSeconds >= 0;

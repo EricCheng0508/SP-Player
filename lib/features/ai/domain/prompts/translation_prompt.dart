@@ -62,7 +62,8 @@ List<String?> parseBatchTranslationOutput(String raw, int lineCount) {
   final result = List<String?>.filled(lineCount, null);
   var numbered = 0;
   for (final line in raw.split('\n')) {
-    final match = _numberedPipe.firstMatch(line) ?? _numberedLoose.firstMatch(line);
+    final match =
+        _numberedPipe.firstMatch(line) ?? _numberedLoose.firstMatch(line);
     if (match == null) continue;
     final n = int.tryParse(match.group(1)!);
     if (n == null || n < 1 || n > lineCount) continue;

@@ -161,10 +161,7 @@ class _LocalLoadingSplitBody extends ConsumerWidget {
               bottom: false,
               left: false,
               right: false,
-              child: AspectRatio(
-                aspectRatio: 16 / 9,
-                child: _stageChild(),
-              ),
+              child: AspectRatio(aspectRatio: 16 / 9, child: _stageChild()),
             ),
           );
         }
@@ -197,9 +194,7 @@ class _LocalLoadingSplitBody extends ConsumerWidget {
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: t.ground,
-                  border: Border(
-                    left: BorderSide(color: t.line, width: 1),
-                  ),
+                  border: Border(left: BorderSide(color: t.line, width: 1)),
                 ),
                 child: const Center(child: SkeletonAppBootstrap()),
               ),

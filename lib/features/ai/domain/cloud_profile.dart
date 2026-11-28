@@ -177,7 +177,12 @@ class LlmPreset {
 
 const List<LlmPreset> kLlmPresets = [
   LlmPreset('openai', 'OpenAI', 'https://api.openai.com/v1', 'gpt-4o-mini'),
-  LlmPreset('deepseek', 'DeepSeek', 'https://api.deepseek.com/v1', 'deepseek-chat'),
+  LlmPreset(
+    'deepseek',
+    'DeepSeek',
+    'https://api.deepseek.com/v1',
+    'deepseek-chat',
+  ),
   LlmPreset(
     'groq',
     'Groq',

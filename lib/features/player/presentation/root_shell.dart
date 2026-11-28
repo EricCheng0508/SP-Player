@@ -24,7 +24,6 @@ import 'package:enjoy_player/features/player/application/player_controller.dart'
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
 import 'package:enjoy_player/features/player/presentation/widgets/fullscreen_transport_bar.dart';
 import 'package:enjoy_player/features/player/presentation/widgets/player_dock.dart';
-import 'package:enjoy_player/core/local/no_tier_host.dart';
 import 'package:enjoy_player/features/sync/application/sync_controller.dart';
 import 'package:enjoy_player/features/discover/application/discover_providers.dart';
 import 'package:enjoy_player/features/update/application/update_controller.dart';
@@ -121,7 +120,7 @@ class _RootShellState extends ConsumerState<RootShell> {
 
   int _navIndexForPath(String path) {
     if (_accountPrefixes.any(path.startsWith)) return _navAccount;
-    if (path.startsWith('/library') || path.startsWith('/cloud')) {
+    if (path.startsWith('/library')) {
       return _navLibrary;
     }
     if (path.startsWith('/discover')) return _navDiscover;
@@ -159,284 +158,286 @@ class _RootShellState extends ConsumerState<RootShell> {
     final onPlayer = path.startsWith('/player/');
     final onReview = path.startsWith('/vocabulary/review');
 
+    // True video fullscreen: dock floats over the stage and auto-hides after
+    // idle (mouse move reveals it again). The listen must live in the build
+    // body — Riverpod forbids listen inside a LayoutBuilder callback, which
+    // runs during layout, not build.
+    ref.listen(windowFullscreenProvider, (prev, next) {
+      if (!onPlayer || !isDesktop || prev == next) return;
+      _dockHideTimer?.cancel();
+      _setKeyRevealHandler(next);
+      if (mounted) setState(() => _dockVisible = true);
+      if (next && _enginePlaying()) {
+        _dockHideTimer = Timer(_dockAutoHideDelay, _hideDockIfPlaying);
+      }
+    });
+
     return OnboardingShowcaseHost(
-      child: TierReconcileHost(
-        child: Builder(
-          builder: (context) => LayoutBuilder(
-            builder: (context, constraints) {
-              final tokens = EnjoyThemeTokens.of(context);
-              final useSidebar =
-                  constraints.maxWidth >= tokens.breakpointRail &&
-                  !onPlayer &&
-                  !onReview;
+      child: Builder(
+        builder: (context) => LayoutBuilder(
+          builder: (context, constraints) {
+            final tokens = EnjoyThemeTokens.of(context);
+            final useSidebar =
+                constraints.maxWidth >= tokens.breakpointRail &&
+                !onPlayer &&
+                !onReview;
 
-              final bottomNav = (!useSidebar && !onPlayer && !onReview)
-                  ? EnjoyBottomNav(
-                      selectedIndex: _navIndexForPath(path),
-                      onDestinationSelected: (i) => _goNavIndex(context, i),
-                      destinations: [
-                        EnjoyBottomNavDestination(
-                          icon: EnjoyIcons.home,
-                          selectedIcon: EnjoyIcons.homeFill,
-                          iconWidget: const EnjoyChromeIcon(
-                            EnjoyChromeGlyph.home,
-                          ),
-                          selectedIconWidget: const EnjoyChromeIcon(
-                            EnjoyChromeGlyph.home,
-                            filled: true,
-                          ),
-                          label: l10n.homeTitle,
+            final bottomNav = (!useSidebar && !onPlayer && !onReview)
+                ? EnjoyBottomNav(
+                    selectedIndex: _navIndexForPath(path),
+                    onDestinationSelected: (i) => _goNavIndex(context, i),
+                    destinations: [
+                      EnjoyBottomNavDestination(
+                        icon: EnjoyIcons.home,
+                        selectedIcon: EnjoyIcons.homeFill,
+                        iconWidget: const EnjoyChromeIcon(
+                          EnjoyChromeGlyph.home,
                         ),
-                        EnjoyBottomNavDestination(
-                          icon: EnjoyIcons.compass,
-                          selectedIcon: EnjoyIcons.compassFill,
-                          iconWidget: const EnjoyChromeIcon(
-                            EnjoyChromeGlyph.compass,
-                          ),
-                          selectedIconWidget: const EnjoyChromeIcon(
-                            EnjoyChromeGlyph.compass,
-                            filled: true,
-                          ),
-                          label: l10n.discoverTitle,
+                        selectedIconWidget: const EnjoyChromeIcon(
+                          EnjoyChromeGlyph.home,
+                          filled: true,
                         ),
-                        EnjoyBottomNavDestination(
-                          icon: EnjoyIcons.library,
-                          selectedIcon: EnjoyIcons.library,
-                          iconWidget: const EnjoyChromeIcon(
-                            EnjoyChromeGlyph.library,
-                          ),
-                          selectedIconWidget: const EnjoyChromeIcon(
-                            EnjoyChromeGlyph.library,
-                            filled: true,
-                          ),
-                          label: l10n.libraryTitle,
-                        ),
-                        EnjoyBottomNavDestination(
-                          icon: EnjoyIcons.person,
-                          selectedIcon: EnjoyIcons.personFill,
-                          iconWidget: const EnjoyChromeIcon(
-                            EnjoyChromeGlyph.user,
-                          ),
-                          selectedIconWidget: const EnjoyChromeIcon(
-                            EnjoyChromeGlyph.user,
-                            filled: true,
-                          ),
-                          label: l10n.profileTitle,
-                          showBadge: updateBadge,
-                          semanticsLabel: updateBadge
-                              ? '${l10n.profileTitle}, ${l10n.updateAvailableBadgeSemantics}'
-                              : null,
-                        ),
-                      ],
-                    )
-                  : null;
-
-              /// `/player/...` nests a [Scaffold] inside the route. Keeping transport in a
-              /// [Column] + [Expanded] sibling can yield **zero** body height on some mobile
-              /// frames (nested scaffold / safe-area constraint propagation), which pins the
-              /// bar under the status bar and hides video + transcript. [Scaffold] reserves
-              /// space via [bottomNavigationBar] instead.
-              // The dock slot is held for the whole player route: while the
-              // session is still opening a placeholder of the dock's exact
-              // height stands in (a plain SizedBox — no provider reads, so
-              // the engine-identity lazy allocation is not triggered). A dock
-              // that appears mid-open resizes a *playing* video — the "flash
-              // on open" report.
-              final playerWithTransport = onPlayer;
-
-              // True video fullscreen: dock floats over the stage and
-              // auto-hides after idle (mouse move reveals it again).
-              final videoFullscreen =
-                  playerWithTransport &&
-                  isDesktop &&
-                  ref.watch(windowFullscreenProvider);
-              ref.listen(windowFullscreenProvider, (prev, next) {
-                if (!playerWithTransport || !isDesktop || prev == next) return;
-                _dockHideTimer?.cancel();
-                _setKeyRevealHandler(next);
-                if (mounted) setState(() => _dockVisible = true);
-                if (next && _enginePlaying()) {
-                  _dockHideTimer = Timer(_dockAutoHideDelay, _hideDockIfPlaying);
-                }
-              });
-
-              final bottomClearance = !useSidebar && !onPlayer && !onReview
-                  ? rootShellBottomNavClearance(context)
-                  : 0.0;
-
-              // Notices must clear the player dock on the player route too —
-              // without this [AppNotice] floats at the window bottom and the
-              // dock covers it (unreadable dark-on-dark strip).
-              final noticeBottomClearance = onPlayer
-                  ? kRootShellTransportSnackClearance
-                  : bottomClearance;
-
-              Widget mobileShellScaffold() {
-                if (playerWithTransport) {
-                  Widget playerBody = SafeArea(
-                    bottom: false,
-                    child: SizedBox.expand(child: widget.child),
-                  );
-                  Widget? bottomDock = sessionActive
-                      ? PlayerDock(chrome: chrome)
-                      : const PlayerDockSkeleton();
-                  if (videoFullscreen) {
-                    // The floating dock is NOT rendered here: the engine video
-                    // surface paints above this entire scaffold
-                    // (PlayerSurfaceHost is the root Stack's top layer), which
-                    // would cover any in-shell overlay. RootShell mounts the
-                    // dock ABOVE the surface host instead — see the root Stack
-                    // below. Fullscreen just drops the dock slot so the stage
-                    // owns the full height.
-                    return RootShellBottomInset(
-                      bottomClearance: noticeBottomClearance,
-                      child: Scaffold(
-                        backgroundColor: Colors.transparent,
-                        extendBody: true,
-                        body: playerBody,
+                        label: l10n.homeTitle,
                       ),
-                    );
-                  }
+                      EnjoyBottomNavDestination(
+                        icon: EnjoyIcons.compass,
+                        selectedIcon: EnjoyIcons.compassFill,
+                        iconWidget: const EnjoyChromeIcon(
+                          EnjoyChromeGlyph.compass,
+                        ),
+                        selectedIconWidget: const EnjoyChromeIcon(
+                          EnjoyChromeGlyph.compass,
+                          filled: true,
+                        ),
+                        label: l10n.discoverTitle,
+                      ),
+                      EnjoyBottomNavDestination(
+                        icon: EnjoyIcons.library,
+                        selectedIcon: EnjoyIcons.library,
+                        iconWidget: const EnjoyChromeIcon(
+                          EnjoyChromeGlyph.library,
+                        ),
+                        selectedIconWidget: const EnjoyChromeIcon(
+                          EnjoyChromeGlyph.library,
+                          filled: true,
+                        ),
+                        label: l10n.libraryTitle,
+                      ),
+                      EnjoyBottomNavDestination(
+                        icon: EnjoyIcons.person,
+                        selectedIcon: EnjoyIcons.personFill,
+                        iconWidget: const EnjoyChromeIcon(
+                          EnjoyChromeGlyph.user,
+                        ),
+                        selectedIconWidget: const EnjoyChromeIcon(
+                          EnjoyChromeGlyph.user,
+                          filled: true,
+                        ),
+                        label: l10n.profileTitle,
+                        showBadge: updateBadge,
+                        semanticsLabel: updateBadge
+                            ? '${l10n.profileTitle}, ${l10n.updateAvailableBadgeSemantics}'
+                            : null,
+                      ),
+                    ],
+                  )
+                : null;
+
+            /// `/player/...` nests a [Scaffold] inside the route. Keeping transport in a
+            /// [Column] + [Expanded] sibling can yield **zero** body height on some mobile
+            /// frames (nested scaffold / safe-area constraint propagation), which pins the
+            /// bar under the status bar and hides video + transcript. [Scaffold] reserves
+            /// space via [bottomNavigationBar] instead.
+            // The dock slot is held for the whole player route: while the
+            // session is still opening a placeholder of the dock's exact
+            // height stands in (a plain SizedBox — no provider reads, so
+            // the engine-identity lazy allocation is not triggered). A dock
+            // that appears mid-open resizes a *playing* video — the "flash
+            // on open" report.
+            final playerWithTransport = onPlayer;
+
+            final videoFullscreen =
+                playerWithTransport &&
+                isDesktop &&
+                ref.watch(windowFullscreenProvider);
+
+            final bottomClearance = !useSidebar && !onPlayer && !onReview
+                ? rootShellBottomNavClearance(context)
+                : 0.0;
+
+            // Notices must clear the player dock on the player route too —
+            // without this [AppNotice] floats at the window bottom and the
+            // dock covers it (unreadable dark-on-dark strip).
+            final noticeBottomClearance = onPlayer
+                ? kRootShellTransportSnackClearance
+                : bottomClearance;
+
+            Widget mobileShellScaffold() {
+              if (playerWithTransport) {
+                Widget playerBody = SafeArea(
+                  bottom: false,
+                  child: SizedBox.expand(child: widget.child),
+                );
+                Widget? bottomDock = sessionActive
+                    ? PlayerDock(chrome: chrome)
+                    : const PlayerDockSkeleton();
+                if (videoFullscreen) {
+                  // The floating dock is NOT rendered here: the engine video
+                  // surface paints above this entire scaffold
+                  // (PlayerSurfaceHost is the root Stack's top layer), which
+                  // would cover any in-shell overlay. RootShell mounts the
+                  // dock ABOVE the surface host instead — see the root Stack
+                  // below. Fullscreen just drops the dock slot so the stage
+                  // owns the full height.
                   return RootShellBottomInset(
                     bottomClearance: noticeBottomClearance,
                     child: Scaffold(
                       backgroundColor: Colors.transparent,
                       extendBody: true,
                       body: playerBody,
-                      bottomNavigationBar: Material(
-                        type: MaterialType.transparency,
-                        // Hard swap skeleton → real dock (same slot, same
-                        // height). A crossfade here superimposes skeleton
-                        // ghosts on the live controls for its duration.
-                        child: bottomDock,
-                      ),
                     ),
                   );
                 }
-                return Scaffold(
-                  backgroundColor: Colors.transparent,
-                  extendBody: bottomNav != null,
-                  body: SafeArea(
-                    bottom: false,
-                    child: Padding(
-                      key: const ValueKey<String>('root-shell-content'),
-                      padding: EdgeInsets.only(bottom: bottomClearance),
-                      child: widget.child,
+                return RootShellBottomInset(
+                  bottomClearance: noticeBottomClearance,
+                  child: Scaffold(
+                    backgroundColor: Colors.transparent,
+                    extendBody: true,
+                    body: playerBody,
+                    bottomNavigationBar: Material(
+                      type: MaterialType.transparency,
+                      // Hard swap skeleton → real dock (same slot, same
+                      // height). A crossfade here superimposes skeleton
+                      // ghosts on the live controls for its duration.
+                      child: bottomDock,
                     ),
                   ),
-                  bottomNavigationBar: bottomNav == null
-                      ? null
-                      : Material(
-                          type: MaterialType.transparency,
-                          child: bottomNav,
-                        ),
                 );
               }
+              return Scaffold(
+                backgroundColor: Colors.transparent,
+                extendBody: bottomNav != null,
+                body: SafeArea(
+                  bottom: false,
+                  child: Padding(
+                    key: const ValueKey<String>('root-shell-content'),
+                    padding: EdgeInsets.only(bottom: bottomClearance),
+                    child: widget.child,
+                  ),
+                ),
+                bottomNavigationBar: bottomNav == null
+                    ? null
+                    : Material(
+                        type: MaterialType.transparency,
+                        child: bottomNav,
+                      ),
+              );
+            }
 
-              final shell = useSidebar
-                  ? RootShellBottomInset(
-                      bottomClearance: noticeBottomClearance,
-                      child: ColoredBox(
-                        color: tokens.canvas,
-                        child: Scaffold(
-                          backgroundColor: Colors.transparent,
-                          body: SafeArea(
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Semantics(
-                                  container: true,
-                                  label: l10n.navMainLabel,
-                                  child: AppSidebar(
-                                    collapsed: ref.watch(
-                                        sidebarCollapsedProvider),
-                                    onToggleCollapse: () => ref
-                                        .read(sidebarCollapsedProvider
-                                            .notifier)
-                                        .state = !ref.watch(
-                                        sidebarCollapsedProvider),
+            final shell = useSidebar
+                ? RootShellBottomInset(
+                    bottomClearance: noticeBottomClearance,
+                    child: ColoredBox(
+                      color: tokens.canvas,
+                      child: Scaffold(
+                        backgroundColor: Colors.transparent,
+                        body: SafeArea(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Semantics(
+                                container: true,
+                                label: l10n.navMainLabel,
+                                child: AppSidebar(
+                                  collapsed: ref.watch(
+                                    sidebarCollapsedProvider,
                                   ),
+                                  onToggleCollapse: () =>
+                                      ref
+                                          .read(
+                                            sidebarCollapsedProvider.notifier,
+                                          )
+                                          .state = !ref.watch(
+                                        sidebarCollapsedProvider,
+                                      ),
                                 ),
-                                Expanded(child: widget.child),
-                              ],
-                            ),
+                              ),
+                              Expanded(child: widget.child),
+                            ],
                           ),
                         ),
                       ),
-                    )
-                  : RootShellBottomInset(
-                      // mobileShellScaffold provides its own player-route
-                      // clearance; non-player routes use the nav clearance.
-                      bottomClearance: playerWithTransport
-                          ? 0.0
-                          : noticeBottomClearance,
-                      child: AppBackground(child: mobileShellScaffold()),
-                    );
+                    ),
+                  )
+                : RootShellBottomInset(
+                    // mobileShellScaffold provides its own player-route
+                    // clearance; non-player routes use the nav clearance.
+                    bottomClearance: playerWithTransport
+                        ? 0.0
+                        : noticeBottomClearance,
+                    child: AppBackground(child: mobileShellScaffold()),
+                  );
 
-              final parkSurface =
-                  path.startsWith('/youtube/login') ||
-                  (onPlayer &&
-                      GoRouterState.of(context).uri.pathSegments.length > 2);
-              final fullscreen =
-                  playerWithTransport &&
-                  ref.watch(windowFullscreenProvider);
-              return Stack(
-                fit: StackFit.expand,
-                children: [
-                  shell,
-                  // Engine video surface paints above the shell — any
-                  // fullscreen chrome must stack ABOVE it to be visible.
-                  PlayerSurfaceHost(forcePark: parkSurface),
-                  // Floating captions mini-window covers everything while on.
-                  if (ref.watch(floatCaptionsModeProvider))
-                    const Positioned.fill(child: FloatCaptionsHost()),
-                  // Fullscreen reveal layer: pointer move / press over the
-                  // video wakes the dock. translucent + non-opaque so video
-                  // gestures and hotkeys keep working.
-                  if (fullscreen)
-                    Positioned.fill(
+            final parkSurface =
+                path.startsWith('/youtube/login') ||
+                (onPlayer &&
+                    GoRouterState.of(context).uri.pathSegments.length > 2);
+            final fullscreen =
+                playerWithTransport && ref.watch(windowFullscreenProvider);
+            return Stack(
+              fit: StackFit.expand,
+              children: [
+                shell,
+                // Engine video surface paints above the shell — any
+                // fullscreen chrome must stack ABOVE it to be visible.
+                PlayerSurfaceHost(forcePark: parkSurface),
+                // Floating captions mini-window covers everything while on.
+                if (ref.watch(floatCaptionsModeProvider))
+                  const Positioned.fill(child: FloatCaptionsHost()),
+                // Fullscreen reveal layer: pointer move / press over the
+                // video wakes the dock. translucent + non-opaque so video
+                // gestures and hotkeys keep working.
+                if (fullscreen)
+                  Positioned.fill(
+                    child: MouseRegion(
+                      opaque: false,
+                      cursor: _dockVisible
+                          ? MouseCursor.defer
+                          : SystemMouseCursors.none,
+                      onHover: (_) => _pokeDock(),
+                      child: Listener(
+                        behavior: HitTestBehavior.translucent,
+                        onPointerDown: (_) => _pokeDock(),
+                        child: const SizedBox.expand(),
+                      ),
+                    ),
+                  ),
+                // Floating fullscreen dock, above the video surface.
+                if (fullscreen && sessionActive)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: AnimatedSlide(
+                      offset: _dockVisible ? Offset.zero : const Offset(0, 1),
+                      duration: tokens.motionMedium,
+                      curve: Curves.easeOutCubic,
                       child: MouseRegion(
-                        opaque: false,
-                        cursor: _dockVisible
-                            ? MouseCursor.defer
-                            : SystemMouseCursors.none,
-                        onHover: (_) => _pokeDock(),
-                        child: Listener(
-                          behavior: HitTestBehavior.translucent,
-                          onPointerDown: (_) => _pokeDock(),
-                          child: const SizedBox.expand(),
-                        ),
+                        onEnter: (_) {
+                          _pointerOverDock = true;
+                          _dockHideTimer?.cancel();
+                        },
+                        onExit: (_) {
+                          _pointerOverDock = false;
+                          _pokeDock();
+                        },
+                        child: FullscreenTransportBar(chrome: chrome),
                       ),
                     ),
-                  // Floating fullscreen dock, above the video surface.
-                  if (fullscreen && sessionActive)
-                    Positioned(
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      child: AnimatedSlide(
-                        offset: _dockVisible
-                            ? Offset.zero
-                            : const Offset(0, 1),
-                        duration: tokens.motionMedium,
-                        curve: Curves.easeOutCubic,
-                        child: MouseRegion(
-                          onEnter: (_) {
-                            _pointerOverDock = true;
-                            _dockHideTimer?.cancel();
-                          },
-                          onExit: (_) {
-                            _pointerOverDock = false;
-                            _pokeDock();
-                          },
-                          child: FullscreenTransportBar(chrome: chrome),
-                        ),
-                      ),
-                    ),
-                ],
-              );
-            },
-          ),
+                  ),
+              ],
+            );
+          },
         ),
       ),
     );

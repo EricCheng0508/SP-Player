@@ -166,7 +166,9 @@ LocalAlignmentResult assessLocalPronunciation({
   }
   for (var i = 1; i <= n; i++) {
     for (var j = 1; j <= m; j++) {
-      final match = dp[i - 1][j - 1] + wordSimilarity(reference[i - 1], spoken[j - 1].normalized);
+      final match =
+          dp[i - 1][j - 1] +
+          wordSimilarity(reference[i - 1], spoken[j - 1].normalized);
       final omit = dp[i - 1][j] + omissionPenalty;
       final insert = dp[i][j - 1] + insertionPenalty;
       dp[i][j] = math.max(match, math.max(omit, insert));
@@ -224,10 +226,7 @@ LocalAlignmentResult assessLocalPronunciation({
       continue;
     }
     final sp = spokenByRef[r]!;
-    final score = math.max(
-      kLocalMispronunciationFloor,
-      (sim * 100).round(),
-    );
+    final score = math.max(kLocalMispronunciationFloor, (sim * 100).round());
     final kind = sim >= 0.999 ? 'None' : 'Mispronunciation';
     assessments.add(
       LocalWordAssessment(
@@ -245,9 +244,7 @@ LocalAlignmentResult assessLocalPronunciation({
 
   // Insertions merged in timeline order.
   final insertionSet = insertions.toSet();
-  final insertionWords = insertionSet
-      .map((k) => spoken[k])
-      .toList()
+  final insertionWords = insertionSet.map((k) => spoken[k]).toList()
     ..sort((a, b) => a.startMs.compareTo(b.startMs));
   for (final sp in insertionWords) {
     var idx = assessments.lastIndexWhere(
@@ -268,16 +265,15 @@ LocalAlignmentResult assessLocalPronunciation({
   }
 
   final accuracyScore = n == 0 ? 0 : (accuracySum / n).round();
-  final completenessScore = n == 0
-      ? 0
-      : (spokenCount * 100 / n).round();
+  final completenessScore = n == 0 ? 0 : (spokenCount * 100 / n).round();
 
   // Fluency: speech time vs mid-sentence pauses between adjacent spoken
   // (aligned) words. Timings unavailable → fall back to accuracy.
-  final aligned = assessments
-      .where((w) => w.isSpoken && w.startMs != null && w.endMs != null)
-      .toList()
-    ..sort((a, b) => a.startMs!.compareTo(b.startMs!));
+  final aligned =
+      assessments
+          .where((w) => w.isSpoken && w.startMs != null && w.endMs != null)
+          .toList()
+        ..sort((a, b) => a.startMs!.compareTo(b.startMs!));
   var speechMs = 0, pauseMs = 0;
   for (final w in aligned) {
     speechMs += math.max(0, w.endMs! - w.startMs!);
@@ -292,8 +288,9 @@ LocalAlignmentResult assessLocalPronunciation({
       ? (aligned.isEmpty ? 0 : accuracyScore)
       : (100 * speechMs / (speechMs + pauseMs)).round();
 
-  final pronScore = (0.5 * accuracyScore + 0.25 * fluencyScore + 0.25 * completenessScore)
-      .round();
+  final pronScore =
+      (0.5 * accuracyScore + 0.25 * fluencyScore + 0.25 * completenessScore)
+          .round();
 
   final spokenText = aligned.map((w) => w.displayWord).join(' ');
 
@@ -308,11 +305,10 @@ LocalAlignmentResult assessLocalPronunciation({
 }
 
 /// Splits a reference sentence into alignment-ready words.
-List<String> splitReferenceWords(String referenceText) =>
-    referenceText
-        .split(RegExp(r'\s+'))
-        .where((w) => w.trim().isNotEmpty)
-        .toList();
+List<String> splitReferenceWords(String referenceText) => referenceText
+    .split(RegExp(r'\s+'))
+    .where((w) => w.trim().isNotEmpty)
+    .toList();
 
 /// Synthesizes an Azure-Speech-shaped result JSON (PascalCase keys, 100-ns
 /// ticks) so the existing assessment UI and storage consume it unchanged.

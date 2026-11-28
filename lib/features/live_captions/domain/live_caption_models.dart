@@ -86,8 +86,7 @@ final class LiveCaptionSession {
     return '$m-$d $hh:$mm';
   }
 
-  Duration get duration =>
-      (endedAt ?? DateTime.now()).difference(startedAt);
+  Duration get duration => (endedAt ?? DateTime.now()).difference(startedAt);
 
   factory LiveCaptionSession.fromJson(Map<String, dynamic> json) =>
       _$LiveCaptionSessionFromJson(json);

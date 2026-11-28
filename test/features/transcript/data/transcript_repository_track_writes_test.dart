@@ -12,7 +12,6 @@ import 'dart:io';
 import 'package:cross_file/cross_file.dart';
 import 'package:drift/native.dart';
 import 'package:enjoy_player/core/ids/enjoy_ids.dart';
-import 'package:enjoy_player/data/api/services/ai/youtube_transcripts_api.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/transcript_row.dart';
 import 'package:enjoy_player/data/subtitle/transcript_line.dart';
@@ -22,31 +21,6 @@ import 'package:enjoy_player/features/transcript/data/youtube_caption_fetcher.da
 import 'package:enjoy_player/features/transcript/domain/auto_translate.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
-
-class _FakeTranscriptsApi implements YoutubeTranscriptsClient {
-  _FakeTranscriptsApi(this.cached);
-
-  final Map<String, Map<String, dynamic>> cached;
-
-  @override
-  Future<Map<String, dynamic>?> getCachedTranscript({
-    required String videoId,
-    required String language,
-  }) async => cached['$videoId/$language'];
-
-  @override
-  Future<bool> uploadTranscript({
-    required String videoId,
-    required String language,
-    required String source,
-    required List<Map<String, dynamic>> timeline,
-    Map<String, dynamic>? metadata,
-  }) async => true;
-
-  @override
-  Future<List<Map<String, dynamic>>> fetchClientProfiles() async =>
-      <Map<String, dynamic>>[];
-}
 
 class _StubYoutubeCaptionFetcher extends YoutubeCaptionFetcher {
   _StubYoutubeCaptionFetcher(this._results)
@@ -232,70 +206,6 @@ void main() {
     );
     final rebuilt = await db.transcriptDao.getById(id);
     expect(repo.linesForRow(rebuilt!).length, 1);
-  });
-
-  test('YouTube direct fetch read reflects the stored captions', () async {
-    const mediaId = 'yt-fetch-1';
-    await db.videoDao.insertRow(_video(id: mediaId));
-    final fetcher = _StubYoutubeCaptionFetcher([
-      AllCaptionsResult(
-        results: [_track(language: 'en', text: 'alpha')],
-      ),
-      AllCaptionsResult(
-        results: [_track(language: 'en', text: 'bravo')],
-      ),
-    ]);
-    final repo = TranscriptRepository(
-      db,
-      youtubeTranscripts: _FakeTranscriptsApi({}),
-      youtubeFetcher: fetcher,
-    );
-
-    await repo.fetchCloudTranscripts(mediaId, force: true);
-    final id = enjoyTranscriptId(
-      targetType: 'Video',
-      targetId: mediaId,
-      language: 'en',
-      source: 'official',
-    );
-    expect(await readFirstLineText(repo, id), 'alpha');
-
-    await repo.fetchCloudTranscripts(mediaId, force: true);
-    expect(await readFirstLineText(repo, id), 'bravo');
-  });
-
-  test('YouTube worker cache read reflects the cached captions', () async {
-    const mediaId = 'yt-cache-1';
-    await db.videoDao.insertRow(_video(id: mediaId));
-    final api = _FakeTranscriptsApi({
-      'tIgO_Sjh3tQ/en': {
-        'language': 'en',
-        'source': 'official',
-        'timeline': [
-          {'text': 'cached one', 'start': 0, 'duration': 1000},
-        ],
-      },
-    });
-    final repo = TranscriptRepository(db, youtubeTranscripts: api);
-
-    await repo.fetchCloudTranscripts(mediaId);
-    final id = enjoyTranscriptId(
-      targetType: 'Video',
-      targetId: mediaId,
-      language: 'en',
-      source: 'official',
-    );
-    expect(await readFirstLineText(repo, id), 'cached one');
-
-    api.cached['tIgO_Sjh3tQ/en'] = {
-      'language': 'en',
-      'source': 'official',
-      'timeline': [
-        {'text': 'cached b', 'start': 0, 'duration': 1000},
-      ],
-    };
-    await repo.fetchCloudTranscripts(mediaId);
-    expect(await readFirstLineText(repo, id), 'cached b');
   });
 
   test('auto-translate track id is derived from the primary pair', () async {

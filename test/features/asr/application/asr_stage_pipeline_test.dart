@@ -21,20 +21,23 @@ void main() {
       ]);
     });
 
-    test('recognition stages (uploading/polling/recognizing) share one chip', () {
-      for (final phase in {
-        AsrGenerationPhase.uploading,
-        AsrGenerationPhase.polling,
-        AsrGenerationPhase.recognizing,
-      }) {
-        final views = asrStageViews(phase, alignInstalled: false);
-        expect(views[0].stage, AsrStage.extract);
-        expect(views[0].state, AsrStageState.done);
-        expect(views[1].stage, AsrStage.recognize);
-        expect(views[1].state, AsrStageState.active);
-        expect(views[2].state, AsrStageState.pending);
-      }
-    });
+    test(
+      'recognition stages (uploading/polling/recognizing) share one chip',
+      () {
+        for (final phase in {
+          AsrGenerationPhase.uploading,
+          AsrGenerationPhase.polling,
+          AsrGenerationPhase.recognizing,
+        }) {
+          final views = asrStageViews(phase, alignInstalled: false);
+          expect(views[0].stage, AsrStage.extract);
+          expect(views[0].state, AsrStageState.done);
+          expect(views[1].stage, AsrStage.recognize);
+          expect(views[1].state, AsrStageState.active);
+          expect(views[2].state, AsrStageState.pending);
+        }
+      },
+    );
 
     test('aligning → align active with prior stages done', () {
       final views = asrStageViews(
@@ -88,7 +91,10 @@ void main() {
     });
 
     test('qwen missing → transitional Whisper label', () {
-      expect(localAsrEngineLabel(qwenInstalled: false), 'Whisper large-v3-turbo');
+      expect(
+        localAsrEngineLabel(qwenInstalled: false),
+        'Whisper large-v3-turbo',
+      );
     });
   });
 }

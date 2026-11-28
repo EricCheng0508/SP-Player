@@ -121,23 +121,27 @@ void main() {
     expect(engine.playedUrls, hasLength(2));
   });
 
-  test('a fresh session hits the on-disk cache without downloading again',
-      () async {
-    final svc = service();
+  test(
+    'a fresh session hits the on-disk cache without downloading again',
+    () async {
+      final svc = service();
 
-    final first = makeContainer(svc: svc);
-    await first.read(pronouncePlaybackControllerProvider.notifier).play(target());
-    first.dispose();
+      final first = makeContainer(svc: svc);
+      await first
+          .read(pronouncePlaybackControllerProvider.notifier)
+          .play(target());
+      first.dispose();
 
-    // 新容器 = 空的内存缓存，只能靠磁盘缓存命中。
-    container = makeContainer(svc: svc);
-    await container
-        .read(pronouncePlaybackControllerProvider.notifier)
-        .play(target());
+      // 新容器 = 空的内存缓存，只能靠磁盘缓存命中。
+      container = makeContainer(svc: svc);
+      await container
+          .read(pronouncePlaybackControllerProvider.notifier)
+          .play(target());
 
-    expect(getCount, 1);
-    expect(engine.playedUrls, hasLength(2));
-  });
+      expect(getCount, 1);
+      expect(engine.playedUrls, hasLength(2));
+    },
+  );
 
   test('non-200 download surfaces as a failure, nothing is played', () async {
     container = makeContainer(svc: service(statusCode: 500));

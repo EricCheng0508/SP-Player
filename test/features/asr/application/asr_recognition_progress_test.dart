@@ -16,10 +16,7 @@ void main() {
 
   test('starts at zero and advances with elapsed time', () {
     final clock = _Clock();
-    final p = AsrRecognitionProgress(
-      audioSeconds: 300,
-      clock: clock.call,
-    );
+    final p = AsrRecognitionProgress(audioSeconds: 300, clock: clock.call);
     expect(p.progress, 0.0);
 
     clock.advance(const Duration(seconds: 10));

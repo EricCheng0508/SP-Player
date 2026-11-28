@@ -101,6 +101,7 @@ class AsrGenerationJob {
     DateTime? completedAt,
     String? trackId,
     int? creditsCharged,
+
     /// Drops [progress] back to `null` — phase changes carry no fraction, and
     /// a stale 1.0 from extraction would otherwise pin the next bar at full.
     bool clearProgress = false,

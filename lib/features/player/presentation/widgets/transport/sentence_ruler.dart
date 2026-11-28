@@ -198,8 +198,8 @@ class _SentenceRulerState extends ConsumerState<SentenceRuler> {
     // Buffered-ahead band; 0 on engines without buffered-range data.
     final bufferedEnd =
         ref.watch(playerBufferEndProvider).valueOrNull ?? Duration.zero;
-    final bufferedFraction =
-        (bufferedEnd.inMilliseconds / 1000 / _durationSec).clamp(0.0, 1.0);
+    final bufferedFraction = (bufferedEnd.inMilliseconds / 1000 / _durationSec)
+        .clamp(0.0, 1.0);
     if (_bufferedFraction.value != bufferedFraction) {
       _bufferedFraction.value = bufferedFraction;
     }
@@ -363,8 +363,7 @@ class _RulerProgressPainter extends CustomPainter {
       _trackPaint,
     );
 
-    final bufferedWidth =
-        size.width * buffered.value.clamp(0.0, 1.0);
+    final bufferedWidth = size.width * buffered.value.clamp(0.0, 1.0);
     if (bufferedWidth > size.width * fraction.value.clamp(0.0, 1.0)) {
       canvas.drawRRect(
         RRect.fromRectAndRadius(

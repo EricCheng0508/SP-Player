@@ -6,6 +6,8 @@
 /// downloaded, with inline install/delete actions and live progress.
 library;
 
+import 'package:enjoy_player/core/theme/enjoy_icons.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -29,9 +31,8 @@ class _AsrLocalComponentsState extends ConsumerState<AsrLocalComponents> {
   int _generation = 0;
 
   /// Specs to render, ordered as passed in [AsrLocalComponents.kinds].
-  List<ComponentSpec> get _specs => kComponentSpecs
-      .where((s) => widget.kinds.contains(s.kind))
-      .toList();
+  List<ComponentSpec> get _specs =>
+      kComponentSpecs.where((s) => widget.kinds.contains(s.kind)).toList();
 
   /// Merge specs sharing a [ComponentSpec.uiGroupId] into one display row —
   /// e.g. the qwen runtime+model pair shows as a single engine row. Groups
@@ -65,10 +66,7 @@ class _AsrLocalComponentsState extends ConsumerState<AsrLocalComponents> {
       // Feed the notifier so the tile swaps the button for a live progress
       // bar — with a no-op callback the download ran invisible and every
       // further click just awaited the same single-flight future.
-      await store.install(
-        spec,
-        (p) => progress.update(spec.kind, p),
-      );
+      await store.install(spec, (p) => progress.update(spec.kind, p));
       messenger.showSnackBar(
         SnackBar(content: Text('${spec.displayName} 安装完成')),
       );
@@ -91,7 +89,9 @@ class _AsrLocalComponentsState extends ConsumerState<AsrLocalComponents> {
 
   void _cancel(ComponentSpec spec) {
     ref.read(componentStoreProvider).cancel(spec.kind);
-    ref.read(componentProgressProvider.notifier).update(
+    ref
+        .read(componentProgressProvider.notifier)
+        .update(
           spec.kind,
           const ComponentProgress(
             phase: ComponentDownloadPhase.failed,
@@ -134,9 +134,7 @@ class _AsrLocalComponentsState extends ConsumerState<AsrLocalComponents> {
         SnackBar(content: Text('${spec.displayName} 已删除')),
       );
     } on Object catch (e) {
-      messenger.showSnackBar(
-        SnackBar(content: Text('删除失败：$e')),
-      );
+      messenger.showSnackBar(SnackBar(content: Text('删除失败：$e')));
     } finally {
       if (mounted) setState(() => _generation++);
     }
@@ -145,8 +143,9 @@ class _AsrLocalComponentsState extends ConsumerState<AsrLocalComponents> {
   /// Deletes every installed spec of a merged group row after one confirm.
   Future<void> _deleteUnit(_ComponentUnit unit) async {
     final store = ref.read(componentStoreProvider);
-    final installedSpecs =
-        unit.specs.where(store.isInstalled).toList(growable: false);
+    final installedSpecs = unit.specs
+        .where(store.isInstalled)
+        .toList(growable: false);
     if (installedSpecs.isEmpty) return;
     await _delete(installedSpecs.first);
     for (final spec in installedSpecs.skip(1)) {
@@ -172,9 +171,7 @@ class _AsrLocalComponentsState extends ConsumerState<AsrLocalComponents> {
       children: [
         for (final unit in _units)
           _AsrComponentTile(
-            key: ValueKey(
-              '${unit.specs.first.kind.name}-$_generation',
-            ),
+            key: ValueKey('${unit.specs.first.kind.name}-$_generation'),
             label: unit.label,
             sizeHint: unit.sizeHint,
             note: unit.note,
@@ -197,12 +194,10 @@ class _ComponentUnit {
   final List<ComponentSpec> specs;
 
   /// Group label when merged; the single spec's own name otherwise.
-  String get label =>
-      specs.first.uiGroupLabel ?? specs.first.displayName;
+  String get label => specs.first.uiGroupLabel ?? specs.first.displayName;
 
   /// Combined group size hint when merged; the spec hint otherwise.
-  String get sizeHint =>
-      specs.first.uiGroupSizeHint ?? specs.first.sizeHint;
+  String get sizeHint => specs.first.uiGroupSizeHint ?? specs.first.sizeHint;
 
   /// Capability note for merged rows; null for plain singles.
   String? get note => specs.first.uiGroupNote;
@@ -250,7 +245,8 @@ class _AsrComponentTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final progress = this.progress;
-    final downloading = progress != null &&
+    final downloading =
+        progress != null &&
         (progress.phase == ComponentDownloadPhase.downloading ||
             progress.phase == ComponentDownloadPhase.extracting);
     return Padding(
@@ -258,9 +254,7 @@ class _AsrComponentTile extends StatelessWidget {
       child: Row(
         children: [
           Icon(
-            installed
-                ? Icons.check_circle
-                : Icons.download_for_offline_outlined,
+            installed ? EnjoyIcons.checkCircle : EnjoyIcons.download,
             size: 22,
             color: installed
                 ? theme.colorScheme.primary
@@ -283,9 +277,7 @@ class _AsrComponentTile extends StatelessWidget {
                 ],
                 const SizedBox(height: 2),
                 Text(
-                  installed
-                      ? '已安装 · $sizeHint'
-                      : '未安装 · $sizeHint',
+                  installed ? '已安装 · $sizeHint' : '未安装 · $sizeHint',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -315,7 +307,7 @@ class _AsrComponentTile extends StatelessWidget {
           if (installed)
             IconButton(
               tooltip: '删除',
-              icon: const Icon(Icons.delete_outline),
+              icon: const Icon(EnjoyIcons.delete),
               onPressed: onDelete,
             )
           else if (downloading)

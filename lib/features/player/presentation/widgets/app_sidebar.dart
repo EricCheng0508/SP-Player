@@ -174,81 +174,83 @@ class _AppSidebarState extends ConsumerState<AppSidebar> {
                 ),
 
                 if (!widget.collapsed)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: Tooltip(
-                    message: searchTooltip,
-                    child: SizedBox(
-                      height: 38,
-                      child: ListenableBuilder(
-                        listenable: Listenable.merge([
-                          searchFocusNode,
-                          _searchController,
-                        ]),
-                        builder: (context, _) {
-                          final showKeycap =
-                              isDesktop &&
-                              searchKeys.isNotEmpty &&
-                              !searchFocusNode.hasFocus &&
-                              _searchController.text.isEmpty;
-                          return TextField(
-                            focusNode: searchFocusNode,
-                            controller: _searchController,
-                            onTap: () => ensureLibraryRouteForSearch(
-                              GoRouter.of(context),
-                            ),
-                            onChanged: (v) => ref
-                                .read(librarySearchProvider.notifier)
-                                .setQuery(v),
-                            onSubmitted: (_) => ref
-                                .read(librarySearchProvider.notifier)
-                                .commit(),
-                            style: tt.bodyMedium?.copyWith(
-                              fontSize: 13.5,
-                              color: t.ink,
-                            ),
-                            textAlignVertical: TextAlignVertical.center,
-                            decoration: InputDecoration(
-                              hintText: l10n.librarySearchHint,
-                              hintStyle: tt.bodyMedium?.copyWith(
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Tooltip(
+                      message: searchTooltip,
+                      child: SizedBox(
+                        height: 38,
+                        child: ListenableBuilder(
+                          listenable: Listenable.merge([
+                            searchFocusNode,
+                            _searchController,
+                          ]),
+                          builder: (context, _) {
+                            final showKeycap =
+                                isDesktop &&
+                                searchKeys.isNotEmpty &&
+                                !searchFocusNode.hasFocus &&
+                                _searchController.text.isEmpty;
+                            return TextField(
+                              focusNode: searchFocusNode,
+                              controller: _searchController,
+                              onTap: () => ensureLibraryRouteForSearch(
+                                GoRouter.of(context),
+                              ),
+                              onChanged: (v) => ref
+                                  .read(librarySearchProvider.notifier)
+                                  .setQuery(v),
+                              onSubmitted: (_) => ref
+                                  .read(librarySearchProvider.notifier)
+                                  .commit(),
+                              style: tt.bodyMedium?.copyWith(
                                 fontSize: 13.5,
-                                color: t.ink3,
+                                color: t.ink,
                               ),
-                              prefixIcon: Icon(
-                                EnjoyIcons.search,
-                                color: t.ink3,
-                                size: 16,
+                              textAlignVertical: TextAlignVertical.center,
+                              decoration: InputDecoration(
+                                hintText: l10n.librarySearchHint,
+                                hintStyle: tt.bodyMedium?.copyWith(
+                                  fontSize: 13.5,
+                                  color: t.ink3,
+                                ),
+                                prefixIcon: Icon(
+                                  EnjoyIcons.search,
+                                  color: t.ink3,
+                                  size: 16,
+                                ),
+                                prefixIconConstraints: const BoxConstraints(
+                                  minWidth: 36,
+                                  minHeight: 38,
+                                ),
+                                suffixIcon: showKeycap
+                                    ? Padding(
+                                        padding: const EdgeInsets.only(
+                                          right: 8,
+                                        ),
+                                        child: Center(
+                                          widthFactor: 1,
+                                          child: EnjoyKeycap(label: searchKeys),
+                                        ),
+                                      )
+                                    : null,
+                                suffixIconConstraints: const BoxConstraints(
+                                  minHeight: 38,
+                                ),
+                                filled: true,
+                                fillColor: t.paper,
+                                border: searchBorder(Colors.transparent),
+                                enabledBorder: searchBorder(t.line),
+                                focusedBorder: searchBorder(t.brandInk, 1.5),
+                                contentPadding: EdgeInsets.zero,
+                                isDense: true,
                               ),
-                              prefixIconConstraints: const BoxConstraints(
-                                minWidth: 36,
-                                minHeight: 38,
-                              ),
-                              suffixIcon: showKeycap
-                                  ? Padding(
-                                      padding: const EdgeInsets.only(right: 8),
-                                      child: Center(
-                                        widthFactor: 1,
-                                        child: EnjoyKeycap(label: searchKeys),
-                                      ),
-                                    )
-                                  : null,
-                              suffixIconConstraints: const BoxConstraints(
-                                minHeight: 38,
-                              ),
-                              filled: true,
-                              fillColor: t.paper,
-                              border: searchBorder(Colors.transparent),
-                              enabledBorder: searchBorder(t.line),
-                              focusedBorder: searchBorder(t.brandInk, 1.5),
-                              contentPadding: EdgeInsets.zero,
-                              isDense: true,
-                            ),
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ),
-                ),
 
                 NavItemPill(
                   icon: EnjoyIcons.home,
@@ -280,8 +282,7 @@ class _AppSidebarState extends ConsumerState<AppSidebar> {
                   ),
                   label: l10n.libraryTitle,
                   collapsed: widget.collapsed,
-                  selected:
-                      path.startsWith('/library') || path.startsWith('/cloud'),
+                  selected: path.startsWith('/library'),
                   onTap: () => context.go('/library'),
                 ),
                 NavItemPill(
@@ -328,7 +329,7 @@ class _AppSidebarState extends ConsumerState<AppSidebar> {
                       tooltip: '展开侧边栏',
                       onPressed: widget.onToggleCollapse,
                       icon: Icon(
-                        Icons.chevron_right_rounded,
+                        EnjoyIcons.chevronRight,
                         size: 20,
                         color: t.ink2,
                       ),
@@ -355,7 +356,7 @@ class _AppSidebarState extends ConsumerState<AppSidebar> {
                         tooltip: '折叠侧边栏',
                         onPressed: widget.onToggleCollapse,
                         icon: Icon(
-                          Icons.chevron_left_rounded,
+                          EnjoyIcons.chevronLeft,
                           size: 20,
                           color: t.ink2,
                         ),

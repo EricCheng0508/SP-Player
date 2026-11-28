@@ -1,7 +1,7 @@
 /// Scheduling pool for manual full-video batch translation (ADR-0106 §5).
 ///
-/// Pure Dart with injected callbacks — mirrors [AutoTranslateLineQueue]'s
-/// testability contract. Batches are precomputed chunks of untranslated line
+/// Pure Dart with injected callbacks — a testability contract over plain
+/// callback injection. Batches are precomputed chunks of untranslated line
 /// indexes; [run] keeps up to [kFullTranslateConcurrency] requests in flight,
 /// reports each persisted batch, and stops starting new work when the
 /// injected cancel check flips true (in-flight batches finish so their
@@ -38,10 +38,7 @@ class FullTranslateScheduler {
 
   /// One LLM request for the batch. Returns per-line translations in the
   /// same order, or null when the batch reply was unparseable.
-  final Future<List<String>?> Function(
-    List<int> indexes,
-    List<String> texts,
-  )
+  final Future<List<String>?> Function(List<int> indexes, List<String> texts)
   translateBatch;
 
   /// Called after translations for [indexes] persisted (write buffer enqueued).
@@ -59,7 +56,7 @@ class FullTranslateScheduler {
   Future<void> run({
     required Future<List<String>> Function(List<int> indexes) textsFor,
   }) async {
-  var next = 0;
+    var next = 0;
 
     Future<void> worker() async {
       while (true) {

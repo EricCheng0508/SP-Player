@@ -184,7 +184,7 @@ final class TranslationCapabilityProvider
 }
 
 String _$translationCapabilityHash() =>
-    r'69dfdb1d11a3e6e87f35dba249cb378aaa85e885';
+    r'3eb9b5d15a412389f117fa4f9719144ce8474fff';
 
 @ProviderFor(dictionaryCapability)
 final dictionaryCapabilityProvider = DictionaryCapabilityProvider._();

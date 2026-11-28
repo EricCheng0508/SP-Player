@@ -6,6 +6,11 @@
 /// can be deferred to a manual download in Settings.
 library;
 
+import 'package:enjoy_player/core/theme/typography.dart';
+import 'package:enjoy_player/core/interaction/enjoy_pressable.dart';
+
+import 'package:enjoy_player/core/theme/enjoy_icons.dart';
+
 import 'dart:async';
 import 'dart:io';
 
@@ -36,8 +41,9 @@ Future<void> maybeShowSetupWizard(BuildContext context, WidgetRef ref) async {
   if (_wizardShownThisSession) return;
   try {
     final db = ref.read(appDatabaseProvider);
-    final completed =
-        await db.settingsDao.readSetting(SettingsKeys.setupWizardCompletedV1);
+    final completed = await db.settingsDao.readSetting(
+      SettingsKeys.setupWizardCompletedV1,
+    );
     if (completed == true) return;
 
     final store = ref.read(componentStoreProvider);
@@ -46,7 +52,10 @@ Future<void> maybeShowSetupWizard(BuildContext context, WidgetRef ref) async {
     final cloudConfigured = await _hasCloudTranslationConfig(ref);
     if (runtimeReady && modelReady) {
       // Components present (e.g. dev machine) — mark done silently.
-      await db.settingsDao.writeSetting(SettingsKeys.setupWizardCompletedV1, true);
+      await db.settingsDao.writeSetting(
+        SettingsKeys.setupWizardCompletedV1,
+        true,
+      );
       return;
     }
     if (cloudConfigured && (runtimeReady || modelReady)) {
@@ -82,7 +91,13 @@ enum _TranslationChoice { cloud, localNow, localLater }
 enum _InstallRowState { pending, downloading, extracting, done, failed }
 
 class _RowState {
-  _RowState(this.state, {this.received = 0, this.total = 0, this.error, this.speedBps});
+  _RowState(
+    this.state, {
+    this.received = 0,
+    this.total = 0,
+    this.error,
+    this.speedBps,
+  });
   final _InstallRowState state;
   final int received;
   final int total;
@@ -159,8 +174,12 @@ class _SetupWizardDialogState extends ConsumerState<SetupWizardDialog> {
 
   Future<void> _finish() async {
     final db = ref.read(appDatabaseProvider);
-    await db.settingsDao.writeSetting(SettingsKeys.setupWizardCompletedV1, true);
-    if (_choice == _TranslationChoice.localNow || _choice == _TranslationChoice.localLater) {
+    await db.settingsDao.writeSetting(
+      SettingsKeys.setupWizardCompletedV1,
+      true,
+    );
+    if (_choice == _TranslationChoice.localNow ||
+        _choice == _TranslationChoice.localLater) {
       await _writeLocalLlmConfig();
     }
     if (!mounted) return;
@@ -169,7 +188,9 @@ class _SetupWizardDialogState extends ConsumerState<SetupWizardDialog> {
 
   Future<void> _writeLocalLlmConfig() async {
     try {
-      await ref.read(aiModalityConfigCtrlProvider.notifier).saveModality(
+      await ref
+          .read(aiModalityConfigCtrlProvider.notifier)
+          .saveModality(
             modality: ModalityKind.llm,
             config: const AIServiceConfig(
               provider: AIProvider.byok,
@@ -208,8 +229,10 @@ class _SetupWizardDialogState extends ConsumerState<SetupWizardDialog> {
           setState(() {
             _rows[spec.kind] = _RowState(
               switch (progress.phase) {
-                ComponentDownloadPhase.downloading => _InstallRowState.downloading,
-                ComponentDownloadPhase.extracting => _InstallRowState.extracting,
+                ComponentDownloadPhase.downloading =>
+                  _InstallRowState.downloading,
+                ComponentDownloadPhase.extracting =>
+                  _InstallRowState.extracting,
                 ComponentDownloadPhase.done => _InstallRowState.done,
                 ComponentDownloadPhase.failed => _InstallRowState.failed,
                 _ => _InstallRowState.pending,
@@ -283,15 +306,12 @@ class _SetupWizardDialogState extends ConsumerState<SetupWizardDialog> {
       await ref.read(componentStoreProvider).importArchive(target, path, (p) {
         if (!mounted) return;
         setState(() {
-          _rows[target.kind] = _RowState(
-            switch (p.phase) {
-              ComponentDownloadPhase.extracting => _InstallRowState.extracting,
-              ComponentDownloadPhase.done => _InstallRowState.done,
-              ComponentDownloadPhase.failed => _InstallRowState.failed,
-              _ => _InstallRowState.extracting,
-            },
-            error: p.error,
-          );
+          _rows[target.kind] = _RowState(switch (p.phase) {
+            ComponentDownloadPhase.extracting => _InstallRowState.extracting,
+            ComponentDownloadPhase.done => _InstallRowState.done,
+            ComponentDownloadPhase.failed => _InstallRowState.failed,
+            _ => _InstallRowState.extracting,
+          }, error: p.error);
         });
       });
     } on Object catch (e) {
@@ -312,15 +332,9 @@ class _SetupWizardDialogState extends ConsumerState<SetupWizardDialog> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                '首次配置',
-                style: theme.textTheme.headlineSmall,
-              ),
+              Text('首次配置', style: theme.textTheme.headlineSmall),
               const SizedBox(height: 4),
-              Text(
-                '选择偏好，安装组件，即可开始。',
-                style: theme.textTheme.bodySmall,
-              ),
+              Text('选择偏好，安装组件，即可开始。', style: theme.textTheme.bodySmall),
               const SizedBox(height: 16),
               _StepIndicator(current: _step),
               const SizedBox(height: 16),
@@ -349,7 +363,7 @@ class _SetupWizardDialogState extends ConsumerState<SetupWizardDialog> {
         _InfoCard(
           title: '字幕识别（必装）',
           subtitle: '本地 large-v3-turbo 模型 · 离线转写字幕 · 约 3.8 GB（运行时 + 模型）',
-          icon: Icons.graphic_eq,
+          icon: EnjoyIcons.waveform,
           theme: theme,
         ),
         const SizedBox(height: 12),
@@ -401,7 +415,7 @@ class _SetupWizardDialogState extends ConsumerState<SetupWizardDialog> {
             alignment: Alignment.centerRight,
             child: TextButton.icon(
               onPressed: _importManually,
-              icon: const Icon(Icons.file_open, size: 18),
+              icon: const Icon(EnjoyIcons.folder, size: 18),
               label: const Text('已下载好 zip？导入安装'),
             ),
           ),
@@ -414,8 +428,9 @@ class _SetupWizardDialogState extends ConsumerState<SetupWizardDialog> {
           const SizedBox(height: 12),
           Text(
             '安装失败：$_installError',
-            style: theme.textTheme.bodySmall
-                ?.copyWith(color: theme.colorScheme.error),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.error,
+            ),
           ),
         ],
       ],
@@ -425,17 +440,20 @@ class _SetupWizardDialogState extends ConsumerState<SetupWizardDialog> {
   Widget _buildRow(ComponentSpec spec, ThemeData theme) {
     final row = _rows[spec.kind] ?? _RowState(_InstallRowState.pending);
     final icon = switch (row.state) {
-      _InstallRowState.pending => const Icon(Icons.schedule, size: 20),
+      _InstallRowState.pending => const Icon(EnjoyIcons.clock, size: 20),
       _InstallRowState.downloading ||
       _InstallRowState.extracting => const SizedBox(
         width: 18,
         height: 18,
         child: CircularProgressIndicator(strokeWidth: 2),
       ),
-      _InstallRowState.done =>
-        Icon(Icons.check_circle, size: 20, color: theme.colorScheme.primary),
+      _InstallRowState.done => Icon(
+        EnjoyIcons.checkCircle,
+        size: 20,
+        color: theme.colorScheme.primary,
+      ),
       _InstallRowState.failed => Icon(
-        Icons.error_outline,
+        EnjoyIcons.error,
         size: 20,
         color: theme.colorScheme.error,
       ),
@@ -444,7 +462,9 @@ class _SetupWizardDialogState extends ConsumerState<SetupWizardDialog> {
     if (row.state == _InstallRowState.downloading) {
       final parts = <String>[];
       if (row.total > 0) {
-        final pct = ((row.received / row.total) * 100).clamp(0, 100).toStringAsFixed(0);
+        final pct = ((row.received / row.total) * 100)
+            .clamp(0, 100)
+            .toStringAsFixed(0);
         parts.add('$pct%');
         parts.add('${_fmtBytes(row.received)} / ${_fmtBytes(row.total)}');
       } else {
@@ -499,17 +519,13 @@ class _SetupWizardDialogState extends ConsumerState<SetupWizardDialog> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '${spec.displayName} · 手动下载',
-            style: theme.textTheme.labelLarge,
-          ),
+          Text('${spec.displayName} · 手动下载', style: theme.textTheme.labelLarge),
           const SizedBox(height: 4),
           Text(
             accelerated,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodySmall
-                ?.copyWith(fontFamily: 'monospace'),
+            style: enjoyMonoStyle(context, size: 11, weight: FontWeight.w400),
           ),
           const SizedBox(height: 6),
           Wrap(
@@ -517,17 +533,17 @@ class _SetupWizardDialogState extends ConsumerState<SetupWizardDialog> {
             runSpacing: 4,
             children: [
               ActionChip(
-                avatar: const Icon(Icons.link, size: 16),
+                avatar: const Icon(EnjoyIcons.link, size: 16),
                 label: const Text('复制加速链接'),
                 onPressed: () => _copyUrl(accelerated, theme),
               ),
               ActionChip(
-                avatar: const Icon(Icons.link_off, size: 16),
+                avatar: const Icon(EnjoyIcons.cloudOff, size: 16),
                 label: const Text('复制原始链接'),
                 onPressed: () => _copyUrl(original, theme),
               ),
               ActionChip(
-                avatar: const Icon(Icons.open_in_browser, size: 16),
+                avatar: const Icon(EnjoyIcons.openExternal, size: 16),
                 label: const Text('浏览器打开'),
                 onPressed: () async {
                   final uri = Uri.parse(original);
@@ -560,7 +576,7 @@ class _SetupWizardDialogState extends ConsumerState<SetupWizardDialog> {
       children: [
         Row(
           children: [
-            Icon(Icons.check_circle, color: theme.colorScheme.primary),
+            Icon(EnjoyIcons.checkCircle, color: theme.colorScheme.primary),
             const SizedBox(width: 8),
             Text('一切就绪', style: theme.textTheme.titleLarge),
           ],
@@ -604,13 +620,11 @@ class _SetupWizardDialogState extends ConsumerState<SetupWizardDialog> {
                         _finish();
                       }
                     },
-              child: Text(
-                switch (_step) {
-                  0 => '下一步',
-                  1 => '开始安装',
-                  _ => '开始使用',
-                },
-              ),
+              child: Text(switch (_step) {
+                0 => '下一步',
+                1 => '开始安装',
+                _ => '开始使用',
+              }),
             ),
           ],
         ),
@@ -752,7 +766,7 @@ class _ChoiceTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
-      child: InkWell(
+      child: EnjoyPressable(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Container(

@@ -377,10 +377,7 @@ void main() {
       0,
       reason: 'bundler failed:\n${result.stdout}\n${result.stderr}',
     );
-    expect(
-      sandbox.depsOf('SP Player'),
-      contains('@rpath/$_freetypeKegDylib'),
-    );
+    expect(sandbox.depsOf('SP Player'), contains('@rpath/$_freetypeKegDylib'));
   }, skip: skipOnWindows);
 
   test('fails the build when an @rpath dependency cannot be resolved', () {
@@ -437,9 +434,7 @@ void main() {
       '@executable_path/../Frameworks',
       '@executable_path',
     ]);
-    sandbox.writeDeps('SP Player.debug.dylib', [
-      '/usr/lib/libSystem.B.dylib',
-    ]);
+    sandbox.writeDeps('SP Player.debug.dylib', ['/usr/lib/libSystem.B.dylib']);
     sandbox.writeAppFile('Contents/MacOS/SP Player.debug.dylib', 'mach-o');
 
     final result = sandbox.runBundler();

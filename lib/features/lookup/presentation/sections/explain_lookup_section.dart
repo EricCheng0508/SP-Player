@@ -63,7 +63,8 @@ class _ExplainLookupSectionState extends ConsumerState<ExplainLookupSection> {
     super.didUpdateWidget(oldWidget);
     final old = oldWidget.request;
     final now = widget.request;
-    final changed = old.selectedText != now.selectedText ||
+    final changed =
+        old.selectedText != now.selectedText ||
         old.sourceLanguage != now.sourceLanguage ||
         old.targetLanguage != now.targetLanguage ||
         old.contextualContext != now.contextualContext;

@@ -20,8 +20,8 @@ import 'package:enjoy_player/features/settings/domain/settings_search_entry.dart
 import 'package:enjoy_player/features/settings/presentation/widgets/sections/about_section.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/sections/ai_providers_section.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/sections/appearance_language_section.dart';
-import 'package:enjoy_player/features/settings/presentation/widgets/sections/cloud_sync_section.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/sections/developer_section.dart';
+import 'package:enjoy_player/features/local_components/presentation/local_components_section.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/sections/keyboard_shortcuts_section.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/sections/network_section.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/sections/recording_section.dart';
@@ -135,21 +135,6 @@ bool _hidden() => false;
 /// this list covers exactly the registry's section headers.
 final List<SettingsSectionSpec> kSettingsSectionSpecs = [
   SettingsSectionSpec(
-    sectionId: SettingsSectionIds.cloudSync,
-    icon: EnjoyIcons.cloudSync,
-    title: (l10n) => l10n.settingsSectionSync,
-    hint: (l10n) => l10n.settingsSectionSyncHint,
-    rows: [
-      SettingsRowSpec(
-        rowId: 'syncStatus',
-        title: (l10n) => l10n.syncSettingsTileTitle,
-      ),
-    ],
-    body: () => const CloudSyncSectionBody(),
-    isVisible: _hidden,
-    collapsedByDefault: true,
-  ),
-  SettingsSectionSpec(
     sectionId: SettingsSectionIds.appearanceLanguage,
     icon: EnjoyIcons.palette,
     title: (l10n) => l10n.settingsSectionAppearanceLanguage,
@@ -176,10 +161,30 @@ final List<SettingsSectionSpec> kSettingsSectionSpecs = [
     icon: EnjoyIcons.sparkle,
     title: (l10n) => l10n.settingsSectionAi,
     hint: (l10n) => l10n.settingsSectionAiHint,
-    rows: const [],
+    rows: [
+      SettingsRowSpec(
+        rowId: 'aiProviders',
+        title: (l10n) => l10n.settingsSectionAi,
+      ),
+    ],
     body: () => const AiProvidersSectionBody(),
     wrapInCard: false,
-    collapsedByDefault: false,
+    collapsedByDefault: true,
+  ),
+  SettingsSectionSpec(
+    sectionId: SettingsSectionIds.localComponents,
+    icon: EnjoyIcons.download,
+    title: (l10n) => l10n.settingsSectionLocalComponents,
+    hint: (l10n) => l10n.settingsSectionLocalComponentsHint,
+    rows: [
+      SettingsRowSpec(
+        rowId: 'componentList',
+        title: (l10n) => l10n.settingsSectionLocalComponents,
+      ),
+    ],
+    body: () => const LocalComponentsSectionBody(),
+    wrapInCard: false,
+    collapsedByDefault: true,
   ),
   SettingsSectionSpec(
     sectionId: SettingsSectionIds.network,

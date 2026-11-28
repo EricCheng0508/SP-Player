@@ -86,6 +86,7 @@ List<Override> _overrides() {
       (ref) => (
         cueIndex: ref.watch(_cueIndexProvider),
         wordIndex: ref.watch(_wordIndexProvider),
+        visibleCueIndex: ref.watch(_cueIndexProvider),
       ),
     ),
   ];

@@ -253,24 +253,4 @@ void main() {
       expect(autoTranslateSourceKeyDerivationCount, 2);
     });
   });
-
-  group('findCachedAutoTranslateText', () {
-    test('reuses translation for identical sourceKey', () {
-      final key = autoTranslateSourceKey(
-        primaryText: 'Same',
-        sourceLanguage: 'en',
-        targetLanguage: 'zh-CN',
-      );
-      final ai = [
-        TranscriptLine(
-          text: '相同',
-          startMs: 0,
-          durationMs: 1000,
-          sourceKey: key,
-        ),
-        const TranscriptLine(text: '', startMs: 1000, durationMs: 500),
-      ];
-      expect(findCachedAutoTranslateText(aiLines: ai, key: key), '相同');
-    });
-  });
 }

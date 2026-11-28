@@ -20,13 +20,7 @@ import 'package:enjoy_player/data/db/settings_keys.dart';
 import 'package:enjoy_player/features/local_components/domain/component_catalog.dart';
 
 /// Lifecycle phase of one component download.
-enum ComponentDownloadPhase {
-  idle,
-  downloading,
-  extracting,
-  done,
-  failed,
-}
+enum ComponentDownloadPhase { idle, downloading, extracting, done, failed }
 
 final class ComponentProgress {
   const ComponentProgress({
@@ -220,9 +214,7 @@ final class ComponentStore {
     try {
       // Already installed (pre-imported or previous run) → nothing to do.
       if (isInstalled(spec)) {
-        onProgress(
-          const ComponentProgress(phase: ComponentDownloadPhase.done),
-        );
+        onProgress(const ComponentProgress(phase: ComponentDownloadPhase.done));
         return;
       }
       final dir = installDir(spec);
@@ -266,9 +258,7 @@ final class ComponentStore {
           await dest.rename(target.path);
         }
       }
-      onProgress(
-        const ComponentProgress(phase: ComponentDownloadPhase.done),
-      );
+      onProgress(const ComponentProgress(phase: ComponentDownloadPhase.done));
     } on Object catch (e) {
       onProgress(
         ComponentProgress(
@@ -517,9 +507,9 @@ final class ComponentStore {
         'bytes=$resumeFrom-${resumeFrom + (1 << 20)}',
       );
       final probeResponse = await probe.close().timeout(
-            const Duration(seconds: 45),
-            onTimeout: () => throw TimeoutException('no response: $url'),
-          );
+        const Duration(seconds: 45),
+        onTimeout: () => throw TimeoutException('no response: $url'),
+      );
       final status = probeResponse.statusCode;
       if (status == 416) {
         if (resumeFrom >= minBytes ~/ 2) return resumeFrom;
@@ -539,8 +529,9 @@ final class ComponentStore {
       // "Content-Range: bytes <start>-<end>/<total>"
       var total = 0;
       if (status == 206) {
-        final contentRange =
-            probeResponse.headers.value(HttpHeaders.contentRangeHeader);
+        final contentRange = probeResponse.headers.value(
+          HttpHeaders.contentRangeHeader,
+        );
         final match = RegExp(r'/(\d+)\s*$').firstMatch(contentRange ?? '');
         if (match != null) total = int.tryParse(match.group(1)!) ?? 0;
       } else {
@@ -599,7 +590,8 @@ final class ComponentStore {
     if (metaFile.existsSync()) {
       try {
         final meta = jsonDecode(metaFile.readAsStringSync()) as Map;
-        layoutOk = meta['url'] == url &&
+        layoutOk =
+            meta['url'] == url &&
             meta['total'] == total &&
             meta['base'] == base &&
             meta['chunkLen'] == chunkLen;
@@ -614,7 +606,12 @@ final class ComponentStore {
       }
     }
     metaFile.writeAsStringSync(
-      jsonEncode({'url': url, 'total': total, 'base': base, 'chunkLen': chunkLen}),
+      jsonEncode({
+        'url': url,
+        'total': total,
+        'base': base,
+        'chunkLen': chunkLen,
+      }),
     );
 
     Future<void> pullChunk(int index, int start, int end) async {
@@ -636,9 +633,9 @@ final class ComponentStore {
             'bytes=${start + offset}-${end - 1}',
           );
           final response = await request.close().timeout(
-                const Duration(seconds: 45),
-                onTimeout: () => throw TimeoutException('chunk stall: $url'),
-              );
+            const Duration(seconds: 45),
+            onTimeout: () => throw TimeoutException('chunk stall: $url'),
+          );
           if (response.statusCode != 206) {
             throw HttpException('HTTP ${response.statusCode} chunk $index');
           }
@@ -763,9 +760,9 @@ final class ComponentStore {
           request.headers.set(HttpHeaders.rangeHeader, 'bytes=$received-');
         }
         final response = await request.close().timeout(
-              const Duration(seconds: 45),
-              onTimeout: () => throw TimeoutException('no response: $url'),
-            );
+          const Duration(seconds: 45),
+          onTimeout: () => throw TimeoutException('no response: $url'),
+        );
         if (response.statusCode == 416) {
           // Range beyond EOF with a complete-enough file — accept.
           if (received >= minBytes ~/ 2) return received;
@@ -781,10 +778,9 @@ final class ComponentStore {
           await dest.writeAsBytes([], mode: FileMode.write);
         }
 
-        final total = received +
-            (response.contentLength > 0
-                ? response.contentLength
-                : 0);
+        final total =
+            received +
+            (response.contentLength > 0 ? response.contentLength : 0);
         final sink = dest.openWrite(mode: FileMode.append);
         try {
           // Stall guard: any 45s gap between chunks aborts this candidate
@@ -804,7 +800,7 @@ final class ComponentStore {
             if (now.difference(lastTick).inMilliseconds >= 500) {
               final speed =
                   ((received - lastBytes) * 1000) ~/
-                      now.difference(lastTick).inMilliseconds;
+                  now.difference(lastTick).inMilliseconds;
               lastTick = now;
               lastBytes = received;
               onProgress(
@@ -864,8 +860,9 @@ final class ComponentStore {
       if (!zipPath.toLowerCase().endsWith('.zip')) {
         throw Exception('请选择 .zip 压缩包');
       }
-      final minBytes =
-          spec.files.map((f) => f.minBytes).reduce((a, b) => a < b ? a : b);
+      final minBytes = spec.files
+          .map((f) => f.minBytes)
+          .reduce((a, b) => a < b ? a : b);
       if (file.lengthSync() < minBytes) {
         throw Exception(
           '文件不完整（${_fmtSize(file.lengthSync())}，应为约 ${_fmtSize(minBytes)}）'
@@ -878,13 +875,10 @@ final class ComponentStore {
       final dir = installDir(spec);
       await dir.create(recursive: true);
       await _extractZip(file, dir);
-      if (spec.archiveEntry != null &&
-          installedEntryPath(spec) == null) {
+      if (spec.archiveEntry != null && installedEntryPath(spec) == null) {
         throw Exception('压缩包内容不对：缺少 ${spec.archiveEntry}');
       }
-      onProgress(
-        const ComponentProgress(phase: ComponentDownloadPhase.done),
-      );
+      onProgress(const ComponentProgress(phase: ComponentDownloadPhase.done));
     } on Object catch (e) {
       onProgress(
         ComponentProgress(
@@ -930,10 +924,10 @@ final class ComponentProgressNotifier
 }
 
 final componentProgressProvider =
-    NotifierProvider<ComponentProgressNotifier,
-        Map<ComponentKind, ComponentProgress>>(
-  ComponentProgressNotifier.new,
-);
+    NotifierProvider<
+      ComponentProgressNotifier,
+      Map<ComponentKind, ComponentProgress>
+    >(ComponentProgressNotifier.new);
 
 final componentRootSettingProvider = FutureProvider<String?>((ref) async {
   final db = ref.watch(appDatabaseProvider);

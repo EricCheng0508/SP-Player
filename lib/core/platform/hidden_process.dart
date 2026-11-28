@@ -73,31 +73,33 @@ final class _ProcessInformation extends Struct {
   external int dwThreadId;
 }
 
-typedef _CreateProcessWNative = Int32 Function(
-  Pointer<Utf16> lpApplicationName,
-  Pointer<Utf16> lpCommandLine,
-  Pointer<Void> lpProcessAttributes,
-  Pointer<Void> lpThreadAttributes,
-  Int32 bInheritHandles,
-  Uint32 dwCreationFlags,
-  Pointer<Void> lpEnvironment,
-  Pointer<Utf16> lpCurrentDirectory,
-  Pointer<_StartupInfoW> lpStartupInfo,
-  Pointer<_ProcessInformation> lpProcessInformation,
-);
+typedef _CreateProcessWNative =
+    Int32 Function(
+      Pointer<Utf16> lpApplicationName,
+      Pointer<Utf16> lpCommandLine,
+      Pointer<Void> lpProcessAttributes,
+      Pointer<Void> lpThreadAttributes,
+      Int32 bInheritHandles,
+      Uint32 dwCreationFlags,
+      Pointer<Void> lpEnvironment,
+      Pointer<Utf16> lpCurrentDirectory,
+      Pointer<_StartupInfoW> lpStartupInfo,
+      Pointer<_ProcessInformation> lpProcessInformation,
+    );
 
-typedef _CreateProcessWDart = int Function(
-  Pointer<Utf16> lpApplicationName,
-  Pointer<Utf16> lpCommandLine,
-  Pointer<Void> lpProcessAttributes,
-  Pointer<Void> lpThreadAttributes,
-  int bInheritHandles,
-  int dwCreationFlags,
-  Pointer<Void> lpEnvironment,
-  Pointer<Utf16> lpCurrentDirectory,
-  Pointer<_StartupInfoW> lpStartupInfo,
-  Pointer<_ProcessInformation> lpProcessInformation,
-);
+typedef _CreateProcessWDart =
+    int Function(
+      Pointer<Utf16> lpApplicationName,
+      Pointer<Utf16> lpCommandLine,
+      Pointer<Void> lpProcessAttributes,
+      Pointer<Void> lpThreadAttributes,
+      int bInheritHandles,
+      int dwCreationFlags,
+      Pointer<Void> lpEnvironment,
+      Pointer<Utf16> lpCurrentDirectory,
+      Pointer<_StartupInfoW> lpStartupInfo,
+      Pointer<_ProcessInformation> lpProcessInformation,
+    );
 
 typedef _CloseHandleNative = Int32 Function(Pointer<Void> hObject);
 typedef _CloseHandleDart = int Function(Pointer<Void> hObject);
@@ -120,9 +122,8 @@ void _ensureBindings() {
 /// Quotes one argument the way `CommandLineToArgvW` parses it back.
 String _quote(String arg) {
   if (arg.isEmpty) return '""';
-  final needsQuotes = arg.contains(' ') ||
-      arg.contains('\t') ||
-      arg.contains('"');
+  final needsQuotes =
+      arg.contains(' ') || arg.contains('\t') || arg.contains('"');
   if (!needsQuotes) return arg;
 
   final buffer = StringBuffer('"');
@@ -173,17 +174,17 @@ Future<bool> spawnHidden(
 
   try {
     _ensureBindings();
-    final commandLine = [
-      _quote(executable),
-      ...args.map(_quote),
-    ].join(' ');
+    final commandLine = [_quote(executable), ...args.map(_quote)].join(' ');
 
     final cmdPtr = commandLine.toNativeUtf16();
     final cwdPtr = workingDirectory?.toNativeUtf16();
     final startupInfo = calloc<_StartupInfoW>();
     final processInfo = calloc<_ProcessInformation>();
     try {
-      assert(sizeOf<_StartupInfoW>() == 104, 'STARTUPINFOW is 104 bytes on x64');
+      assert(
+        sizeOf<_StartupInfoW>() == 104,
+        'STARTUPINFOW is 104 bytes on x64',
+      );
       startupInfo.ref.cb = sizeOf<_StartupInfoW>();
 
       final created = _createProcess!(

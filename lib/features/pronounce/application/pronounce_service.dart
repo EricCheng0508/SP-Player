@@ -107,9 +107,13 @@ final class PronounceService {
 
     if (response.statusCode != 200) {
       // 有道对「词库里没有这个词」返回 500，而不是 404。
-      _log.info('pronounce download HTTP ${response.statusCode} for ${uri.path}');
+      _log.info(
+        'pronounce download HTTP ${response.statusCode} for ${uri.path}',
+      );
       throw NetworkFailure(
-        response.statusCode >= 500 ? '该词没有发音音频' : '发音服务返回 HTTP ${response.statusCode}',
+        response.statusCode >= 500
+            ? '该词没有发音音频'
+            : '发音服务返回 HTTP ${response.statusCode}',
         statusCode: response.statusCode,
       );
     }

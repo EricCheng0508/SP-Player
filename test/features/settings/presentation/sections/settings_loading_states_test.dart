@@ -11,7 +11,6 @@ import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/sections/appearance_language_section.dart';
-import 'package:enjoy_player/features/settings/presentation/widgets/sections/cloud_sync_section.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/settings_row.dart';
 import 'package:enjoy_player/features/sync/application/sync_providers.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
@@ -28,7 +27,7 @@ class _NeverPrefsCtrl extends AppPreferencesCtrl {
       Completer<AppPreferencesState>().future;
 }
 
-class _SignedInAuthCtrlForSyncLoading extends AuthCtrl {
+class _UnusedAuthCtrl extends AuthCtrl {
   @override
   Future<AuthState> build() async => const AuthSignedIn(profile: _fakeProfile);
 }
@@ -71,30 +70,6 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
 
-      expect(find.byType(Skeleton), findsWidgets);
-      expect(tester.takeException(), isNull);
-    },
-  );
-
-  testWidgets(
-    'a loading sync queue snapshot renders a skeleton value badge, not a '
-    'blank row',
-    (tester) async {
-      await tester.pumpWidget(
-        _harness(
-          const CloudSyncSectionBody(),
-          overrides: [
-            authCtrlProvider.overrideWith(_SignedInAuthCtrlForSyncLoading.new),
-            syncQueueSnapshotProvider.overrideWith(
-              (ref) => const Stream.empty(),
-            ),
-          ],
-        ),
-      );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 50));
-
-      expect(find.byType(SettingsRow), findsOneWidget);
       expect(find.byType(Skeleton), findsWidgets);
       expect(tester.takeException(), isNull);
     },

@@ -10,7 +10,6 @@ import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/auth/presentation/sign_in_screen.dart';
 import 'package:enjoy_player/features/library/presentation/home_screen.dart';
 import 'package:enjoy_player/features/player/application/player_engine_test_double_provider.dart';
 import 'package:enjoy_player/features/update/application/update_controller.dart';
@@ -184,7 +183,6 @@ void main() {
 
       expect(find.byType(SkeletonAppBootstrap), findsOneWidget);
       expect(find.byType(HomeScreen), findsNothing);
-      expect(find.byType(SignInScreen), findsNothing);
       expect(tester.takeException(), isNull);
 
       await tester.pumpWidget(const SizedBox.shrink());

@@ -11,6 +11,7 @@
 /// transient 完成/取消/失败 note that auto-dismisses.
 library;
 
+import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -90,7 +91,7 @@ class _AsrGenerationProgressBannerState
     _noteTimer?.cancel();
     if (phase == AsrGenerationPhase.success) {
       _note = l10n.asrStatusSuccess;
-      _noteColor = const Color(0xFF176B3A);
+      _noteColor = EnjoyThemeTokens.of(context).brandInk;
       _noteIcon = EnjoyIcons.checkCircle;
     } else if (phase == AsrGenerationPhase.cancelled) {
       _note = l10n.asrStatusCancelled;
@@ -146,8 +147,10 @@ class _AsrGenerationProgressBannerState
     // Terminal-phase transition → transient completion note. Observed via
     // listen so the note only appears for runs seen from this banner (not
     // when reopening a page whose job finished long ago).
-    ref.listen(asrGenerationControllerProvider(widget.mediaId),
-        (previous, next) {
+    ref.listen(asrGenerationControllerProvider(widget.mediaId), (
+      previous,
+      next,
+    ) {
       final prevPhase = previous?.valueOrNull?.phase;
       final nextPhase = next.valueOrNull?.phase;
       if (nextPhase == null || identical(prevPhase, nextPhase)) return;
@@ -179,12 +182,12 @@ class _AsrGenerationProgressBannerState
     final phaseText = asrMessageForKey(l10n, asrPhaseMessageKey(phase));
     final stages = asrStageViews(
       phase,
-      alignInstalled:
-          widget.alignInstalledProbe?.call() ?? _alignerInstalled(),
+      alignInstalled: widget.alignInstalledProbe?.call() ?? _alignerInstalled(),
     );
 
     final infoParts = <String>[
-      if (elapsed != null) '${l10n.asrBannerElapsed} ${_formatElapsed(elapsed)}',
+      if (elapsed != null)
+        '${l10n.asrBannerElapsed} ${_formatElapsed(elapsed)}',
       if (_engineLabel() case final engine?) l10n.asrBannerEngine(engine),
       if (percent != null) percent,
       phaseText,
@@ -206,7 +209,11 @@ class _AsrGenerationProgressBannerState
                   tooltip: l10n.asrLongMediaConfirmCancel,
                   icon: const Icon(EnjoyIcons.close, size: 20),
                   onPressed: () => ref
-                      .read(asrGenerationControllerProvider(widget.mediaId).notifier)
+                      .read(
+                        asrGenerationControllerProvider(
+                          widget.mediaId,
+                        ).notifier,
+                      )
                       .cancel(),
                 ),
               ],

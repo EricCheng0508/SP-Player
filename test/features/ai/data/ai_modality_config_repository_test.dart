@@ -111,7 +111,7 @@ void main() {
     await repo.removeByok(ModalityKind.assessment);
 
     final loaded = await repo.load();
-    expect(loaded.assessment.provider, AIProvider.enjoy);
+    expect(loaded.assessment.provider, AIProvider.byok);
     expect(await secrets.hasApiKey(ModalityKind.assessment), isFalse);
   });
 
@@ -169,7 +169,7 @@ void main() {
 
     final loaded = await repo.load();
     expect(loaded.llm.provider, AIProvider.byok);
-    expect(loaded.assessment.provider, AIProvider.enjoy);
-    expect(loaded.asr.provider, AIProvider.enjoy);
+    expect(loaded.assessment.provider, AIProvider.byok);
+    expect(loaded.asr.provider, AIProvider.byok);
   });
 }

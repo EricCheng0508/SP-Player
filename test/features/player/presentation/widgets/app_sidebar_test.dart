@@ -7,7 +7,6 @@ import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/auth/domain/user_profile.dart';
-import 'package:enjoy_player/features/auth/presentation/widgets/sidebar_account_chip.dart';
 import 'package:enjoy_player/features/player/presentation/widgets/app_sidebar.dart';
 import 'package:enjoy_player/features/sync/application/sync_providers.dart';
 import 'package:enjoy_player/features/sync/data/sync_queue_repository.dart';
@@ -215,33 +214,5 @@ void main() {
     await pumpAndFindPills(tester);
 
     expect(find.text(l10n.homeContinuePracticing), findsNothing);
-  });
-
-  testWidgets('AppSidebar shows the sync line when signed in', (tester) async {
-    final authedContainer = ProviderContainer(
-      overrides: [
-        appDatabaseProvider.overrideWithValue(db),
-        deviceGlobalAppDatabaseProvider.overrideWithValue(db),
-        authCtrlProvider.overrideWith(_SignedInAuthCtrl.new),
-        syncQueueSnapshotProvider.overrideWith(
-          (ref) => Stream.value(
-            const SyncQueueSnapshot(
-              retryablePending: 0,
-              permanentlyFailed: 0,
-              detailRows: [],
-            ),
-          ),
-        ),
-      ],
-    );
-    addTearDown(authedContainer.dispose);
-    final saved = container;
-    container = authedContainer;
-    addTearDown(() => container = saved);
-    final l10n = await AppLocalizations.delegate.load(const Locale('en'));
-    await pumpAndFindPills(tester);
-
-    expect(find.text(l10n.syncSettingsTileSubtitleUpToDate), findsOneWidget);
-    expect(find.byType(SidebarAccountChip), findsOneWidget);
   });
 }

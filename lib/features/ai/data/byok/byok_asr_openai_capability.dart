@@ -44,7 +44,9 @@ final class ByokAsrOpenAiCapability implements AsrCapability {
       prompt: request.prompt,
       // 本地模式：强制 verbose_json，才能拿到逐句 segments（时间轴精确）。
       // 上游传的是 'json'，多数 OpenAI 兼容服务只回纯文本，字幕时间会被均分。
-      responseFormat: kLocalOfflineMode ? 'verbose_json' : request.responseFormat,
+      responseFormat: kLocalOfflineMode
+          ? 'verbose_json'
+          : request.responseFormat,
       client: _httpClient,
     );
 

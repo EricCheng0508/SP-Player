@@ -6,15 +6,10 @@ import 'dart:async';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/core/routing/not_found_screen.dart';
 import 'package:enjoy_player/features/ai/presentation/settings/ai_providers_screen.dart';
-import 'package:enjoy_player/features/auth/presentation/profile_edit_screen.dart';
-import 'package:enjoy_player/features/auth/presentation/profile_preferences_screen.dart';
-import 'package:enjoy_player/features/auth/presentation/profile_screen.dart';
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/auth/presentation/sign_in_screen.dart';
 import 'package:enjoy_player/features/craft/presentation/craft_history_screen.dart';
 import 'package:enjoy_player/features/craft/presentation/craft_screen.dart';
-import 'package:enjoy_player/features/credits/presentation/credits_usage_screen.dart';
 import 'package:enjoy_player/features/discover/presentation/discover_screen.dart';
 import 'package:enjoy_player/features/hotkeys/presentation/hotkeys_help_dialog.dart';
 import 'package:enjoy_player/features/library/presentation/home_screen.dart';
@@ -23,13 +18,8 @@ import 'package:enjoy_player/features/library/presentation/library_screen.dart';
 import 'package:enjoy_player/features/player/presentation/root_shell.dart';
 import 'package:enjoy_player/features/settings/presentation/hotkeys_settings_screen.dart';
 import 'package:enjoy_player/features/settings/presentation/settings_screen.dart';
-import 'package:enjoy_player/features/settings/presentation/sync_status_screen.dart';
 import 'package:enjoy_player/features/shadow_reading/application/recording_input_device_controller.dart';
 import 'package:enjoy_player/features/auth/domain/user_profile.dart';
-import 'package:enjoy_player/features/subscription/presentation/subscription_screen.dart';
-
-import 'package:enjoy_player/features/subscription/presentation/widgets/auto_renew_plan_sheet.dart';
-import 'package:enjoy_player/features/subscription/presentation/widgets/tier_catalog.dart';
 import 'package:enjoy_player/features/update/domain/update_types.dart';
 import 'package:enjoy_player/features/update/presentation/update_prompt_dialog.dart';
 import 'package:enjoy_player/features/vocabulary/presentation/vocabulary_review_session_screen.dart';
@@ -54,22 +44,15 @@ class _FakeMic extends RecordingInputDeviceCtrl {
       );
 }
 
-class _SignedOut extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedOut();
-}
-
 var openHomeImportOnNextMount = false;
 var openLibraryDeleteOnNextMount = false;
 var openUpdateDialogOnNextMount = false;
-var openPlansSheetOnNextMount = false;
 var openCheatsheetOnNextMount = false;
 
 GoRouter _router(String initial) => GoRouter(
   initialLocation: initial,
   errorBuilder: (_, state) => NotFoundScreen(uri: state.uri),
   routes: [
-    GoRoute(path: '/sign-in', builder: (_, _) => const SignInScreen()),
     ShellRoute(
       builder: (context, state, child) => RootShell(child: child),
       routes: [
@@ -153,10 +136,6 @@ GoRouter _router(String initial) => GoRouter(
           ),
         ),
         GoRoute(
-          path: '/settings/sync',
-          builder: (_, _) => const SyncStatusScreen(),
-        ),
-        GoRoute(
           path: '/settings/keyboard',
           builder: (_, _) => Consumer(
             builder: (context, ref, _) {
@@ -176,41 +155,6 @@ GoRouter _router(String initial) => GoRouter(
           path: '/settings/ai-providers',
           builder: (_, _) => const AiProvidersScreen(),
         ),
-        GoRoute(path: '/profile', builder: (_, _) => const ProfileScreen()),
-        GoRoute(
-          path: '/profile/edit',
-          builder: (_, _) => const ProfileEditScreen(),
-        ),
-        GoRoute(
-          path: '/profile/preferences',
-          builder: (_, _) => const ProfilePreferencesScreen(),
-        ),
-        GoRoute(
-          path: '/credits',
-          builder: (_, _) => const CreditsUsageScreen(),
-        ),
-        GoRoute(
-          path: '/subscription',
-          builder: (_, _) => Consumer(
-            builder: (context, ref, _) {
-              if (openPlansSheetOnNextMount) {
-                openPlansSheetOnNextMount = false;
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (context.mounted) {
-                    unawaited(
-                      showUnifiedPurchaseSheet(
-                        context,
-                        tier: SubscriptionTier.pro,
-                        interval: CatalogInterval.month,
-                      ),
-                    );
-                  }
-                });
-              }
-              return const SubscriptionScreen();
-            },
-          ),
-        ),
         GoRoute(path: '/craft', builder: (_, _) => const CraftScreen()),
         GoRoute(
           path: '/craft/history',
@@ -221,8 +165,8 @@ GoRouter _router(String initial) => GoRouter(
   ],
 );
 
-List<Override> _overrides(AppDatabase db, {bool signedOut = false}) => [
-  ...boardOverrides(db, auth: signedOut ? _SignedOut.new : null),
+List<Override> _overrides(AppDatabase db) => [
+  ...boardOverrides(db),
   recordingInputDeviceCtrlProvider.overrideWith(_FakeMic.new),
 ];
 
@@ -237,13 +181,6 @@ final _scenes = <(String, String, String?, GalleryFrame, Brightness)>[
   ('Settings', '/settings', null, GalleryFrame.desktop, Brightness.light),
   ('SettingsDark', '/settings', null, GalleryFrame.desktop, Brightness.dark),
   (
-    'Sync',
-    '/settings',
-    '/settings/sync',
-    GalleryFrame.desktop,
-    Brightness.light,
-  ),
-  (
     'Keyboard',
     '/settings',
     '/settings/keyboard',
@@ -257,29 +194,6 @@ final _scenes = <(String, String, String?, GalleryFrame, Brightness)>[
     GalleryFrame.desktop,
     Brightness.light,
   ),
-  ('Profile', '/profile', null, GalleryFrame.desktop, Brightness.light),
-  (
-    'ProfileEdit',
-    '/profile',
-    '/profile/edit',
-    GalleryFrame.desktop,
-    Brightness.light,
-  ),
-  (
-    'ProfilePrefs',
-    '/profile',
-    '/profile/preferences',
-    GalleryFrame.desktop,
-    Brightness.light,
-  ),
-  ('Credits', '/profile', '/credits', GalleryFrame.desktop, Brightness.light),
-  (
-    'Subscription',
-    '/profile',
-    '/subscription',
-    GalleryFrame.desktop,
-    Brightness.light,
-  ),
   (
     'CraftHistory',
     '/',
@@ -288,8 +202,6 @@ final _scenes = <(String, String, String?, GalleryFrame, Brightness)>[
     Brightness.light,
   ),
   ('Craft', '/', '/craft', GalleryFrame.desktop, Brightness.light),
-  ('SignIn', '/sign-in', null, GalleryFrame.desktop, Brightness.light),
-  ('PhSignIn', '/sign-in', null, GalleryFrame.phone, Brightness.light),
   ('PhCraft', '/', '/craft', GalleryFrame.phone, Brightness.light),
   ('HomeImport', '/', null, GalleryFrame.desktop, Brightness.light),
   (
@@ -301,13 +213,6 @@ final _scenes = <(String, String, String?, GalleryFrame, Brightness)>[
   ),
   ('LibraryDelete', '/library', null, GalleryFrame.desktop, Brightness.light),
   ('SettingsAbout', '/settings', null, GalleryFrame.desktop, Brightness.light),
-  (
-    'SubscriptionPlans',
-    '/subscription',
-    null,
-    GalleryFrame.desktop,
-    Brightness.light,
-  ),
   ('NotFound', '/no-such-route', null, GalleryFrame.desktop, Brightness.light),
   (
     'Review',
@@ -321,7 +226,6 @@ final _scenes = <(String, String, String?, GalleryFrame, Brightness)>[
   ('PhLibrary', '/library', null, GalleryFrame.phone, Brightness.light),
   ('PhDiscover', '/discover', null, GalleryFrame.phone, Brightness.light),
   ('PhVocabulary', '/vocabulary', null, GalleryFrame.phone, Brightness.light),
-  ('PhProfile', '/profile', null, GalleryFrame.phone, Brightness.light),
   ('PhSettings', '/settings', null, GalleryFrame.phone, Brightness.light),
   (
     'StoreIosPhoneHome',
@@ -391,7 +295,6 @@ void main() {
       openHomeImportOnNextMount = board == 'HomeImport';
       openLibraryDeleteOnNextMount = board == 'LibraryDelete';
       openUpdateDialogOnNextMount = board == 'SettingsAbout';
-      openPlansSheetOnNextMount = board == 'SubscriptionPlans';
       openCheatsheetOnNextMount = board == 'KeyboardCheatsheet';
       final db = memoryDb();
       await tester.runAsync(() => seedBoardData(db));
@@ -401,15 +304,12 @@ void main() {
         board,
         sceneApp(
           router: router,
-          overrides: _overrides(db, signedOut: board.endsWith('SignIn')),
+          overrides: _overrides(db),
           brightness: brightness,
         ),
         frame: frame,
         db: db,
         before: switch (board) {
-          'SettingsDark' => (tester) async {
-            await tester.tap(find.text('Account').first);
-          },
           'LibraryAudio' => (tester) async {
             await tester.tap(find.text('Audio'));
             await tester.enterText(find.byType(TextField).last, 'ferry');

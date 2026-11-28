@@ -7,6 +7,8 @@
 /// restores the regular transcript list untouched.
 library;
 
+import 'package:enjoy_player/core/interaction/enjoy_pressable.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -91,7 +93,8 @@ class _TranscriptSearchBarState extends ConsumerState<TranscriptSearchBar> {
         ref.watch(transcriptLinesForMediaProvider(widget.mediaId)).value ??
         const <TranscriptLine>[];
     final secondary =
-        ref.watch(secondaryTranscriptLinesForMediaProvider(widget.mediaId))
+        ref
+            .watch(secondaryTranscriptLinesForMediaProvider(widget.mediaId))
             .value ??
         const <TranscriptLine>[];
     final matchCount = countTranscriptMatches(lines, secondary, query);
@@ -237,7 +240,7 @@ class _SearchResultTile extends ConsumerWidget {
     final onSurface = theme.colorScheme.onSurface;
     final onSurfaceVariant = theme.colorScheme.onSurfaceVariant;
 
-    return InkWell(
+    return EnjoyPressable(
       onTap: () =>
           ref.read(playerInteractionsProvider).seekToLine(line, lineIndex),
       child: Padding(

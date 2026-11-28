@@ -5,6 +5,9 @@
 /// stores them through ByokSecretStore per modality.
 library;
 
+import 'package:enjoy_player/core/theme/widgets/enjoy_segmented_control.dart';
+import 'package:enjoy_player/core/interaction/enjoy_pressable.dart';
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -21,11 +24,7 @@ import 'package:enjoy_player/features/ai/domain/cloud_profile.dart';
 
 /// Result of the picker: the chosen profile and an optionally entered key.
 class CloudProfileSelection {
-  const CloudProfileSelection({
-    this.speech,
-    this.llm,
-    this.apiKey,
-  });
+  const CloudProfileSelection({this.speech, this.llm, this.apiKey});
 
   final CloudSpeechProfile? speech;
   final CloudLlmProfile? llm;
@@ -224,7 +223,8 @@ class _CloudProfileDialogState extends State<_CloudProfileDialog> {
               'Accept': 'application/json',
               if (key.isNotEmpty) 'Authorization': 'Bearer $key',
             },
-          ).timeout(const Duration(seconds: 20));
+          )
+          .timeout(const Duration(seconds: 20));
       if (response.statusCode != 200) {
         throw 'HTTP ${response.statusCode}';
       }
@@ -239,7 +239,9 @@ class _CloudProfileDialogState extends State<_CloudProfileDialog> {
         // Some gateways return a bare array of ids or objects.
         models = [
           for (final item in decoded)
-            if (item is String) item else if (item is Map && item['id'] != null)
+            if (item is String)
+              item
+            else if (item is Map && item['id'] != null)
               item['id'].toString(),
         ];
       }
@@ -318,9 +320,12 @@ class _CloudProfileDialogState extends State<_CloudProfileDialog> {
       }
       await _persist(_profiles.copyWith(speech: list));
       if (!mounted) return;
-      Navigator.of(
-        context,
-      ).pop(CloudProfileSelection(speech: updated, apiKey: key.isEmpty ? null : key));
+      Navigator.of(context).pop(
+        CloudProfileSelection(
+          speech: updated,
+          apiKey: key.isEmpty ? null : key,
+        ),
+      );
     } else {
       final base =
           _editingLlm ??
@@ -347,9 +352,9 @@ class _CloudProfileDialogState extends State<_CloudProfileDialog> {
       }
       await _persist(_profiles.copyWith(llm: list));
       if (!mounted) return;
-      Navigator.of(
-        context,
-      ).pop(CloudProfileSelection(llm: updated, apiKey: key.isEmpty ? null : key));
+      Navigator.of(context).pop(
+        CloudProfileSelection(llm: updated, apiKey: key.isEmpty ? null : key),
+      );
     }
   }
 
@@ -414,7 +419,7 @@ class _CloudProfileDialogState extends State<_CloudProfileDialog> {
                   alignment: Alignment.centerLeft,
                   child: TextButton.icon(
                     onPressed: _openNew,
-                    icon: const Icon(Icons.add, size: 18),
+                    icon: const Icon(EnjoyIcons.add, size: 18),
                     label: const Text('新建配置'),
                   ),
                 ),
@@ -448,7 +453,7 @@ class _CloudProfileDialogState extends State<_CloudProfileDialog> {
     final t = EnjoyThemeTokens.of(context);
     final tt = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
-    return InkWell(
+    return EnjoyPressable(
       onTap: onTap,
       borderRadius: BorderRadius.circular(10),
       child: Padding(
@@ -506,8 +511,7 @@ class _CloudProfileDialogState extends State<_CloudProfileDialog> {
             ),
             TextButton(onPressed: onEdit, child: const Text('编辑')),
             TextButton(onPressed: onDelete, child: const Text('删除')),
-            if (selected)
-              Icon(Icons.check, size: 18, color: cs.primary),
+            if (selected) Icon(EnjoyIcons.check, size: 18, color: cs.primary),
           ],
         ),
       ),
@@ -539,17 +543,20 @@ class _CloudProfileDialogState extends State<_CloudProfileDialog> {
         if (widget.speech) ...[
           Text('协议', style: tt.labelMedium?.copyWith(color: t.ink3)),
           const SizedBox(height: 6),
-          SegmentedButton<CloudVendor>(
+          EnjoySegmentedControl<CloudVendor>(
             segments: const [
-              ButtonSegment(
+              EnjoySegment<CloudVendor>(
                 value: CloudVendor.openAiCompatible,
-                label: Text('OpenAI 兼容'),
+                label: 'OpenAI 兼容',
               ),
-              ButtonSegment(value: CloudVendor.azure, label: Text('Azure Speech')),
+              EnjoySegment<CloudVendor>(
+                value: CloudVendor.azure,
+                label: 'Azure Speech',
+              ),
             ],
-            selected: {_vendor},
-            onSelectionChanged: (s) => setState(() => _vendor = s.first),
-            style: const ButtonStyle(visualDensity: VisualDensity.compact),
+            value: _vendor,
+            onChanged: (v) => setState(() => _vendor = v!),
+            compact: true,
           ),
           const SizedBox(height: 8),
         ] else ...[
@@ -647,10 +654,7 @@ class _CloudProfileDialogState extends State<_CloudProfileDialog> {
           ),
           if (_fetchError != null) ...[
             const SizedBox(height: 6),
-            Text(
-              _fetchError!,
-              style: tt.bodySmall?.copyWith(color: cs.error),
-            ),
+            Text(_fetchError!, style: tt.bodySmall?.copyWith(color: cs.error)),
           ],
           if (_fetchedModels.isNotEmpty) ...[
             const SizedBox(height: 8),
@@ -675,7 +679,7 @@ class _CloudProfileDialogState extends State<_CloudProfileDialog> {
                       style: tt.bodySmall,
                     ),
                     trailing: selected
-                        ? Icon(Icons.check, size: 16, color: cs.primary)
+                        ? Icon(EnjoyIcons.check, size: 16, color: cs.primary)
                         : null,
                     onTap: () => setState(() => _llmModel.text = model),
                   );
@@ -694,9 +698,7 @@ class _CloudProfileDialogState extends State<_CloudProfileDialog> {
         ),
         const SizedBox(height: 6),
         Text(
-          isAzure
-              ? 'Azure 用区域 + 密钥定位服务。'
-              : '任何 OpenAI 兼容端点均可。',
+          isAzure ? 'Azure 用区域 + 密钥定位服务。' : '任何 OpenAI 兼容端点均可。',
           style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
         ),
       ],

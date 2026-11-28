@@ -33,8 +33,7 @@ class AiModalityConfigCtrl extends _$AiModalityConfigCtrl {
   /// while hydration is still in flight. Callers that observe BYOK as
   /// unconfigured should await this before concluding the key is truly
   /// missing (auto-translate was permanently blocked by exactly this race).
-  Future<void> get hydrated =>
-      (_hydrateCompleter ??= Completer<void>()).future;
+  Future<void> get hydrated => (_hydrateCompleter ??= Completer<void>()).future;
 
   @override
   AiModalityConfigs build() {
@@ -76,5 +75,4 @@ class AiModalityConfigCtrl extends _$AiModalityConfigCtrl {
     await repo.removeByok(modality);
     state = await repo.load();
   }
-
 }

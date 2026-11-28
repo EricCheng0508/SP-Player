@@ -7,11 +7,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:enjoy_player/features/shadow_reading/application/shadow_reading_hotkey_bus.dart';
 
+import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/core/transcript/transcript_density.dart';
 import 'package:enjoy_player/data/subtitle/transcript_line.dart';
 import 'package:enjoy_player/features/player/application/echo_mode_provider.dart';
 import 'package:enjoy_player/features/player/application/player_state_providers.dart';
-import 'package:enjoy_player/features/transcript/application/auto_translate_controller.dart';
 import 'package:enjoy_player/features/transcript/application/auto_translate_display_providers.dart';
 import 'package:enjoy_player/features/transcript/application/echo_region_bounds.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_blur_mode_provider.dart';
@@ -142,19 +142,15 @@ class _TranscriptScrollableListState
     );
     final secondaryLines = secondaryAsync.value ?? <TranscriptLine>[];
     final secondaryMatcher = _matcherFor(secondaryLines);
-    final autoTranslate = ref.watch(
-      autoTranslateDisplayStateProvider(widget.mediaId),
-    );
-    final autoTranslateActive = autoTranslate.active;
-    final l10n = AppLocalizations.of(context);
+    final autoTranslate =
+        ref
+            .watch(autoTranslateDisplayStateProvider(widget.mediaId))
+            .valueOrNull ??
+        (active: false, sourceLanguage: null, targetLanguage: null);
     final blurPractice = ref.watch(transcriptBlurModeProvider);
     final items = _virtualItems(echo);
     final lineRecordingCounts = ref.watch(
       transcriptLineRecordingCountsProvider(widget.mediaId),
-    );
-
-    final autoTranslateCtrl = ref.read(
-      autoTranslateCtrlProvider(widget.mediaId),
     );
 
     final scope = TranscriptListItemScope(
@@ -167,11 +163,9 @@ class _TranscriptScrollableListState
       recordingTake: recordingTake,
       secondaryLines: secondaryLines,
       secondaryMatcher: secondaryMatcher,
-      autoTranslateActive: autoTranslateActive,
+      autoTranslateActive: autoTranslate.active,
       sourceLanguage: autoTranslate.sourceLanguage,
       targetLanguage: autoTranslate.targetLanguage,
-      autoTranslateCtrl: autoTranslateCtrl,
-      l10n: l10n,
       lineRecordingCounts: lineRecordingCounts,
       density: density,
     );

@@ -112,6 +112,7 @@ void main() {
             (ref) => (
               cueIndex: ref.watch(_readoutCueProvider),
               wordIndex: ref.watch(_readoutWordProvider),
+              visibleCueIndex: ref.watch(_readoutCueProvider),
             ),
           ),
           transcriptLineRecordingCountsProvider(

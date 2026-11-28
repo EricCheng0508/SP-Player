@@ -46,9 +46,9 @@ class FullTranslateCtrl extends _$FullTranslateCtrl {
   bool _cancelRequested = false;
   final _flushHookRepos = <TranscriptRepository>[];
 
-  /// Repository access (mirrors AutoTranslateCtrl._repo): every distinct
-  /// instance is registered for the disposal flush of its pending buffered
-  /// writes — a force-kill loses at most the debounce window.
+  /// Repository access: every distinct instance is registered for the
+  /// disposal flush of its pending buffered writes — a force-kill loses at
+  /// most the debounce window.
   TranscriptRepository _repo() {
     final repo = ref.read(transcriptRepositoryProvider);
     if (_flushHookRepos.isEmpty) {
@@ -111,9 +111,7 @@ class FullTranslateCtrl extends _$FullTranslateCtrl {
       }
     }
     return FullTranslateUiState(
-      phase: translated >= aiLines.length
-          ? FullTranslatePhase.done
-          : phase,
+      phase: translated >= aiLines.length ? FullTranslatePhase.done : phase,
       translatedCount: translated,
       totalCount: aiLines.length,
       lastTranslatedStartMs: lastStartMs,
@@ -127,7 +125,6 @@ class FullTranslateCtrl extends _$FullTranslateCtrl {
     if (_running) return;
     _cancelRequested = false;
 
-    // Guards mirror AutoTranslateCtrl.selectAutoTranslate.
     if (!kLocalOfflineMode) {
       final auth = ref.read(authCtrlProvider).valueOrNull;
       if (auth is! AuthSignedIn) {
@@ -267,13 +264,12 @@ class FullTranslateCtrl extends _$FullTranslateCtrl {
     final scheduler = FullTranslateScheduler(
       batches: chunkTranslateBatches(untranslated, kFullTranslateBatchSize),
       shouldCancel: () => _cancelRequested || !ref.mounted,
-      translateBatch: (indexes, texts) =>
-          translateLinesBatch(
-            llm: engine,
-            lines: texts,
-            sourceLanguage: sourceLanguage,
-            targetLanguage: native,
-          ),
+      translateBatch: (indexes, texts) => translateLinesBatch(
+        llm: engine,
+        lines: texts,
+        sourceLanguage: sourceLanguage,
+        targetLanguage: native,
+      ),
       onBatchTranslated: (indexes, translations) {
         if (!ref.mounted) return;
         for (var i = 0; i < indexes.length && i < translations.length; i++) {
@@ -310,12 +306,14 @@ class FullTranslateCtrl extends _$FullTranslateCtrl {
     );
 
     try {
-      await scheduler.run(textsFor: (indexes) async {
-        return [
-          for (final i in indexes)
-            plainTextFromSubtitleMarkup(primaryLines[i].text).trim(),
-        ];
-      });
+      await scheduler.run(
+        textsFor: (indexes) async {
+          return [
+            for (final i in indexes)
+              plainTextFromSubtitleMarkup(primaryLines[i].text).trim(),
+          ];
+        },
+      );
       // Persist everything pending now — the debounce timer is for scattered
       // per-line writes, a batch run wants the durable write immediately.
       await repo.flushAutoTranslateWrites();

@@ -95,7 +95,8 @@ final class AudioSegmenter {
       }
 
       final capReached = _totalMs >= maxSegmentMs;
-      final cut = capReached ||
+      final cut =
+          capReached ||
           (_inSpeech &&
               _speechMs >= minSpeechMs &&
               _silenceMs >= tailSilenceMs);

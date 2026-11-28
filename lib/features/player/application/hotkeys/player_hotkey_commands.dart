@@ -139,7 +139,9 @@ class SeekRelativeHotkeyCommand extends HotkeyCommand {
         ? session.durationSeconds
         : double.infinity;
     final target = (session.currentTimeSeconds + delta).clamp(0.0, duration);
-    unawaited(ctx.read(playerControllerProvider.notifier).seekToSeconds(target));
+    unawaited(
+      ctx.read(playerControllerProvider.notifier).seekToSeconds(target),
+    );
   }
 }
 
@@ -161,7 +163,9 @@ class VolumeStepHotkeyCommand extends HotkeyCommand {
   void execute(HotkeyCtx ctx) {
     final prefs = ctx.read(playerPreferencesCtrlProvider);
     final target = (prefs.volume + delta).clamp(0.0, 1.0);
-    unawaited(ctx.read(playerPreferencesCtrlProvider.notifier).setVolume(target));
+    unawaited(
+      ctx.read(playerPreferencesCtrlProvider.notifier).setVolume(target),
+    );
   }
 }
 
@@ -185,9 +189,9 @@ class ToggleMuteHotkeyCommand extends HotkeyCommand {
       unawaited(ctx.read(playerPreferencesCtrlProvider.notifier).setVolume(0));
     } else {
       unawaited(
-        ctx.read(
-          playerPreferencesCtrlProvider.notifier,
-        ).setVolume(_lastNonZeroVolume),
+        ctx
+            .read(playerPreferencesCtrlProvider.notifier)
+            .setVolume(_lastNonZeroVolume),
       );
     }
   }

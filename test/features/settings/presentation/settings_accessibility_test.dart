@@ -136,8 +136,6 @@ void main() {
 
       final l10n = await AppLocalizations.delegate.load(const Locale('en'));
 
-      expect(find.text(l10n.settingsSectionSync), findsOneWidget);
-
       final scrollable = find.byType(Scrollable).first;
       for (var i = 0; i < 15; i++) {
         await tester.drag(scrollable, const Offset(0, -500));

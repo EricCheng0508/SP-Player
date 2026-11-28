@@ -3,6 +3,7 @@ import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/data/subtitle/transcript_line.dart';
 import 'package:enjoy_player/features/player/application/echo_mode_provider.dart';
+import 'package:enjoy_player/features/transcript/application/active_transcript_provider.dart';
 import 'package:enjoy_player/features/player/application/player_controller.dart';
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
 import 'package:enjoy_player/features/settings/application/karaoke_highlight_settings.dart';
@@ -46,6 +47,15 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          secondaryTranscriptIdProvider(
+            'media-1',
+          ).overrideWith((ref) => Stream.value(null)),
+          appDatabaseProvider.overrideWith((ref) {
+            final db = AppDatabase(executor: NativeDatabase.memory());
+            ref.onDispose(db.close);
+            return db;
+          }),
+
           transcriptLineRecordingCountsProvider(
             'media-1',
           ).overrideWithValue(const {}),
@@ -97,6 +107,15 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          secondaryTranscriptIdProvider(
+            'media-1',
+          ).overrideWith((ref) => Stream.value(null)),
+          appDatabaseProvider.overrideWith((ref) {
+            final db = AppDatabase(executor: NativeDatabase.memory());
+            ref.onDispose(db.close);
+            return db;
+          }),
+
           transcriptLineRecordingCountsProvider(
             'media-1',
           ).overrideWithValue({0: 2}),
@@ -157,6 +176,15 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          secondaryTranscriptIdProvider(
+            'media-1',
+          ).overrideWith((ref) => Stream.value(null)),
+          appDatabaseProvider.overrideWith((ref) {
+            final db = AppDatabase(executor: NativeDatabase.memory());
+            ref.onDispose(db.close);
+            return db;
+          }),
+
           transcriptLineRecordingCountsProvider(
             'media-1',
           ).overrideWithValue(const {}),
@@ -216,6 +244,15 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          secondaryTranscriptIdProvider(
+            'media-1',
+          ).overrideWith((ref) => Stream.value(null)),
+          appDatabaseProvider.overrideWith((ref) {
+            final db = AppDatabase(executor: NativeDatabase.memory());
+            ref.onDispose(db.close);
+            return db;
+          }),
+
           transcriptLineRecordingCountsProvider(
             'media-1',
           ).overrideWithValue(const {}),
@@ -265,6 +302,9 @@ void main() {
       );
       final container = ProviderContainer(
         overrides: [
+          secondaryTranscriptIdProvider(
+            'media-1',
+          ).overrideWith((ref) => Stream.value(null)),
           appDatabaseProvider.overrideWithValue(db),
           deviceGlobalAppDatabaseProvider.overrideWithValue(db),
           transcriptLineRecordingCountsProvider(
@@ -336,6 +376,9 @@ void main() {
       );
       final container = ProviderContainer(
         overrides: [
+          secondaryTranscriptIdProvider(
+            'media-1',
+          ).overrideWith((ref) => Stream.value(null)),
           appDatabaseProvider.overrideWithValue(db),
           deviceGlobalAppDatabaseProvider.overrideWithValue(db),
           transcriptLineRecordingCountsProvider(
@@ -425,6 +468,9 @@ void main() {
       );
       final container = ProviderContainer(
         overrides: [
+          secondaryTranscriptIdProvider(
+            'media-1',
+          ).overrideWith((ref) => Stream.value(null)),
           appDatabaseProvider.overrideWithValue(db),
           deviceGlobalAppDatabaseProvider.overrideWithValue(db),
           transcriptLineRecordingCountsProvider(
@@ -515,6 +561,9 @@ void main() {
       );
       final container = ProviderContainer(
         overrides: [
+          secondaryTranscriptIdProvider(
+            'media-1',
+          ).overrideWith((ref) => Stream.value(null)),
           appDatabaseProvider.overrideWithValue(db),
           deviceGlobalAppDatabaseProvider.overrideWithValue(db),
           transcriptLineRecordingCountsProvider(

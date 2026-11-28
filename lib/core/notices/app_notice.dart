@@ -94,7 +94,9 @@ abstract final class AppNotice {
       return;
     }
     _show(ctx, kind, message);
-  }  static void _show(
+  }
+
+  static void _show(
     BuildContext context,
     _AppNoticeKind kind,
     String message, {

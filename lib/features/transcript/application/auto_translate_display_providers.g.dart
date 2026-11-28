@@ -8,34 +8,53 @@ part of 'auto_translate_display_providers.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Whether the auto-translate AI track is the live secondary for [mediaId],
+/// Whether the live secondary for [mediaId] is the AI translation track,
 /// plus the source → target pair its lines render with — the derivation both
 /// transcript hosts (the echo merged card and the scrollable list) previously
 /// re-spelled field by field.
+///
+/// Languages come from the rows themselves (the pair the writes were keyed
+/// with), not from current preferences, so a later native-language change
+/// cannot mismatch stored source keys.
 
 @ProviderFor(autoTranslateDisplayState)
 final autoTranslateDisplayStateProvider = AutoTranslateDisplayStateFamily._();
 
-/// Whether the auto-translate AI track is the live secondary for [mediaId],
+/// Whether the live secondary for [mediaId] is the AI translation track,
 /// plus the source → target pair its lines render with — the derivation both
 /// transcript hosts (the echo merged card and the scrollable list) previously
 /// re-spelled field by field.
+///
+/// Languages come from the rows themselves (the pair the writes were keyed
+/// with), not from current preferences, so a later native-language change
+/// cannot mismatch stored source keys.
 
 final class AutoTranslateDisplayStateProvider
     extends
         $FunctionalProvider<
+          AsyncValue<
+            ({bool active, String? sourceLanguage, String? targetLanguage})
+          >,
           ({bool active, String? sourceLanguage, String? targetLanguage}),
-          ({bool active, String? sourceLanguage, String? targetLanguage}),
-          ({bool active, String? sourceLanguage, String? targetLanguage})
+          FutureOr<
+            ({bool active, String? sourceLanguage, String? targetLanguage})
+          >
         >
     with
-        $Provider<
+        $FutureModifier<
+          ({bool active, String? sourceLanguage, String? targetLanguage})
+        >,
+        $FutureProvider<
           ({bool active, String? sourceLanguage, String? targetLanguage})
         > {
-  /// Whether the auto-translate AI track is the live secondary for [mediaId],
+  /// Whether the live secondary for [mediaId] is the AI translation track,
   /// plus the source → target pair its lines render with — the derivation both
   /// transcript hosts (the echo merged card and the scrollable list) previously
   /// re-spelled field by field.
+  ///
+  /// Languages come from the rows themselves (the pair the writes were keyed
+  /// with), not from current preferences, so a later native-language change
+  /// cannot mismatch stored source keys.
   AutoTranslateDisplayStateProvider._({
     required AutoTranslateDisplayStateFamily super.from,
     required String super.argument,
@@ -59,30 +78,16 @@ final class AutoTranslateDisplayStateProvider
 
   @$internal
   @override
-  $ProviderElement<
+  $FutureProviderElement<
     ({bool active, String? sourceLanguage, String? targetLanguage})
   >
-  $createElement($ProviderPointer pointer) => $ProviderElement(pointer);
+  $createElement($ProviderPointer pointer) => $FutureProviderElement(pointer);
 
   @override
-  ({bool active, String? sourceLanguage, String? targetLanguage}) create(
-    Ref ref,
-  ) {
+  FutureOr<({bool active, String? sourceLanguage, String? targetLanguage})>
+  create(Ref ref) {
     final argument = this.argument as String;
     return autoTranslateDisplayState(ref, argument);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(
-    ({bool active, String? sourceLanguage, String? targetLanguage}) value,
-  ) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride:
-          $SyncValueProvider<
-            ({bool active, String? sourceLanguage, String? targetLanguage})
-          >(value),
-    );
   }
 
   @override
@@ -98,17 +103,23 @@ final class AutoTranslateDisplayStateProvider
 }
 
 String _$autoTranslateDisplayStateHash() =>
-    r'9958b0188610af49045c07c467e03ab73565136c';
+    r'543ee0c27503e8bb1b9afb8c96ecc0e40c51000e';
 
-/// Whether the auto-translate AI track is the live secondary for [mediaId],
+/// Whether the live secondary for [mediaId] is the AI translation track,
 /// plus the source → target pair its lines render with — the derivation both
 /// transcript hosts (the echo merged card and the scrollable list) previously
 /// re-spelled field by field.
+///
+/// Languages come from the rows themselves (the pair the writes were keyed
+/// with), not from current preferences, so a later native-language change
+/// cannot mismatch stored source keys.
 
 final class AutoTranslateDisplayStateFamily extends $Family
     with
         $FunctionalFamilyOverride<
-          ({bool active, String? sourceLanguage, String? targetLanguage}),
+          FutureOr<
+            ({bool active, String? sourceLanguage, String? targetLanguage})
+          >,
           String
         > {
   AutoTranslateDisplayStateFamily._()
@@ -120,10 +131,14 @@ final class AutoTranslateDisplayStateFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Whether the auto-translate AI track is the live secondary for [mediaId],
+  /// Whether the live secondary for [mediaId] is the AI translation track,
   /// plus the source → target pair its lines render with — the derivation both
   /// transcript hosts (the echo merged card and the scrollable list) previously
   /// re-spelled field by field.
+  ///
+  /// Languages come from the rows themselves (the pair the writes were keyed
+  /// with), not from current preferences, so a later native-language change
+  /// cannot mismatch stored source keys.
 
   AutoTranslateDisplayStateProvider call(String mediaId) =>
       AutoTranslateDisplayStateProvider._(argument: mediaId, from: this);

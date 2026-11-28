@@ -26,7 +26,6 @@ import 'package:enjoy_player/core/theme/app_theme.dart';
 import 'package:enjoy_player/core/theme/widgets/skeleton.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/application/auth_deep_link_listener.dart';
 import 'package:enjoy_player/features/hotkeys/presentation/app_hotkeys_keyboard_listener.dart';
 import 'package:enjoy_player/features/update/presentation/update_prompt_host.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
@@ -168,9 +167,7 @@ class _EnjoyAppState extends ConsumerState<EnjoyApp>
         child: child ?? const SizedBox.shrink(),
       ),
     );
-    final hosted = AuthDeepLinkListener(
-      child: UpdatePromptHost(child: viewport),
-    );
+    final hosted = UpdatePromptHost(child: viewport);
     return isDesktop ? AppHotkeysKeyboardListener(child: hosted) : hosted;
   }
 
@@ -242,8 +239,9 @@ class _EnjoyAppState extends ConsumerState<EnjoyApp>
         await Future<void>.delayed(const Duration(milliseconds: 150));
         await windowManager.show();
         await windowManager.focus();
-        logNamed('boot-timing')
-            .info('[boot-timing] window-shown at show()+150ms');
+        logNamed(
+          'boot-timing',
+        ).info('[boot-timing] window-shown at show()+150ms');
       });
     }
     return _baseMaterialApp(
@@ -346,7 +344,9 @@ class _EnjoyAppState extends ConsumerState<EnjoyApp>
 
     if (prefsProj.isLoading && !hasResolved) {
       _onLoadingBranch = true;
-      logNamed('boot-timing').info('[boot-timing] loading-branch (prefs) at build');
+      logNamed(
+        'boot-timing',
+      ).info('[boot-timing] loading-branch (prefs) at build');
       return _loadingBranch(lightTheme, darkTheme, themeMode);
     }
 
@@ -355,7 +355,9 @@ class _EnjoyAppState extends ConsumerState<EnjoyApp>
     );
     if (authBootstrapping) {
       _onLoadingBranch = true;
-      logNamed('boot-timing').info('[boot-timing] loading-branch (auth) at build');
+      logNamed(
+        'boot-timing',
+      ).info('[boot-timing] loading-branch (auth) at build');
       return _loadingBranch(lightTheme, darkTheme, themeMode);
     }
 

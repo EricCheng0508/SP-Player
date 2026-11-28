@@ -5,6 +5,8 @@
 /// exit): the learning-focused rows live in the windowed [PlayerDock].
 library;
 
+import 'package:enjoy_player/core/interaction/enjoy_pressable.dart';
+
 import 'package:enjoy_player/core/theme/enjoy_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -51,9 +53,8 @@ class FullscreenTransportBar extends ConsumerWidget {
               playing: playing,
               buffering: buffering,
               tooltip: playing ? '暂停' : '播放',
-              onPressed: () => ref
-                  .read(playerControllerProvider.notifier)
-                  .togglePlay(),
+              onPressed: () =>
+                  ref.read(playerControllerProvider.notifier).togglePlay(),
             ),
             Expanded(
               child: Padding(
@@ -91,7 +92,7 @@ class _RateChip extends ConsumerWidget {
     return Tooltip(
       message: '倍速',
       child: RateMenuHoverRegion(
-        child: InkWell(
+        child: EnjoyPressable(
           borderRadius: BorderRadius.circular(8),
           onTap: () => showPlaybackRatePicker(
             context: context,

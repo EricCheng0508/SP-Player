@@ -28,14 +28,15 @@ void main() {
     // make CreateProcessW fail outright.
     final target = Directory('${root.path}\\sp player bin');
     target.createSync(recursive: true);
-    final cmd = File('${Platform.environment['SystemRoot']}\\System32\\cmd.exe');
+    final cmd = File(
+      '${Platform.environment['SystemRoot']}\\System32\\cmd.exe',
+    );
     final copied = await cmd.copy('${target.path}\\cmd.exe');
 
-    final ok = await spawnHidden(
-      copied.path,
-      ['/c', 'echo alive> out.txt'],
-      workingDirectory: target.path,
-    );
+    final ok = await spawnHidden(copied.path, [
+      '/c',
+      'echo alive> out.txt',
+    ], workingDirectory: target.path);
     expect(ok, isTrue);
 
     final written = await _waitForFile(File('${target.path}\\out.txt'));

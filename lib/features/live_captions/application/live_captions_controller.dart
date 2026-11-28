@@ -67,18 +67,16 @@ final class LiveCaptionsState {
     bool? micEnabled,
     bool? translate,
     bool? usingStreamingEngine,
-  }) =>
-      LiveCaptionsState(
-        phase: phase ?? this.phase,
-        session: session ?? this.session,
-        error: error,
-        systemEnabled: systemEnabled ?? this.systemEnabled,
-        micEnabled: micEnabled ?? this.micEnabled,
-        usingStreamingEngine:
-            usingStreamingEngine ?? this.usingStreamingEngine,
-        translate: translate ?? this.translate,
-        lastError: lastError,
-      );
+  }) => LiveCaptionsState(
+    phase: phase ?? this.phase,
+    session: session ?? this.session,
+    error: error,
+    systemEnabled: systemEnabled ?? this.systemEnabled,
+    micEnabled: micEnabled ?? this.micEnabled,
+    usingStreamingEngine: usingStreamingEngine ?? this.usingStreamingEngine,
+    translate: translate ?? this.translate,
+    lastError: lastError,
+  );
 
   final String? lastError;
 }
@@ -106,7 +104,8 @@ class LiveCaptionsController extends _$LiveCaptionsController {
     return const LiveCaptionsState();
   }
 
-  bool get _isRunning => state.phase == LiveCaptionsPhase.listening ||
+  bool get _isRunning =>
+      state.phase == LiveCaptionsPhase.listening ||
       state.phase == LiveCaptionsPhase.starting;
 
   LiveCaptionSession _newSessionObject({
@@ -116,7 +115,8 @@ class LiveCaptionsController extends _$LiveCaptionsController {
   }) {
     final now = DateTime.now().toLocal();
     String two(int v) => v.toString().padLeft(2, '0');
-    final id = 'live-'
+    final id =
+        'live-'
         '${now.year}${two(now.month)}${two(now.day)}-'
         '${two(now.hour)}${two(now.minute)}${two(now.second)}';
     return LiveCaptionSession(
@@ -225,7 +225,8 @@ class LiveCaptionsController extends _$LiveCaptionsController {
         messages: [
           const ChatMessage(
             role: ChatMessage.roleSystem,
-            content: '你是实时字幕翻译器。用户给出若干行编号文本，逐行翻译成简体中文，'
+            content:
+                '你是实时字幕翻译器。用户给出若干行编号文本，逐行翻译成简体中文，'
                 '输出同样的编号、每行一条译文，不要解释、不要引号。保留专有名词原文。',
           ),
           ChatMessage(role: ChatMessage.roleUser, content: numbered),
@@ -259,7 +260,8 @@ class LiveCaptionsController extends _$LiveCaptionsController {
         messages: [
           const ChatMessage(
             role: ChatMessage.roleSystem,
-            content: '你是实时字幕翻译器。把用户提供的文本翻译成简体中文，'
+            content:
+                '你是实时字幕翻译器。把用户提供的文本翻译成简体中文，'
                 '只输出译文本身，不要解释、不要引号。保留专有名词原文。',
           ),
           ChatMessage(role: ChatMessage.roleUser, content: line.text),
@@ -310,9 +312,8 @@ class LiveCaptionsController extends _$LiveCaptionsController {
   void _appendEvent(String text) {
     final session = state.session;
     if (session == null) return;
-    final offset = DateTime.now()
-        .difference(session.startedAt)
-        .inMilliseconds / 1000.0;
+    final offset =
+        DateTime.now().difference(session.startedAt).inMilliseconds / 1000.0;
     session.lines.add(
       LiveCaptionLine(
         offsetSeconds: offset,
@@ -324,8 +325,7 @@ class LiveCaptionsController extends _$LiveCaptionsController {
     state = state.copyWith();
   }
 
-  void setTranslate(bool value) =>
-      state = state.copyWith(translate: value);
+  void setTranslate(bool value) => state = state.copyWith(translate: value);
 
   /// Starts listening on the current session with the checked sources.
   Future<void> start() async {
@@ -367,7 +367,8 @@ class LiveCaptionsController extends _$LiveCaptionsController {
     if (!anyStarted) {
       state = state.copyWith(
         phase: LiveCaptionsPhase.idle,
-        error: '无法启动音频监听${failures.isEmpty ? '' : '（$failures）'}：'
+        error:
+            '无法启动音频监听${failures.isEmpty ? '' : '（$failures）'}：'
             '请确认应用目录中存在 sp_audio_capture.exe',
       );
       return;
@@ -421,8 +422,9 @@ class LiveCaptionsController extends _$LiveCaptionsController {
     if (streaming != null && !state.usingStreamingEngine) {
       state = state.copyWith(usingStreamingEngine: true);
     }
-    final levelSink =
-        source == LiveCaptionSource.system ? systemLevel : micLevel;
+    final levelSink = source == LiveCaptionSource.system
+        ? systemLevel
+        : micLevel;
     final run = _CaptureRun(
       ref: ref,
       source: source,
@@ -435,10 +437,7 @@ class LiveCaptionsController extends _$LiveCaptionsController {
         levelSink.value = math.max(levelSink.value * 0.55, normalized);
       },
       onFatal: (message) {
-        state = state.copyWith(
-          phase: LiveCaptionsPhase.idle,
-          error: message,
-        );
+        state = state.copyWith(phase: LiveCaptionsPhase.idle, error: message);
       },
     );
     await run.start(exePath);
@@ -470,15 +469,13 @@ class LiveCaptionsController extends _$LiveCaptionsController {
     state = state.copyWith();
   }
 
-  static String _normalizeForDedupe(String text) => text
-      .toLowerCase()
-      .replaceAll(RegExp(r'[\s\p{P}]', unicode: true), '');
+  static String _normalizeForDedupe(String text) =>
+      text.toLowerCase().replaceAll(RegExp(r'[\s\p{P}]', unicode: true), '');
 
   static String? _captureExePath() {
     final exe = Platform.resolvedExecutable;
     final dir = exe.substring(0, exe.lastIndexOf(Platform.pathSeparator));
-    final path =
-        '$dir${Platform.pathSeparator}sp_audio_capture.exe';
+    final path = '$dir${Platform.pathSeparator}sp_audio_capture.exe';
     return File(path).existsSync() ? path : null;
   }
 
@@ -521,15 +518,15 @@ final class _CaptureRun {
   Future<void> start(String exePath) async {
     // Attached mode: dart:io sets CREATE_NO_WINDOW, so no console flashes,
     // and we keep the stdout pipe for the PCM stream.
-    final process = await Process.start(
-      exePath,
-      ['--source', source == LiveCaptionSource.system ? 'system' : 'mic'],
-    );
+    final process = await Process.start(exePath, [
+      '--source',
+      source == LiveCaptionSource.system ? 'system' : 'mic',
+    ]);
     _process = process;
 
     process.stdout.listen(
-      (chunk) => _handlePcm(
-          chunk is Uint8List ? chunk : Uint8List.fromList(chunk)),
+      (chunk) =>
+          _handlePcm(chunk is Uint8List ? chunk : Uint8List.fromList(chunk)),
       onError: (Object e) => _log.warning('stdout error: $e'),
       onDone: () {
         // Process exited; if we were not the one stopping it, surface it.
@@ -541,7 +538,9 @@ final class _CaptureRun {
       },
     );
     process.stderr.listen(
-      (line) => _log.info('capture stderr: ${utf8.decode(line, allowMalformed: true)}'),
+      (line) => _log.info(
+        'capture stderr: ${utf8.decode(line, allowMalformed: true)}',
+      ),
       onDone: () {},
     );
   }
@@ -579,11 +578,13 @@ final class _CaptureRun {
     if (text.isNotEmpty) {
       final offsetSeconds =
           DateTime.now().difference(startedAt).inMilliseconds / 1000.0;
-      onLine(LiveCaptionLine(
-        offsetSeconds: offsetSeconds,
-        source: source,
-        text: text,
-      ));
+      onLine(
+        LiveCaptionLine(
+          offsetSeconds: offsetSeconds,
+          source: source,
+          text: text,
+        ),
+      );
     }
     engine.reset();
   }
@@ -596,12 +597,14 @@ final class _CaptureRun {
       // Emit whatever the recognizer is still holding, then release it.
       final text = engine.decodeAndGetText();
       if (text.isNotEmpty) {
-        onLine(LiveCaptionLine(
-          offsetSeconds:
-              DateTime.now().difference(startedAt).inMilliseconds / 1000.0,
-          source: source,
-          text: text,
-        ));
+        onLine(
+          LiveCaptionLine(
+            offsetSeconds:
+                DateTime.now().difference(startedAt).inMilliseconds / 1000.0,
+            source: source,
+            text: text,
+          ),
+        );
       }
       engine.close();
     }

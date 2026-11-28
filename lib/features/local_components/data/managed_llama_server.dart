@@ -38,9 +38,7 @@ Future<bool> isLocalLlmUp({
   Duration timeout = const Duration(milliseconds: 900),
 }) async {
   try {
-    final response = await http
-        .get(Uri.parse(_healthUrl))
-        .timeout(timeout);
+    final response = await http.get(Uri.parse(_healthUrl)).timeout(timeout);
     // llama-server /health returns 200 when ready, 503 while loading.
     return response.statusCode == 200;
   } on Object {
@@ -66,10 +64,10 @@ Future<void> _ensure() async {
       '本地组件).',
     );
   }
-  final modelDir = Directory('${store.root}\\${specOf(ComponentKind.mtModel).installDirName}');
-  final gguf = File(
-    '${modelDir.path}\\${kLocalLlmModelId}.gguf',
+  final modelDir = Directory(
+    '${store.root}\\${specOf(ComponentKind.mtModel).installDirName}',
   );
+  final gguf = File('${modelDir.path}\\${kLocalLlmModelId}.gguf');
   if (!gguf.existsSync()) {
     // Fall back to any single *.gguf in the model dir (manual placements).
     final any = modelDir.existsSync()
@@ -104,20 +102,16 @@ Future<void> _ensure() async {
 Future<void> _spawn(String exe, String modelPath) async {
   // Windowless: llama-server is a console binary, and the detached dart:io
   // path would give it a visible console window.
-  await spawnHidden(
-    exe,
-    [
-      '-m',
-      modelPath,
-      '--port',
-      '8760',
-      '--host',
-      '127.0.0.1',
-      _kGpuLayers,
-      '99',
-    ],
-    workingDirectory: File(exe).parent.path,
-  );
+  await spawnHidden(exe, [
+    '-m',
+    modelPath,
+    '--port',
+    '8760',
+    '--host',
+    '127.0.0.1',
+    _kGpuLayers,
+    '99',
+  ], workingDirectory: File(exe).parent.path);
 }
 
 /// Used by the Settings component section to warm the server after install.

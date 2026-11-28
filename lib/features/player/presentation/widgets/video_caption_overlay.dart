@@ -43,8 +43,7 @@ class VideoCaptionOverlay extends ConsumerWidget {
     );
 
     final lines =
-        ref.watch(transcriptLinesForMediaProvider(mediaId)).value ??
-        const [];
+        ref.watch(transcriptLinesForMediaProvider(mediaId)).value ?? const [];
     final secondary =
         ref.watch(secondaryTranscriptLinesForMediaProvider(mediaId)).value ??
         const [];
@@ -62,8 +61,7 @@ class VideoCaptionOverlay extends ConsumerWidget {
         mode == CaptionOverlayMode.translation ||
         mode == CaptionOverlayMode.both;
 
-    final hasContent =
-        cue >= 0 && (originalText.isNotEmpty || hasTranslation);
+    final hasContent = cue >= 0 && (originalText.isNotEmpty || hasTranslation);
 
     // Classic hard-edged video subtitle stroke: stack 8 black copies of the
     // text offset around the white original — crisper than soft Shadows,

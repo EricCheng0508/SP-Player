@@ -43,9 +43,16 @@ final class LocalTtsCapability implements TtsCapability {
     final wavPath = '${dir.path}\\out.wav';
     try {
       // Language primary subtag for voice-culture matching ("en-US" → "en").
-      final langPrefix =
-          language.split('-').first.toLowerCase().replaceAll(RegExp(r'[^a-z]'), '');
-      final script = _buildScript(text: text, langPrefix: langPrefix, wavPath: wavPath);
+      final langPrefix = language
+          .split('-')
+          .first
+          .toLowerCase()
+          .replaceAll(RegExp(r'[^a-z]'), '');
+      final script = _buildScript(
+        text: text,
+        langPrefix: langPrefix,
+        wavPath: wavPath,
+      );
       // -EncodedCommand expects Base64 of UTF-16LE bytes (PowerShell spec),
       // NOT UTF-8 — a UTF-8 payload decodes to garbage and always fails.
       final encoded = base64Encode(_utf16LeBytes(script));

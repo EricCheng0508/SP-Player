@@ -89,16 +89,19 @@ class _PlaylistList extends ConsumerWidget {
             return CustomScrollView(
               slivers: [
                 SliverPadding(
-                  padding: EdgeInsets.fromLTRB(inset, t.space4, inset, t.space16),
+                  padding: EdgeInsets.fromLTRB(
+                    inset,
+                    t.space4,
+                    inset,
+                    t.space16,
+                  ),
                   sliver: SliverToBoxAdapter(
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: EnjoyButton.tonal(
                         icon: EnjoyIcons.add,
-                        onPressed: () => createOrRenamePlaylistDialog(
-                          context,
-                          ref,
-                        ),
+                        onPressed: () =>
+                            createOrRenamePlaylistDialog(context, ref),
                         child: Text(l10n.playlistCreateButton),
                       ),
                     ),
@@ -107,13 +110,12 @@ class _PlaylistList extends ConsumerWidget {
                 SliverPadding(
                   padding: EdgeInsets.fromLTRB(inset, 0, inset, t.space32),
                   sliver: SliverGrid(
-                    gridDelegate:
-                        mediaCardTileGridDelegateForMinTileWidth(
-                          crossAxisExtent: constraints.maxWidth - inset * 2,
-                          minTileWidth: 210,
-                          mainAxisSpacing: 24,
-                          crossAxisSpacing: 20,
-                        ),
+                    gridDelegate: mediaCardTileGridDelegateForMinTileWidth(
+                      crossAxisExtent: constraints.maxWidth - inset * 2,
+                      minTileWidth: 210,
+                      mainAxisSpacing: 24,
+                      crossAxisSpacing: 20,
+                    ),
                     delegate: SliverChildBuilderDelegate((context, index) {
                       final withCount = playlists[index];
                       return _PlaylistCard(
@@ -185,8 +187,7 @@ class _PlaylistCard extends ConsumerWidget {
       isVideo: coverMedia?.kind == MediaKind.video,
       accentColor: generativeAccentForSeed(playlist.id),
       onTap: onOpen,
-      onDelete: () =>
-          ref.read(playlistDaoProvider).deletePlaylist(playlist.id),
+      onDelete: () => ref.read(playlistDaoProvider).deletePlaylist(playlist.id),
       deleteTooltip: l10n.playlistDelete,
     );
   }
@@ -276,87 +277,91 @@ class _PlaylistDetail extends ConsumerWidget {
                 Padding(
                   padding: EdgeInsets.fromLTRB(inset, 0, inset, t.space12),
                   child: Row(
-                children: [
-                  IconButton(
-                    tooltip:
-                        MaterialLocalizations.of(context).backButtonTooltip,
-                    onPressed: onBack,
-                    icon: const Icon(EnjoyIcons.chevronUp, size: 20),
+                    children: [
+                      IconButton(
+                        tooltip: MaterialLocalizations.of(
+                          context,
+                        ).backButtonTooltip,
+                        onPressed: onBack,
+                        icon: const Icon(EnjoyIcons.chevronUp, size: 20),
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          name ?? playlistId,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ),
+                      if (name != null)
+                        IconButton(
+                          tooltip: l10n.playlistRename,
+                          icon: const Icon(EnjoyIcons.edit, size: 18),
+                          onPressed: () => createOrRenamePlaylistDialog(
+                            context,
+                            ref,
+                            existing: playlists
+                                .firstWhere((p) => p.playlist.id == playlistId)
+                                .playlist,
+                          ),
+                        ),
+                      if (items.isNotEmpty) ...[
+                        const SizedBox(width: 4),
+                        EnjoyButton.tonal(
+                          icon: EnjoyIcons.play,
+                          onPressed: () =>
+                              openPlayerRoute(context, items.first.targetId),
+                          child: Text(l10n.playlistPlayAll),
+                        ),
+                      ],
+                      const SizedBox(width: 8),
+                      EnjoyButton.tonal(
+                        icon: EnjoyIcons.add,
+                        onPressed: () =>
+                            showPlaylistMediaPicker(context, ref, playlistId),
+                        child: Text(l10n.playlistAddMedia),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 4),
+                ),
+                if (items.isEmpty)
                   Expanded(
-                    child: Text(
-                      name ?? playlistId,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.titleMedium,
+                    child: EmptyState(
+                      title: l10n.playlistEmptyTitle,
+                      subtitle: l10n.playlistEmptyHint,
+                      action: () =>
+                          showPlaylistMediaPicker(context, ref, playlistId),
+                      actionLabel: l10n.playlistAddMedia,
                     ),
-                  ),
-                  if (name != null)
-                    IconButton(
-                      tooltip: l10n.playlistRename,
-                      icon: const Icon(EnjoyIcons.edit, size: 18),
-                      onPressed: () => createOrRenamePlaylistDialog(
-                        context,
-                        ref,
-                        existing: playlists
-                            .firstWhere((p) => p.playlist.id == playlistId)
-                            .playlist,
+                  )
+                else
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: inset),
+                      child: ListView.builder(
+                        itemCount: items.length,
+                        itemBuilder: (context, index) {
+                          final item = items[index];
+                          final media = ref.watch(
+                            playlistMediaResolverProvider((
+                              item.targetType,
+                              item.targetId,
+                            )),
+                          );
+                          return _PlaylistItemTile(
+                            item: item,
+                            media: media,
+                            isFirst: index == 0,
+                            isLast: index == items.length - 1,
+                            dao: dao,
+                          );
+                        },
                       ),
                     ),
-                  if (items.isNotEmpty) ...[
-                    const SizedBox(width: 4),
-                    EnjoyButton.tonal(
-                      icon: EnjoyIcons.play,
-                      onPressed: () => openPlayerRoute(context, items.first.targetId),
-                      child: Text(l10n.playlistPlayAll),
-                    ),
-                  ],
-                  const SizedBox(width: 8),
-                  EnjoyButton.tonal(
-                    icon: EnjoyIcons.add,
-                    onPressed: () =>
-                        showPlaylistMediaPicker(context, ref, playlistId),
-                    child: Text(l10n.playlistAddMedia),
                   ),
-                ],
-              ),
-            ),
-            if (items.isEmpty)
-              Expanded(
-                child: EmptyState(
-                  title: l10n.playlistEmptyTitle,
-                  subtitle: l10n.playlistEmptyHint,
-                  action: () => showPlaylistMediaPicker(context, ref, playlistId),
-                  actionLabel: l10n.playlistAddMedia,
-                ),
-              )
-            else
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: inset),
-                  child: ListView.builder(
-                    itemCount: items.length,
-                    itemBuilder: (context, index) {
-                      final item = items[index];
-                      final media = ref.watch(
-                        playlistMediaResolverProvider(
-                          (item.targetType, item.targetId),
-                        ),
-                      );
-                      return _PlaylistItemTile(
-                        item: item,
-                        media: media,
-                        isFirst: index == 0,
-                        isLast: index == items.length - 1,
-                        dao: dao,
-                      );
-                    },
-                  ),
-                ),
-              ),
-          ],
-        );
+              ],
+            );
           },
         );
       },
@@ -474,9 +479,7 @@ class _PlaylistMediaPickerDialogState
     final media = ref.watch(libraryMediaProvider).value ?? const <Media>[];
     final visible = _query.isEmpty
         ? media
-        : media
-              .where((m) => m.title.toLowerCase().contains(_query))
-              .toList();
+        : media.where((m) => m.title.toLowerCase().contains(_query)).toList();
 
     return AlertDialog(
       title: Text(l10n.playlistAddMedia),

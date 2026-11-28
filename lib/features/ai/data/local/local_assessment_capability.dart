@@ -66,9 +66,9 @@ final class LocalAssessmentCapability implements AssessmentCapability {
     }
     if (spoken.isEmpty) {
       spoken.addAll(
-        splitReferenceWords(asr.text).map(
-          (w) => (word: w, startMs: 0, endMs: 0),
-        ),
+        splitReferenceWords(
+          asr.text,
+        ).map((w) => (word: w, startMs: 0, endMs: 0)),
       );
     }
 

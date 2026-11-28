@@ -112,14 +112,12 @@ void main() {
   ) async {
     final l10n = await pumpSettingsScreen(tester);
 
-    expect(find.text(l10n.settingsSectionSync), findsOneWidget);
     expect(find.text(l10n.settingsAppearanceDisplayLanguage), findsNothing);
 
     await tester.enterText(find.byType(TextField), 'playground');
     await tester.pumpAndSettle();
 
     expect(find.text(l10n.settingsAiPlaygroundTileTitle), findsOneWidget);
-    expect(find.text(l10n.settingsSectionSync), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -136,13 +134,11 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text(l10n.settingsSearchNoResultsTitle), findsOneWidget);
-      expect(find.text(l10n.settingsSectionSync), findsNothing);
 
       await tester.tap(find.text(l10n.settingsSearchClear));
       await tester.pumpAndSettle();
 
       expect(find.text(l10n.settingsSearchNoResultsTitle), findsNothing);
-      expect(find.text(l10n.settingsSectionSync), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
   );

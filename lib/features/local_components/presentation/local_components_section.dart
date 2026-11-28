@@ -3,6 +3,8 @@
 /// setup wizard's "download later" guidance.
 library;
 
+import 'package:enjoy_player/core/theme/enjoy_icons.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -63,15 +65,15 @@ class _LocalComponentsSectionBodyState
     try {
       await store.remove(spec);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${spec.displayName} 已删除')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('${spec.displayName} 已删除')));
       }
     } on Object catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('删除失败：$e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('删除失败：$e')));
       }
     } finally {
       if (mounted) setState(() => _generation++);
@@ -129,7 +131,7 @@ class _ComponentTile extends StatelessWidget {
       child: Row(
         children: [
           Icon(
-            installed ? Icons.check_circle : Icons.download_for_offline_outlined,
+            installed ? EnjoyIcons.checkCircle : EnjoyIcons.download,
             size: 22,
             color: installed
                 ? theme.colorScheme.primary
@@ -149,7 +151,9 @@ class _ComponentTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  installed ? '已安装 · ${spec.sizeHint}' : '未安装 · ${spec.sizeHint}',
+                  installed
+                      ? '已安装 · ${spec.sizeHint}'
+                      : '未安装 · ${spec.sizeHint}',
                   style: theme.textTheme.bodySmall,
                 ),
               ],
@@ -159,14 +163,11 @@ class _ComponentTile extends StatelessWidget {
           if (installed)
             IconButton(
               tooltip: '删除',
-              icon: const Icon(Icons.delete_outline),
+              icon: const Icon(EnjoyIcons.delete),
               onPressed: onDelete,
             )
           else
-            FilledButton.tonal(
-              onPressed: onInstall,
-              child: const Text('下载'),
-            ),
+            FilledButton.tonal(onPressed: onInstall, child: const Text('下载')),
         ],
       ),
     );

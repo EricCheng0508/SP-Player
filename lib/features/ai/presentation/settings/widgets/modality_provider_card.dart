@@ -1,3 +1,4 @@
+import 'package:enjoy_player/core/theme/widgets/enjoy_segmented_control.dart';
 import 'package:enjoy_player/core/theme/enjoy_icons.dart';
 import 'dart:async';
 
@@ -166,7 +167,6 @@ class ModalityProviderCardState extends ConsumerState<ModalityProviderCard> {
     final tt = Theme.of(context).textTheme;
     final speechMode = _speechFormMode;
 
-
     return AnimatedContainer(
       duration: t.motionFast,
       decoration: widget.embedded
@@ -217,93 +217,83 @@ class ModalityProviderCardState extends ConsumerState<ModalityProviderCard> {
               switchInCurve: Curves.easeOutCubic,
               switchOutCurve: Curves.easeInCubic,
               child: Padding(
-                      key: const ValueKey('byok-form'),
-                      padding: EdgeInsets.only(top: t.space16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          if (widget.modality == ModalityKind.llm)
-                            LlmByokForm(
-                              apiSpec: _apiSpec,
-                              baseUrlController: _baseUrlController,
-                              apiKeyController: _apiKeyController,
-                              modelController: _modelController,
-                              hasExistingKey: _hasExistingKey,
-                              presetId: _presetId,
-                              maskedApiKeyPreview: _maskedApiKeyPreview,
-                              onSpecChanged: (spec) => setState(() {
-                                _apiSpec = spec;
-                                _presetId = null;
-                              }),
-                              onPresetSelected: (preset) => setState(() {
-                                _apiSpec = preset.apiSpec;
-                                _presetId = preset.id;
-                                _baseUrlController.text = preset.baseUrl;
-                                _modelController.text = preset.model;
-                              }),
-                            ),
-                          if (speechMode != null) ...[
-                            SegmentedButton<String>(
-                              segments: [
-                                ButtonSegment(
-                                  value: 'local',
-                                  label: Text(
-                                    l10n.settingsAiEngineLocal,
-                                  ),
-                                ),
-                                ButtonSegment(
-                                  value: 'cloud',
-                                  label: Text(l10n.settingsAiEngineCloud),
-                                ),
-                              ],
-                              selected: {
-                                _useLocalEngine ? 'local' : 'cloud',
-                              },
-                              onSelectionChanged: (selection) =>
-                                  setState(() {
-                                    _useLocalEngine =
-                                        selection.first == 'local';
-                                  }),
-                              style: ButtonStyle(
-                                visualDensity: VisualDensity.compact,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                          ],
-                          if (speechMode != null && _useLocalEngine)
-                            Padding(
-                              key: const ValueKey('local-body'),
-                              padding: EdgeInsets.only(top: t.space12),
-                              child: widget.localBody,
-                            )
-                          else if (speechMode != null)
-                            SpeechByokForm(
-                              mode: speechMode,
-                              kind: _speechKind,
-                              apiKeyController: _apiKeyController,
-                              regionController: _regionController,
-                              baseUrlController: _baseUrlController,
-                              modelController: _modelController,
-                              hasExistingKey: _hasExistingKey,
-                              maskedApiKeyPreview: _maskedApiKeyPreview,
-                              onKindChanged: (kind) =>
-                                  setState(() => _speechKind = kind),
-                              modelLabelText:
-                                  widget.modality == ModalityKind.tts
-                                  ? l10n.settingsAiProvidersSpeechTtsModelLabel
-                                  : null,
-                              modelHintText: widget.modality == ModalityKind.tts
-                                  ? l10n.settingsAiProvidersSpeechTtsModelHint
-                                  : null,
-                            ),
-                          if (!_supportsByokForm)
-                            Text(
-                              l10n.settingsAiProvidersComingSoon,
-                              style: tt.bodySmall?.copyWith(color: t.ink3),
-                            ),
-                        ],
+                key: const ValueKey('byok-form'),
+                padding: EdgeInsets.only(top: t.space16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (widget.modality == ModalityKind.llm)
+                      LlmByokForm(
+                        apiSpec: _apiSpec,
+                        baseUrlController: _baseUrlController,
+                        apiKeyController: _apiKeyController,
+                        modelController: _modelController,
+                        hasExistingKey: _hasExistingKey,
+                        presetId: _presetId,
+                        maskedApiKeyPreview: _maskedApiKeyPreview,
+                        onSpecChanged: (spec) => setState(() {
+                          _apiSpec = spec;
+                          _presetId = null;
+                        }),
+                        onPresetSelected: (preset) => setState(() {
+                          _apiSpec = preset.apiSpec;
+                          _presetId = preset.id;
+                          _baseUrlController.text = preset.baseUrl;
+                          _modelController.text = preset.model;
+                        }),
                       ),
-                    ),
+                    if (speechMode != null) ...[
+                      EnjoySegmentedControl<String>(
+                        segments: [
+                          EnjoySegment<String>(
+                            value: 'local',
+                            label: l10n.settingsAiEngineLocal,
+                          ),
+                          EnjoySegment<String>(
+                            value: 'cloud',
+                            label: l10n.settingsAiEngineCloud,
+                          ),
+                        ],
+                        value: _useLocalEngine ? 'local' : 'cloud',
+                        onChanged: (selection) => setState(() {
+                          _useLocalEngine = selection == 'local';
+                        }),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                    if (speechMode != null && _useLocalEngine)
+                      Padding(
+                        key: const ValueKey('local-body'),
+                        padding: EdgeInsets.only(top: t.space12),
+                        child: widget.localBody,
+                      )
+                    else if (speechMode != null)
+                      SpeechByokForm(
+                        mode: speechMode,
+                        kind: _speechKind,
+                        apiKeyController: _apiKeyController,
+                        regionController: _regionController,
+                        baseUrlController: _baseUrlController,
+                        modelController: _modelController,
+                        hasExistingKey: _hasExistingKey,
+                        maskedApiKeyPreview: _maskedApiKeyPreview,
+                        onKindChanged: (kind) =>
+                            setState(() => _speechKind = kind),
+                        modelLabelText: widget.modality == ModalityKind.tts
+                            ? l10n.settingsAiProvidersSpeechTtsModelLabel
+                            : null,
+                        modelHintText: widget.modality == ModalityKind.tts
+                            ? l10n.settingsAiProvidersSpeechTtsModelHint
+                            : null,
+                      ),
+                    if (!_supportsByokForm)
+                      Text(
+                        l10n.settingsAiProvidersComingSoon,
+                        style: tt.bodySmall?.copyWith(color: t.ink3),
+                      ),
+                  ],
+                ),
+              ),
             ),
             if (!widget.embedded) ...[
               SizedBox(height: t.space16),
@@ -313,14 +303,11 @@ class ModalityProviderCardState extends ConsumerState<ModalityProviderCard> {
                   SizedBox(width: t.space8),
                   Expanded(
                     child: Text(
-                            l10n.settingsAiProvidersPrivacyNotice,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: tt.bodySmall?.copyWith(
-                              color: t.ink3,
-                              height: 1.3,
-                            ),
-                          ),
+                      l10n.settingsAiProvidersPrivacyNotice,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: tt.bodySmall?.copyWith(color: t.ink3, height: 1.3),
+                    ),
                   ),
                   if (widget.config.provider == AIProvider.byok &&
                       !_useLocalEngine) ...[

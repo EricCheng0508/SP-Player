@@ -1,4 +1,5 @@
 // ignore_for_file: scoped_providers_should_specify_dependencies
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
@@ -6,6 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/skeleton.dart';
+import 'package:enjoy_player/data/db/app_database.dart';
+import 'package:enjoy_player/data/subtitle/transcript_line.dart';
 import 'package:enjoy_player/features/player/application/player_controller.dart';
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
 import 'package:enjoy_player/core/application/app_preferences_provider.dart';
@@ -13,12 +16,12 @@ import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/transcript/application/active_transcript_provider.dart';
 import 'package:enjoy_player/features/transcript/application/all_transcripts_provider.dart';
-import 'package:enjoy_player/features/transcript/application/auto_translate_controller.dart';
 import 'package:enjoy_player/features/transcript/application/auto_translate_selection_providers.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_display_readiness_provider.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_fetch_controller.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_lines_provider.dart';
-import 'package:enjoy_player/features/transcript/domain/auto_translate.dart';
+import 'package:enjoy_player/features/transcript/application/transcript_repository_provider.dart';
+import 'package:enjoy_player/features/transcript/data/transcript_repository.dart';
 import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 import 'package:enjoy_player/features/transcript/application/video_row_for_media_provider.dart';
 import 'package:enjoy_player/features/transcript/domain/transcript_fetch_status.dart';
@@ -41,11 +44,49 @@ class _NoSessionPlayerController extends PlayerController {
   PlaybackSession? build() => null;
 }
 
+class _SpyRepo extends TranscriptRepository {
+  _SpyRepo() : super(AppDatabase(executor: NativeDatabase.memory()));
+
+  int ensureCalls = 0;
+  final List<String?> secondaryIds = [];
+
+  @override
+  Future<String?> ensureAutoTranslateTrack({
+    required String mediaId,
+    required String primaryTranscriptId,
+    required String targetLanguage,
+    required List<TranscriptLine> primaryLines,
+  }) async {
+    ensureCalls += 1;
+    return 'ai-created-id';
+  }
+
+  @override
+  Future<void> setSecondaryTranscript(String mediaId, String? id) async {
+    secondaryIds.add(id);
+  }
+
+  @override
+  Future<TranscriptRow?> primaryTranscriptRowForMedia(String mediaId) async =>
+      TranscriptRow(
+        id: 'primary-1',
+        targetType: 'Video',
+        targetId: _mediaId,
+        language: 'en',
+        source: 'user',
+        timelineJson: '[]',
+        label: 'primary',
+        createdAt: DateTime.utc(2026, 11, 28),
+        updatedAt: DateTime.utc(2026, 11, 28),
+      );
+}
+
 List<Override> _pickerOverrides({
   required List<TranscriptTrack> tracks,
-  _SpyAutoTranslateCtrl? autoTranslateCtrl,
+  _SpyRepo? repo,
 }) => [
   playerControllerProvider.overrideWith(() => _NoSessionPlayerController()),
+  if (repo != null) transcriptRepositoryProvider.overrideWithValue(repo),
   allTranscriptsForMediaProvider(
     _mediaId,
   ).overrideWith((ref) => Stream.value(tracks)),
@@ -63,9 +104,6 @@ List<Override> _pickerOverrides({
   transcriptFetchStatusProvider(_mediaId).overrideWithValue(
     const TranscriptFetchUiState(status: TranscriptFetchStatus.idle),
   ),
-  autoTranslateCtrlProvider(
-    _mediaId,
-  ).overrideWith(() => autoTranslateCtrl ?? _SpyAutoTranslateCtrl()),
   autoTranslateSelectionIdProvider(
     _mediaId,
   ).overrideWith((ref) async => 'ai-selection-id'),
@@ -76,18 +114,6 @@ List<Override> _pickerOverrides({
     () => KaraokeHighlightSettingsOverride(false),
   ),
 ];
-
-class _SpyAutoTranslateCtrl extends AutoTranslateCtrl {
-  int selectCalls = 0;
-
-  @override
-  AutoTranslateUiState build(String mediaId) => const AutoTranslateUiState();
-
-  @override
-  Future<void> selectAutoTranslate() async {
-    selectCalls += 1;
-  }
-}
 
 class _SignedInAuthCtrl extends AuthCtrl {
   @override
@@ -258,13 +284,10 @@ void main() {
       label: 'English',
       trackIndex: null,
     );
-    final spy = _SpyAutoTranslateCtrl();
+    final spy = _SpyRepo();
     await tester.pumpWidget(
       _harness(
-        overrides: _pickerOverrides(
-          tracks: const [track],
-          autoTranslateCtrl: spy,
-        ),
+        overrides: _pickerOverrides(tracks: const [track], repo: spy),
       ),
     );
     await tester.pump();
@@ -278,16 +301,17 @@ void main() {
     await tester.tap(find.text(l10n.subtitlesAutoTranslate));
     await tester.pumpAndSettle();
 
-    expect(spy.selectCalls, 1);
+    expect(spy.ensureCalls, 1);
+    expect(spy.secondaryIds, ['ai-created-id']);
   });
 
   testWidgets(
     'disabled Auto translate does not select when no primary is chosen',
     (tester) async {
-      final spy = _SpyAutoTranslateCtrl();
+      final spy = _SpyRepo();
       await tester.pumpWidget(
         _harness(
-          overrides: _pickerOverrides(tracks: const [], autoTranslateCtrl: spy),
+          overrides: _pickerOverrides(tracks: const [], repo: spy),
         ),
       );
       await tester.pump();
@@ -301,7 +325,8 @@ void main() {
       await tester.tap(find.text(l10n.subtitlesAutoTranslate));
       await tester.pumpAndSettle();
 
-      expect(spy.selectCalls, 0);
+      expect(spy.ensureCalls, 0);
+      expect(spy.secondaryIds, isEmpty);
     },
   );
 
@@ -417,9 +442,6 @@ void main() {
       transcriptFetchStatusProvider(_mediaId).overrideWithValue(
         const TranscriptFetchUiState(status: TranscriptFetchStatus.idle),
       ),
-      autoTranslateCtrlProvider(
-        _mediaId,
-      ).overrideWith(_SpyAutoTranslateCtrl.new),
       autoTranslateSelectionIdProvider(
         _mediaId,
       ).overrideWith((ref) async => 'ai-selection-id'),

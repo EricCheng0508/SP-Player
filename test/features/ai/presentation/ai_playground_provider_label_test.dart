@@ -12,15 +12,6 @@ Future<AppLocalizations> _loadL10n() =>
     AppLocalizations.delegate.load(const Locale('en'));
 
 void main() {
-  test('enjoy provider → "Enjoy AI"', () async {
-    final l10n = await _loadL10n();
-    final label = formatPlaygroundProviderLabel(
-      l10n,
-      const AIServiceConfig(provider: AIProvider.enjoy),
-    );
-    expect(label, 'Enjoy AI');
-  });
-
   test('BYOK + known preset id → "BYOK · preset label"', () async {
     final l10n = await _loadL10n();
     final config = const AIServiceConfig(

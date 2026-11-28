@@ -108,7 +108,7 @@ void main() {
 
     final configs = container.read(aiModalityConfigCtrlProvider);
     expect(configs.llm.provider, AIProvider.byok);
-    expect(configs.assessment.provider, AIProvider.enjoy);
-    expect(configs.asr.provider, AIProvider.enjoy);
+    expect(configs.assessment.provider, AIProvider.byok);
+    expect(configs.asr.provider, AIProvider.byok);
   });
 }

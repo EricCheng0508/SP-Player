@@ -114,12 +114,7 @@ class _FullTranslateProgressBannerState
                     child: CircularProgressIndicator(strokeWidth: 2),
                   ),
                 if (running) const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: theme.textTheme.bodyMedium,
-                  ),
-                ),
+                Expanded(child: Text(title, style: theme.textTheme.bodyMedium)),
                 if (message != null && !running)
                   Flexible(
                     child: Text(
@@ -139,7 +134,9 @@ class _FullTranslateProgressBannerState
                     ).cancelButtonLabel,
                     icon: const Icon(EnjoyIcons.close, size: 20),
                     onPressed: () => ref
-                        .read(fullTranslateCtrlProvider(widget.mediaId).notifier)
+                        .read(
+                          fullTranslateCtrlProvider(widget.mediaId).notifier,
+                        )
                         .cancel(),
                   )
                 else
@@ -157,11 +154,10 @@ class _FullTranslateProgressBannerState
                   ),
               ],
             ),
-            const SizedBox(height: 8),
-            LinearProgressIndicator(
-              value: running ? progress : null,
-              minHeight: 3,
-            ),
+            if (progress != null) ...[
+              const SizedBox(height: 8),
+              LinearProgressIndicator(value: progress, minHeight: 3),
+            ],
             if (running && minute > 0) ...[
               const SizedBox(height: 4),
               Text(

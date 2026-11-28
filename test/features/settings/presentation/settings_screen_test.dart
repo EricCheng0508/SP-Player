@@ -210,7 +210,6 @@ void main() {
 
         final l10n = await AppLocalizations.delegate.load(const Locale('en'));
 
-        expect(find.text(l10n.settingsSectionSync), findsOneWidget);
         expect(find.text(l10n.settingsAppearanceDisplayLanguage), findsNothing);
 
         await tester.enterText(find.byType(TextField), 'playground');

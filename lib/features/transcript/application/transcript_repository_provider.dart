@@ -35,9 +35,5 @@ TranscriptRepository transcriptRepository(Ref ref) {
         .watch(systemProxyCoordinatorProvider)
         .transportFailureHint,
   );
-  return TranscriptRepository(
-    db,
-    transcriptApi: api,
-    youtubeFetcher: fetcher,
-  );
+  return TranscriptRepository(db, transcriptApi: api, youtubeFetcher: fetcher);
 }

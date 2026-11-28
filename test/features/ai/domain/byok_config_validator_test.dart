@@ -46,23 +46,6 @@ void main() {
 
       expect(result.isValid, isTrue);
     });
-
-    test('rejects private base URL', () {
-      final result = validator.validate(
-        modality: ModalityKind.llm,
-        config: const AIServiceConfig(
-          provider: AIProvider.byok,
-          llmByok: LlmByokConfig(
-            apiSpec: LlmApiSpec.openAiCompatible,
-            baseUrl: 'https://192.168.1.5/v1',
-            model: 'gpt-4o-mini',
-          ),
-        ),
-        hasExistingApiKey: true,
-      );
-
-      expect(result.errors, contains(ByokValidationError.baseUrlInvalid));
-    });
   });
 
   group('LLM missing fields', () {
@@ -132,22 +115,6 @@ void main() {
         hasExistingApiKey: true,
       );
       expect(result.errors, contains(ByokValidationError.baseUrlRequired));
-    });
-
-    test('openAiCompatible: baseUrlInvalid for private IP', () {
-      final result = validator.validate(
-        modality: ModalityKind.asr,
-        config: const AIServiceConfig(
-          provider: AIProvider.byok,
-          speechByok: SpeechByokConfig(
-            kind: SpeechByokKind.openAiCompatible,
-            baseUrl: 'https://10.0.0.1/v1',
-            model: 'whisper-1',
-          ),
-        ),
-        hasExistingApiKey: true,
-      );
-      expect(result.errors, contains(ByokValidationError.baseUrlInvalid));
     });
 
     test('openAiCompatible: modelRequired when model empty', () {
@@ -241,14 +208,5 @@ void main() {
 
       expect(result.isValid, isTrue);
     });
-  });
-
-  test('non-byok provider always valid', () {
-    final result = validator.validate(
-      modality: ModalityKind.llm,
-      config: const AIServiceConfig(provider: AIProvider.enjoy),
-      hasExistingApiKey: false,
-    );
-    expect(result.isValid, isTrue);
   });
 }

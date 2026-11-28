@@ -1,8 +1,6 @@
 /// Per-line tile construction and reuse cache for the echo region card.
 library;
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -10,18 +8,14 @@ import 'package:enjoy_player/data/subtitle/transcript_line.dart';
 import 'package:enjoy_player/features/lookup/application/transcript_lookup_open.dart';
 import 'package:enjoy_player/features/player/application/echo_mode_provider.dart';
 import 'package:enjoy_player/features/player/application/player_interactions.dart';
-import 'package:enjoy_player/features/transcript/application/auto_translate_controller.dart';
-import 'package:enjoy_player/features/transcript/application/auto_translate_line_request_policy.dart';
 import 'package:enjoy_player/features/transcript/application/auto_translate_resolved_text.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_line_alignment.dart';
 import 'package:enjoy_player/features/transcript/presentation/transcript_line_tile.dart';
-import 'package:enjoy_player/l10n/app_localizations.dart';
 
 typedef EchoTileInputs = ({
   TranscriptLine line,
   bool isActive,
   String? secondaryText,
-  bool canRetranslate,
   Set<int>? wavyWordIndexes,
   int? recordingCount,
   double loopFontSize,
@@ -59,12 +53,11 @@ List<Widget> buildEchoRegionTiles({
   required bool reuseUnchangedTiles,
   required EchoRegionTileCache cache,
 }) {
-  final l10n = AppLocalizations.of(context);
   final lineWidgets = <Widget>[];
   for (var i = echo.startLineIndex; i <= echo.endLineIndex; i++) {
     final line = lines[i];
     final isActive = i == activeCueIndex;
-    final resolved = resolveAutoTranslateTextForDisplay(
+    final secondaryText = resolveAutoTranslateTextForDisplay(
       autoTranslateActive: autoTranslateActive,
       primaryLines: lines,
       aiLines: secondaryLines,
@@ -73,39 +66,12 @@ List<Widget> buildEchoRegionTiles({
       targetLanguage: autoTranslateTargetLanguage,
       matcher: matcher,
       line: line,
-      isLineFailed: (i) =>
-          ref.read(autoTranslateCtrlProvider(mediaId)).isLineFailed(i),
-      isLineInFlight: (i) =>
-          ref.read(autoTranslateCtrlProvider(mediaId)).isLineInFlight(i),
-      l10nLineFailed: l10n?.subtitlesAutoTranslateLineFailed,
-      l10nLinePending: l10n?.subtitlesAutoTranslatePendingLine,
     );
-    final secondaryText = resolved.secondaryText;
-    final canRetranslate = resolved.canRetranslate;
-    final lineFailed = resolved.isFailed;
-
-    if (shouldRequestAutoTranslateLine(
-      lineIndex: i,
-      anchorLineIndex: 0,
-      scope: AutoTranslateRequestScope.block,
-      isAutoTranslateActive: autoTranslateActive,
-      hasSecondaryText:
-          secondaryText != null && secondaryText.trim().isNotEmpty,
-      isLineFailed: lineFailed,
-    )) {
-      scheduleAutoTranslateLineRequest(
-        isMounted: () => ref.context.mounted,
-        request: () => ref
-            .read(autoTranslateCtrlProvider(mediaId).notifier)
-            .requestTranslateLine(i),
-      );
-    }
 
     final inputs = (
       line: line,
       isActive: isActive,
       secondaryText: secondaryText,
-      canRetranslate: canRetranslate,
       wavyWordIndexes: wavyByLine?[i],
       recordingCount: lineRecordingCounts?[i],
       loopFontSize: loopFontSize,
@@ -136,13 +102,6 @@ List<Widget> buildEchoRegionTiles({
         lines: lines,
         lineIndex: i,
       ),
-      onRetranslateSecondary: canRetranslate
-          ? () => unawaited(
-              ref
-                  .read(autoTranslateCtrlProvider(mediaId).notifier)
-                  .retranslateLine(i),
-            )
-          : null,
       onTap: () => ref.read(playerInteractionsProvider).seekToLine(line, i),
     );
 

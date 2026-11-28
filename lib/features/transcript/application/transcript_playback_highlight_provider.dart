@@ -133,9 +133,7 @@ int _captionVisibleIndex(List<TranscriptLine> lines, double t) {
 
   double displayStartOf(int i) {
     final start = lines[i].startSeconds;
-    final prevEnd = i > 0
-        ? lines[i - 1].endSeconds
-        : double.negativeInfinity;
+    final prevEnd = i > 0 ? lines[i - 1].endSeconds : double.negativeInfinity;
     // Floor at start_i so overlapping whisper timings never push the window
     // past the cue's own speech.
     final floor = prevEnd < start ? prevEnd : start;

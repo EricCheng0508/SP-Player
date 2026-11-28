@@ -19,12 +19,11 @@ class PlaylistDao extends DatabaseAccessor<AppDatabase> {
         count,
       ])
       ..join([
-          leftOuterJoin(
-            _db.playlistItems,
-            _db.playlistItems.playlistId.equalsExp(_db.playlists.id),
-          ),
-        ],
-      )
+        leftOuterJoin(
+          _db.playlistItems,
+          _db.playlistItems.playlistId.equalsExp(_db.playlists.id),
+        ),
+      ])
       ..groupBy([_db.playlists.id])
       ..orderBy([OrderingTerm.asc(_db.playlists.createdAt)]);
     return query.watch().map(
@@ -44,9 +43,9 @@ class PlaylistDao extends DatabaseAccessor<AppDatabase> {
     );
   }
 
-  Future<PlaylistRow?> byId(String id) =>
-      (_db.select(_db.playlists)..where((p) => p.id.equals(id)))
-          .getSingleOrNull();
+  Future<PlaylistRow?> byId(String id) => (_db.select(
+    _db.playlists,
+  )..where((p) => p.id.equals(id))).getSingleOrNull();
 
   Future<PlaylistRow> create(String name) async {
     final now = DateTime.now();
@@ -76,19 +75,15 @@ class PlaylistDao extends DatabaseAccessor<AppDatabase> {
   /// Items in play order, joined with nothing — callers resolve titles via
   /// the media registry.
   Stream<List<PlaylistItemRow>> watchItems(String playlistId) =>
-      (_db.select(
-        _db.playlistItems,
-      )..where(
-            (i) => i.playlistId.equals(playlistId),
-          )..orderBy([(i) => OrderingTerm.asc(i.position)]))
+      (_db.select(_db.playlistItems)
+            ..where((i) => i.playlistId.equals(playlistId))
+            ..orderBy([(i) => OrderingTerm.asc(i.position)]))
           .watch();
 
   Future<List<PlaylistItemRow>> itemsOnce(String playlistId) =>
-      (_db.select(
-        _db.playlistItems,
-      )..where(
-            (i) => i.playlistId.equals(playlistId),
-          )..orderBy([(i) => OrderingTerm.asc(i.position)]))
+      (_db.select(_db.playlistItems)
+            ..where((i) => i.playlistId.equals(playlistId))
+            ..orderBy([(i) => OrderingTerm.asc(i.position)]))
           .get();
 
   /// Appends [targetType]/[targetId] unless already present; returns whether
@@ -99,13 +94,12 @@ class PlaylistDao extends DatabaseAccessor<AppDatabase> {
     required String targetId,
   }) async {
     final existing =
-        await (_db.select(_db.playlistItems)
-              ..where(
-                (i) =>
-                    i.playlistId.equals(playlistId) &
-                    i.targetType.equals(targetType) &
-                    i.targetId.equals(targetId),
-              ))
+        await (_db.select(_db.playlistItems)..where(
+              (i) =>
+                  i.playlistId.equals(playlistId) &
+                  i.targetType.equals(targetType) &
+                  i.targetId.equals(targetId),
+            ))
             .getSingleOrNull();
     if (existing != null) return false;
 
@@ -115,16 +109,18 @@ class PlaylistDao extends DatabaseAccessor<AppDatabase> {
               ..where(_db.playlistItems.playlistId.equals(playlistId)))
             .getSingleOrNull();
     final maxPos = maxPosRow?.read(_db.playlistItems.position.max()) ?? -1;
-    await _db.into(_db.playlistItems).insert(
-      PlaylistItemRow(
-        id: const Uuid().v4(),
-        playlistId: playlistId,
-        targetType: targetType,
-        targetId: targetId,
-        position: maxPos + 1,
-        addedAt: DateTime.now(),
-      ),
-    );
+    await _db
+        .into(_db.playlistItems)
+        .insert(
+          PlaylistItemRow(
+            id: const Uuid().v4(),
+            playlistId: playlistId,
+            targetType: targetType,
+            targetId: targetId,
+            position: maxPos + 1,
+            addedAt: DateTime.now(),
+          ),
+        );
     await _touch(playlistId);
     return true;
   }
@@ -132,10 +128,9 @@ class PlaylistDao extends DatabaseAccessor<AppDatabase> {
   /// Removes the item and compacts the remaining positions back to dense
   /// 0..n-1 order.
   Future<void> removeItem(String itemId) async {
-    final item =
-        await (_db.select(
-          _db.playlistItems,
-        )..where((i) => i.id.equals(itemId))).getSingleOrNull();
+    final item = await (_db.select(
+      _db.playlistItems,
+    )..where((i) => i.id.equals(itemId))).getSingleOrNull();
     if (item == null) return;
     await (_db.delete(
       _db.playlistItems,
@@ -146,10 +141,9 @@ class PlaylistDao extends DatabaseAccessor<AppDatabase> {
 
   /// Moves [itemId] up/down by swapping positions with its neighbour.
   Future<void> moveItem(String itemId, {required bool up}) async {
-    final item =
-        await (_db.select(
-          _db.playlistItems,
-        )..where((i) => i.id.equals(itemId))).getSingleOrNull();
+    final item = await (_db.select(
+      _db.playlistItems,
+    )..where((i) => i.id.equals(itemId))).getSingleOrNull();
     if (item == null) return;
     final rows = await itemsOnce(item.playlistId);
     final index = rows.indexWhere((r) => r.id == itemId);
@@ -175,11 +169,9 @@ class PlaylistDao extends DatabaseAccessor<AppDatabase> {
     final rows = await itemsOnce(playlistId);
     for (var i = 0; i < rows.length; i++) {
       if (rows[i].position != i) {
-        await (_db.update(
-          _db.playlistItems,
-        )..where((r) => r.id.equals(rows[i].id))).write(
-          PlaylistItemsCompanion(position: Value(i)),
-        );
+        await (_db.update(_db.playlistItems)
+              ..where((r) => r.id.equals(rows[i].id)))
+            .write(PlaylistItemsCompanion(position: Value(i)));
       }
     }
   }

@@ -1,4 +1,8 @@
 import 'package:enjoy_player/core/interaction/enjoy_pressable.dart';
+import 'package:drift/native.dart';
+import 'package:enjoy_player/data/db/app_database.dart';
+import 'package:enjoy_player/data/db/app_database_provider.dart';
+import 'package:enjoy_player/features/transcript/application/active_transcript_provider.dart';
 import 'package:enjoy_player/data/subtitle/transcript_line.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_blur_mode_provider.dart';
 import 'package:enjoy_player/features/transcript/presentation/transcript_blur_text.dart';
@@ -20,6 +24,15 @@ void main() {
   }) {
     return ProviderScope(
       overrides: [
+        secondaryTranscriptIdProvider(
+          'm1',
+        ).overrideWith((ref) => Stream.value(null)),
+        appDatabaseProvider.overrideWith((ref) {
+          final db = AppDatabase(executor: NativeDatabase.memory());
+          ref.onDispose(db.close);
+          return db;
+        }),
+
         transcriptBlurModeProvider.overrideWith(() => _BlurMode(blurActive)),
         ...transcriptWordPracticeOffOverrides(),
       ],
@@ -85,6 +98,15 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          secondaryTranscriptIdProvider(
+            'm1',
+          ).overrideWith((ref) => Stream.value(null)),
+          appDatabaseProvider.overrideWith((ref) {
+            final db = AppDatabase(executor: NativeDatabase.memory());
+            ref.onDispose(db.close);
+            return db;
+          }),
+
           transcriptBlurModeProvider.overrideWith(() => _BlurMode(true)),
           ...transcriptWordPracticeOffOverrides(),
         ],
@@ -194,6 +216,15 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          secondaryTranscriptIdProvider(
+            'm1',
+          ).overrideWith((ref) => Stream.value(null)),
+          appDatabaseProvider.overrideWith((ref) {
+            final db = AppDatabase(executor: NativeDatabase.memory());
+            ref.onDispose(db.close);
+            return db;
+          }),
+
           transcriptBlurModeProvider.overrideWith(() => _BlurMode(true)),
           ...transcriptWordPracticeOffOverrides(),
         ],
@@ -299,6 +330,15 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          secondaryTranscriptIdProvider(
+            'm1',
+          ).overrideWith((ref) => Stream.value(null)),
+          appDatabaseProvider.overrideWith((ref) {
+            final db = AppDatabase(executor: NativeDatabase.memory());
+            ref.onDispose(db.close);
+            return db;
+          }),
+
           transcriptBlurModeProvider.overrideWith(() => _BlurMode(true)),
           ...transcriptWordPracticeOffOverrides(),
         ],

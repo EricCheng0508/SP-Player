@@ -23,7 +23,6 @@ import 'package:enjoy_player/features/settings/application/settings_search_query
 import 'package:enjoy_player/features/settings/domain/settings_search_entry.dart';
 import 'package:enjoy_player/features/settings/presentation/settings_section_spec.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/sections/appearance_language_section.dart';
-import 'package:enjoy_player/features/settings/presentation/widgets/sections/cloud_sync_section.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/settings_layout_single_column.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/settings_row.dart';
 import 'package:enjoy_player/features/shadow_reading/application/recording_input_device_controller.dart';
@@ -89,7 +88,6 @@ class _HubSectionRow extends ConsumerWidget {
     return SettingsRow(
       leadingIcon: spec.icon,
       leadingIconTone: switch (spec.sectionId) {
-        SettingsSectionIds.cloudSync => EnjoyIconTileTone.original,
         SettingsSectionIds.aiProviders => EnjoyIconTileTone.brand,
         _ => EnjoyIconTileTone.neutral,
       },
@@ -113,16 +111,6 @@ class _HubSectionRow extends ConsumerWidget {
 
   String? _value(WidgetRef ref, AppLocalizations l10n) {
     switch (spec.sectionId) {
-      case SettingsSectionIds.cloudSync:
-        final auth = ref.watch(authCtrlProvider).valueOrNull;
-        if (auth is! AuthSignedIn) return null;
-        final snapshot = ref.watch(syncQueueSnapshotProvider).valueOrNull;
-        if (snapshot == null) return null;
-        return SyncQueueStatusPill(
-          retryablePending: snapshot.retryablePending,
-          permanentlyFailed: snapshot.permanentlyFailed,
-          l10n: l10n,
-        ).label;
       case SettingsSectionIds.appearanceLanguage:
         final prefs = ref.watch(appPreferencesCtrlProvider).valueOrNull;
         if (prefs == null) return null;
@@ -154,7 +142,6 @@ class _HubSectionRow extends ConsumerWidget {
 
   String _routeFor(String sectionId) {
     return switch (sectionId) {
-      SettingsSectionIds.cloudSync => '/settings/sync',
       SettingsSectionIds.appearanceLanguage => '/settings/appearance-language',
       SettingsSectionIds.aiProviders => '/settings/ai-providers',
       SettingsSectionIds.recording => '/settings/recording',

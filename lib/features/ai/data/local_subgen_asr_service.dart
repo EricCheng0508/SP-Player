@@ -38,9 +38,7 @@ Future<bool> isLocalAsrUp({
 }) async {
   try {
     final client = _probeClient ??= http.Client();
-    final response = await client
-        .get(Uri.parse(_healthUrl))
-        .timeout(timeout);
+    final response = await client.get(Uri.parse(_healthUrl)).timeout(timeout);
     return response.statusCode == 200;
   } on Object {
     return false;
@@ -176,7 +174,9 @@ Future<bool> _spawnManaged() async {
   );
   final args = <String>['--port', '8000'];
   if (modelDir.existsSync()) {
-    args..add('--model')..add(modelDir.path);
+    args
+      ..add('--model')
+      ..add(modelDir.path);
   }
 
   try {
@@ -197,11 +197,11 @@ Future<bool> _spawnLegacyDev() async {
   final pythonw = File('$kSubgenDir\\.venv\\Scripts\\pythonw.exe');
   try {
     if (!pythonw.existsSync()) return false;
-    return await spawnHidden(
-      pythonw.path,
-      [r'serve.py', '--port', '8000'],
-      workingDirectory: kSubgenDir,
-    );
+    return await spawnHidden(pythonw.path, [
+      r'serve.py',
+      '--port',
+      '8000',
+    ], workingDirectory: kSubgenDir);
   } on Object {
     return false;
   }

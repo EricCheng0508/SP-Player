@@ -73,8 +73,7 @@ final class ByokLlmCapability implements LlmCapability {
       } on Object catch (e) {
         _log.warning('ensureLocalLlmServer failed: $e');
         throw const ApiException(
-          message:
-              '本地翻译服务未能启动:请到「设置 → 本地组件」确认翻译组件已下载安装。',
+          message: '本地翻译服务未能启动:请到「设置 → 本地组件」确认翻译组件已下载安装。',
           statusCode: 503,
         );
       }

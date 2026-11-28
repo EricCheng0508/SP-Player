@@ -308,10 +308,7 @@ void main() {
         final learn = canonicalFocusLanguageTag(null);
         expect(state.locale, kAppDefaultDisplayLocale);
         expect(state.learningLanguage, learn);
-        expect(
-          state.nativeLanguage,
-          coerceNativeIfEqualsLearning(null, learn),
-        );
+        expect(state.nativeLanguage, coerceNativeIfEqualsLearning(null, learn));
         expect(state.themeMode, ThemeMode.system);
         expect(
           await db.settingsDao.getValue(

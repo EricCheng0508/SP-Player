@@ -7,8 +7,6 @@ import 'package:enjoy_player/features/ai/domain/models/tts_result.dart';
 import 'package:enjoy_player/features/asr/domain/asr_long_form_mapper.dart';
 import 'package:enjoy_player/features/asr/domain/asr_long_form_models.dart';
 import 'package:enjoy_player/features/craft/domain/craft_failure.dart';
-import 'package:enjoy_player/features/credits/domain/credits_summary.dart';
-import 'package:enjoy_player/features/subscription/domain/subscription_plan.dart';
 import 'package:enjoy_player/features/transcript/domain/transcript_blur.dart';
 import 'package:enjoy_player/features/transcript/domain/transcript_fetch_status.dart';
 import 'package:enjoy_player/features/update/domain/semver_compare.dart';
@@ -83,87 +81,6 @@ void main() {
         TranscriptFetchUiState.toPersisted(TranscriptFetchStatus.loading),
         'success',
       );
-    });
-  });
-
-  group('CreditsSummary.toJson', () {
-    test('round-trips through fromJson/toJson', () {
-      const summary = CreditsSummary(
-        tier: 'pro',
-        dailyUsed: 10,
-        dailyLimit: 100,
-        dailyRemaining: 90,
-        permanentAvailable: 500,
-        resetAt: 1700000000,
-      );
-      final json = summary.toJson();
-      expect(json['tier'], 'pro');
-      expect(json['dailyUsed'], 10);
-      expect(json['dailyLimit'], 100);
-      expect(json['dailyRemaining'], 90);
-      expect(json['permanentAvailable'], 500);
-      expect(json['resetAt'], 1700000000);
-      final restored = CreditsSummary.fromJson(json);
-      expect(restored.tier, 'pro');
-      expect(restored.dailyUsed, 10);
-    });
-  });
-
-  group('SubscriptionPlan', () {
-    test('fromJson parses fields', () {
-      final plan = SubscriptionPlan.fromJson({
-        'id': 'plan-1',
-        'tier': 'pro',
-        'interval': 'month',
-        'amount': 9.99,
-        'currencyNote': 'USD',
-      });
-      expect(plan.id, 'plan-1');
-      expect(plan.tier, 'pro');
-      expect(plan.interval, 'month');
-      expect(plan.amount, 9.99);
-      expect(plan.currencyNote, 'USD');
-      expect(plan.isMonthly, isTrue);
-      expect(plan.isYearly, isFalse);
-    });
-
-    test('isYearly for year interval', () {
-      final plan = SubscriptionPlan.fromJson({
-        'id': 'plan-2',
-        'tier': 'pro',
-        'interval': 'year',
-        'amount': 79.99,
-      });
-      expect(plan.isYearly, isTrue);
-      expect(plan.isMonthly, isFalse);
-      expect(plan.currencyNote, isNull);
-    });
-
-    test('toJson produces correct map', () {
-      const plan = SubscriptionPlan(
-        id: 'p1',
-        tier: 'pro',
-        interval: 'month',
-        amount: 5,
-        currencyNote: 'EUR',
-      );
-      final json = plan.toJson();
-      expect(json['id'], 'p1');
-      expect(json['tier'], 'pro');
-      expect(json['interval'], 'month');
-      expect(json['amount'], 5);
-      expect(json['currencyNote'], 'EUR');
-    });
-
-    test('toJson omits null currencyNote', () {
-      const plan = SubscriptionPlan(
-        id: 'p2',
-        tier: 'pro',
-        interval: 'year',
-        amount: 50,
-      );
-      final json = plan.toJson();
-      expect(json.containsKey('currencyNote'), isFalse);
     });
   });
 

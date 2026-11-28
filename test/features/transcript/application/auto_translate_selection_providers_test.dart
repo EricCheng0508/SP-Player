@@ -23,11 +23,6 @@ class _SignedInAuthCtrl extends AuthCtrl {
   );
 }
 
-class _SignedOutAuthCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedOut();
-}
-
 class _ZhNativePrefsCtrl extends AppPreferencesCtrl {
   @override
   Future<AppPreferencesState> build() async => AppPreferencesState.initial
@@ -186,23 +181,6 @@ void main() {
     tearDown(() async {
       container.dispose();
       await db.close();
-    });
-
-    test('returns null when not signed in', () async {
-      container = ProviderContainer(
-        overrides: [
-          appDatabaseProvider.overrideWithValue(db),
-          transcriptRepositoryProvider.overrideWithValue(repo),
-          authCtrlProvider.overrideWith(_SignedOutAuthCtrl.new),
-          appPreferencesCtrlProvider.overrideWith(_ZhNativePrefsCtrl.new),
-        ],
-      );
-      await container.read(authCtrlProvider.future);
-
-      final result = await container.read(
-        autoTranslateSelectionIdProvider(mediaId).future,
-      );
-      expect(result, isNull);
     });
 
     test(

@@ -36,7 +36,6 @@ class TranscriptTileText extends StatelessWidget {
     this.onIpaTap,
     this.onRevealHoldOnly,
     this.onLookupRequested,
-    this.onRetranslateSecondary,
     super.key,
   });
 
@@ -57,7 +56,6 @@ class TranscriptTileText extends StatelessWidget {
   final ValueChanged<int>? onIpaTap;
   final VoidCallback? onRevealHoldOnly;
   final ValueChanged<String>? onLookupRequested;
-  final VoidCallback? onRetranslateSecondary;
 
   @override
   Widget build(BuildContext context) {
@@ -184,36 +182,7 @@ class TranscriptTileText extends StatelessWidget {
         defaultColor: scheme.onSurfaceVariant,
         emphasize: false,
       );
-      final retranslate = onRetranslateSecondary;
-      final retranslateLabel =
-          AppLocalizations.of(context)?.subtitlesAutoTranslateRetranslateLine ??
-          'Re-translate this line';
-      final span = retranslate == null
-          ? secondarySpan
-          : TextSpan(
-              children: [
-                secondarySpan,
-                WidgetSpan(
-                  alignment: PlaceholderAlignment.middle,
-                  child: Semantics(
-                    label: retranslateLabel,
-                    button: true,
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: retranslate,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 6, right: 2),
-                        child: Icon(
-                          EnjoyIcons.refresh,
-                          size: 15,
-                          color: scheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            );
+      final span = secondarySpan;
       secondaryWidget = selectable
           ? TranscriptSelectableRichText(
               span: span,

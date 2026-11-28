@@ -18,8 +18,7 @@ TranscriptLine cue(
   );
 }
 
-({String? secondaryText, bool canRetranslate, bool isFailed, bool isInFlight})
-callResolve({
+String? callResolve({
   required bool autoTranslateActive,
   required List<TranscriptLine> primaryLines,
   required List<TranscriptLine> aiLines,
@@ -28,10 +27,6 @@ callResolve({
   String? targetLanguage,
   required TranscriptSecondaryMatcher matcher,
   required TranscriptLine line,
-  required Set<int> failedIndexes,
-  required Set<int> inFlightIndexes,
-  String? l10nLineFailed,
-  String? l10nLinePending,
 }) {
   return resolveAutoTranslateTextForDisplay(
     autoTranslateActive: autoTranslateActive,
@@ -42,10 +37,6 @@ callResolve({
     targetLanguage: targetLanguage,
     matcher: matcher,
     line: line,
-    isLineFailed: (i) => failedIndexes.contains(i),
-    isLineInFlight: (i) => inFlightIndexes.contains(i),
-    l10nLineFailed: l10nLineFailed,
-    l10nLinePending: l10nLinePending,
   );
 }
 
@@ -63,13 +54,8 @@ void main() {
           lineIndex: 0,
           matcher: matcher,
           line: primary.first,
-          failedIndexes: const {},
-          inFlightIndexes: const {},
         );
-        expect(result.secondaryText, 'hello world');
-        expect(result.canRetranslate, isFalse);
-        expect(result.isFailed, isFalse);
-        expect(result.isInFlight, isFalse);
+        expect(result, 'hello world');
       });
 
       test('secondaryText is null when matcher returns null', () {
@@ -82,13 +68,8 @@ void main() {
           lineIndex: 0,
           matcher: matcher,
           line: primary.first,
-          failedIndexes: const {0},
-          inFlightIndexes: const {0},
         );
-        expect(result.secondaryText, isNull);
-        expect(result.isFailed, isFalse);
-        expect(result.isInFlight, isFalse);
-        expect(result.canRetranslate, isFalse);
+        expect(result, isNull);
       });
     });
 
@@ -113,11 +94,8 @@ void main() {
           targetLanguage: tgt,
           matcher: matcher,
           line: primary.first,
-          failedIndexes: const {},
-          inFlightIndexes: const {},
         );
-        expect(result.secondaryText, 'hello');
-        expect(result.canRetranslate, isTrue);
+        expect(result, 'hello');
       });
 
       test('returns null when sourceKey mismatches (soft-stale)', () {
@@ -133,10 +111,8 @@ void main() {
           targetLanguage: 'en',
           matcher: matcher,
           line: primary.first,
-          failedIndexes: const {},
-          inFlightIndexes: const {},
         );
-        expect(result.secondaryText, isNull);
+        expect(result, isNull);
       });
 
       test(
@@ -154,10 +130,8 @@ void main() {
             targetLanguage: 'en',
             matcher: matcher,
             line: primary.first,
-            failedIndexes: const {},
-            inFlightIndexes: const {},
           );
-          expect(result.secondaryText, isNull);
+          expect(result, isNull);
         },
       );
 
@@ -172,10 +146,8 @@ void main() {
           lineIndex: 0,
           matcher: matcher,
           line: primary.first,
-          failedIndexes: const {},
-          inFlightIndexes: const {},
         );
-        expect(result.secondaryText, 'hello');
+        expect(result, 'hello');
       });
 
       test(
@@ -192,10 +164,8 @@ void main() {
             sourceLanguage: 'es',
             matcher: matcher,
             line: primary.first,
-            failedIndexes: const {},
-            inFlightIndexes: const {},
           );
-          expect(result.secondaryText, 'hello');
+          expect(result, 'hello');
         },
       );
     });
@@ -212,10 +182,8 @@ void main() {
           lineIndex: 5,
           matcher: matcher,
           line: primary.first,
-          failedIndexes: const {},
-          inFlightIndexes: const {},
         );
-        expect(result.secondaryText, isNull);
+        expect(result, isNull);
       });
 
       test('returns null when aiLines shorter than lineIndex', () {
@@ -229,10 +197,8 @@ void main() {
           lineIndex: 1,
           matcher: matcher,
           line: primary.last,
-          failedIndexes: const {},
-          inFlightIndexes: const {},
         );
-        expect(result.secondaryText, isNull);
+        expect(result, isNull);
       });
 
       test('returns null when ai slot text is whitespace-only', () {
@@ -246,205 +212,8 @@ void main() {
           lineIndex: 0,
           matcher: matcher,
           line: primary.first,
-          failedIndexes: const {},
-          inFlightIndexes: const {},
         );
-        expect(result.secondaryText, isNull);
-      });
-    });
-
-    group('l10n fallback for empty secondary text', () {
-      const failedL10n = '[failed]';
-      const pendingL10n = '[pending]';
-
-      test('uses l10nLineFailed when failed flag is set and raw is empty', () {
-        final primary = [cue(0, 2000, 'hola')];
-        final matcher = TranscriptSecondaryMatcher.from(const []);
-        final result = callResolve(
-          autoTranslateActive: true,
-          primaryLines: primary,
-          aiLines: const [],
-          lineIndex: 0,
-          matcher: matcher,
-          line: primary.first,
-          failedIndexes: const {0},
-          inFlightIndexes: const {},
-          l10nLineFailed: failedL10n,
-          l10nLinePending: pendingL10n,
-        );
-        expect(result.secondaryText, failedL10n);
-        expect(result.isFailed, isTrue);
-        expect(result.isInFlight, isFalse);
-        expect(result.canRetranslate, isTrue);
-      });
-
-      test(
-        'uses l10nLinePending when inFlight (and not failed) and raw is empty',
-        () {
-          final primary = [cue(0, 2000, 'hola')];
-          final matcher = TranscriptSecondaryMatcher.from(const []);
-          final result = callResolve(
-            autoTranslateActive: true,
-            primaryLines: primary,
-            aiLines: const [],
-            lineIndex: 0,
-            matcher: matcher,
-            line: primary.first,
-            failedIndexes: const {},
-            inFlightIndexes: const {0},
-            l10nLineFailed: failedL10n,
-            l10nLinePending: pendingL10n,
-          );
-          expect(result.secondaryText, pendingL10n);
-          expect(result.isFailed, isFalse);
-          expect(result.isInFlight, isTrue);
-        },
-      );
-
-      test('failed wins over inFlight when both flags are set', () {
-        final primary = [cue(0, 2000, 'hola')];
-        final matcher = TranscriptSecondaryMatcher.from(const []);
-        final result = callResolve(
-          autoTranslateActive: true,
-          primaryLines: primary,
-          aiLines: const [],
-          lineIndex: 0,
-          matcher: matcher,
-          line: primary.first,
-          failedIndexes: const {0},
-          inFlightIndexes: const {0},
-          l10nLineFailed: failedL10n,
-          l10nLinePending: pendingL10n,
-        );
-        expect(result.secondaryText, failedL10n);
-        expect(result.isFailed, isTrue);
-        expect(result.isInFlight, isTrue);
-      });
-
-      test('returns null when raw empty and l10nLineFailed is null', () {
-        final primary = [cue(0, 2000, 'hola')];
-        final matcher = TranscriptSecondaryMatcher.from(const []);
-        final result = callResolve(
-          autoTranslateActive: true,
-          primaryLines: primary,
-          aiLines: const [],
-          lineIndex: 0,
-          matcher: matcher,
-          line: primary.first,
-          failedIndexes: const {0},
-          inFlightIndexes: const {},
-        );
-        expect(result.secondaryText, isNull);
-        expect(result.isFailed, isTrue);
-        expect(result.canRetranslate, isTrue);
-      });
-
-      test('non-empty raw is preserved even when failed flag is set', () {
-        final primary = [cue(0, 2000, 'hola')];
-        final ai = [cue(0, 2000, 'hello')];
-        final matcher = TranscriptSecondaryMatcher.from(const []);
-        final result = callResolve(
-          autoTranslateActive: true,
-          primaryLines: primary,
-          aiLines: ai,
-          lineIndex: 0,
-          matcher: matcher,
-          line: primary.first,
-          failedIndexes: const {0},
-          inFlightIndexes: const {},
-          l10nLineFailed: failedL10n,
-          l10nLinePending: pendingL10n,
-        );
-        expect(result.secondaryText, 'hello');
-        expect(result.isFailed, isTrue);
-      });
-
-      test('raw is preserved when empty AND neither failed nor inFlight', () {
-        final primary = [cue(0, 2000, 'hola')];
-        final matcher = TranscriptSecondaryMatcher.from(const []);
-        final result = callResolve(
-          autoTranslateActive: true,
-          primaryLines: primary,
-          aiLines: const [],
-          lineIndex: 0,
-          matcher: matcher,
-          line: primary.first,
-          failedIndexes: const {},
-          inFlightIndexes: const {},
-          l10nLineFailed: failedL10n,
-          l10nLinePending: pendingL10n,
-        );
-        expect(result.secondaryText, isNull);
-      });
-    });
-
-    group('canRetranslate semantics', () {
-      test('false when autoTranslateActive is false', () {
-        final primary = [cue(0, 2000, 'hola')];
-        final matcher = TranscriptSecondaryMatcher.from(const []);
-        final result = callResolve(
-          autoTranslateActive: false,
-          primaryLines: primary,
-          aiLines: const [],
-          lineIndex: 0,
-          matcher: matcher,
-          line: primary.first,
-          failedIndexes: const {},
-          inFlightIndexes: const {},
-        );
-        expect(result.canRetranslate, isFalse);
-      });
-
-      test('true when failed=true regardless of display text', () {
-        final primary = [cue(0, 2000, 'hola')];
-        final matcher = TranscriptSecondaryMatcher.from(const []);
-        final result = callResolve(
-          autoTranslateActive: true,
-          primaryLines: primary,
-          aiLines: const [],
-          lineIndex: 0,
-          matcher: matcher,
-          line: primary.first,
-          failedIndexes: const {0},
-          inFlightIndexes: const {},
-        );
-        expect(result.canRetranslate, isTrue);
-      });
-
-      test('true when display has non-empty trimmed text', () {
-        final primary = [cue(0, 2000, 'hola')];
-        final ai = [cue(0, 2000, 'hello')];
-        final matcher = TranscriptSecondaryMatcher.from(const []);
-        final result = callResolve(
-          autoTranslateActive: true,
-          primaryLines: primary,
-          aiLines: ai,
-          lineIndex: 0,
-          matcher: matcher,
-          line: primary.first,
-          failedIndexes: const {},
-          inFlightIndexes: const {},
-        );
-        expect(result.secondaryText, 'hello');
-        expect(result.canRetranslate, isTrue);
-      });
-
-      test('false when not failed AND display is whitespace-only', () {
-        final primary = [cue(0, 2000, 'hola')];
-        final ai = [cue(0, 2000, '   ')];
-        final matcher = TranscriptSecondaryMatcher.from(const []);
-        final result = callResolve(
-          autoTranslateActive: true,
-          primaryLines: primary,
-          aiLines: ai,
-          lineIndex: 0,
-          matcher: matcher,
-          line: primary.first,
-          failedIndexes: const {},
-          inFlightIndexes: const {},
-        );
-        expect(result.secondaryText, isNull);
-        expect(result.canRetranslate, isFalse);
+        expect(result, isNull);
       });
     });
   });

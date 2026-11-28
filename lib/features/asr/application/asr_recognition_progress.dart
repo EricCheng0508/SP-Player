@@ -20,8 +20,10 @@ class AsrRecognitionProgress {
   /// `audioSeconds` — length of the audio being transcribed.
   ///
   /// [clock] is injectable so tests can drive elapsed time without waiting.
-  AsrRecognitionProgress({required this.audioSeconds, DateTime Function()? clock})
-    : _now = clock ?? DateTime.now {
+  AsrRecognitionProgress({
+    required this.audioSeconds,
+    DateTime Function()? clock,
+  }) : _now = clock ?? DateTime.now {
     _startedAt = _now();
   }
 
@@ -89,7 +91,10 @@ class AsrRecognitionProgress {
   Duration get expected {
     final seconds = audioSeconds <= 0
         ? _maxExpectedSeconds
-        : (audioSeconds / _rate).clamp(_minExpectedSeconds, _maxExpectedSeconds);
+        : (audioSeconds / _rate).clamp(
+            _minExpectedSeconds,
+            _maxExpectedSeconds,
+          );
     return Duration(milliseconds: (seconds * 1000).round());
   }
 

@@ -2,8 +2,6 @@ import 'package:enjoy_player/core/theme/enjoy_icons.dart';
 import 'package:drift/native.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/vocabulary/application/vocabulary_review_session.dart';
 import 'package:enjoy_player/features/vocabulary/data/vocabulary_repository.dart';
 import 'package:enjoy_player/features/vocabulary/domain/vocabulary_models.dart';
@@ -15,11 +13,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-
-class _AuthSignedOutCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedOut();
-}
 
 GoRouter _buildRouter() {
   return GoRouter(
@@ -76,10 +69,7 @@ void main() {
   setUp(() {
     db = AppDatabase(executor: NativeDatabase.memory());
     container = ProviderContainer(
-      overrides: [
-        appDatabaseProvider.overrideWithValue(db),
-        authCtrlProvider.overrideWith(_AuthSignedOutCtrl.new),
-      ],
+      overrides: [appDatabaseProvider.overrideWithValue(db)],
     );
     router = _buildRouter();
   });

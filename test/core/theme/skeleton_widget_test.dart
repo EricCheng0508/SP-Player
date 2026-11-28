@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:enjoy_player/core/theme/widgets/enjoy_logo.dart';
 import 'package:enjoy_player/core/theme/widgets/skeleton.dart';
 
 Widget _wrap(Widget child, {bool reduceMotion = false}) {
@@ -154,12 +155,13 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('SkeletonAppBootstrap renders circle + two lines', (
+  testWidgets('SkeletonAppBootstrap renders logo + circle + line', (
     tester,
   ) async {
     await tester.pumpWidget(_wrap(const SkeletonAppBootstrap()));
     expect(find.byType(SkeletonAppBootstrap), findsOneWidget);
-    expect(find.byType(Skeleton), findsAtLeastNWidgets(3));
+    expect(find.byType(EnjoyLogo), findsOneWidget);
+    expect(find.byType(Skeleton), findsNWidgets(2));
   });
 
   testWidgets('SkeletonMediaList bounded path uses ListView.separated', (

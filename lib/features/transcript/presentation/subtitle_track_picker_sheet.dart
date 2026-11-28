@@ -12,7 +12,6 @@ import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_modal.dart';
 import 'package:enjoy_player/core/theme/widgets/sheet_drag_handle.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 import '../application/active_transcript_provider.dart';
 import '../application/all_transcripts_provider.dart';

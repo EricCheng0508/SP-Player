@@ -24,7 +24,6 @@ import 'package:enjoy_player/features/player/application/player_controller.dart'
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
 import 'package:enjoy_player/features/player/presentation/widgets/fullscreen_transport_bar.dart';
 import 'package:enjoy_player/features/player/presentation/widgets/player_dock.dart';
-import 'package:enjoy_player/features/sync/application/sync_controller.dart';
 import 'package:enjoy_player/features/discover/application/discover_providers.dart';
 import 'package:enjoy_player/features/update/application/update_controller.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
@@ -45,7 +44,7 @@ class _RootShellState extends ConsumerState<RootShell> {
   static const _navHome = 0;
   static const _navDiscover = 1;
   static const _navLibrary = 2;
-  static const _navAccount = 3;
+  static const _navSettings = 3;
 
   /// Fullscreen dock auto-reveal: idle delay before the floating dock slides
   /// away again after a mouse move.
@@ -110,16 +109,10 @@ class _RootShellState extends ConsumerState<RootShell> {
     _dockHideTimer = Timer(_dockAutoHideDelay, _hideDockIfPlaying);
   }
 
-  static const _accountPrefixes = {
-    '/profile',
-    '/settings',
-    '/subscription',
-    '/credits',
-    '/vocabulary',
-  };
+  static const _settingsTabPrefixes = {'/settings', '/vocabulary'};
 
   int _navIndexForPath(String path) {
-    if (_accountPrefixes.any(path.startsWith)) return _navAccount;
+    if (_settingsTabPrefixes.any(path.startsWith)) return _navSettings;
     if (path.startsWith('/library')) {
       return _navLibrary;
     }
@@ -138,8 +131,8 @@ class _RootShellState extends ConsumerState<RootShell> {
       case _navLibrary:
         context.go('/library');
         return;
-      case _navAccount:
-        context.go('/profile');
+      case _navSettings:
+        context.go('/settings');
         return;
       default:
         context.go('/');
@@ -148,7 +141,6 @@ class _RootShellState extends ConsumerState<RootShell> {
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(syncCtrlProvider);
     ref.watch(discoverFeedRefreshSchedulerProvider);
     final chrome = ref.watch(playerControllerProvider.select(playbackChromeOf));
     final sessionActive = chrome != null;
@@ -224,19 +216,19 @@ class _RootShellState extends ConsumerState<RootShell> {
                         label: l10n.libraryTitle,
                       ),
                       EnjoyBottomNavDestination(
-                        icon: EnjoyIcons.person,
-                        selectedIcon: EnjoyIcons.personFill,
+                        icon: EnjoyIcons.gear,
+                        selectedIcon: EnjoyIcons.gearFill,
                         iconWidget: const EnjoyChromeIcon(
-                          EnjoyChromeGlyph.user,
+                          EnjoyChromeGlyph.gear,
                         ),
                         selectedIconWidget: const EnjoyChromeIcon(
-                          EnjoyChromeGlyph.user,
+                          EnjoyChromeGlyph.gear,
                           filled: true,
                         ),
-                        label: l10n.profileTitle,
+                        label: l10n.settingsTitle,
                         showBadge: updateBadge,
                         semanticsLabel: updateBadge
-                            ? '${l10n.profileTitle}, ${l10n.updateAvailableBadgeSemantics}'
+                            ? '${l10n.settingsTitle}, ${l10n.updateAvailableBadgeSemantics}'
                             : null,
                       ),
                     ],

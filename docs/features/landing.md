@@ -63,15 +63,9 @@ The Pages Function serves `GET /api/latest`:
 
 Two locales, `en` (default) and `zh`, selected by the header `EN` / `中` buttons (`data-lang`). `initI18n()` swaps the text of every `[data-i18n]` node (plus `data-alt-i18n` image alts and `data-aria-i18n` labels) from `window.translations`, sets `<html lang>` to `en` / `zh-CN`, and persists the choice (localStorage, guarded — a blocked store just keeps the choice for the page view), so reloads keep the language. Dynamic strings created later (e.g., the recommended badge) look up their `data-i18n` key against the active locale at creation time.
 
-## Pricing offers
+## Pricing section
 
-The landing page mirrors the current subscription catalog with three informational offers:
-
-- **Free** — $0 forever, 1,000 Enjoy AI credits per day, and all core player features.
-- **Lite** — $1.99/month, 12,000 Enjoy AI credits per day.
-- **Pro** — $9.99/month, 60,000 Enjoy AI credits per day.
-
-The pricing cards link to the download section rather than pretending to provide checkout. Paid plans are managed inside the app, with platform-specific purchase availability described in [subscription.md](subscription.md). If plan prices or allowances change, update the cards and both locale tables together with the product catalog.
+The static page still ships an informational `#pricing` section (three tiers; the cards link to the download section, not checkout). The app itself has **no subscription or credits** ([ADR-0107](../decisions/0107-local-only-no-account-spine.md)) — AI runs on BYOK endpoints and local components — so treat the section as legacy site copy pending removal from `landing/`.
 
 ## Security headers & caching — `_headers`
 

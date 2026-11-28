@@ -7,20 +7,16 @@ import 'package:enjoy_player/core/errors/app_failure.dart';
 import 'package:enjoy_player/features/lookup/presentation/widgets/latched_retry_state.dart';
 import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_callout.dart';
 import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_retry_button.dart';
-import 'package:enjoy_player/core/errors/ai_failure_messages.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 /// User-facing text for lookup failures (translation, dictionary, contextual).
 ///
-/// The [CreditsFailure] arm routes through the shared credits message builder
-/// (spec 045) so a rejected lookup spells out the credit numbers instead of
-/// leaking the raw `HTTP 402` internal string. Cross-feature import is the
-/// documented presentation seam (specs/045 contracts/client-presentation-api.md).
+/// A [ProviderBillingFailure] gets the provider-billing copy; every other
+/// [AppFailure] renders its own message, and non-[AppFailure] errors fall
+/// back to `error.toString()`.
 String lookupErrorUserMessage(Object error, AppLocalizations l10n) {
   return switch (error) {
-    AuthFailure() => l10n.lookupCloudRequiresSignIn,
     ProviderBillingFailure() => l10n.byokProviderBillingMessage,
-    CreditsFailure() => creditsFailureMessage(error, l10n),
     AppFailure(:final message) => message,
     _ => error.toString(),
   };

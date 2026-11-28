@@ -1,10 +1,10 @@
 /// Read-your-writes tests for the transcript track write paths.
 ///
 /// Every track write (subtitle import, ASR generation, auto-translate
-/// skeleton, YouTube direct fetch, YouTube worker cache) goes through
-/// `_upsertTranscriptTrack`. The decoded-timeline memo is keyed on the row's
-/// `(updatedAt, jsonLength)` revision, so a write must never leave a reader
-/// on the previous timeline — these tests pin that per write path.
+/// skeleton) goes through `_upsertTranscriptTrack`. The decoded-timeline memo
+/// is keyed on the row's `(updatedAt, jsonLength)` revision, so a write must
+/// never leave a reader on the previous timeline — these tests pin that per
+/// write path.
 library;
 
 import 'dart:io';
@@ -15,49 +15,9 @@ import 'package:enjoy_player/core/ids/enjoy_ids.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/transcript_row.dart';
 import 'package:enjoy_player/data/subtitle/transcript_line.dart';
-import 'package:enjoy_player/features/transcript/data/client_profile.dart';
 import 'package:enjoy_player/features/transcript/data/transcript_repository.dart';
-import 'package:enjoy_player/features/transcript/data/youtube_caption_fetcher.dart';
 import 'package:enjoy_player/features/transcript/domain/auto_translate.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:http/http.dart' as http;
-
-class _StubYoutubeCaptionFetcher extends YoutubeCaptionFetcher {
-  _StubYoutubeCaptionFetcher(this._results)
-    : super(httpClient: http.Client(), profiles: kBuiltInClientProfiles);
-
-  final List<AllCaptionsResult> _results;
-  int _index = 0;
-
-  @override
-  Future<AllCaptionsResult> fetchAllSubtitles({
-    required String videoId,
-    String preferredLang = 'en',
-  }) async => _results[_index++];
-}
-
-VideoRow _video({required String id, String language = 'en-US'}) {
-  final now = DateTime.utc(2026, 11, 17);
-  return VideoRow(
-    id: id,
-    vid: 'tIgO_Sjh3tQ',
-    provider: 'youtube',
-    title: 't',
-    description: null,
-    thumbnailUrl: null,
-    durationSeconds: 0,
-    language: language,
-    source: 'youtube',
-    localUri: null,
-    md5: null,
-    size: 0,
-    mediaUrl: 'https://www.youtube.com/watch?v=tIgO_Sjh3tQ',
-    syncStatus: null,
-    serverUpdatedAt: null,
-    createdAt: now,
-    updatedAt: now,
-  );
-}
 
 AudioRow _audio({required String id}) {
   final now = DateTime.utc(2026, 11, 17);
@@ -82,15 +42,6 @@ AudioRow _audio({required String id}) {
     serverUpdatedAt: null,
     createdAt: now,
     updatedAt: now,
-  );
-}
-
-CaptionFetchResult _track({required String language, required String text}) {
-  return CaptionFetchResult(
-    subtitles: [TranscriptLine(text: text, startMs: 0, durationMs: 1000)],
-    source: 'official',
-    language: language,
-    fetchProfile: 'ios',
   );
 }
 

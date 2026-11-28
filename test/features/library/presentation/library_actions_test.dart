@@ -6,9 +6,6 @@ import 'package:enjoy_player/core/application/app_preferences_provider.dart';
 import 'package:enjoy_player/core/errors/app_failure.dart';
 import 'package:enjoy_player/core/notices/app_notice.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 import 'package:enjoy_player/features/library/application/library_repository_provider.dart';
 import 'package:enjoy_player/features/library/data/library_repository.dart';
 import 'package:enjoy_player/features/library/domain/media.dart';
@@ -22,16 +19,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-
-const _profile = UserProfile(
-  id: 'user-1',
-  email: 'reader@example.com',
-  name: 'Reader',
-  avatarUrl: null,
-  balance: 0,
-  subscriptionTier: SubscriptionTier.free,
-  learningLanguage: 'en',
-);
 
 final _media = Media(
   id: 'media-1',
@@ -58,14 +45,6 @@ final _otherMedia = Media(
   createdAt: DateTime.utc(2024, 1, 2),
   updatedAt: DateTime.utc(2024, 1, 2),
 );
-
-class _FakeAuthCtrl extends AuthCtrl {
-  _FakeAuthCtrl(this._state);
-  final AuthState _state;
-
-  @override
-  Future<AuthState> build() async => _state;
-}
 
 class _NoSessionPlayerController extends PlayerController {
   @override
@@ -177,11 +156,9 @@ enum _ActionKind {
 
 List<Override> _overrides({
   required _CountingLibraryRepository repo,
-  AuthState authState = const AuthSignedIn(profile: _profile),
   PlaybackSession? session,
   PlayerController? controller,
 }) => [
-  authCtrlProvider.overrideWith(() => _FakeAuthCtrl(authState)),
   mediaLibraryRepositoryProvider.overrideWithValue(repo),
   playerControllerProvider.overrideWith(() {
     if (controller != null) return controller;
@@ -199,7 +176,6 @@ Widget _wrap({
   required _CountingLibraryRepository repo,
   required _ActionKind action,
   required Media media,
-  AuthState authState = const AuthSignedIn(profile: _profile),
   PlaybackSession? session,
   PlayerController? controller,
   ProviderContainer? container,
@@ -221,7 +197,6 @@ Widget _wrap({
 
   final overrides = _overrides(
     repo: repo,
-    authState: authState,
     session: session,
     controller: controller,
   );

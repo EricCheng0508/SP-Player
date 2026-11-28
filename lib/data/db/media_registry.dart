@@ -15,7 +15,6 @@ import 'package:drift/drift.dart' show Value;
 import 'package:enjoy_player/core/utils/stream_combine_latest.dart';
 import 'package:enjoy_player/core/utils/stream_distinct.dart';
 import 'package:enjoy_player/features/library/domain/media.dart';
-import 'package:enjoy_player/features/sync/domain/sync_types.dart';
 
 import 'app_database.dart';
 import 'media_library_row.dart';
@@ -31,25 +30,12 @@ part 'media_registry_writes.dart';
 /// never inserts one id into both — see `media_target_resolver_test.dart`).
 ///
 /// Writes are thin dispatch choke points: callers hand over a row or a field
-/// patch and get back the [MediaKind] they touched (so they can enqueue the
-/// matching [SyncEntityType]) instead of branching per table themselves.
-/// Transaction, GC, and enqueue policy stay with the callers.
+/// patch and get back the [MediaKind] they touched instead of branching per
+/// table themselves. Transaction and GC policy stay with the callers.
 class MediaRegistry
     with MediaRegistryReads, MediaRegistryStreams, MediaRegistryWrites {
   const MediaRegistry(this._db);
 
   @override
   final AppDatabase _db;
-
-  /// The cloud-sync entity matching [kind] — the one mapping enqueue sites
-  /// need after a registry write returns the touched kind.
-  ///
-  /// [SyncEntityType] lives in the sync feature's domain layer; importing it
-  /// here follows the existing `data → features/*/domain` direction (this
-  /// file already imports `features/library/domain/media.dart`, and
-  /// `sync_types.dart` itself has no imports, so no cycle can form).
-  static SyncEntityType syncEntityTypeOf(MediaKind kind) => switch (kind) {
-    MediaKind.video => SyncEntityType.video,
-    MediaKind.audio => SyncEntityType.audio,
-  };
 }

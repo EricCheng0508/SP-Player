@@ -22,14 +22,12 @@ library;
 import 'package:enjoy_player/core/theme/enjoy_icons.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_button.dart';
-import 'package:enjoy_player/core/routing/route_paths.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:enjoy_player/features/craft/domain/craft_failure.dart';
-import 'package:enjoy_player/core/errors/ai_failure_messages.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 /// Non-blocking failure caption plus its action, for the Advanced tool panels.
@@ -44,12 +42,6 @@ class CraftInlineFailure extends StatelessWidget {
   final AppLocalizations l10n;
 
   ({String label, VoidCallback onPressed})? _action(BuildContext context) {
-    if (failure is CraftCreditsFailure) {
-      return (
-        label: creditsCtaLabel(l10n),
-        onPressed: () => unawaited(context.push(kSubscriptionRoutePath)),
-      );
-    }
     switch (failure.action) {
       case CraftFailureAction.openAiSettings:
         return (
@@ -139,7 +131,6 @@ class CraftFailureCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = EnjoyThemeTokens.of(context);
     final theme = Theme.of(context);
-    final showCreditsCta = failure is CraftCreditsFailure;
     final light = theme.brightness == Brightness.light;
 
     return Center(
@@ -199,10 +190,6 @@ class CraftFailureCard extends StatelessWidget {
                         onPressed: () => _handleAction(context),
                         child: Text(_actionLabel()),
                       ),
-                      if (showCreditsCta) ...[
-                        SizedBox(height: t.space8),
-                        const CreditsCtaButton(style: CreditsCtaStyle.ghost),
-                      ],
                     ],
                   ),
                 ),

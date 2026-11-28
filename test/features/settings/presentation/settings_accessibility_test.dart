@@ -14,20 +14,11 @@ import 'package:enjoy_player/core/application/app_preferences_provider.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/settings/presentation/settings_screen.dart';
 import 'package:enjoy_player/features/settings/presentation/settings_section_page.dart';
 import 'package:enjoy_player/features/settings/domain/settings_search_entry.dart';
 import 'package:enjoy_player/features/shadow_reading/application/recording_input_device_controller.dart';
-import 'package:enjoy_player/features/sync/application/sync_providers.dart';
-import 'package:enjoy_player/features/sync/data/sync_queue_repository.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
-
-class _SignedOutAuthCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedOut();
-}
 
 class _StaticPrefsCtrl extends AppPreferencesCtrl {
   @override
@@ -48,21 +39,10 @@ class _FakeRecordingInputDeviceCtrl extends RecordingInputDeviceCtrl {
 _settingsTestOverrides(AppDatabase db) => [
   deviceGlobalAppDatabaseProvider.overrideWithValue(db),
   appDatabaseProvider.overrideWithValue(db),
-  authCtrlProvider.overrideWith(_SignedOutAuthCtrl.new),
   appPreferencesCtrlProvider.overrideWith(_StaticPrefsCtrl.new),
   recordingInputDeviceCtrlProvider.overrideWith(
     _FakeRecordingInputDeviceCtrl.new,
   ),
-  syncQueueSnapshotProvider.overrideWith(
-    (ref) => Stream.value(
-      const SyncQueueSnapshot(
-        retryablePending: 0,
-        permanentlyFailed: 0,
-        detailRows: [],
-      ),
-    ),
-  ),
-  syncLastFullSyncAtProvider.overrideWith((ref) async => null),
 ];
 
 Widget _harness({
@@ -183,7 +163,7 @@ void main() {
 
       final l10n = await AppLocalizations.delegate.load(const Locale('en'));
 
-      expect(find.text(l10n.settingsApiBaseUrl), findsOneWidget);
+      expect(find.text(l10n.settingsAiPlaygroundTileTitle), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
   );

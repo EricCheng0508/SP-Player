@@ -7,19 +7,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/lookup/domain/lookup_request.dart';
 import 'package:enjoy_player/features/lookup/presentation/dictionary_lookup_sheet.dart';
 import 'package:enjoy_player/features/pronounce/application/pronounce_playback_controller.dart';
 import 'package:enjoy_player/features/pronounce/domain/pronounce_target.dart';
 import 'package:enjoy_player/features/pronounce/presentation/pronounce_icon_button.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
-
-class _AuthSignedOutCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedOut();
-}
 
 class _TrackingPlaybackController extends PronouncePlaybackController {
   int stopCount = 0;
@@ -75,7 +68,6 @@ void main() {
     await tester.pumpWidget(
       _harness(
         overrides: [
-          authCtrlProvider.overrideWith(_AuthSignedOutCtrl.new),
           appDatabaseProvider.overrideWithValue(db),
           pronouncePlaybackControllerProvider.overrideWith(() => playback),
         ],
@@ -102,7 +94,6 @@ void main() {
     await tester.pumpWidget(
       _harness(
         overrides: [
-          authCtrlProvider.overrideWith(_AuthSignedOutCtrl.new),
           appDatabaseProvider.overrideWithValue(db),
           pronouncePlaybackControllerProvider.overrideWith(() => playback),
         ],

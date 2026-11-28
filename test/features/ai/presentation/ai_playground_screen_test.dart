@@ -266,7 +266,7 @@ void main() {
         find.text(l10n.settingsAiProvidersModalityAssessment),
         findsOneWidget,
       );
-      expect(find.text(l10n.settingsAiProvidersEnjoyAi), findsNWidgets(9));
+      expect(find.text(l10n.settingsAiProvidersByok), findsNWidgets(9));
       expect(find.text(l10n.settingsAiProvidersTileTitle), findsOneWidget);
     });
 

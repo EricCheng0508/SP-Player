@@ -10,13 +10,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:enjoy_player/core/application/app_language_catalog.dart';
 import 'package:enjoy_player/core/logging/log.dart';
-import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/data/db/settings_keys.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/auth/domain/update_profile_request.dart';
-import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 
 export 'package:enjoy_player/core/application/app_language_catalog.dart'
     show kAppDefaultDisplayLocale;
@@ -108,20 +103,10 @@ String themeModeToStorage(ThemeMode mode) {
 
 @Riverpod(keepAlive: true)
 class AppPreferencesCtrl extends _$AppPreferencesCtrl {
-  String? _lastAppliedProfileSignature;
-
   @override
   Future<AppPreferencesState> build() async {
     final sw = Stopwatch()..start();
     _prefsLog.info('prefs: build start');
-
-    final sessionUserId = ref.watch(authCtrlProvider.select(sessionUserIdOf));
-    if (sessionUserId == null) {
-      _prefsLog.info(
-        'prefs: no session — defaults only (${sw.elapsedMilliseconds}ms)',
-      );
-      return AppPreferencesState.initial;
-    }
 
     final db = ref.watch(appDatabaseProvider);
     final stored = await db.settingsDao.readSettings([
@@ -176,24 +161,9 @@ class AppPreferencesCtrl extends _$AppPreferencesCtrl {
       themeMode: themeMode,
     );
 
-    ref.listen(authCtrlProvider, (previous, next) {
-      final v = next.valueOrNull;
-      if (v is! AuthSignedIn) {
-        _lastAppliedProfileSignature = null;
-        return;
-      }
-      final sig = _profileSignature(v.profile);
-      if (sig == _lastAppliedProfileSignature) return;
-      _lastAppliedProfileSignature = sig;
-      unawaited(Future<void>.microtask(() => applyFromUserProfile(v.profile)));
-    }, fireImmediately: true);
-
     _prefsLog.info('prefs: build done in ${sw.elapsedMilliseconds}ms');
     return out;
   }
-
-  static String _profileSignature(UserProfile p) =>
-      '${p.id}|${p.locale ?? ''}|${p.learningLanguage ?? ''}|${p.nativeLanguage ?? ''}';
 
   Future<void> setLocale(Locale? locale) async {
     final resolved = locale == null
@@ -206,9 +176,6 @@ class AppPreferencesCtrl extends _$AppPreferencesCtrl {
         .read(appDatabaseProvider)
         .settingsDao
         .writeSetting(SettingsKeys.prefsLocale, tag);
-    await ref
-        .read(authCtrlProvider.notifier)
-        .syncLocaleToServerIfSignedIn(resolved);
   }
 
   Future<void> setLearningLanguage(String tag) async {
@@ -235,10 +202,6 @@ class AppPreferencesCtrl extends _$AppPreferencesCtrl {
       SettingsKeys.prefsNativeLanguage,
       nativeCoerced,
     );
-    await _syncLanguageFieldsToServerIfSignedIn(
-      learningLanguage: canonical,
-      nativeLanguage: nativeCoerced,
-    );
   }
 
   Future<void> setNativeLanguage(String tag) async {
@@ -260,96 +223,14 @@ class AppPreferencesCtrl extends _$AppPreferencesCtrl {
         .read(appDatabaseProvider)
         .settingsDao
         .writeSetting(SettingsKeys.prefsNativeLanguage, canonical);
-    await _syncLanguageFieldsToServerIfSignedIn(
-      learningLanguage: learn,
-      nativeLanguage: canonical,
-    );
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
     final next = (await future).copyWith(themeMode: mode);
     state = AsyncData(next);
-    if (sessionUserIdOf(ref.read(authCtrlProvider)) == null) return;
     await ref
         .read(appDatabaseProvider)
         .settingsDao
         .writeSetting(SettingsKeys.prefsThemeMode, themeModeToStorage(mode));
-  }
-
-  /// Ensures Drift + (when signed in) server use canonical learning + coerced native.
-  Future<void> applyFromUserProfile(UserProfile profile) async {
-    final prev = await future;
-    Locale? nextLocale = prev.locale;
-    if (profile.locale != null && profile.locale!.trim().isNotEmpty) {
-      nextLocale = displayLocaleFromRawOrDefault(profile.locale);
-    }
-
-    final learnCanonical =
-        profile.learningLanguage != null &&
-            profile.learningLanguage!.trim().isNotEmpty
-        ? canonicalFocusLanguageTag(profile.learningLanguage)
-        : canonicalFocusLanguageTag(prev.learningLanguage);
-    final nativeCoerced = coerceNativeIfEqualsLearning(
-      profile.nativeLanguage ?? prev.nativeLanguage,
-      learnCanonical,
-    );
-
-    final next = AppPreferencesState(
-      locale: nextLocale,
-      learningLanguage: learnCanonical,
-      nativeLanguage: nativeCoerced,
-      themeMode: prev.themeMode,
-    );
-    if (next != prev) {
-      state = AsyncData(next);
-      final db = ref.read(appDatabaseProvider);
-      if (next.locale != prev.locale) {
-        await db.settingsDao.writeSetting(
-          SettingsKeys.prefsLocale,
-          localeToBcp47(nextLocale ?? kAppDefaultDisplayLocale),
-        );
-      }
-      if (next.learningLanguage != prev.learningLanguage) {
-        await db.settingsDao.writeSetting(
-          SettingsKeys.prefsLearningLanguage,
-          learnCanonical,
-        );
-      }
-      if (next.nativeLanguage != prev.nativeLanguage) {
-        await db.settingsDao.writeSetting(
-          SettingsKeys.prefsNativeLanguage,
-          nativeCoerced,
-        );
-      }
-    }
-
-    final serverLearn = profile.learningLanguage;
-    final serverNative = profile.nativeLanguage;
-    final needsPatchLearn =
-        serverLearn != null && !tagsEqual(serverLearn, learnCanonical);
-    final needsPatchNative =
-        serverNative != null && !tagsEqual(serverNative, nativeCoerced);
-    if (needsPatchLearn || needsPatchNative) {
-      await _syncLanguageFieldsToServerIfSignedIn(
-        learningLanguage: learnCanonical,
-        nativeLanguage: nativeCoerced,
-      );
-    }
-  }
-
-  Future<void> _syncLanguageFieldsToServerIfSignedIn({
-    String? learningLanguage,
-    String? nativeLanguage,
-  }) async {
-    final cur = ref.read(authCtrlProvider).valueOrNull;
-    if (cur is! AuthSignedIn) return;
-    await ref
-        .read(authCtrlProvider.notifier)
-        .updateProfile(
-          UpdateProfileRequest(
-            learningLanguage: learningLanguage,
-            nativeLanguage: nativeLanguage,
-          ),
-        );
   }
 }

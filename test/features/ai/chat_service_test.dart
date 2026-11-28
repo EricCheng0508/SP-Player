@@ -58,11 +58,11 @@ final class _ThrowingLlm implements LlmCapability {
 }
 
 void main() {
-  test('mapApiExceptionToAppFailure maps 402 to CreditsFailure', () {
+  test('mapApiExceptionToAppFailure maps 402 to ProviderBillingFailure', () {
     final f = mapApiExceptionToAppFailure(
       const ApiException(message: 'pay', statusCode: 402),
     );
-    expect(f, isA<CreditsFailure>());
+    expect(f, isA<ProviderBillingFailure>());
   });
 
   test('ChatService uses overridden LlmCapability', () async {

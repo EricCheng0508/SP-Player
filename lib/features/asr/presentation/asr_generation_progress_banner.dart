@@ -220,7 +220,7 @@ class _AsrGenerationProgressBannerState
             ),
             const SizedBox(height: 8),
             LinearProgressIndicator(
-              value: determinate ? progress!.clamp(0.0, 1.0) : null,
+              value: determinate ? progress.clamp(0.0, 1.0) : null,
               minHeight: 3,
             ),
             const SizedBox(height: 6),

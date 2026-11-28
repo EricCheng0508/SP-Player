@@ -18,7 +18,6 @@ import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/sheet_drag_handle.dart';
 import 'package:enjoy_player/features/ai/application/ai_result_cache.dart';
-import 'package:enjoy_player/features/lookup/application/lookup_credits_exhausted_provider.dart';
 import 'package:enjoy_player/features/lookup/application/lookup_sheet_result_cache.dart';
 import 'package:enjoy_player/features/lookup/application/lookup_target_languages.dart';
 import 'package:enjoy_player/features/lookup/domain/lookup_request.dart';
@@ -27,9 +26,8 @@ import 'package:enjoy_player/features/lookup/presentation/sections/contextual_tr
 import 'package:enjoy_player/features/lookup/presentation/sections/dictionary_lookup_section.dart';
 import 'package:enjoy_player/features/lookup/presentation/sections/explain_lookup_section.dart';
 import 'package:enjoy_player/features/lookup/presentation/sections/translation_lookup_section.dart';
-import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_credits_banner.dart';
-import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_credits_chip.dart';
 import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_language_picker_row.dart';
+
 import 'package:enjoy_player/features/pronounce/application/pronounce_playback_controller.dart';
 import 'package:enjoy_player/features/pronounce/domain/pronounce_target.dart';
 import 'package:enjoy_player/features/pronounce/presentation/pronounce_icon_button.dart';
@@ -165,7 +163,6 @@ class _DictionaryLookupSheetState extends ConsumerState<DictionaryLookupSheet> {
     final t = EnjoyThemeTokens.of(context);
     final scheme = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
-    final creditsExhausted = ref.watch(lookupCreditsExhaustedProvider);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -257,7 +254,6 @@ class _DictionaryLookupSheetState extends ConsumerState<DictionaryLookupSheet> {
                 ),
               ),
             ),
-            constrain(const LookupCreditsChip()),
             Divider(
               height: 1,
               color: scheme.outlineVariant.withValues(alpha: 0.2),
@@ -285,19 +281,6 @@ class _DictionaryLookupSheetState extends ConsumerState<DictionaryLookupSheet> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          if (creditsExhausted.isNotEmpty) ...[
-                            LookupCreditsBanner(
-                              message:
-                                  creditsExhausted[LookupSectionId
-                                      .translation] ??
-                                  creditsExhausted[LookupSectionId
-                                      .dictionary] ??
-                                  creditsExhausted[LookupSectionId
-                                      .contextualTranslation] ??
-                                  '',
-                            ),
-                            SizedBox(height: t.space8),
-                          ],
                           TranslationLookupSection(request: _effectiveRequest),
                           SizedBox(height: t.space8),
                           DictionaryLookupSection(request: _effectiveRequest),

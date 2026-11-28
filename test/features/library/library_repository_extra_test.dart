@@ -5,6 +5,7 @@ import 'package:crypto/crypto.dart';
 import 'package:cross_file/cross_file.dart';
 import 'package:drift/native.dart';
 import 'package:enjoy_player/core/errors/app_failure.dart';
+import 'package:enjoy_player/core/config/local_mode.dart';
 import 'package:enjoy_player/core/ids/enjoy_ids.dart';
 import 'package:enjoy_player/core/utils/youtube_video_identity.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
@@ -12,7 +13,6 @@ import 'package:enjoy_player/data/db/media_registry.dart';
 import 'package:enjoy_player/data/files/file_storage.dart';
 import 'package:enjoy_player/features/library/data/library_repository.dart';
 import 'package:enjoy_player/features/library/domain/media.dart';
-import 'package:enjoy_player/features/sync/domain/sync_types.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -20,8 +20,6 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 
 import '../../support/test_path_provider.dart';
-
-const _testUserId = 'test-user';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -132,7 +130,7 @@ void main() {
         final hash = sha256.convert(bytes).toString();
         final expectedVid = enjoyLocalVideoVid(
           contentHashHex: hash,
-          userId: _testUserId,
+          userId: kLocalSessionId,
         );
         final expectedId = enjoyVideoId(vid: expectedVid);
 
@@ -141,7 +139,7 @@ void main() {
 
         final id = await repo.importMedia(
           XFile(src.path),
-          signedInUserId: _testUserId,
+          signedInUserId: kLocalSessionId,
         );
         expect(id, expectedId);
 
@@ -157,52 +155,15 @@ void main() {
 
         final id1 = await repo.importMedia(
           XFile(src.path, name: 'same.mp4'),
-          signedInUserId: _testUserId,
+          signedInUserId: kLocalSessionId,
         );
         final id2 = await repo.importMedia(
           XFile(src.path, name: 'same.mp4'),
-          signedInUserId: _testUserId,
+          signedInUserId: kLocalSessionId,
         );
         expect(id1, id2);
         expect(await db.videoDao.watchAll().first, hasLength(1));
       });
-
-      test(
-        'enqueues sync create on first import and update on re-import',
-        () async {
-          final syncLog = <(SyncEntityType, String, SyncAction)>[];
-          final syncRepo = MediaLibraryRepository(
-            db,
-            FileStorage(),
-            enqueueSync: (type, id, action) async {
-              syncLog.add((type, id, action));
-            },
-          );
-
-          final bytes = utf8.encode('sync-video-test');
-          final src = File(p.join(root.path, 'sync.mp4'));
-          await src.writeAsBytes(bytes);
-
-          final id = await syncRepo.importMedia(
-            XFile(src.path, name: 'sync.mp4'),
-            signedInUserId: _testUserId,
-          );
-          expect(
-            syncLog,
-            contains((SyncEntityType.video, id, SyncAction.create)),
-          );
-
-          syncLog.clear();
-          await syncRepo.importMedia(
-            XFile(src.path, name: 'sync.mp4'),
-            signedInUserId: _testUserId,
-          );
-          expect(
-            syncLog,
-            contains((SyncEntityType.video, id, SyncAction.update)),
-          );
-        },
-      );
     });
 
     group('importYoutubeVideo', () {
@@ -282,28 +243,6 @@ void main() {
         );
         final row = await db.videoDao.getById(id);
         expect(row!.title, 'Real From OEmbed');
-      });
-
-      test('enqueues sync create for new youtube import', () async {
-        const vid = 'dQw4w9WgXcQ';
-        final syncLog = <(SyncEntityType, String, SyncAction)>[];
-        final ytRepo = MediaLibraryRepository(
-          db,
-          FileStorage(),
-          oembedClient: MockClient((_) async => http.Response('', 500)),
-          enqueueSync: (type, id, action) async {
-            syncLog.add((type, id, action));
-          },
-        );
-
-        final id = await ytRepo.importYoutubeVideo(
-          vid,
-          prefetchedTitle: 'Test',
-        );
-        expect(
-          syncLog,
-          contains((SyncEntityType.video, id, SyncAction.create)),
-        );
       });
 
       test(
@@ -466,16 +405,7 @@ void main() {
     });
 
     group('deleteMedia', () {
-      test('removes video row and enqueues sync delete', () async {
-        final syncLog = <(SyncEntityType, String, SyncAction)>[];
-        final syncRepo = MediaLibraryRepository(
-          db,
-          FileStorage(),
-          enqueueSync: (type, id, action) async {
-            syncLog.add((type, id, action));
-          },
-        );
-
+      test('removes the video row', () async {
         final now = DateTime.now();
         const id = 'vid-del';
         await db.videoDao.insertRow(
@@ -500,24 +430,11 @@ void main() {
           ),
         );
 
-        await syncRepo.deleteMedia(id);
+        await repo.deleteMedia(id);
         expect(await MediaRegistry(db).getById(id), isNull);
-        expect(
-          syncLog,
-          contains((SyncEntityType.video, id, SyncAction.delete)),
-        );
       });
 
-      test('enqueues audio sync delete', () async {
-        final syncLog = <(SyncEntityType, String, SyncAction)>[];
-        final syncRepo = MediaLibraryRepository(
-          db,
-          FileStorage(),
-          enqueueSync: (type, id, action) async {
-            syncLog.add((type, id, action));
-          },
-        );
-
+      test('removes the audio row', () async {
         final now = DateTime.now();
         const id = 'aud-del';
         await db.audioDao.insertRow(
@@ -545,12 +462,8 @@ void main() {
           ),
         );
 
-        await syncRepo.deleteMedia(id);
+        await repo.deleteMedia(id);
         expect(await MediaRegistry(db).getById(id), isNull);
-        expect(
-          syncLog,
-          contains((SyncEntityType.audio, id, SyncAction.delete)),
-        );
       });
 
       test('no-op for non-existent id', () async {
@@ -559,17 +472,8 @@ void main() {
     });
 
     group('updateMediaLanguage', () {
-      test('updates audio row and enqueues sync', () async {
-        final syncLog = <(SyncEntityType, String, SyncAction)>[];
-        final syncRepo = MediaLibraryRepository(
-          db,
-          FileStorage(),
-          enqueueSync: (type, id, action) async {
-            syncLog.add((type, id, action));
-          },
-        );
-
-        final now = DateTime.now();
+      test('updates the audio row language and bumps updatedAt', () async {
+        final now = DateTime(2026, 7, 1, 12);
         const id = 'aud-lang';
         await db.audioDao.insertRow(
           AudioRow(
@@ -596,26 +500,14 @@ void main() {
           ),
         );
 
-        await syncRepo.updateMediaLanguage(id, 'ja');
+        await repo.updateMediaLanguage(id, 'ja');
         final row = await db.audioDao.getById(id);
         expect(row!.language, 'ja-JP');
-        expect(
-          syncLog,
-          contains((SyncEntityType.audio, id, SyncAction.update)),
-        );
+        expect(row.updatedAt.isAfter(now), isTrue);
       });
 
       test('skips update when language is already the same', () async {
-        var syncCalls = 0;
-        final syncRepo = MediaLibraryRepository(
-          db,
-          FileStorage(),
-          enqueueSync: (_, _, _) async {
-            syncCalls++;
-          },
-        );
-
-        final now = DateTime.now();
+        final now = DateTime(2026, 7, 1, 12);
         const id = 'vid-same-lang';
         await db.videoDao.insertRow(
           VideoRow(
@@ -639,21 +531,14 @@ void main() {
           ),
         );
 
-        await syncRepo.updateMediaLanguage(id, 'ja');
-        expect(syncCalls, 0);
+        await repo.updateMediaLanguage(id, 'ja');
+        final row = await db.videoDao.getById(id);
+        expect(row!.language, 'ja-JP');
+        expect(row.updatedAt, now);
       });
 
       test('skips audio update when language is already the same', () async {
-        var syncCalls = 0;
-        final syncRepo = MediaLibraryRepository(
-          db,
-          FileStorage(),
-          enqueueSync: (_, _, _) async {
-            syncCalls++;
-          },
-        );
-
-        final now = DateTime.now();
+        final now = DateTime(2026, 7, 1, 12);
         const id = 'aud-same-lang';
         await db.audioDao.insertRow(
           AudioRow(
@@ -680,8 +565,10 @@ void main() {
           ),
         );
 
-        await syncRepo.updateMediaLanguage(id, 'en');
-        expect(syncCalls, 0);
+        await repo.updateMediaLanguage(id, 'en');
+        final row = await db.audioDao.getById(id);
+        expect(row!.language, 'en-US');
+        expect(row.updatedAt, now);
       });
 
       test('throws FileFailure for non-existent media', () async {
@@ -693,17 +580,8 @@ void main() {
     });
 
     group('updateMediaTitle', () {
-      test('updates video row title and enqueues sync', () async {
-        final syncLog = <(SyncEntityType, String, SyncAction)>[];
-        final syncRepo = MediaLibraryRepository(
-          db,
-          FileStorage(),
-          enqueueSync: (type, id, action) async {
-            syncLog.add((type, id, action));
-          },
-        );
-
-        final now = DateTime.now();
+      test('updates the video row title', () async {
+        final now = DateTime(2026, 7, 1, 12);
         const id = 'vid-title';
         await db.videoDao.insertRow(
           VideoRow(
@@ -727,26 +605,14 @@ void main() {
           ),
         );
 
-        await syncRepo.updateMediaTitle(id, 'New title');
+        await repo.updateMediaTitle(id, 'New title');
         final row = await db.videoDao.getById(id);
         expect(row!.title, 'New title');
-        expect(
-          syncLog,
-          contains((SyncEntityType.video, id, SyncAction.update)),
-        );
+        expect(row.updatedAt.isAfter(now), isTrue);
       });
 
-      test('updates audio row title and enqueues sync', () async {
-        final syncLog = <(SyncEntityType, String, SyncAction)>[];
-        final syncRepo = MediaLibraryRepository(
-          db,
-          FileStorage(),
-          enqueueSync: (type, id, action) async {
-            syncLog.add((type, id, action));
-          },
-        );
-
-        final now = DateTime.now();
+      test('updates the audio row title', () async {
+        final now = DateTime(2026, 7, 1, 12);
         const id = 'aud-title';
         await db.audioDao.insertRow(
           AudioRow(
@@ -773,13 +639,10 @@ void main() {
           ),
         );
 
-        await syncRepo.updateMediaTitle(id, 'Renamed audio');
+        await repo.updateMediaTitle(id, 'Renamed audio');
         final row = await db.audioDao.getById(id);
         expect(row!.title, 'Renamed audio');
-        expect(
-          syncLog,
-          contains((SyncEntityType.audio, id, SyncAction.update)),
-        );
+        expect(row.updatedAt.isAfter(now), isTrue);
       });
 
       test('trims the title before writing', () async {
@@ -813,16 +676,7 @@ void main() {
       });
 
       test('skips update when the title is unchanged', () async {
-        var syncCalls = 0;
-        final syncRepo = MediaLibraryRepository(
-          db,
-          FileStorage(),
-          enqueueSync: (_, _, _) async {
-            syncCalls++;
-          },
-        );
-
-        final now = DateTime.now();
+        final now = DateTime(2026, 7, 1, 12);
         const id = 'vid-same-title';
         await db.videoDao.insertRow(
           VideoRow(
@@ -846,8 +700,10 @@ void main() {
           ),
         );
 
-        await syncRepo.updateMediaTitle(id, 'Same title');
-        expect(syncCalls, 0);
+        await repo.updateMediaTitle(id, 'Same title');
+        final row = await db.videoDao.getById(id);
+        expect(row!.title, 'Same title');
+        expect(row.updatedAt, now);
       });
 
       test('throws FileFailure for a blank title', () async {
@@ -996,56 +852,6 @@ void main() {
             picked: XFile(src.path, name: 'y.mp3'),
           ),
           throwsA(isA<FileFailure>()),
-        );
-      });
-
-      test('enqueues sync update after successful relocation', () async {
-        final syncLog = <(SyncEntityType, String, SyncAction)>[];
-        final syncRepo = MediaLibraryRepository(
-          db,
-          FileStorage(),
-          enqueueSync: (type, id, action) async {
-            syncLog.add((type, id, action));
-          },
-        );
-
-        final bytes = utf8.encode('sync-relocate');
-        final hash = sha256.convert(bytes).toString();
-        final id = enjoyVideoId(vid: hash);
-        final src = File(p.join(root.path, 'synced.mp4'));
-        await src.writeAsBytes(bytes);
-
-        final now = DateTime.now();
-        await db.videoDao.insertRow(
-          VideoRow(
-            id: id,
-            vid: hash,
-            provider: 'user',
-            title: 'Synced',
-            description: null,
-            thumbnailUrl: null,
-            durationSeconds: 0,
-            language: 'und',
-            source: null,
-            localUri: null,
-            md5: hash,
-            size: bytes.length,
-            mediaUrl: null,
-            syncStatus: 'synced',
-            serverUpdatedAt: null,
-            createdAt: now,
-            updatedAt: now,
-          ),
-        );
-
-        await syncRepo.relocateLocalFile(
-          mediaId: id,
-          picked: XFile(src.path, name: 'synced.mp4'),
-        );
-
-        expect(
-          syncLog,
-          contains((SyncEntityType.video, id, SyncAction.update)),
         );
       });
 
@@ -1281,107 +1087,6 @@ void main() {
         expect(patch, isNotNull);
         expect(patch!.thumbnailUrl, 'https://new-thumb.jpg');
       });
-
-      test('enqueues sync update after metadata refresh', () async {
-        const vid = 'dQw4w9WgXcQ';
-        final mediaId = enjoyVideoId(provider: 'youtube', vid: vid);
-        final now = DateTime.now();
-        final syncLog = <(SyncEntityType, String, SyncAction)>[];
-
-        await db.videoDao.insertRow(
-          VideoRow(
-            id: mediaId,
-            vid: vid,
-            provider: 'youtube',
-            title: youtubeImportPlaceholderTitle(vid),
-            description: null,
-            thumbnailUrl: null,
-            durationSeconds: 0,
-            language: 'und',
-            source: 'youtube',
-            localUri: null,
-            md5: null,
-            size: null,
-            mediaUrl: 'https://www.youtube.com/watch?v=$vid',
-            syncStatus: 'pending',
-            serverUpdatedAt: null,
-            createdAt: now,
-            updatedAt: now,
-          ),
-        );
-
-        final oembedClient = MockClient((_) async {
-          return http.Response(
-            '{"title":"Synced Title","thumbnail_url":"https://t.jpg"}',
-            200,
-            headers: {'content-type': 'application/json'},
-          );
-        });
-
-        final ytRepo = MediaLibraryRepository(
-          db,
-          FileStorage(),
-          oembedClient: oembedClient,
-          enqueueSync: (type, id, action) async {
-            syncLog.add((type, id, action));
-          },
-        );
-
-        await ytRepo.refreshYoutubeMetadataIfNeeded(mediaId);
-        expect(
-          syncLog,
-          contains((SyncEntityType.video, mediaId, SyncAction.update)),
-        );
-      });
-
-      test('skips sync enqueue when syncStatus is null', () async {
-        const vid = 'dQw4w9WgXcQ';
-        final mediaId = enjoyVideoId(provider: 'youtube', vid: vid);
-        final now = DateTime.now();
-        var syncCalls = 0;
-
-        await db.videoDao.insertRow(
-          VideoRow(
-            id: mediaId,
-            vid: vid,
-            provider: 'youtube',
-            title: youtubeImportPlaceholderTitle(vid),
-            description: null,
-            thumbnailUrl: null,
-            durationSeconds: 0,
-            language: 'und',
-            source: 'youtube',
-            localUri: null,
-            md5: null,
-            size: null,
-            mediaUrl: 'https://www.youtube.com/watch?v=$vid',
-            syncStatus: null,
-            serverUpdatedAt: null,
-            createdAt: now,
-            updatedAt: now,
-          ),
-        );
-
-        final oembedClient = MockClient((_) async {
-          return http.Response(
-            '{"title":"No Sync","thumbnail_url":"https://t.jpg"}',
-            200,
-            headers: {'content-type': 'application/json'},
-          );
-        });
-
-        final ytRepo = MediaLibraryRepository(
-          db,
-          FileStorage(),
-          oembedClient: oembedClient,
-          enqueueSync: (_, _, _) async {
-            syncCalls++;
-          },
-        );
-
-        await ytRepo.refreshYoutubeMetadataIfNeeded(mediaId);
-        expect(syncCalls, 0);
-      });
     });
 
     group('importMedia error wrapping', () {
@@ -1391,45 +1096,9 @@ void main() {
         await expectLater(
           repo.importMedia(
             XFile(src.path, name: 'gone.mp3'),
-            signedInUserId: _testUserId,
+            signedInUserId: kLocalSessionId,
           ),
           throwsA(isA<FileFailure>()),
-        );
-      });
-    });
-
-    group('importMedia audio sync enqueue', () {
-      test('enqueues create for new audio and update for re-import', () async {
-        final syncLog = <(SyncEntityType, String, SyncAction)>[];
-        final syncRepo = MediaLibraryRepository(
-          db,
-          FileStorage(),
-          enqueueSync: (type, id, action) async {
-            syncLog.add((type, id, action));
-          },
-        );
-
-        final bytes = utf8.encode('sync-audio-test');
-        final src = File(p.join(root.path, 'sync.mp3'));
-        await src.writeAsBytes(bytes);
-
-        final id = await syncRepo.importMedia(
-          XFile(src.path, name: 'sync.mp3'),
-          signedInUserId: _testUserId,
-        );
-        expect(
-          syncLog,
-          contains((SyncEntityType.audio, id, SyncAction.create)),
-        );
-
-        syncLog.clear();
-        await syncRepo.importMedia(
-          XFile(src.path, name: 'sync.mp3'),
-          signedInUserId: _testUserId,
-        );
-        expect(
-          syncLog,
-          contains((SyncEntityType.audio, id, SyncAction.update)),
         );
       });
     });
@@ -1445,7 +1114,7 @@ void main() {
           final videoHash = sha256.convert(videoBytes).toString();
           final vid = enjoyLocalVideoVid(
             contentHashHex: videoHash,
-            userId: _testUserId,
+            userId: kLocalSessionId,
           );
           final videoId = enjoyVideoId(vid: vid);
           await db.videoDao.insertRow(
@@ -1474,7 +1143,7 @@ void main() {
           await videoFile.writeAsBytes(videoBytes);
           await repo.importMedia(
             XFile(videoFile.path, name: 'preserved.mp4'),
-            signedInUserId: _testUserId,
+            signedInUserId: kLocalSessionId,
             contentLanguage: 'en-US',
           );
 
@@ -1496,7 +1165,7 @@ void main() {
           final audioHash = sha256.convert(audioBytes).toString();
           final aid = enjoyLocalAudioAid(
             contentHashHex: audioHash,
-            userId: _testUserId,
+            userId: kLocalSessionId,
           );
           final audioId = enjoyAudioId(aid: aid);
           await db.audioDao.insertRow(
@@ -1528,7 +1197,7 @@ void main() {
           await audioFile.writeAsBytes(audioBytes);
           await repo.importMedia(
             XFile(audioFile.path, name: 'preserved.mp3'),
-            signedInUserId: _testUserId,
+            signedInUserId: kLocalSessionId,
             contentLanguage: 'en-US',
           );
 

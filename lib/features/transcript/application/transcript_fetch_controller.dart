@@ -38,25 +38,14 @@ class TranscriptFetchCtrl extends _$TranscriptFetchCtrl {
     );
   }
 
-  Future<bool> _alreadyCloudFetched() =>
-      ref.read(transcriptRepositoryProvider).isCloudFetchSkippable(mediaId);
-
-  /// Resolves transcripts on media open (primary, sidecar, optional cloud).
-  Future<void> resolveOnOpen({required bool signedIn}) async {
+  /// Resolves transcripts on media open (primary, sidecar).
+  Future<void> resolveOnOpen() async {
     if (_inFlight != null) {
       await _inFlight;
       return;
     }
 
-    final shouldShowLoading = signedIn && !await _alreadyCloudFetched();
-    if (shouldShowLoading && ref.mounted) {
-      state = state.copyWith(
-        status: TranscriptFetchStatus.loading,
-        clearError: true,
-      );
-    }
-
-    _inFlight = _runResolve(signedIn: signedIn, forceCloud: false);
+    _inFlight = _runResolve(forceCloud: false);
     try {
       await _inFlight;
     } finally {
@@ -65,13 +54,13 @@ class TranscriptFetchCtrl extends _$TranscriptFetchCtrl {
   }
 
   /// Forces a cloud refresh from the subtitle picker or error retry.
-  Future<void> refreshFromCloud({required bool signedIn}) async {
+  Future<void> refreshFromCloud() async {
     if (_inFlight != null) {
       await _inFlight;
       return;
     }
 
-    if (signedIn && ref.mounted) {
+    if (ref.mounted) {
       state = state.copyWith(
         status: TranscriptFetchStatus.loading,
         clearError: true,
@@ -79,7 +68,6 @@ class TranscriptFetchCtrl extends _$TranscriptFetchCtrl {
     }
 
     _inFlight = _runResolve(
-      signedIn: signedIn,
       forceCloud: true,
       analyticsSource: AnalyticsEvents.sourceYoutube,
     );
@@ -91,7 +79,6 @@ class TranscriptFetchCtrl extends _$TranscriptFetchCtrl {
   }
 
   Future<void> _runResolve({
-    required bool signedIn,
     required bool forceCloud,
 
     /// When set, the transcript-acquisition journey is captured under this
@@ -109,16 +96,14 @@ class TranscriptFetchCtrl extends _$TranscriptFetchCtrl {
       );
     }
     final repo = ref.read(transcriptRepositoryProvider);
-    final prefs = signedIn
-        ? ref.read(appPreferencesCtrlProvider).valueOrNull
-        : null;
+    final prefs = ref.read(appPreferencesCtrlProvider).valueOrNull;
     final nativeLanguage = prefs?.effectiveNativeLanguage;
     final learningLanguage = prefs?.effectiveLearningLanguage;
     try {
       final result = await repo.resolveOnOpen(
         mediaId,
         forceCloud: forceCloud,
-        fetchCloud: signedIn,
+        fetchCloud: forceCloud,
         nativeLanguage: nativeLanguage,
         learningLanguage: learningLanguage,
       );

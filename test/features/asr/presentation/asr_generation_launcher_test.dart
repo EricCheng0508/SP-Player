@@ -10,9 +10,6 @@ import 'package:enjoy_player/features/ai/domain/models/asr_request.dart';
 import 'package:enjoy_player/features/ai/domain/models/asr_result.dart';
 import 'package:enjoy_player/features/asr/application/asr_generation_controller.dart';
 import 'package:enjoy_player/features/asr/presentation/asr_generation_launcher.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_repository_provider.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -21,13 +18,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 final DateTime _epoch = DateTime.utc(2024);
-
-class _SignedInAuthCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedIn(
-    profile: UserProfile(id: 'u1', email: 't@test.com', name: 'Test'),
-  );
-}
 
 Widget _wrap({
   required ProviderContainer container,
@@ -70,7 +60,6 @@ ProviderContainer _containerFor(
   return ProviderContainer(
     overrides: [
       appDatabaseProvider.overrideWithValue(db),
-      authCtrlProvider.overrideWith(_SignedInAuthCtrl.new),
       transcriptRepositoryProvider.overrideWithValue(repo),
       asrCapabilityProvider.overrideWithValue(capability),
     ],

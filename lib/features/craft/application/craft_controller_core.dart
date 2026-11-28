@@ -5,7 +5,6 @@ library;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meta/meta.dart';
 
-import 'package:enjoy_player/core/errors/app_failure.dart';
 import 'package:enjoy_player/data/api/api_exception.dart';
 import 'package:enjoy_player/features/ai/application/ai_call_runner.dart';
 import 'package:enjoy_player/features/ai/domain/byok_not_configured_failure.dart';
@@ -47,9 +46,6 @@ mixin CraftControllerCore on Notifier<CraftJobState> {
 
   @protected
   CraftFailure mapTtsFailure(Object error) {
-    if (error is CreditsFailure) {
-      return CraftCreditsFailure(error);
-    }
     if (error is ByokNotConfiguredFailure) {
       return const CraftTtsFailure(action: CraftFailureAction.openAiSettings);
     }
@@ -64,9 +60,8 @@ mixin CraftControllerCore on Notifier<CraftJobState> {
   /// [logLabel] names the logger and [surface] names the operation in the
   /// warning text, so each caller keeps its own log wording. [call] performs
   /// the request, [onSuccess] patches the state after a successful call, and
-  /// [genericFailure] builds the failure for a non-credits error.
-  /// [clearTranslating] and [clearTranscribing] name the busy flags the
-  /// failure arms reset.
+  /// [genericFailure] builds the failure for any error. [clearTranslating]
+  /// and [clearTranscribing] name the busy flags the failure arm resets.
   ///
   /// Returns the call result, or null when the call failed.
   @protected
@@ -88,14 +83,6 @@ mixin CraftControllerCore on Notifier<CraftJobState> {
           : (result) {
               state = onSuccess(result);
             },
-      onCredits: (failure, st) {
-        state = state.copyWith(
-          isTranslating: clearTranslating ? false : null,
-          isTranscribing: clearTranscribing ? false : null,
-          failure: CraftCreditsFailure(failure),
-        );
-        return null;
-      },
       onGeneric: (e, st) {
         state = state.copyWith(
           isTranslating: clearTranslating ? false : null,

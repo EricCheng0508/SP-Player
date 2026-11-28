@@ -7,29 +7,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:enjoy_player/core/application/app_preferences_provider.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/skeleton.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/sections/appearance_language_section.dart';
-import 'package:enjoy_player/features/settings/presentation/widgets/settings_row.dart';
-import 'package:enjoy_player/features/sync/application/sync_providers.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
-
-const _fakeProfile = UserProfile(
-  id: 'user-1',
-  email: 'reader@example.com',
-  name: 'Reader',
-);
 
 class _NeverPrefsCtrl extends AppPreferencesCtrl {
   @override
   Future<AppPreferencesState> build() =>
       Completer<AppPreferencesState>().future;
-}
-
-class _UnusedAuthCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedIn(profile: _fakeProfile);
 }
 
 // ignore: strict_top_level_inference

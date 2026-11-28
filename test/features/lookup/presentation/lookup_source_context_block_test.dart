@@ -1,8 +1,11 @@
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
+import 'package:enjoy_player/data/db/app_database.dart';
+import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/features/lookup/domain/lookup_request.dart';
 import 'package:enjoy_player/features/lookup/presentation/dictionary_lookup_sheet.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
@@ -20,8 +23,11 @@ const _request = LookupRequest(
 
 Future<void> _pump(WidgetTester tester, LookupRequest request) async {
   final scheme = ColorScheme.fromSeed(seedColor: const Color(0xFF003366));
+  final db = AppDatabase(executor: NativeDatabase.memory());
+  addTearDown(db.close);
   await tester.pumpWidget(
     ProviderScope(
+      overrides: [appDatabaseProvider.overrideWithValue(db)],
       child: MaterialApp(
         theme: ThemeData(
           colorScheme: scheme,

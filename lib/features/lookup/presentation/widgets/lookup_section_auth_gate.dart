@@ -3,7 +3,7 @@ library;
 
 import 'package:flutter/material.dart';
 
-import 'package:enjoy_player/features/auth/presentation/widgets/auth_required_callout.dart';
+import 'package:enjoy_player/features/lookup/presentation/widgets/auth_required_callout.dart';
 
 /// 原本按登录态分流，本地版一律放行 —— 查词、翻译、词典全部走用户自备的
 /// 模型端点，与 Enjoy 账号无关。

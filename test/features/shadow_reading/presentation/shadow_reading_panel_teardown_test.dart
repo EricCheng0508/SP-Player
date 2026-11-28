@@ -17,7 +17,6 @@ import 'package:enjoy_player/features/shadow_reading/application/shadow_take_pro
 import 'package:enjoy_player/features/shadow_reading/application/shadow_take_store.dart';
 import 'package:enjoy_player/features/shadow_reading/presentation/shadow_reading_panel.dart';
 import 'package:enjoy_player/features/shadow_reading/presentation/widgets/shadow_record_fab.dart';
-import 'package:enjoy_player/features/sync/domain/sync_types.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
 class _HangingMicRecorder implements MicRecorder {
@@ -41,7 +40,7 @@ class _HangingMicRecorder implements MicRecorder {
 }
 
 class _HangingStoreFactory extends ShadowTakeStoreFactory {
-  _HangingStoreFactory({required super.db, required super.enqueueSync});
+  _HangingStoreFactory({required super.db});
 
   @override
   ShadowTakeStore call({
@@ -102,10 +101,7 @@ void main() {
         appDatabaseProvider.overrideWithValue(db),
         recordingInputDeviceCtrlProvider.overrideWith(_NoopInputDeviceCtrl.new),
         shadowTakeStoreFactoryProvider.overrideWithValue(
-          _HangingStoreFactory(
-            db: db,
-            enqueueSync: (SyncEntityType _, String _, SyncAction _) async {},
-          ),
+          _HangingStoreFactory(db: db),
         ),
       ],
     );

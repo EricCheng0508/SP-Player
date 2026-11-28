@@ -116,10 +116,6 @@ mixin VocabularyReviewSessionFetches on VocabularyReviewSessionBase {
         }
         state = onPersisted(persisted);
       },
-      onCredits: (failure, st) {
-        state = onError(kVocabularyAiErrorCredits);
-        return null;
-      },
       onGeneric: (e, st) {
         state = onError(kVocabularyAiErrorFetchFailed);
         return null;

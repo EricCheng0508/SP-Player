@@ -31,9 +31,6 @@ String asrExtractionMessageKey(AsrAudioExtractionFailureReason reason) {
 /// ARB key for Enjoy long-form job failures.
 String asrLongFormFailureMessageKey(AsrLongFormJobException e) {
   switch (e.category) {
-    case 'billing_exhausted':
-    case 'credits_exhausted':
-      return 'asrErrorCreditsExhausted';
     case 'unsupported_media':
       return 'asrErrorUnsupportedMedia';
     case 'provider_timeout':
@@ -111,8 +108,6 @@ String asrMessageForKey(AppLocalizations l10n, String? key) {
       return l10n.asrErrorProviderRetryable;
     case 'asrErrorByokMissing':
       return l10n.asrErrorByokMissing;
-    case 'asrErrorCreditsExhausted':
-      return l10n.asrErrorCreditsExhausted;
     case 'asrErrorNetwork':
       return l10n.asrErrorNetwork;
     case 'asrErrorNoSpeech':

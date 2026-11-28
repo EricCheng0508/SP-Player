@@ -9,30 +9,14 @@ import 'package:enjoy_player/features/ai/application/ai_kind_policies.dart';
 import 'package:enjoy_player/features/ai/application/ai_result_cache.dart';
 import 'package:enjoy_player/features/ai/domain/capabilities/contextual_translation_capability.dart';
 import 'package:enjoy_player/features/ai/domain/models/contextual_translation_result.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 import 'package:enjoy_player/features/lookup/domain/lookup_request.dart';
 import 'package:enjoy_player/features/lookup/presentation/sections/contextual_translation_lookup_section.dart';
-import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_credits_notice.dart';
 import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_error_row.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
-
-class _AuthSignedInCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedIn(
-    profile: UserProfile(id: 'tester', email: 't@example.com', name: 'Tester'),
-  );
-}
-
-class _AuthSignedOutCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedOut();
-}
 
 class _FakeContextualCapability implements ContextualTranslationCapability {
   _FakeContextualCapability(this._resultOrError);
@@ -115,9 +99,7 @@ void main() {
 
   List<Override> baseOverrides({
     required ContextualTranslationCapability capability,
-    AuthCtrl Function()? authCtrlBuilder,
   }) => [
-    authCtrlProvider.overrideWith(authCtrlBuilder ?? _AuthSignedInCtrl.new),
     appDatabaseProvider.overrideWithValue(db),
     aiContextualTranslationCacheProvider.overrideWithValue(ctxCache),
     contextualTranslationCapabilityProvider.overrideWithValue(capability),
@@ -179,101 +161,34 @@ void main() {
     expect(find.byType(LookupErrorRow), findsOneWidget);
   });
 
-  testWidgets(
-    'shows AuthRequiredCallout on AuthFailure when user is signed out',
-    (tester) async {
-      final cap = _FakeContextualCapability(const AuthFailure('nope'));
+  testWidgets('retrying after a rejection succeeds on the next attempt '
+      '(FR-007 recovery loop)', (tester) async {
+    final cap = _FakeContextualCapability(
+      const NetworkFailure('HTTP 402', statusCode: 402),
+    );
 
-      await tester.pumpWidget(
-        _harness(
-          overrides: baseOverrides(
-            capability: cap,
-            authCtrlBuilder: _AuthSignedOutCtrl.new,
-          ),
-          child: const ContextualTranslationLookupSection(request: request),
-        ),
-      );
-      await _expand(tester);
-      await tester.pumpAndSettle();
+    await tester.pumpWidget(
+      _harness(
+        overrides: baseOverrides(capability: cap),
+        child: const ContextualTranslationLookupSection(request: request),
+      ),
+    );
+    await _expand(tester);
+    await tester.pumpAndSettle();
 
-      expect(find.byType(LookupErrorRow), findsNothing);
-      expect(find.text('Sign in'), findsOneWidget);
-    },
-  );
+    final retry = find.text('Retry');
+    expect(retry, findsOneWidget);
 
-  testWidgets(
-    'shows the friendly credits message in a compact notice without the '
-    'in-section CTA on CreditsFailure',
-    (tester) async {
-      final cap = _FakeContextualCapability(
-        const CreditsFailure(
-          'HTTP 402',
-          requiredCredits: 750,
-          usedCredits: 800,
-          limitCredits: 1000,
-        ),
-      );
+    cap.nextResult = Future.value(
+      const ContextualTranslationResult(translatedText: 'recovered-ok'),
+    );
+    await tester.tap(retry);
+    await tester.pumpAndSettle();
 
-      await tester.pumpWidget(
-        _harness(
-          overrides: baseOverrides(capability: cap),
-          child: const ContextualTranslationLookupSection(request: request),
-        ),
-      );
-      await _expand(tester);
-      await tester.pumpAndSettle();
-
-      expect(find.byType(LookupCreditsNotice), findsOneWidget);
-      expect(find.textContaining('750'), findsOneWidget);
-      expect(find.text('HTTP 402'), findsNothing);
-      expect(
-        find.text(
-          lookupAppLocalizations(
-            const Locale('en'),
-          ).subscriptionViewPlansAndPackages,
-        ),
-        findsNothing,
-      );
-    },
-  );
-
-  testWidgets(
-    'retrying after a credits rejection succeeds once credits are available '
-    '(FR-007 recovery loop)',
-    (tester) async {
-      final cap = _FakeContextualCapability(
-        const CreditsFailure(
-          'HTTP 402',
-          requiredCredits: 300,
-          usedCredits: 800,
-          limitCredits: 1000,
-        ),
-      );
-
-      await tester.pumpWidget(
-        _harness(
-          overrides: baseOverrides(capability: cap),
-          child: const ContextualTranslationLookupSection(request: request),
-        ),
-      );
-      await _expand(tester);
-      await tester.pumpAndSettle();
-
-      expect(find.textContaining('300'), findsOneWidget);
-      final retry = find.text('Retry');
-      expect(retry, findsOneWidget);
-
-      cap.nextResult = Future.value(
-        const ContextualTranslationResult(translatedText: 'recovered-ok'),
-      );
-      await tester.tap(retry);
-      await tester.pumpAndSettle();
-
-      expect(cap.calls, greaterThanOrEqualTo(2));
-      expect(find.textContaining('recovered-ok'), findsWidgets);
-      expect(find.byType(LookupErrorRow), findsNothing);
-    },
-  );
+    expect(cap.calls, greaterThanOrEqualTo(2));
+    expect(find.textContaining('recovered-ok'), findsWidgets);
+    expect(find.byType(LookupErrorRow), findsNothing);
+  });
 
   testWidgets('BYOK provider billing rejection shows provider copy without the '
       'subscription CTA (FR-008)', (tester) async {

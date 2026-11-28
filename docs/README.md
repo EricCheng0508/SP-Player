@@ -9,7 +9,7 @@ Maintainers and agents should keep these files **accurate** when behavior or arc
 | [architecture.md](architecture.md) | Everyone | Layers, providers, or DB schema change |
 | [tech-stack.md](tech-stack.md) | Everyone | Dependencies or versions change |
 | [conventions.md](conventions.md) | Contributors | Style / lint / folder rules change (incl. the sliver stable-key convention) |
-| [api/rest-services.md](api/rest-services.md) | Contributors | REST service layer pattern (`RestApi`, `JsonMap`, `*ApiClient` choice) changes |
+| [api/rest-services.md](api/rest-services.md) | Contributors | Removed `RestApi`/`ApiClient` layer pointer (ADR-0107); only touch if BYOK / worker feed client patterns change |
 | [packaging.md](packaging.md) | Release | Local-first release runbook (Windows / Android / Apple) |
 | [apple-release-ci.md](apple-release-ci.md) | Release | GitHub Actions Apple release workflow & secrets |
 | [android-release-ci.md](android-release-ci.md) | Release | GitHub Actions Android release workflow & secrets |
@@ -24,28 +24,22 @@ Maintainers and agents should keep these files **accurate** when behavior or arc
 | [design/duet/](design/duet/README.md) | Product + dev | The Duet redesign (renders, boards, tokens, board → screen map) changes on the canvas — re-render with `tool/render_design_boards.mjs`; [PLAN.md](design/duet/PLAN.md) / [STATUS.md](design/duet/STATUS.md) as tasks land |
 | [features/skeleton-loading.md](features/skeleton-loading.md) | Product + dev | Skeleton widget API, prebuilt placeholders, or sliver-safe placement rules change |
 | [features/hotkeys.md](features/hotkeys.md) | Product + dev | Keyboard shortcuts or customization behavior changes |
-| [features/auth.md](features/auth.md) | Product + dev | Sign-in, profile, API base URL, or settings sync behavior changes |
-| [features/credits-usage.md](features/credits-usage.md) | Product + dev | Credits usage audit (Worker `/credits/usages`) behavior changes |
-| [features/subscription.md](features/subscription.md) | Product + dev | Pro subscription status, desktop checkout, or mobile purchase deferral changes |
 | [features/ai.md](features/ai.md) | Product + dev | AI worker capabilities, playground, provider matrix, or `ApiException → AppFailure` translation (`guardAiCall`) behavior changes |
-| [features/sync.md](features/sync.md) | Product + dev | Cloud metadata sync (library + recordings + queue) behavior changes |
 | [features/library.md](features/library.md) | Product + dev | Home / Library media UI, thumbnails, cold-start perf notes |
-| [features/cloud.md](features/cloud.md) | Product + dev | Remote media index (add-to-library) behavior changes |
 | [features/youtube.md](features/youtube.md) | Product + dev | YouTube import, WebView playback, login, transcripts behavior changes |
 | [features/diagnostics.md](features/diagnostics.md) | Product + dev | Local diagnostic logging, export, and privacy behavior changes |
 | [features/analytics.md](features/analytics.md) | Product + dev | PostHog product analytics (opt-out, capture matrix, `Analytics` facade) behavior changes |
 | [features/discover.md](features/discover.md) | Product + dev | YouTube Discover feeds, subscriptions, add-to-library behavior changes |
 | [features/dictionary-lookup.md](features/dictionary-lookup.md) | Product + dev | Transcript selection lookup (translation / contextual / dictionary) behavior changes |
-| [features/vocabulary.md](features/vocabulary.md) | Product + dev | Vocabulary book, SRS review, add-from-lookup, Anki export, or vocab sync behavior changes |
-| [features/community.md](features/community.md) | Product + dev | Signed-in Home community activity card behavior changes |
-| [features/settings.md](features/settings.md) | Product + dev | Settings hub, hotkeys / sync sub-screens, account hero, language / mic pickers, or developer API editors change |
+| [features/vocabulary.md](features/vocabulary.md) | Product + dev | Vocabulary book, SRS review, add-from-lookup, Anki export behavior changes |
+| [features/settings.md](features/settings.md) | Product + dev | Settings hub, hotkeys, language / mic pickers, voice services, or the AI playground row change |
 | [features/shadow-reading.md](features/shadow-reading.md) | Product + dev | Shadow reading panel, recording bus, pitch contour, or Azure pronunciation assessment behavior changes |
 | [features/update.md](features/update.md) | Product + dev | App update strategy (NoOp / Direct), manifest schema, evaluator rules, or prompt UX change |
 | [features/landing.md](features/landing.md) | Product + dev | Download landing page (player.enjoy.bot) links, manifest proxy, i18n, or deploy workflow change |
 | [features/agentic-workflows.md](features/agentic-workflows.md) | Dev | Agentic workflow (gh-aw) sources, upstream update procedure, or the safe-update gate changes |
 | [features/share-poster.md](features/share-poster.md) | Product + dev | Shareable practice poster (echo-tailored cover + quote) behavior changes |
 | [features/player.md](features/player.md) | Product + dev | Player engine binding, expand/collapse, transport, echo enforcement, or wide-layout behavior changes |
-| [features/transcript.md](features/transcript.md) | Product + dev | Transcript loading, line navigation, auto-scroll, or cloud fetch behavior changes |
+| [features/transcript.md](features/transcript.md) | Product + dev | Transcript loading, line navigation, auto-scroll, or YouTube subtitle fetch behavior changes |
 | [features/asr.md](features/asr.md) | Product + dev | Local-file ASR generation pipeline, audio extraction (FFmpegKit / isolate), failure reasons, or `source: ai` upsert behavior changes |
 | [features/echo-mode.md](features/echo-mode.md) | Product + dev | Echo region, shadow-reading, pronunciation assessment, or share practice poster behavior changes |
 | [features/local-database-recovery.md](features/local-database-recovery.md) | Product + dev | Stale/malformed local-DB detection, the recovery surface, or the reset-local-library flow changes |

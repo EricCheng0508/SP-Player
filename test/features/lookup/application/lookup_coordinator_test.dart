@@ -9,21 +9,13 @@ import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/lookup/application/lookup_coordinator.dart';
 import 'package:enjoy_player/features/lookup/domain/lookup_request.dart';
 import 'package:enjoy_player/features/lookup/presentation/dictionary_lookup_sheet.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
-class _AuthSignedOutCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedOut();
-}
-
 Widget _wrap({
   required AppDatabase db,
-  required AuthCtrl authCtrl,
   required Size size,
   required List<Override> extraOverrides,
 }) {
@@ -32,11 +24,7 @@ Widget _wrap({
     brightness: Brightness.dark,
   );
   return ProviderScope(
-    overrides: [
-      appDatabaseProvider.overrideWithValue(db),
-      authCtrlProvider.overrideWith(() => authCtrl),
-      ...extraOverrides,
-    ],
+    overrides: [appDatabaseProvider.overrideWithValue(db), ...extraOverrides],
     child: MaterialApp(
       theme: ThemeData(
         colorScheme: scheme,
@@ -123,12 +111,7 @@ void main() {
   ]) {
     testWidgets('open() uses ${entry.$3.name} at ${entry.$1}', (tester) async {
       await tester.pumpWidget(
-        _wrap(
-          db: db,
-          authCtrl: _AuthSignedOutCtrl(),
-          size: entry.$2,
-          extraOverrides: const [],
-        ),
+        _wrap(db: db, size: entry.$2, extraOverrides: const []),
       );
       await tester.pump();
 

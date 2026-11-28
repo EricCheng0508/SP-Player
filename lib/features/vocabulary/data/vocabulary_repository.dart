@@ -1,5 +1,4 @@
-/// Local vocabulary repository (Drift DAOs + SRS) with optional cloud sync
-/// enqueue (ADR-0054). Review audits are never enqueued.
+/// Local vocabulary repository (Drift DAOs + SRS).
 library;
 
 import 'package:drift/drift.dart';
@@ -8,7 +7,6 @@ import 'package:uuid/uuid.dart';
 import 'package:enjoy_player/core/ids/enjoy_ids.dart';
 import 'package:enjoy_player/core/utils/stream_distinct.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
-import 'package:enjoy_player/features/sync/domain/sync_types.dart';
 import 'package:enjoy_player/features/vocabulary/domain/vocabulary_cta_state.dart';
 import 'package:enjoy_player/features/vocabulary/domain/vocabulary_locator_json.dart';
 import 'package:enjoy_player/features/vocabulary/domain/vocabulary_models.dart';
@@ -16,12 +14,9 @@ import 'package:enjoy_player/features/vocabulary/domain/vocabulary_normalize.dar
 import 'package:enjoy_player/features/vocabulary/domain/vocabulary_srs.dart';
 
 class VocabularyRepository {
-  VocabularyRepository(this._db, {this.enqueueSync});
+  VocabularyRepository(this._db);
 
   final AppDatabase _db;
-
-  /// Optional cloud sync enqueue (ADR-0054). Null in unit tests.
-  final SyncEnqueueFn? enqueueSync;
 
   // ignore: prefer_const_constructors — Uuid() has no const constructor
   static final Uuid _uuid = Uuid();
@@ -78,11 +73,6 @@ class VocabularyRepository {
           updatedAt: at,
         );
         await _db.vocabularyItemDao.insertRow(row);
-        await enqueueSync?.call(
-          SyncEntityType.vocabularyItem,
-          id,
-          SyncAction.create,
-        );
         item = _itemFromRow(row);
       } else {
         item = _itemFromRow(existing);
@@ -136,11 +126,6 @@ class VocabularyRepository {
         updatedAt: at,
       );
       await _db.vocabularyContextDao.insertRow(contextRow);
-      await enqueueSync?.call(
-        SyncEntityType.vocabularyContext,
-        contextId,
-        SyncAction.create,
-      );
 
       if (!isNewItem) {
         final fresh = await _db.vocabularyItemDao.getById(item.id);
@@ -150,11 +135,6 @@ class VocabularyRepository {
             updatedAt: at,
           );
           await _db.vocabularyItemDao.updateRow(updated);
-          await enqueueSync?.call(
-            SyncEntityType.vocabularyItem,
-            item.id,
-            SyncAction.update,
-          );
           item = _itemFromRow(updated);
         }
       }
@@ -172,11 +152,6 @@ class VocabularyRepository {
       await _db.vocabularyReviewDao.deleteByItemId(id);
       await _db.vocabularyContextDao.deleteByItemId(id);
       await _db.vocabularyItemDao.deleteById(id);
-      await enqueueSync?.call(
-        SyncEntityType.vocabularyItem,
-        id,
-        SyncAction.delete,
-      );
     });
   }
 
@@ -226,11 +201,6 @@ class VocabularyRepository {
         updatedAt: at,
       );
       await _db.vocabularyItemDao.updateRow(updated);
-      await enqueueSync?.call(
-        SyncEntityType.vocabularyItem,
-        itemId,
-        SyncAction.update,
-      );
       return _itemFromRow(updated);
     });
   }
@@ -260,11 +230,6 @@ class VocabularyRepository {
       );
       await _db.vocabularyItemDao.updateRow(restoredRow);
       await _db.vocabularyReviewDao.deleteById(review.id);
-      await enqueueSync?.call(
-        SyncEntityType.vocabularyItem,
-        itemId,
-        SyncAction.update,
-      );
       return _itemFromRow(restoredRow);
     });
   }
@@ -288,11 +253,6 @@ class VocabularyRepository {
       updatedAt: at,
     );
     await _db.vocabularyItemDao.updateRow(updated);
-    await enqueueSync?.call(
-      SyncEntityType.vocabularyItem,
-      itemId,
-      SyncAction.update,
-    );
     return _itemFromRow(updated);
   }
 
@@ -310,11 +270,6 @@ class VocabularyRepository {
       updatedAt: at,
     );
     await _db.vocabularyContextDao.updateRow(updated);
-    await enqueueSync?.call(
-      SyncEntityType.vocabularyContext,
-      contextId,
-      SyncAction.update,
-    );
     return _contextFromRow(updated);
   }
 

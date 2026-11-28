@@ -9,9 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:enjoy_player/core/application/app_preferences_provider.dart';
 import 'package:enjoy_player/core/theme/app_theme.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_segmented_control.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 import 'package:enjoy_player/features/craft/application/craft_controller.dart';
 import 'package:enjoy_player/features/craft/application/craft_preferences_provider.dart';
 import 'package:enjoy_player/features/craft/domain/craft_preferences.dart';
@@ -26,13 +23,6 @@ import 'package:enjoy_player/features/craft/presentation/express_flow.dart';
 import 'package:enjoy_player/features/craft/application/craft_library_repository_provider.dart';
 import 'package:enjoy_player/features/craft/data/craft_library_repository.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
-
-class _AuthSignedInCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedIn(
-    profile: UserProfile(id: 'test-user', email: 't@example.com', name: 'Test'),
-  );
-}
 
 class _FakePrefsCtrl extends AppPreferencesCtrl {
   @override
@@ -121,7 +111,6 @@ Widget _harness({required List<Override> overrides}) {
 }
 
 List<Override> _baseOverrides({CraftPreferences? craftPrefs}) => [
-  authCtrlProvider.overrideWith(_AuthSignedInCtrl.new),
   appPreferencesCtrlProvider.overrideWith(_FakePrefsCtrl.new),
   craftPreferencesCtrlProvider.overrideWith(
     () => _StubCraftPrefsCtrl(craftPrefs),
@@ -219,7 +208,6 @@ void main() {
       final container = ProviderScope.containerOf(
         tester.element(find.byType(CraftScreen)),
       );
-      await container.read(authCtrlProvider.future);
       await container.read(appPreferencesCtrlProvider.future);
       await container
           .read(craftControllerProvider.notifier)

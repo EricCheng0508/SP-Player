@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 import 'package:enjoy_player/features/pronounce/application/pronounce_playback_controller.dart';
 import 'package:enjoy_player/features/pronounce/domain/pronounce_target.dart';
 import 'package:enjoy_player/features/pronounce/presentation/pronounce_icon_button.dart';
@@ -13,13 +10,6 @@ import 'package:enjoy_player/features/vocabulary/domain/vocabulary_models.dart';
 import 'package:enjoy_player/features/vocabulary/presentation/vocabulary_flashcard.dart';
 import 'package:enjoy_player/features/vocabulary/presentation/vocabulary_flashcard_state.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
-
-class _AuthSignedInCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedIn(
-    profile: UserProfile(id: 'test-user', email: 't@example.com', name: 'Test'),
-  );
-}
 
 class _TrackingPlaybackController extends PronouncePlaybackController {
   int stopCount = 0;
@@ -80,7 +70,6 @@ void main() {
   Widget wrap(Widget child) {
     return ProviderScope(
       overrides: [
-        authCtrlProvider.overrideWith(_AuthSignedInCtrl.new),
         vocabularySourceTitleProvider.overrideWith((ref, id) async => 'Title'),
         pronouncePlaybackControllerProvider.overrideWith(() => playback),
       ],

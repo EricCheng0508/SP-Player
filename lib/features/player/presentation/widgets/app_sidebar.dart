@@ -1,9 +1,8 @@
 /// Primary navigation sidebar — Duet ground with a right line, brand row,
-/// search, nav rows, and the account footer (ADR-0093).
+/// search, and nav rows (ADR-0093).
 library;
 
 import 'package:enjoy_player/core/theme/enjoy_icons.dart';
-import 'package:enjoy_player/features/live_captions/application/live_captions_controller.dart';
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,7 +10,8 @@ import 'package:go_router/go_router.dart';
 
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/typography.dart';
-import 'package:enjoy_player/core/theme/widgets/enjoy_avatar.dart';
+import 'package:enjoy_player/core/theme/widgets/enjoy_avatar.dart'
+    show EnjoyKeycap;
 import 'package:enjoy_player/core/theme/widgets/enjoy_chrome_icon.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_logo.dart';
 import 'package:enjoy_player/core/theme/widgets/nav_item_pill.dart';

@@ -1,4 +1,3 @@
-import 'package:enjoy_player/core/routing/route_paths.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/features/vocabulary/domain/vocabulary_ai_error.dart';
 import 'package:enjoy_player/features/vocabulary/presentation/widgets/flashcard_ai_error_retry.dart';
@@ -31,11 +30,6 @@ void main() {
             ),
           ),
         ),
-        GoRoute(
-          path: kSubscriptionRoutePath,
-          builder: (context, state) =>
-              const Scaffold(body: Text('subscription-page')),
-        ),
       ],
     );
 
@@ -54,30 +48,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('a credits rejection shows the credits message and the CTA', (
-    tester,
-  ) async {
-    await pumpSurface(tester, error: kVocabularyAiErrorCredits, onRetry: () {});
-
-    expect(find.byType(FlashcardSoftError), findsOneWidget);
-    expect(
-      find.text(l10n.subscriptionCreditsLimitMessageWithPackages),
-      findsOneWidget,
-    );
-    expect(find.text(l10n.subscriptionViewPlansAndPackages), findsOneWidget);
-    expect(find.text(l10n.vocabularyAiFetchFailed), findsNothing);
-  });
-
-  testWidgets('the CTA navigates to the subscription screen', (tester) async {
-    await pumpSurface(tester, error: kVocabularyAiErrorCredits, onRetry: () {});
-
-    await tester.tap(find.text(l10n.subscriptionViewPlansAndPackages));
-    await tester.pumpAndSettle();
-
-    expect(find.text('subscription-page'), findsOneWidget);
-  });
-
-  testWidgets('other failures show the generic message without the CTA', (
+  testWidgets('a failure shows the generic message without any CTA', (
     tester,
   ) async {
     await pumpSurface(
@@ -88,10 +59,6 @@ void main() {
 
     expect(find.byType(FlashcardSoftError), findsOneWidget);
     expect(find.text(l10n.vocabularyAiFetchFailed), findsOneWidget);
-    expect(
-      find.text(l10n.subscriptionCreditsLimitMessageWithPackages),
-      findsNothing,
-    );
     expect(find.text(l10n.subscriptionViewPlansAndPackages), findsNothing);
   });
 

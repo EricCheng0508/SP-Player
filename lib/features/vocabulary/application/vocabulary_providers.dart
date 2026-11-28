@@ -5,7 +5,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
-import 'package:enjoy_player/features/sync/application/sync_providers.dart';
 import 'package:enjoy_player/features/vocabulary/application/vocabulary_list_controller.dart';
 import 'package:enjoy_player/features/vocabulary/data/vocabulary_repository.dart';
 import 'package:enjoy_player/features/vocabulary/domain/vocabulary_models.dart';
@@ -16,7 +15,7 @@ part 'vocabulary_providers.g.dart';
 @Riverpod(keepAlive: true)
 VocabularyRepository vocabularyRepository(Ref ref) {
   final db = ref.watch(appDatabaseProvider);
-  return VocabularyRepository(db, enqueueSync: ref.read(syncEnqueueProvider));
+  return VocabularyRepository(db);
 }
 
 /// Live list of all vocabulary items (updates after add/rate/delete).

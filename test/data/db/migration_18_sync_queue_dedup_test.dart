@@ -29,6 +29,26 @@ void main() {
       await db.close();
     });
 
+    Future<void> enqueueViaSql(
+      AppDatabase target, {
+      required String entityType,
+      required String entityId,
+      required String action,
+      String? payloadJson,
+    }) async {
+      await target.customStatement(
+        'INSERT INTO sync_queue (entity_type, entity_id, action, payload_json, '
+        'retry_count, created_at) VALUES (?, ?, ?, ?, 0, ?)',
+        [
+          entityType,
+          entityId,
+          action,
+          payloadJson,
+          DateTime.now().millisecondsSinceEpoch,
+        ],
+      );
+    }
+
     test('schemaVersion is at least 18', () {
       expect(db.schemaVersion, greaterThanOrEqualTo(18));
     });
@@ -46,25 +66,29 @@ void main() {
 
         final seed = AppDatabase(executor: NativeDatabase(file));
         await seed.customStatement('PRAGMA user_version = 17');
-        await seed.syncQueueDao.enqueue(
+        await enqueueViaSql(
+          seed,
           entityType: 'video',
           entityId: 'dQw4w9WgXcQ/en',
           action: 'update',
           payloadJson: '{"v":1}',
         );
-        await seed.syncQueueDao.enqueue(
+        await enqueueViaSql(
+          seed,
           entityType: 'video',
           entityId: 'dQw4w9WgXcQ/en',
           action: 'update',
           payloadJson: '{"v":1}',
         );
-        await seed.syncQueueDao.enqueue(
+        await enqueueViaSql(
+          seed,
           entityType: 'video',
           entityId: 'dQw4w9WgXcQ/en',
           action: 'update',
           payloadJson: '{"v":2}',
         );
-        await seed.syncQueueDao.enqueue(
+        await enqueueViaSql(
+          seed,
           entityType: 'video',
           entityId: 'oQ4w9WgXcQ/fr',
           action: 'update',
@@ -105,12 +129,14 @@ void main() {
 
         final seed = AppDatabase(executor: NativeDatabase(file));
         await seed.customStatement('PRAGMA user_version = 17');
-        await seed.syncQueueDao.enqueue(
+        await enqueueViaSql(
+          seed,
           entityType: 'audio',
           entityId: 'aud-1',
           action: 'create',
         );
-        await seed.syncQueueDao.enqueue(
+        await enqueueViaSql(
+          seed,
           entityType: 'video',
           entityId: 'vid-1',
           action: 'delete',

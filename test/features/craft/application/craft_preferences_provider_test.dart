@@ -7,27 +7,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/data/db/settings_keys.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 import 'package:enjoy_player/features/craft/application/craft_preferences_provider.dart';
 import 'package:enjoy_player/features/craft/domain/craft_preferences.dart';
 import 'package:enjoy_player/features/craft/domain/craft_screen_mode.dart';
 import 'package:enjoy_player/features/craft/domain/translation_style.dart';
-
-class _SignedInAuthCtrl extends AuthCtrl {
-  _SignedInAuthCtrl(this.profile);
-  final UserProfile profile;
-  @override
-  Future<AuthState> build() async => AuthSignedIn(profile: profile);
-}
-
-class _SignedOutAuthCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedOut();
-}
-
-const _profile = UserProfile(id: 'user-1', email: 'a@b.com', name: 'Tester');
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -45,15 +28,9 @@ void main() {
   Future<String?> storedRaw() =>
       db.settingsDao.getValue(SettingsKeys.craftPreferencesV1.name);
 
-  ProviderContainer container({UserProfile? profile = _profile}) {
+  ProviderContainer container() {
     return ProviderContainer(
-      overrides: [
-        appDatabaseProvider.overrideWithValue(db),
-        if (profile == null)
-          authCtrlProvider.overrideWith(_SignedOutAuthCtrl.new)
-        else
-          authCtrlProvider.overrideWith(() => _SignedInAuthCtrl(profile)),
-      ],
+      overrides: [appDatabaseProvider.overrideWithValue(db)],
     );
   }
 
@@ -72,7 +49,6 @@ void main() {
 
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final prefs = await c.read(craftPreferencesCtrlProvider.notifier).load();
 
       expect(prefs, persisted);
@@ -82,7 +58,6 @@ void main() {
     test('returns defaults when nothing is stored', () async {
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final prefs = await c.read(craftPreferencesCtrlProvider.notifier).load();
       expect(prefs, CraftPreferences.defaults);
     });
@@ -94,7 +69,6 @@ void main() {
       );
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final prefs = await c.read(craftPreferencesCtrlProvider.notifier).load();
       expect(prefs, CraftPreferences.defaults);
     });
@@ -102,16 +76,14 @@ void main() {
     test('is single-flight', () async {
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final notifier = c.read(craftPreferencesCtrlProvider.notifier);
       expect(identical(notifier.load(), notifier.load()), isTrue);
       await notifier.load();
     });
 
     test('returns defaults when the session DB has no row', () async {
-      final c = container(profile: null);
+      final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final prefs = await c.read(craftPreferencesCtrlProvider.notifier).load();
       expect(prefs, CraftPreferences.defaults);
       expect(await storedRaw(), isNull);
@@ -122,7 +94,6 @@ void main() {
     test('setScreenMode persists', () async {
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final notifier = c.read(craftPreferencesCtrlProvider.notifier);
       await notifier.setScreenMode(CraftScreenMode.advanced);
       final prefs = c.read(craftPreferencesCtrlProvider);
@@ -138,7 +109,6 @@ void main() {
     test('setStyleFor persists per mode', () async {
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final notifier = c.read(craftPreferencesCtrlProvider.notifier);
       await notifier.setStyleFor(
         CraftScreenMode.express,
@@ -162,7 +132,6 @@ void main() {
     test('setCustomPrompt persists; empty clears', () async {
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final notifier = c.read(craftPreferencesCtrlProvider.notifier);
       await notifier.setCustomPrompt('be poetic');
       expect(c.read(craftPreferencesCtrlProvider).customPrompt, 'be poetic');
@@ -180,7 +149,6 @@ void main() {
     test('setVoice persists per base language; null removes', () async {
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final notifier = c.read(craftPreferencesCtrlProvider.notifier);
       await notifier.setVoice('en', 'en-US-GuyNeural');
       await notifier.setVoice('JA', 'ja-JP-NanamiNeural');
@@ -200,28 +168,24 @@ void main() {
       );
     });
 
-    test(
-      'setters persist on the local session without an auth session',
-      () async {
-        final c = container(profile: null);
-        addTearDown(c.dispose);
-        await c.read(authCtrlProvider.future);
-        final notifier = c.read(craftPreferencesCtrlProvider.notifier);
-        await notifier.setScreenMode(CraftScreenMode.advanced);
-        await notifier.setStyleFor(
-          CraftScreenMode.advanced,
-          TranslationStyle.formal,
-        );
-        final prefs = c.read(craftPreferencesCtrlProvider);
-        expect(prefs.screenMode, CraftScreenMode.advanced);
-        expect(prefs.advancedStyle, TranslationStyle.formal);
-        expect(
-          CraftPreferences.fromJson(
-            jsonDecode((await storedRaw())!) as Map<String, dynamic>,
-          ),
-          prefs,
-        );
-      },
-    );
+    test('setters persist on the local session', () async {
+      final c = container();
+      addTearDown(c.dispose);
+      final notifier = c.read(craftPreferencesCtrlProvider.notifier);
+      await notifier.setScreenMode(CraftScreenMode.advanced);
+      await notifier.setStyleFor(
+        CraftScreenMode.advanced,
+        TranslationStyle.formal,
+      );
+      final prefs = c.read(craftPreferencesCtrlProvider);
+      expect(prefs.screenMode, CraftScreenMode.advanced);
+      expect(prefs.advancedStyle, TranslationStyle.formal);
+      expect(
+        CraftPreferences.fromJson(
+          jsonDecode((await storedRaw())!) as Map<String, dynamic>,
+        ),
+        prefs,
+      );
+    });
   });
 }

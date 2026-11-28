@@ -12,8 +12,6 @@ import 'package:enjoy_player/data/subtitle/transcript_line.dart';
 import 'package:enjoy_player/features/player/application/player_controller.dart';
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
 import 'package:enjoy_player/core/application/app_preferences_provider.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/transcript/application/active_transcript_provider.dart';
 import 'package:enjoy_player/features/transcript/application/all_transcripts_provider.dart';
 import 'package:enjoy_player/features/transcript/application/auto_translate_selection_providers.dart';
@@ -22,7 +20,6 @@ import 'package:enjoy_player/features/transcript/application/transcript_fetch_co
 import 'package:enjoy_player/features/transcript/application/transcript_lines_provider.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_repository_provider.dart';
 import 'package:enjoy_player/features/transcript/data/transcript_repository.dart';
-import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 import 'package:enjoy_player/features/transcript/application/video_row_for_media_provider.dart';
 import 'package:enjoy_player/features/transcript/domain/transcript_fetch_status.dart';
 import 'package:enjoy_player/features/transcript/domain/transcript_track.dart';
@@ -108,19 +105,11 @@ List<Override> _pickerOverrides({
     _mediaId,
   ).overrideWith((ref) async => 'ai-selection-id'),
   appPreferencesCtrlProvider.overrideWith(() => _ZhNativePrefsCtrl()),
-  authCtrlProvider.overrideWith(() => _SignedInAuthCtrl()),
   ...transcriptIpaOverlayOffOverrides(),
   karaokeHighlightSettingsProvider.overrideWith(
     () => KaraokeHighlightSettingsOverride(false),
   ),
 ];
-
-class _SignedInAuthCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedIn(
-    profile: UserProfile(id: 'u1', email: 't@example.com', name: 'Test'),
-  );
-}
 
 class _ZhNativePrefsCtrl extends AppPreferencesCtrl {
   @override
@@ -446,7 +435,6 @@ void main() {
         _mediaId,
       ).overrideWith((ref) async => 'ai-selection-id'),
       appPreferencesCtrlProvider.overrideWith(() => _ZhNativePrefsCtrl()),
-      authCtrlProvider.overrideWith(() => _SignedInAuthCtrl()),
       ...transcriptIpaOverlayOffOverrides(),
       karaokeHighlightSettingsProvider.overrideWith(
         () => KaraokeHighlightSettingsOverride(false),

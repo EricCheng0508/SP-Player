@@ -13,7 +13,7 @@ void main() {
       );
 
   group('mapApiExceptionToAppFailure', () {
-    test('Enjoy worker 402 becomes CreditsFailure with envelope fields', () {
+    test('any 402 becomes ProviderBillingFailure', () {
       final failure = mapApiExceptionToAppFailure(
         err(
           402,
@@ -29,33 +29,21 @@ void main() {
         ),
       );
 
-      expect(failure, isA<CreditsFailure>());
-      final credits = failure as CreditsFailure;
-      expect(credits.requiredCredits, 750);
-      expect(credits.remainingCredits, 200);
-      expect(credits.resetAt, DateTime.utc(2026, 8, 31));
+      expect(failure, isA<ProviderBillingFailure>());
     });
 
-    test('Enjoy worker 402 with empty body falls back to nulls', () {
-      final failure = mapApiExceptionToAppFailure(err(402));
-      expect(failure, isA<CreditsFailure>());
-      expect((failure as CreditsFailure).requiredCredits, isNull);
-    });
-
-    test('BYOK provider 402 becomes ProviderBillingFailure (no envelope)', () {
+    test('BYOK provider 402 becomes ProviderBillingFailure', () {
       final failure = mapApiExceptionToAppFailure(
         err(402, body: {'error': 'insufficient_quota'}, byokProvider: true),
       );
 
       expect(failure, isA<ProviderBillingFailure>());
-      expect(failure, isNot(isA<CreditsFailure>()));
     });
 
-    test('401 becomes session-revoked AuthFailure', () {
+    test('401 stays NetworkFailure with the status code attached', () {
       final failure = mapApiExceptionToAppFailure(err(401));
-      final auth = failure;
-      expect(auth, isA<AuthFailure>());
-      expect((auth as AuthFailure).isSessionRevoked, isTrue);
+      expect(failure, isA<NetworkFailure>());
+      expect((failure as NetworkFailure).statusCode, 401);
     });
 
     test('409 stays NetworkFailure at the AI seam (subscription-only)', () {

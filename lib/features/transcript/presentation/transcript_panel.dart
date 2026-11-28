@@ -9,7 +9,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:enjoy_player/features/asr/presentation/asr_generation_launcher.dart';
 import 'package:enjoy_player/features/asr/presentation/asr_generation_progress_banner.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/transcript/presentation/full_translate_progress_banner.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
@@ -83,7 +82,6 @@ class _TranscriptPanelState extends ConsumerState<TranscriptPanel> {
     );
     final showExtractButton = dexieTargetType == 'Video' && showLocalActions;
 
-    final signedIn = ref.watch(authIsSignedInProvider);
     final searchOpen = ref.watch(transcriptSearchOpenProvider);
     final searchQuery = ref.watch(transcriptSearchQueryProvider).trim();
 
@@ -167,7 +165,7 @@ class _TranscriptPanelState extends ConsumerState<TranscriptPanel> {
                                 .read(
                                   transcriptFetchCtrlProvider(mediaId).notifier,
                                 )
-                                .refreshFromCloud(signedIn: signedIn),
+                                .refreshFromCloud(),
                             child: Text(l10n.retry),
                           ),
                         ],
@@ -192,7 +190,7 @@ class _TranscriptPanelState extends ConsumerState<TranscriptPanel> {
                   onFetchYoutube: isYoutube
                       ? () => ref
                             .read(transcriptFetchCtrlProvider(mediaId).notifier)
-                            .refreshFromCloud(signedIn: signedIn)
+                            .refreshFromCloud()
                       : null,
                   onAlign: showLocalActions
                       ? () => alignExistingScript(context, ref, mediaId)

@@ -2,13 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/native.dart';
-import 'package:enjoy_player/core/utils/local_thumbnail.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 import 'package:enjoy_player/features/player/application/local_thumbnail_provider.dart';
+import 'package:enjoy_player/features/player/application/player_surface_registry.dart';
 import 'package:enjoy_player/features/player/presentation/expanded_player_widgets.dart';
 import 'package:enjoy_player/features/player/presentation/widgets/player_surface_target.dart';
 import 'package:flutter/material.dart';
@@ -17,13 +14,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 const _onePixelPng =
     'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
-
-class _SignedInAuthCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedIn(
-    profile: UserProfile(id: 'u1', email: 't@test.com', name: 'Test'),
-  );
-}
 
 void main() {
   late AppDatabase db;
@@ -49,10 +39,8 @@ void main() {
   }
 
   testWidgets(
-    'local loading stage decodes the thumbnail at the slot width, not full size',
+    'local loading stage is a plain black panel — no thumbnail decodes',
     (tester) async {
-      final thumb = File('${tempDir.path}/thumb.png');
-      thumb.writeAsBytesSync(base64Decode(_onePixelPng));
       final now = DateTime(2026, 1, 1);
       await db.videoDao.insertRow(
         VideoRow(
@@ -71,17 +59,13 @@ void main() {
           mediaUrl: null,
           createdAt: now,
           updatedAt: now,
-          thumbnailUrl: thumb.path,
+          thumbnailUrl: null,
         ),
       );
       final container = ProviderContainer(
         overrides: [
           appDatabaseProvider.overrideWithValue(db),
           deviceGlobalAppDatabaseProvider.overrideWithValue(db),
-          authCtrlProvider.overrideWith(_SignedInAuthCtrl.new),
-          localThumbnailFileProvider(
-            thumb.path,
-          ).overrideWith((ref) async => File(thumb.path)),
         ],
       );
       addTearDown(container.dispose);
@@ -99,13 +83,11 @@ void main() {
       await tester.pump();
       await tester.pump();
 
-      final provider = tester.widget<Image>(find.byType(Image)).image;
-      final expected = thumbnailCacheWidthFor(
-        tester.getSize(find.byType(PlayerSurfaceTarget)).width,
+      expect(find.byType(Image), findsNothing);
+      final target = tester.widget<PlayerSurfaceTarget>(
+        find.byType(PlayerSurfaceTarget),
       );
-      expect(provider, isA<ResizeImage>());
-      expect((provider as ResizeImage).width, expected);
-      expect(expected, lessThanOrEqualTo(2048));
+      expect(target.id, PlayerSurfaceIds.expandedPlayer);
     },
   );
 

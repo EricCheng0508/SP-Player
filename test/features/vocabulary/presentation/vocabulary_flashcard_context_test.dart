@@ -1,11 +1,7 @@
 import 'package:enjoy_player/core/utils/ipa_formatter.dart';
 import 'package:enjoy_player/features/ai/domain/models/contextual_translation_result.dart';
 import 'package:enjoy_player/features/ai/domain/models/dictionary_result.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 import 'package:enjoy_player/features/vocabulary/application/vocabulary_source_title.dart';
-import 'package:enjoy_player/features/vocabulary/domain/vocabulary_ai_error.dart';
 import 'package:enjoy_player/features/vocabulary/domain/vocabulary_explanation_codec.dart';
 import 'package:enjoy_player/features/vocabulary/domain/vocabulary_models.dart';
 import 'package:enjoy_player/features/vocabulary/presentation/vocabulary_flashcard.dart';
@@ -15,13 +11,6 @@ import 'package:enjoy_player/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-class _AuthSignedInCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedIn(
-    profile: UserProfile(id: 'test-user', email: 't@example.com', name: 'Test'),
-  );
-}
 
 VocabularyItem _item({String? explanation}) => VocabularyItem(
   id: 'i1',
@@ -54,7 +43,6 @@ VocabularyContext _context({String? explanation}) => VocabularyContext(
 Widget _wrap(Widget child, {String? sourceTitle = 'Test Talk Title'}) {
   return ProviderScope(
     overrides: [
-      authCtrlProvider.overrideWith(_AuthSignedInCtrl.new),
       vocabularySourceTitleProvider.overrideWith(
         (ref, id) async => sourceTitle,
       ),
@@ -92,8 +80,6 @@ VocabularyFlashcard _card({
 }
 
 void main() {
-  final l10n = lookupAppLocalizations(const Locale('en'));
-
   test('formatIpaWithSlashes strips duplicate slashes', () {
     expect(formatIpaWithSlashes('ɪnˈvɪʒən'), '/ɪnˈvɪʒən/');
     expect(formatIpaWithSlashes('/ɪnˈvɪʒən/'), '/ɪnˈvɪʒən/');
@@ -227,27 +213,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Test Talk Title'), findsOneWidget);
     expect(find.text('v1'), findsNothing);
-  });
-
-  testWidgets('Context tab shows the credits CTA after a credits rejection', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      _wrap(
-        _card(
-          fetchState: const FlashcardFetchState(
-            contextualError: kVocabularyAiErrorCredits,
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    expect(
-      find.text(l10n.subscriptionCreditsLimitMessageWithPackages),
-      findsOneWidget,
-    );
-    expect(find.text(l10n.subscriptionViewPlansAndPackages), findsOneWidget);
-    expect(find.text(l10n.vocabularyAiFetchFailed), findsNothing);
   });
 
   testWidgets('Context tab falls back when title missing', (tester) async {

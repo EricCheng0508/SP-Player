@@ -1,25 +1,23 @@
 /// Shared shell for the lookup sheet sections.
 ///
 /// Every lookup section renders the same scaffold: an expandable tonal card
-/// whose body is gated behind the signed-in check. The body is built only
-/// after the gate lets it through, so a signed-out reader never triggers the
-/// section's provider — and therefore never spends a credit.
+/// whose body is built through [LookupSectionAuthGate] (a pass-through in the
+/// local build).
 library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show ProviderListenable;
 
-import 'package:enjoy_player/features/auth/presentation/widgets/auth_required_callout.dart';
-import 'package:enjoy_player/features/lookup/application/lookup_credits_exhausted_provider.dart';
-import 'package:enjoy_player/features/lookup/presentation/lookup_credits_reporting.dart';
+import 'package:enjoy_player/features/lookup/presentation/widgets/auth_required_callout.dart';
+import 'package:enjoy_player/features/lookup/domain/lookup_section_id.dart';
 import 'package:enjoy_player/features/lookup/presentation/lookup_section_error_widget.dart';
 import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_expansion_card.dart';
 import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_section_auth_gate.dart';
 import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_section_shimmer.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
-/// The expandable card plus auth gate every lookup sheet section renders.
+/// The expandable card plus gate shell every lookup sheet section renders.
 class LookupSectionShell extends StatelessWidget {
   const LookupSectionShell({
     required this.title,
@@ -35,7 +33,7 @@ class LookupSectionShell extends StatelessWidget {
   final Widget? leading;
   final AuthRequiredSurface surface;
 
-  /// Built inside the auth gate, so it runs only for a signed-in reader.
+  /// Built inside the gate shell, so it runs only while the card is expanded.
   final Widget Function(BuildContext context) bodyBuilder;
 
   @override
@@ -54,9 +52,8 @@ class LookupSectionShell extends StatelessWidget {
 
 /// A lookup sheet section whose body comes from a provider-backed value.
 ///
-/// Owns the whole async shell — the auth gate, the loading shimmer, the
-/// shared error surface and the credits bookkeeping — so a section only
-/// describes its own body.
+/// Owns the whole async shell — the gate shell, the loading shimmer and the
+/// shared error surface — so a section only describes its own body.
 class LookupAiSectionCard<T> extends ConsumerWidget {
   const LookupAiSectionCard({
     required this.title,
@@ -76,7 +73,7 @@ class LookupAiSectionCard<T> extends ConsumerWidget {
   final AuthRequiredSurface surface;
   final LookupSectionId section;
 
-  /// Watched inside the auth gate, never while signed out.
+  /// Watched inside the gate shell, only while the card is expanded.
   final ProviderListenable<AsyncValue<T>> provider;
 
   /// Re-attempts the section's fetch.
@@ -98,15 +95,7 @@ class LookupAiSectionCard<T> extends ConsumerWidget {
           final async = ref.watch(provider);
           return async.when(
             skipLoadingOnReload: true,
-            data: (T data) {
-              scheduleLookupCreditsClear(
-                context,
-                ref,
-                section,
-                resultToken: data,
-              );
-              return bodyBuilder(context, data, async);
-            },
+            data: (T data) => bodyBuilder(context, data, async),
             loading: () => const LookupSectionShimmer(),
             error: (Object e, StackTrace st) => lookupSectionErrorWidget(
               context: context,

@@ -4,26 +4,11 @@ import 'package:drift/native.dart';
 import 'package:enjoy_player/core/config/local_mode.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 
 import '../../support/test_path_provider.dart';
-
-class _SignedInAuthCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedIn(
-    profile: UserProfile(id: 'user-42', email: 'u@test.com', name: 'Test'),
-  );
-}
-
-class _SignedOutAuthCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedOut();
-}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -52,39 +37,19 @@ void main() {
     },
   );
 
-  test('appDatabaseProvider opens per-user file when signed in', () async {
-    final container = ProviderContainer(
-      overrides: [authCtrlProvider.overrideWith(_SignedInAuthCtrl.new)],
-    );
+  test('appDatabaseProvider opens the single local session file', () async {
+    final container = ProviderContainer();
     addTearDown(container.dispose);
-    await container.read(authCtrlProvider.future);
 
     final global = container.read(deviceGlobalAppDatabaseProvider);
     final app = container.read(appDatabaseProvider);
+    expect(
+      app.databaseFileBaseName,
+      '${AppDatabase.deviceGlobalDatabaseName}_$kLocalSessionId',
+    );
     expect(identical(app, global), isFalse);
-    expect(global.isDeviceGlobalDatabase, isTrue);
     expect(app.isDeviceGlobalDatabase, isFalse);
   });
-
-  test(
-    'appDatabaseProvider opens the local session file when signed out',
-    () async {
-      final container = ProviderContainer(
-        overrides: [authCtrlProvider.overrideWith(_SignedOutAuthCtrl.new)],
-      );
-      addTearDown(container.dispose);
-      await container.read(authCtrlProvider.future);
-
-      final global = container.read(deviceGlobalAppDatabaseProvider);
-      final app = container.read(appDatabaseProvider);
-      expect(
-        app.databaseFileBaseName,
-        '${AppDatabase.deviceGlobalDatabaseName}_$kLocalSessionId',
-      );
-      expect(identical(app, global), isFalse);
-      expect(app.isDeviceGlobalDatabase, isFalse);
-    },
-  );
 
   test(
     'closeAndClearAllAppDatabases allows a fresh device-global open',

@@ -838,14 +838,7 @@ void main() {
     test(
       'updateMediaLanguage updates row and clears transcript fetch state',
       () async {
-        var syncCalls = 0;
-        final syncingRepo = MediaLibraryRepository(
-          db,
-          FileStorage(),
-          enqueueSync: (_, _, _) async {
-            syncCalls++;
-          },
-        );
+        final repo = MediaLibraryRepository(db, FileStorage());
 
         final now = DateTime.now();
         const id = 'yt-lang';
@@ -878,10 +871,9 @@ void main() {
           lastError: 'wrong language',
         );
 
-        await syncingRepo.updateMediaLanguage(id, 'fr');
+        await repo.updateMediaLanguage(id, 'fr');
         final row = await db.videoDao.getById(id);
         expect(row!.language, 'fr-FR');
-        expect(syncCalls, 1);
         final fetchState = await db.transcriptFetchStateDao.getForTarget(
           'video',
           id,

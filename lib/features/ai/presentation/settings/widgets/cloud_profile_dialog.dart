@@ -555,7 +555,7 @@ class _CloudProfileDialogState extends State<_CloudProfileDialog> {
               ),
             ],
             value: _vendor,
-            onChanged: (v) => setState(() => _vendor = v!),
+            onChanged: (v) => setState(() => _vendor = v),
             compact: true,
           ),
           const SizedBox(height: 8),

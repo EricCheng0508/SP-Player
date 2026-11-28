@@ -1,5 +1,4 @@
 import 'package:enjoy_player/core/application/app_language_catalog.dart';
-import 'package:enjoy_player/core/config/local_mode.dart';
 import 'package:enjoy_player/data/api/byok_secret_store.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_speech_guards.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_whisper_client.dart';
@@ -42,11 +41,7 @@ final class ByokAsrOpenAiCapability implements AsrCapability {
           ? null
           : workerLanguageBase(request.language!),
       prompt: request.prompt,
-      // 本地模式：强制 verbose_json，才能拿到逐句 segments（时间轴精确）。
-      // 上游传的是 'json'，多数 OpenAI 兼容服务只回纯文本，字幕时间会被均分。
-      responseFormat: kLocalOfflineMode
-          ? 'verbose_json'
-          : request.responseFormat,
+      responseFormat: 'verbose_json',
       client: _httpClient,
     );
 

@@ -6,7 +6,6 @@ import 'package:drift/native.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/files/file_storage.dart';
 import 'package:enjoy_player/features/craft/data/craft_library_repository.dart';
-import 'package:enjoy_player/features/sync/domain/sync_types.dart';
 import 'package:enjoy_player/features/transcript/data/transcript_timeline_codec.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
@@ -716,32 +715,6 @@ void main() {
         );
 
         expect(id1, id2);
-      });
-
-      test('enqueues sync create', () async {
-        final syncLog = <(SyncEntityType, String, SyncAction)>[];
-        final syncRepo = CraftLibraryRepository(
-          db,
-          FileStorage(),
-          enqueueSync: (type, id, action) async {
-            syncLog.add((type, id, action));
-          },
-        );
-
-        final id = await syncRepo.importCraftedFromText(
-          audioBytes: Uint8List.fromList([20]),
-          audioFormat: 'wav',
-          learningLanguage: 'en',
-          text: 'Sync craft',
-          normalizedText: 'Sync craft',
-          sourceFlag: 'craft-direct',
-          signedInUserId: _testUserId,
-        );
-
-        expect(
-          syncLog,
-          contains((SyncEntityType.audio, id, SyncAction.create)),
-        );
       });
 
       test('title is not truncated when text is short', () async {

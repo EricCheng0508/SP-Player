@@ -1,8 +1,8 @@
 /// Persisted Craft preferences (Drift settings KV, JSON blob).
 ///
 /// Storage goes through the typed [SettingsKeys.craftPreferencesV1] key
-/// (per-user DB, JSON object codec); the [CraftPreferences] field mapping
-/// stays here.
+/// (local session DB, JSON object codec); the [CraftPreferences] field
+/// mapping stays here.
 library;
 
 import 'dart:async';
@@ -12,7 +12,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:enjoy_player/core/logging/log.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/data/db/settings_keys.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/craft/domain/craft_preferences.dart';
 import 'package:enjoy_player/features/craft/domain/craft_screen_mode.dart';
 import 'package:enjoy_player/features/craft/domain/translation_style.dart';
@@ -34,9 +33,7 @@ class CraftPreferencesCtrl extends _$CraftPreferencesCtrl {
   @override
   CraftPreferences build() {
     _loadFuture = null;
-    if (sessionUserIdOf(ref.watch(authCtrlProvider)) != null) {
-      unawaited(Future<void>.microtask(load));
-    }
+    unawaited(Future<void>.microtask(load));
     return CraftPreferences.defaults;
   }
 
@@ -49,14 +46,12 @@ class CraftPreferencesCtrl extends _$CraftPreferencesCtrl {
     final readGeneration = _mutation;
     CraftPreferences? loaded;
     try {
-      if (sessionUserIdOf(ref.read(authCtrlProvider)) != null) {
-        final decoded = await ref
-            .read(appDatabaseProvider)
-            .settingsDao
-            .readSetting(SettingsKeys.craftPreferencesV1);
-        if (decoded != null) {
-          loaded = CraftPreferences.fromJson(decoded);
-        }
+      final decoded = await ref
+          .read(appDatabaseProvider)
+          .settingsDao
+          .readSetting(SettingsKeys.craftPreferencesV1);
+      if (decoded != null) {
+        loaded = CraftPreferences.fromJson(decoded);
       }
     } catch (e, st) {
       logNamed('craft.prefs').warning('Hydrate failed; using defaults', e, st);
@@ -68,13 +63,8 @@ class CraftPreferencesCtrl extends _$CraftPreferencesCtrl {
   }
 
   Future<void> _persist() {
-    final sessionUserId = sessionUserIdOf(ref.read(authCtrlProvider));
-    if (sessionUserId == null) return Future<void>.value();
-
     final task = _persistQueue.then((_) async {
       if (!ref.mounted) return;
-
-      if (sessionUserIdOf(ref.read(authCtrlProvider)) != sessionUserId) return;
 
       await ref
           .read(appDatabaseProvider)

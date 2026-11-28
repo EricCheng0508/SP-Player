@@ -11,7 +11,6 @@ import 'package:enjoy_player/core/audio/mic_capture_session.dart';
 import 'package:enjoy_player/core/audio/mic_recorder.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/features/shadow_reading/application/shadow_take_store.dart';
-import 'package:enjoy_player/features/sync/domain/sync_types.dart';
 
 /// Minimal RIFF PCM16 mono WAV (44-byte header + samples).
 Uint8List buildPcm16Wav(List<int> samples, {int sampleRate = 16000}) {
@@ -105,19 +104,14 @@ void main() {
   late AppDatabase db;
   late Directory tempDir;
   late FakeMicRecorder recorder;
-  late List<(SyncEntityType, String, SyncAction)> syncCalls;
   late ShadowTakeStore store;
 
   setUp(() async {
     db = AppDatabase(executor: NativeDatabase.memory());
     tempDir = await Directory.systemTemp.createTemp('take_store_test');
     recorder = FakeMicRecorder();
-    syncCalls = [];
     store = ShadowTakeStore(
       db: db,
-      enqueueSync: (type, id, action) async {
-        syncCalls.add((type, id, action));
-      },
       recorderFactory: () => recorder,
       takeDirectory: tempDir,
     );
@@ -177,45 +171,39 @@ void main() {
   });
 
   group('stopAndPersist', () {
-    test(
-      'persists hash, duration, reference fields and enqueues sync create',
-      () async {
-        final path = await startTake();
-        final samples = List<int>.generate(
-          1600,
-          (i) => i.isEven ? 16000 : -16000,
-        );
-        final bytes = buildPcm16Wav(samples);
-        await File(path).writeAsBytes(bytes);
+    test('persists hash, duration, and reference fields', () async {
+      final path = await startTake();
+      final samples = List<int>.generate(
+        1600,
+        (i) => i.isEven ? 16000 : -16000,
+      );
+      final bytes = buildPcm16Wav(samples);
+      await File(path).writeAsBytes(bytes);
 
-        final outcome = await store.stopAndPersist(region: _region);
-        final row = outcome.row;
+      final outcome = await store.stopAndPersist(region: _region);
+      final row = outcome.row;
 
-        expect(outcome.looksSilent, isFalse);
-        expect(
-          row.id,
-          path.split(Platform.pathSeparator).last.replaceAll('.wav', ''),
-        );
-        expect(row.targetType, 'video');
-        expect(row.targetId, 'media-1');
-        expect(row.language, 'en');
-        expect(row.referenceText, 'hello world');
-        expect(row.referenceStart, 10000);
-        expect(row.referenceDuration, 2500);
-        expect(row.duration, 100);
-        expect(row.md5, sha256.convert(bytes).toString());
-        expect(row.localPath, path);
-        expect(row.syncStatus, 'local');
+      expect(outcome.looksSilent, isFalse);
+      expect(
+        row.id,
+        path.split(Platform.pathSeparator).last.replaceAll('.wav', ''),
+      );
+      expect(row.targetType, 'video');
+      expect(row.targetId, 'media-1');
+      expect(row.language, 'en');
+      expect(row.referenceText, 'hello world');
+      expect(row.referenceStart, 10000);
+      expect(row.referenceDuration, 2500);
+      expect(row.duration, 100);
+      expect(row.md5, sha256.convert(bytes).toString());
+      expect(row.localPath, path);
+      expect(row.syncStatus, 'local');
 
-        final stored = await db.recordingDao.getById(row.id);
-        expect(stored, isNotNull);
-        expect(stored!.id, row.id);
-        expect(syncCalls, [
-          (SyncEntityType.recording, row.id, SyncAction.create),
-        ]);
-        expect(store.isActive, isFalse);
-      },
-    );
+      final stored = await db.recordingDao.getById(row.id);
+      expect(stored, isNotNull);
+      expect(stored!.id, row.id);
+      expect(store.isActive, isFalse);
+    });
 
     test('flags a silent WAV but still persists it', () async {
       final path = await startTake();
@@ -224,7 +212,6 @@ void main() {
       final outcome = await store.stopAndPersist(region: _region);
       expect(outcome.looksSilent, isTrue);
       expect(await db.recordingDao.getById(outcome.row.id), isNotNull);
-      expect(syncCalls, hasLength(1));
     });
 
     test('throws TakeFileMissingException when the WAV is gone', () async {
@@ -234,7 +221,6 @@ void main() {
         throwsA(isA<TakeFileMissingException>()),
       );
       expect(path, isNotEmpty);
-      expect(syncCalls, isEmpty);
     });
 
     test('throws TakeFileMissingException when stop yields no path', () async {
@@ -244,7 +230,6 @@ void main() {
         store.stopAndPersist(region: _region),
         throwsA(isA<TakeFileMissingException>()),
       );
-      expect(syncCalls, isEmpty);
     });
 
     test(
@@ -253,7 +238,6 @@ void main() {
         var created = 0;
         final countingStore = ShadowTakeStore(
           db: db,
-          enqueueSync: (type, id, action) async {},
           recorderFactory: () {
             created++;
             return recorder;
@@ -281,7 +265,6 @@ void main() {
 
       expect(await File(path).exists(), isFalse);
       expect(store.isActive, isFalse);
-      expect(syncCalls, isEmpty);
       await expectLater(
         store.stopAndPersist(region: _region),
         throwsA(isA<TakeFileMissingException>()),
@@ -296,21 +279,17 @@ void main() {
   });
 
   group('deleteTake', () {
-    test('removes the file and row and enqueues sync delete', () async {
+    test('removes the file and row', () async {
       final path = await startTake();
       final bytes = buildPcm16Wav(List.filled(160, 8000));
       await File(path).writeAsBytes(bytes);
       final outcome = await store.stopAndPersist(region: _region);
       final row = outcome.row;
-      syncCalls.clear();
 
       await store.deleteTake(row);
 
       expect(await File(path).exists(), isFalse);
       expect(await db.recordingDao.getById(row.id), isNull);
-      expect(syncCalls, [
-        (SyncEntityType.recording, row.id, SyncAction.delete),
-      ]);
     });
 
     test('tolerates a row whose file is already gone', () async {
@@ -332,9 +311,6 @@ void main() {
       await store.deleteTake(inserted);
 
       expect(await db.recordingDao.getById('orphan'), isNull);
-      expect(syncCalls, [
-        (SyncEntityType.recording, 'orphan', SyncAction.delete),
-      ]);
     });
   });
 

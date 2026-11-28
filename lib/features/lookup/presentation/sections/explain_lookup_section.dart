@@ -22,13 +22,12 @@ import 'package:enjoy_player/features/ai/application/ai_result_cache.dart';
 import 'package:enjoy_player/features/ai/application/ai_services.dart';
 import 'package:enjoy_player/features/ai/domain/ai_kind.dart';
 import 'package:enjoy_player/features/ai/domain/models/line_explanation.dart';
-import 'package:enjoy_player/features/auth/presentation/widgets/auth_required_callout.dart';
-import 'package:enjoy_player/features/lookup/application/lookup_credits_exhausted_provider.dart';
+import 'package:enjoy_player/features/lookup/presentation/widgets/auth_required_callout.dart';
 import 'package:enjoy_player/features/lookup/application/lookup_section_params.dart';
 import 'package:enjoy_player/features/lookup/application/lookup_section_providers.dart'
     show lookupExplainCacheKey;
 import 'package:enjoy_player/features/lookup/domain/lookup_request.dart';
-import 'package:enjoy_player/features/lookup/presentation/lookup_credits_reporting.dart';
+import 'package:enjoy_player/features/lookup/domain/lookup_section_id.dart';
 import 'package:enjoy_player/features/lookup/presentation/lookup_section_error_widget.dart';
 import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_ai_section_card.dart';
 import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_refresh_icon_button.dart';
@@ -224,12 +223,6 @@ class _ExplainLookupSectionState extends ConsumerState<ExplainLookupSection> {
         _staleSuccess = d;
         _retryInFlight = false;
         _lastError = null;
-        scheduleLookupCreditsClear(
-          context,
-          ref,
-          LookupSectionId.explain,
-          resultToken: d,
-        );
         return _resultStack(
           isRefreshing: false,
           onRefresh: () => _run(forceRefresh: true),

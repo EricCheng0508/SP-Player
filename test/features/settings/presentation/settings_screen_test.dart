@@ -8,8 +8,6 @@ import 'package:enjoy_player/core/application/app_preferences_provider.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/settings/application/settings_selected_section_provider.dart';
 import 'package:enjoy_player/features/settings/domain/settings_search_entry.dart';
 import 'package:enjoy_player/features/settings/presentation/settings_screen.dart';
@@ -17,14 +15,7 @@ import 'package:enjoy_player/features/settings/presentation/widgets/settings_lay
 import 'package:enjoy_player/features/settings/presentation/widgets/settings_layout_single_column.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/settings_layout_two_pane.dart';
 import 'package:enjoy_player/features/shadow_reading/application/recording_input_device_controller.dart';
-import 'package:enjoy_player/features/sync/application/sync_providers.dart';
-import 'package:enjoy_player/features/sync/data/sync_queue_repository.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
-
-class _SignedOutAuthCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedOut();
-}
 
 class _StaticPrefsCtrl extends AppPreferencesCtrl {
   @override
@@ -43,30 +34,17 @@ class _FakeRecordingInputDeviceCtrl extends RecordingInputDeviceCtrl {
       );
 }
 
-/// Common test overrides. Sync providers are pinned to static values
-/// (rather than left to hit real drift `.watch()` streams) so widget tests
-/// can safely dispose without tripping flutter_test's pending-timer check.
+/// Common test overrides.
 ///
 /// (Untyped: Riverpod 3.x's `Override` type isn't part of its public API.)
 // ignore: strict_top_level_inference
 _settingsTestOverrides(AppDatabase db) => [
   deviceGlobalAppDatabaseProvider.overrideWithValue(db),
   appDatabaseProvider.overrideWithValue(db),
-  authCtrlProvider.overrideWith(_SignedOutAuthCtrl.new),
   appPreferencesCtrlProvider.overrideWith(_StaticPrefsCtrl.new),
   recordingInputDeviceCtrlProvider.overrideWith(
     _FakeRecordingInputDeviceCtrl.new,
   ),
-  syncQueueSnapshotProvider.overrideWith(
-    (ref) => Stream.value(
-      const SyncQueueSnapshot(
-        retryablePending: 0,
-        permanentlyFailed: 0,
-        detailRows: [],
-      ),
-    ),
-  ),
-  syncLastFullSyncAtProvider.overrideWith((ref) async => null),
 ];
 
 Widget _harness({required AppDatabase db}) {
@@ -216,7 +194,8 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text(l10n.settingsAiPlaygroundTileTitle), findsOneWidget);
-        expect(find.text(l10n.settingsApiBaseUrl), findsOneWidget);
+        // API base URL 配置已移至 AI 服务页 BYOK 区，Developer 区只剩 playground。
+        expect(find.text(l10n.settingsApiBaseUrl), findsNothing);
 
         expect(find.text(l10n.settingsTranscriptEnrichmentTitle), findsNothing);
         expect(find.text(l10n.settingsTranscriptKaraokeTitle), findsNothing);

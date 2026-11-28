@@ -4,12 +4,7 @@ import 'package:enjoy_player/core/theme/widgets/enjoy_avatar.dart';
 import 'package:enjoy_player/core/theme/widgets/nav_item_pill.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 import 'package:enjoy_player/features/player/presentation/widgets/app_sidebar.dart';
-import 'package:enjoy_player/features/sync/application/sync_providers.dart';
-import 'package:enjoy_player/features/sync/data/sync_queue_repository.dart';
 import 'package:enjoy_player/features/vocabulary/application/vocabulary_providers.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 import 'package:flutter/foundation.dart';
@@ -45,13 +40,6 @@ Widget buildHost(ProviderContainer container, GoRouter router) {
       supportedLocales: AppLocalizations.supportedLocales,
       routerConfig: router,
     ),
-  );
-}
-
-class _SignedInAuthCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedIn(
-    profile: UserProfile(id: 'u1', email: 't@example.com', name: 'An Lee'),
   );
 }
 

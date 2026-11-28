@@ -168,6 +168,7 @@ const _durationSentinels = <String, Duration>{
   'motionMedium': Duration(milliseconds: 1004),
   'motionLens': Duration(milliseconds: 1005),
   'motionMargin': Duration(milliseconds: 1006),
+  'motionPress': Duration(milliseconds: 1007),
 };
 
 const _shadowSentinels = <String, List<BoxShadow>>{
@@ -224,6 +225,7 @@ const _motionTokenNames = <String>[
   'motionMedium',
   'motionLens',
   'motionMargin',
+  'motionPress',
 ];
 
 const _elevationTokenNames = <String>[
@@ -433,7 +435,7 @@ void main() {
           0,
           (total, names) => total + names.length,
         ),
-        160,
+        161,
       );
 
       for (final entry in _tokenGroups.entries) {
@@ -610,6 +612,7 @@ void main() {
         motionMedium: _durationSentinels['motionMedium'],
         motionLens: _durationSentinels['motionLens'],
         motionMargin: _durationSentinels['motionMargin'],
+        motionPress: _durationSentinels['motionPress'],
         elevationNone: _doubleSentinels['elevationNone'],
         elevationCard: _doubleSentinels['elevationCard'],
         elevationSheet: _doubleSentinels['elevationSheet'],
@@ -773,6 +776,7 @@ void main() {
       expect(copy.motionMedium, _durationSentinels['motionMedium']);
       expect(copy.motionLens, _durationSentinels['motionLens']);
       expect(copy.motionMargin, _durationSentinels['motionMargin']);
+      expect(copy.motionPress, _durationSentinels['motionPress']);
       expect(copy.elevationNone, _doubleSentinels['elevationNone']);
       expect(copy.elevationCard, _doubleSentinels['elevationCard']);
       expect(copy.elevationSheet, _doubleSentinels['elevationSheet']);
@@ -960,6 +964,7 @@ void main() {
       expect(copy.motionMedium, tokens.motionMedium);
       expect(copy.motionLens, tokens.motionLens);
       expect(copy.motionMargin, tokens.motionMargin);
+      expect(copy.motionPress, tokens.motionPress);
       expect(copy.elevationNone, tokens.elevationNone);
       expect(copy.elevationCard, tokens.elevationCard);
       expect(copy.elevationSheet, tokens.elevationSheet);

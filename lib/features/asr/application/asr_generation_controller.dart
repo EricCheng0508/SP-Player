@@ -291,13 +291,7 @@ class AsrGenerationController extends _$AsrGenerationController {
         _log.info('Long-form job failed: ${e.category}');
         await attemptStore.clear(mediaId);
         final key = asrLongFormFailureMessageKey(e);
-        _setError(
-          key,
-          creditsFailure: key == 'asrErrorCreditsExhausted'
-              ? const CreditsFailure('')
-              : null,
-          reason: asrLongFormFailureReason(e.category),
-        );
+        _setError(key, reason: asrLongFormFailureReason(e.category));
         return;
       } on Object catch (e, st) {
         _log.warning('ASR call failed', e, st);
@@ -308,10 +302,7 @@ class AsrGenerationController extends _$AsrGenerationController {
         }
         _setError(
           _mapProviderError(e),
-          creditsFailure: e is CreditsFailure ? e : null,
-          reason: e is CreditsFailure
-              ? AnalyticsFailureReason.credits
-              : analyticsFailureReasonFromObject(e),
+          reason: analyticsFailureReasonFromObject(e),
         );
         return;
       }
@@ -478,7 +469,6 @@ class AsrGenerationController extends _$AsrGenerationController {
 
   void _setError(
     String messageKey, {
-    CreditsFailure? creditsFailure,
     AnalyticsFailureReason reason = AnalyticsFailureReason.unknown,
   }) {
     state = AsyncValue.data(
@@ -487,7 +477,6 @@ class AsrGenerationController extends _$AsrGenerationController {
         language: '',
         phase: AsrGenerationPhase.error,
         errorMessage: messageKey,
-        creditsFailure: creditsFailure,
         completedAt: DateTime.now(),
       ),
     );
@@ -529,7 +518,6 @@ class AsrGenerationController extends _$AsrGenerationController {
   }
 
   String _mapProviderError(Object e) {
-    if (e is CreditsFailure) return 'asrErrorCreditsExhausted';
     if (e is NetworkFailure) return 'asrErrorNetwork';
     if (e is AsrLongFormJobException) {
       return asrLongFormFailureMessageKey(e);

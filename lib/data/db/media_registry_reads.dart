@@ -56,10 +56,9 @@ mixin MediaRegistryReads {
   /// Kind-known single-table read: the raw [VideoRow] with [id], or `null`.
   ///
   /// Callers that already know the row is a video (YouTube paths, poster
-  /// capture, video-only transcript fetch, sync upload of a
-  /// [SyncEntityType.video] entity) get one indexed `videos` lookup instead
-  /// of a probe — and an audio-only id reads as `null`, exactly as a direct
-  /// `videoDao.getById` would.
+  /// capture, video-only transcript fetch) get one indexed `videos` lookup
+  /// instead of a probe — and an audio-only id reads as `null`, exactly as a
+  /// direct `videoDao.getById` would.
   Future<VideoRow?> getVideoById(String id) => _db.videoDao.getById(id);
 
   /// Kind-known single-table read: the raw [AudioRow] with [id], or `null`.

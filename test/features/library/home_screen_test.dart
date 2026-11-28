@@ -2,9 +2,6 @@ import 'package:enjoy_player/core/application/app_preferences_provider.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_button.dart';
 import 'package:enjoy_player/core/theme/widgets/skeleton.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 import 'package:enjoy_player/features/library/application/library_media_provider.dart';
 import 'package:enjoy_player/features/library/application/learning_statistics_provider.dart';
 import 'package:enjoy_player/features/library/domain/learning_statistics.dart';
@@ -22,13 +19,6 @@ import 'package:enjoy_player/features/library/application/continue_practice_prov
 import 'package:enjoy_player/features/library/domain/practice_resume.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_lines_provider.dart';
 import 'package:go_router/go_router.dart';
-
-class _SignedInAuthCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedIn(
-    profile: UserProfile(id: 'u1', email: 'a@b.com', name: 'A'),
-  );
-}
 
 class _FakePrefsCtrl extends AppPreferencesCtrl {
   @override
@@ -63,7 +53,6 @@ List<Override> _homeOverrides({
       transcriptLinesForMediaProvider(
         resume.media.id,
       ).overrideWith((ref) => Stream.value(resumeLines)),
-    authCtrlProvider.overrideWith(_SignedInAuthCtrl.new),
     appPreferencesCtrlProvider.overrideWith(_FakePrefsCtrl.new),
     libraryHomeRecentsProvider.overrideWith(
       (ref) => streamOverride ?? Stream.value(recents),

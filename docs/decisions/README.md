@@ -29,14 +29,14 @@ Trade-offs, follow-up work, risks.
 | [0003](0003-player-core-media-kit.md) | media_kit as sole player engine |
 | [0004](0004-feature-first-architecture.md) | Feature-first directory layout |
 | [0005](0005-mvp-scope-local-only.md) | MVP scope — local files only |
-| [0006](0006-auth-and-profile-sync.md) | Auth, profile, settings sync (browser flow) |
+| [0006](0006-auth-and-profile-sync.md) | Auth, profile, settings sync (browser flow) (**superseded by 0107**) |
 | [0007](0007-dynamic-color-from-artwork.md) | Dynamic color from media artwork (**superseded by 0093**) |
 | [0008](0008-light-mode-parity.md) | Light mode parity |
 | [0009](0009-platform-adaptive-shell.md) | Platform-adaptive shell nuances |
-| [0010](0010-cloud-sync-mvp.md) | Cloud sync MVP — metadata (audio/video/recording) |
+| [0010](0010-cloud-sync-mvp.md) | Cloud sync MVP — metadata (audio/video/recording) (**superseded by 0107**) |
 | [0011](0011-dark-mode-only.md) | Dark mode only + logo-aligned brand (supersedes 0008; **superseded by 0083**) |
 | [0012](0012-per-user-sqlite-isolation.md) | Per-user SQLite + secure profile cache (partial supersession of 0006) |
-| [0013](0013-local-first-sync.md) | Local-first cloud sync + Cloud index (supersedes 0010 download behavior on player) |
+| [0013](0013-local-first-sync.md) | Local-first cloud sync + Cloud index (supersedes 0010 download behavior on player) (**superseded by 0107**) |
 | [0014](0014-ai-capabilities-layer.md) | AI capabilities layer (Enjoy worker + capability pattern; BYOK/local placeholders) |
 | [0015](0015-youtube-playback.md) | YouTube playback via WebView + HTML5 video (dual engine with media_kit) |
 | [0016](0016-enjoy-account-webview-sign-in.md) | Enjoy account sign-in via in-app WebView (partial supersession of 0006) |
@@ -54,8 +54,8 @@ Trade-offs, follow-up work, risks.
 | [0028](0028-agentic-engine-choice.md) | Agentic workflow engine choice — third-party Anthropic-compatible proxy; Amendment 1 (2026-10-30): every workflow moved to GLM (`open.bigmodel.cn`), the egress gate derives sanctioned hosts from the shared engine components |
 | [0029](0029-supply-chain-risk.md) | Supply-chain risk for pre-release and local-path dependencies |
 | [0030](0030-flutter-lints-baseline-no-custom-lint.md) | Expanded flutter_lints baseline; defer custom_lint |
-| [0031](0031-login-only-access.md) | Login-only application access — auth gate, welcome sign-in hub, guest migration removed |
-| [0032](0032-platform-scoped-subscription-purchase.md) | Platform-scoped Pro purchase — desktop external checkout; mobile IAP deferred |
+| [0031](0031-login-only-access.md) | Login-only application access — auth gate, welcome sign-in hub, guest migration removed (**superseded by 0107**) |
+| [0032](0032-platform-scoped-subscription-purchase.md) | Platform-scoped Pro purchase — desktop external checkout; mobile IAP deferred (**superseded by 0107**) |
 | [0033](0033-byok-ai-provider-settings.md) | BYOK AI provider settings — per-modality Enjoy vs BYOK, secure secrets, direct vendor HTTP |
 | [0034](0034-custom-scheme-only-pkce-callback.md) | Custom-scheme-only PKCE callback — drops universal/app links (partial supersession of 0027) |
 | [0035](0035-responsive-transport-priorities.md) | Responsive transport priorities and collapsed-expand recovery |
@@ -64,7 +64,7 @@ Trade-offs, follow-up work, risks.
 | [0038](0038-viewport-per-line-auto-translate.md) | Viewport-driven per-line auto-translate (supersedes 0037 orchestration) |
 | [0039](0039-auto-translate-primary-text-keyed-overlay.md) | Auto-translate as primary-text keyed overlay (index display + sourceKey; supplements 0037/0038) |
 | [0040](0040-asr-transcript-generation.md) | ASR transcript generation |
-| [0041](0041-unified-tier-reconciliation.md) | Unified tier reconciliation — single source of truth + global resume/cold-start reconcile |
+| [0041](0041-unified-tier-reconciliation.md) | Unified tier reconciliation — single source of truth + global resume/cold-start reconcile (**superseded by 0107**) |
 | [0042](0042-multi-language-lookup-catalog.md) | Multi-language lookup catalog — decoupled source / target language pickers for transcript dictionary lookup |
 | [0043](0043-craft-from-text-import.md) | Craft from text import — single entry, two modes, BYOK parity for TTS |
 | [0044](0044-deterministic-end-of-media-completion-loop.md) | Deterministic end-of-media handling with generation-guarded completion loop |
@@ -77,9 +77,9 @@ Trade-offs, follow-up work, risks.
 | [0051](0051-youtube-worker-discovery.md) | YouTube discovery via server-side RSSHub proxy (supersedes 0021 and 0047) |
 | [0052](0052-vocabulary-local-first-schema.md) | Vocabulary local-first Drift schema (items/contexts/reviews; sync deferred) |
 | [0053](0053-vocabulary-secondary-route.md) | Vocabulary secondary route (Profile entry; not a primary shell tab) |
-| [0054](0054-vocabulary-cloud-sync.md) | Vocabulary cloud sync — SRS-preserving item conflict, LWW contexts, reviews never sync, auto-pull exception to ADR-0013 (extends ADR-0010) |
+| [0054](0054-vocabulary-cloud-sync.md) | Vocabulary cloud sync — SRS-preserving item conflict, LWW contexts, reviews never sync, auto-pull exception to ADR-0013 (extends ADR-0010) (**superseded by 0107**) |
 | [0055](0055-adaptive-page-layout-system.md) | Adaptive page layout system (`EnjoyPage` / browse·hub·form widths) |
-| [0056](0056-uservideo-library-membership.md) | UserVideo library membership + content-addressed video uploads (partially supersedes 0013 for video upload ids) |
+| [0056](0056-uservideo-library-membership.md) | UserVideo library membership + content-addressed video uploads (partially supersedes 0013 for video upload ids) (**superseded by 0107**) |
 | [0057](0057-permanent-player-surface-host.md) | Permanent RootShell player surface host (clip portal + launch pipeline) |
 | [0058](0058-enjoy-deepgram-long-form-asr.md) | Enjoy long-form ASR via Worker Deepgram jobs (≥900s upload/submit/poll) |
 | [0059](0059-phone-tablet-orientation-and-player-aspect-layout.md) | Phone portrait lock / tablet rotate; player stack vs side-by-side by window aspect |
@@ -107,7 +107,7 @@ Trade-offs, follow-up work, risks.
 | [0081](0081-crafted-audio-cloud-sync.md) | Crafted audio cloud sync — Active Storage direct-upload of TTS binaries for cross-device playback |
 | [0082](0082-home-continue-no-mini-player.md) | Home Continue practicing card; no global mini player; leave player clears live session (supersedes ADR-0035 E1–E7) |
 | [0083](0083-paper-graphite-light-dark.md) | Paper / graphite dual theme + System/Light/Dark appearance (supersedes 0011; palette, chrome, and type superseded by 0089) |
-| [0084](0084-linux-google-signin-off-and-pkce-deeplink.md) | Disable native Google Sign-In on Linux (ADR-0048 kill switch); GTK single-instance `enjoyplayer://` forwarding + AppImage scheme registration for PKCE callbacks |
+| [0084](0084-linux-google-signin-off-and-pkce-deeplink.md) | Disable native Google Sign-In on Linux (ADR-0048 kill switch); GTK single-instance `enjoyplayer://` forwarding + AppImage scheme registration for PKCE callbacks (**superseded by 0107**) |
 | [0085](0085-audio-floating-collapse-chrome.md) | Audio expanded chrome is the shared floating frosted collapse control over the transcript; desktop gets a roomier top inset (supersedes 0077 audio clause; **superseded by 0093**) |
 | [0086](0086-posthog-product-analytics.md) | PostHog product analytics integration |
 | [0087](0087-norwegian-bokmal-language-catalog.md) | Norwegian Bokmål (`nb-NO`) joins the focus / media / lookup catalogs; `no` / `nob` / `nor` alias to `nb` as deliberate policy (Nynorsk `nn` stays unsupported) |
@@ -130,3 +130,4 @@ Trade-offs, follow-up work, risks.
 | [0104](0104-git-hook-gate-layering.md) | Local git hooks stay narrow — `pre-commit` scans only added lines with confidence-split credential rules and value-scoped digest masks (`sha256:`, `*hash` JSON keys, path-keyed digests, `checksum=`/`digest=`) plus file-level exemptions for `test/` and generated manifests; `pre-push` runs only the ~3s format gate because codegen drift and analyze already run in CI; a 27-case hook regression suite runs in CI |
 | [0105](0105-ci-test-sharding-and-host-lane-budget.md) | CI test shards and the shared host's 12-lane budget — every test leg caps at `--concurrency=6` so a two-PR collision stays at the load a solo run sustains; the app suite shards 4 ways with `fail-fast: false`; analyze, coverage/codecov/DST gates and path packages split into jobs behind the `ci-approval`-gated analyze job; `Analyze & test` survives as a zero-step aggregate; the Drift-backed logging budgets land at a bounded 180s — the 60s candidate falsified by run 43381445516 under two-shard load (issue #1335) |
 | [0106](0106-multi-engine-asr.md) | Multi-engine ASR (en-only scope) — Qwen3-ASR wgpu sidecar as default English engine, faster-whisper kept as switchable fallback, CTC alignment stage (supplements ADR-0071, different layer), hotwords via prompt, transcript matching, ModelScope-first distribution; OneAsr referenced for engine internals only; existing live-ASR / karaoke / craft flows untouched; UI additions are entry-level only (P0/P1/P2 roadmap inside) |
+| [0107](0107-local-only-no-account-spine.md) | Local-only build — account/credits/cloud-sync spine removed; single local session, BYOK-only AI, dormant sync schema kept (supersedes 0006, 0010, 0013, 0031, 0032, 0041, 0054, 0056, 0084) |

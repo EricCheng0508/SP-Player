@@ -12,7 +12,6 @@ import 'package:enjoy_player/core/analytics/analytics_events.dart';
 import 'package:enjoy_player/core/analytics/analytics_provider.dart';
 import 'package:enjoy_player/core/application/app_language_catalog.dart';
 import 'package:enjoy_player/core/application/app_preferences_provider.dart';
-import 'package:enjoy_player/core/errors/app_failure.dart';
 import 'package:enjoy_player/features/ai/domain/byok_not_configured_failure.dart';
 import 'package:enjoy_player/core/logging/log.dart';
 import 'package:enjoy_player/core/riverpod/async_value_x.dart';
@@ -22,8 +21,6 @@ import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/features/ai/application/ai_call_runner.dart';
 import 'package:enjoy_player/features/ai/application/ai_services.dart';
 import 'package:enjoy_player/features/ai/domain/models/assessment_request.dart';
-import 'package:enjoy_player/features/sync/application/sync_providers.dart';
-import 'package:enjoy_player/features/sync/domain/sync_types.dart';
 
 part 'recording_assessment_controller.g.dart';
 
@@ -62,27 +59,14 @@ enum RecordingAssessmentFailureKind {
   emptyReference,
   fileTooSmall,
   unsupportedLanguage,
-
-  /// Credits exhausted / billing rejection (worker 402). Carries the
-  /// [RecordingAssessmentFailure.creditsFailure] envelope so the flow can
-  /// show the numbered message + subscription CTA (spec 045) instead of
-  /// leaking the raw status string through `serviceError`.
-  credits,
   serviceError,
 }
 
 final class RecordingAssessmentFailure extends RecordingAssessmentOutcome {
-  RecordingAssessmentFailure(
-    this.kind, {
-    this.debugMessage,
-    this.creditsFailure,
-  });
+  RecordingAssessmentFailure(this.kind, {this.debugMessage});
 
   final RecordingAssessmentFailureKind kind;
   final String? debugMessage;
-
-  /// Set only for [RecordingAssessmentFailureKind.credits].
-  final CreditsFailure? creditsFailure;
 }
 
 @riverpod
@@ -192,12 +176,6 @@ class RecordingAssessmentController extends _$RecordingAssessmentController {
                   updatedAt: now,
                 );
 
-            await ref.read(syncEnqueueProvider)(
-              SyncEntityType.recording,
-              row.id,
-              SyncAction.update,
-            );
-
             try {
               final media = await ref
                   .read(mediaRegistryProvider)
@@ -218,10 +196,6 @@ class RecordingAssessmentController extends _$RecordingAssessmentController {
 
             return RecordingAssessmentSuccess(result.detail);
           },
-          onCredits: (failure, st) => RecordingAssessmentFailure(
-            RecordingAssessmentFailureKind.credits,
-            creditsFailure: failure,
-          ),
           onGeneric: (e, st) => RecordingAssessmentFailure(
             RecordingAssessmentFailureKind.serviceError,
             // Raw exception names read as gibberish in the UI; give BYOK

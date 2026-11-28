@@ -4,12 +4,12 @@
 
 ## Design direction
 
-**Duet — two voices, flat ground.** Material is the widget toolkit, not the look: no ink ripples, continuous (superellipse) corners, flat surfaces with line borders and the lift shadow instead of elevation, one icon family, and one motion language on every platform. **Blue (original)** is the original speaker — playback, the spoken word, reference pitch, Listen; **violet (you)** is the learner — the Echo loop, Record, takes, your pitch. The brand gradient between them is Enjoy itself (logo, Play, primary buttons, goal ring, Pro). Everything else is ink. Modes are lenses: Listen reads like a book; Echo grows the loop in place and fades the rest. Feedback lands on the words (karaoke underline, hide-text shapes, practiced dots), never in chrome.
+**Duet — two voices, flat ground.** Material is the widget toolkit, not the look: no ink ripples, continuous (superellipse) corners, flat surfaces with line borders and the lift shadow instead of elevation, one icon family, and one motion language on every platform. **Blue (original)** is the original speaker — playback, the spoken word, reference pitch, Listen; **violet (you)** is the learner — the Echo loop, Record, takes, your pitch. The brand gradient between them is Enjoy itself (logo, Play, primary buttons, goal ring). Everything else is ink. Modes are lenses: Listen reads like a book; Echo grows the loop in place and fades the rest. Feedback lands on the words (karaoke underline, hide-text shapes, practiced dots), never in chrome.
 
 **Color** (`AppColors` in `lib/core/theme/colors.dart`, role tokens on `EnjoyThemeTokens`; Duet values per [ADR-0093](../decisions/0093-duet-design-language.md) — Aurora-named fields alias them until the rename pass, values from [`tokens.json`](../design/duet/tokens.json)):
 - **Flat neutrals** — one **ground** for sidebar and pages (light `#F5F6F8`, dark `#0E1014`), `paper` cards, `raised` menus / dialogs, `sunk` control fills, `line` separators; text inks `ink` / `ink2` / `ink3`. No floating content panel, no glass surfaces.
 - **Two voices** — **original** blue (`original` / `originalInk` / `originalSoft`) is the original speaker: playback, the spoken word, reference pitch, Listen. **You** violet (`you` / `youInk` / `youSoft` / `youLine` / `onYou`) is the learner: the Echo loop, Record, takes, your pitch, notes. The voices keep a ~1.9:1 lightness gap in both themes and never rely on hue alone (translucent layer vs solid).
-- **Brand** — the gradient between the voices: `brand` `#2563EB → #7C3AED` (`t.brand`) for Play, primary buttons, Pro, Upgrade; `logo` `#4797F5 → #A855F7` (`t.logo`) for the mark, goal ring, credits meter, avatar ring, generated covers. `brandInk` / `brandSoft` carry selected rows and tabs.
+- **Brand** — the gradient between the voices: `brand` `#2563EB → #7C3AED` (`t.brand`) for Play and primary buttons; `logo` `#4797F5 → #A855F7` (`t.logo`) for the mark, goal ring, generated covers. `brandInk` / `brandSoft` carry selected rows and tabs.
 - **Material `ColorScheme`** (`AppColors.colorScheme`) maps onto Duet: `primary`/`onPrimary` = `brandInk` / white (dark `ground`), `primaryContainer` = `brandSoft`, `secondary` = `original`, `tertiary`/`onTertiary` = `you`/`onYou`, `error` = `danger`, `surface` = `ground`, `surfaceContainer*` = `paper`/`raised`/`sunk`, `onSurface`/`onSurfaceVariant` = `ink`/`ink2`, `outline`/`outlineVariant` = `ink3`/`line`, `scrim` = the `scrim` token. Filled action buttons never take `ColorScheme.primary` — `EnjoyButton` owns its fills.
 - **Component accents** — switches, radios, checkboxes, and input focus borders use `brandInk`; sliders, text selection, and the sentence ruler use `original`. Dialogs sit on `raised` at radius 24 with the `scrim` token; sheets use radius 26; menus use `raised` + the float shadow; tooltips are ink-on-ground. `AppNotice` stays a dark toast in `ink`.
 - **Semantic inks** — `danger` for destructive actions and errors. Scores are **uncolored**: an ink number plus a four-step meter.
@@ -54,11 +54,11 @@ Number and date formatting goes through two shared, process-level memo caches �
 
 **Call sites key on the app's display locale**, not intl's process default: widget code passes `Localizations.localeOf(context)` (or `AppLocalizations.localeName` where no `BuildContext` is available). The app's display locale is the user's pick (default `zh_CN`), while `Intl.getCurrentLocale()` returns intl's built-in **`en_US`** — nothing in the app calls `findSystemLocale()` or sets `Intl.defaultLocale`, so that value never follows the user's pick. A surface keyed on it renders hardcoded English whatever language the UI is in, and must not key a formatter.
 
-**Regression checks:** [`test/core/format/cached_date_format_test.dart`](../../test/core/format/cached_date_format_test.dart) pins the shared date cache (instance identity, locale canonicalization, byte-identical output against every constructor shape it replaces) and [`test/core/presentation/date_format_caches_shapes_test.dart`](../../test/core/presentation/date_format_caches_shapes_test.dart) pins each dated surface against fresh per-row construction. The display-locale rule is pinned by widget tests that set the app locale to `zh_CN` while intl's default stays `en_US` — [`test/features/craft/presentation/craft_history_test.dart`](../../test/features/craft/presentation/craft_history_test.dart) and [`test/features/credits/presentation/credits_usage_screen_test.dart`](../../test/features/credits/presentation/credits_usage_screen_test.dart) — because `en` and `en_US` share identical CLDR skeletons, so only a locale that differs from `en_US` can tell the two apart.
+**Regression checks:** [`test/core/format/cached_date_format_test.dart`](../../test/core/format/cached_date_format_test.dart) pins the shared date cache (instance identity, locale canonicalization, byte-identical output against every constructor shape it replaces) and [`test/core/presentation/date_format_caches_shapes_test.dart`](../../test/core/presentation/date_format_caches_shapes_test.dart) pins each dated surface against fresh per-row construction. The display-locale rule is pinned by the widget test that sets the app locale to `zh_CN` while intl's default stays `en_US` — [`test/features/craft/presentation/craft_history_test.dart`](../../test/features/craft/presentation/craft_history_test.dart) — because `en` and `en_US` share identical CLDR skeletons, so only a locale that differs from `en_US` can tell the two apart.
 
 ## Startup preferences
 
-`AppPreferencesCtrl` ([`lib/core/application/app_preferences_provider.dart`](../../lib/core/application/app_preferences_provider.dart)) resolves the four shell preferences — `prefs.locale`, `prefs.learning_language`, `prefs.native_language`, `prefs.theme_mode` — before the app renders its router, so its reads sit on the **signed-in cold-start critical path**.
+`AppPreferencesCtrl` ([`lib/core/application/app_preferences_provider.dart`](../../lib/core/application/app_preferences_provider.dart)) resolves the four shell preferences — `prefs.locale`, `prefs.learning_language`, `prefs.native_language`, `prefs.theme_mode` — before the app renders its router, so its reads sit on the **cold-start critical path**.
 
 The controller reads all four with **one** `settings` query — `SettingsDao.readSettings` issues a single `WHERE key IN (…)` — instead of four per-key round trips. Each key still resolves through its own codec and falls back to its declared default when its row is missing, exactly like a single `readSetting`.
 
@@ -68,9 +68,9 @@ The canonicalization writes (persisting a non-canonical language tag or locale b
 
 ## Navigation
 
-- **Mobile**: `EnjoyBottomNav` — a solid full-width paper bar (58pt content + the real bottom safe inset; 84pt on home-indicator devices) with a top `line`. The selected tab gets a 52×30 `brandSoft` pill, a filled glyph in `brandInk`, and a 600 label. **Four** destinations: Home, Discover, Library, **Profile** (Settings is reached from a tile inside Profile); the update badge stays on Profile. Profile stays selected across the screens it opens — `/settings`, `/subscription`, `/credits`, and `/vocabulary`. `RootShell` mounts it as `Scaffold.bottomNavigationBar` with `extendBody`; the routed body reserves `rootShellBottomNavClearance`.
-- **Library source switch**: inside `LibraryScreen`, a compact **Local / Cloud** capsule (`LibrarySourceToggle`) beside the title; tap toggles source. Cloud mode uses `/library?source=cloud`; legacy `/cloud` redirects.
-- **Desktop (≥ 900 px)**: `AppSidebar` sits on the flat **ground** with a right `line`; routed pages sit directly on the ground beside it — no floating panel. Sidebar (244px): brand row (logo + "SP Player"), search field (paper, 38px, radius 11, `/` keycap), nav rows (`NavItemPill`, 38px, radius 11; the selected row is a paper plate with the lift shadow and a brandInk glyph): Home, Discover, Library, **Vocabulary** (a you-soft due-count pill from `vocabularyStatsProvider`), **Craft** (`C` keycap); footer: sync line (check + "Up to date" / counts → `/settings/sync`), **Settings** row, and `SidebarAccountChip` (34px logo-ring avatar, name, plan subtitle; Free users get a brand **Upgrade** pill). Route highlighting: `/vocabulary*`, `/craft*`, `/settings*`, `/profile` (the chip). The player and review routes still hide the sidebar.
+- **Mobile**: `EnjoyBottomNav` — a solid full-width paper bar (58pt content + the real bottom safe inset; 84pt on home-indicator devices) with a top `line`. The selected tab gets a 52×30 `brandSoft` pill, a filled glyph in `brandInk`, and a 600 label. **Four** destinations: Home, Discover, Library, **Settings**; the update badge stays on Settings. Settings stays selected across the screens it opens — `/settings` and `/vocabulary`. `RootShell` mounts it as `Scaffold.bottomNavigationBar` with `extendBody`; the routed body reserves `rootShellBottomNavClearance`.
+- **Library source switch**: removed — the Library screen shows the local media library only (a legacy `/library?source=cloud` URL still parses but renders no separate source).
+- **Desktop (≥ 900 px)**: `AppSidebar` sits on the flat **ground** with a right `line`; routed pages sit directly on the ground beside it — no floating panel. Sidebar (244px): brand row (logo + "SP Player"), search field (paper, 38px, radius 11, `/` keycap), nav rows (`NavItemPill`, 38px, radius 11; the selected row is a paper plate with the lift shadow and a brandInk glyph): Home, Discover, Library, **Vocabulary** (a you-soft due-count pill from `vocabularyStatsProvider`), **Craft** (`C` keycap); footer: the **Settings** row (plus the sidebar collapse toggle). Route highlighting: `/vocabulary*`, `/craft*`, `/settings*`. The player and review routes still hide the sidebar.
 - Page transitions: one glide everywhere, Cupertino on iOS.
 
 ## Page layout
@@ -80,10 +80,9 @@ Adaptive page families ([ADR-0055](../decisions/0055-adaptive-page-layout-system
 | Kind | Width | Chrome | Examples |
 |------|-------|--------|----------|
 | `browse` | Centered `pageMaxBrowse` (1180) + `gutter` (40 / 16 phone) | `EditorialHeader` (gutter-aligned) | Home, Discover, Library, channel feed |
-| `hub` | Centered `pageMaxHub` (840) | Editorial or `EnjoySubpageAppBar` | Profile, Settings, Subscription, Credits, Hotkeys, AI providers, Vocabulary |
-| `form` | Centered `pageMaxForm` (680) | `EnjoySubpageAppBar` | Preferences, Edit Profile |
+| `hub` | Centered `pageMaxHub` (840) | Editorial or `EnjoySubpageAppBar` | Settings, Hotkeys, AI providers, Vocabulary, Craft history |
+| `form` | Centered `pageMaxForm` (680) | `EnjoySubpageAppBar` | Craft (Express), transcript editor |
 | `craft` | Centered `pageMaxCraft` (1080) | Craft header | Craft (adopted by the Craft rebuild, D4.6) |
-| `auth` | Centered `modalMaxWidth` (400) | Auth scaffold | Sign-in |
 | `playerChrome` | Player-owned | Player chrome | Expanded player |
 
 `EnjoySubpageAppBar` is 64px (`subpageHeaderHeight`): a quiet back chevron and a Geist 600 title. Not-found renders the logo mark rotated 180° at 0.55 opacity over a centered 440px column with a Literata 40 title and one brand button.
@@ -107,12 +106,10 @@ Screens are built to their Duet boards: `renders/<Board>.webp` is the visual tar
 
 | Screen | Board(s) |
 |--------|----------|
-| `SignInScreen` | `SignIn`, `SignInCode` |
 | `HomeScreen` | `Home` (variants `HomeDark`, `HomeFirstRun`, `HomeImport`) |
 | `LibraryScreen` | `Library` (variants `LibraryAudio`, `LibraryCloud`, `LibraryDelete`, `LibraryImporting`) |
 | `DiscoverScreen` | `Discover`, `DiscoverChannel`, `DiscoverManage` |
 | `ExpandedPlayerScreen` | `Main` desktop · `Phone` mobile, with the `D*` / `P*` state boards (`DEcho`, `DScored`, `PEcho`, …) |
-| `ProfileScreen` | `Profile`, `ProfileEdit`, `ProfilePrefs` |
 | `SettingsScreen` | `Settings` (variants `SettingsDark`, `SettingsAbout`) |
 | `VocabularyScreen` | `Vocabulary`, `VocabularyReview` |
 | `NotFoundScreen` | `NotFound` |
@@ -129,7 +126,7 @@ Inks:       ink / ink2 / ink3 · primary + onPrimary (ink fill) · danger · sha
 Voices:     original · originalInk · originalSoft          (blue — playback, spoken word, reference pitch, Listen)
             you · youInk · youSoft · youLine · onYou       (violet — Echo loop, Record, takes, your pitch)
             brandInk · brandSoft                           (readable brand-gradient end)
-Gradients:  brand #2563EB → #7C3AED (buttons, Pro) · logo #4797F5 → #A855F7 (mark, rings, covers) — `t.brand` / `t.logo`
+Gradients:  brand #2563EB → #7C3AED (buttons) · logo #4797F5 → #A855F7 (mark, rings, covers) — `t.brand` / `t.logo`
 Vocabulary: vocabNew / vocabLearning / vocabReviewing / vocabMastered
 Spacing:    4 / 8 / 12 / 16 / 20 / 24 / 32 / 40 / 48
 Radii:      keycap 5 · badge 7 · segment thumb 9 · control / segment track / input 12 · tile 14
@@ -158,9 +155,9 @@ Legacy:     `auroraStart`/`auroraEnd`/`aurora` = logo stops · `shadowCard`=lift
 | `EnjoyButton` (`brand` / `primary` / `secondary` / `ghost` / `destructive`, `small` / `medium` / `large`, `expand`) | `core/theme/widgets/enjoy_button.dart` | Action buttons at 32 / 40 / 50, radius 12, Geist 600 14: `brand` is the gradient with a white label and the brand-button shadow (one per screen), `primary` is the ink fill, `secondary` paper + line (legacy `tonal` aliases it), `ghost` ink2 text, `destructive` solid danger with a white label |
 | `EnjoyIconButton` | same | Square icon-only action in the same variants; 40 on desktop, 44 on phone |
 | `EnjoyCard` / `enjoyCardDecoration` | `core/theme/widgets/enjoy_card.dart` | Paper card with a line outline and the lift shadow, radius 20 |
-| `EnjoyAvatar` / `EnjoyTierBadge` / `EnjoyKeycap` | `core/theme/widgets/enjoy_avatar.dart` | Gradient-initial avatar with an optional logo-gradient ring, brand-gradient tier pill (`leading` icon, `padding` scale, `shape`, solid `color` override — also the sidebar Upgrade pill and the tier-catalog badges), paper keycap with a line border and 1px drop |
-| `EnjoyPillBadge` | `core/theme/widgets/enjoy_pill_badge.dart` | 24px stadium status pill (ADR-0018): `emphasized` is the ink fill with a 600 paper label, the default is the quiet twin — sunk fill with an ink2 label (credits usage allowed/denied, subscription status chip). The pill fits its label unless `fillWidth` is set, which stretches it to the width its parent offers |
-| `EnjoyFilterPill` / `EnjoyFilterMenu` | `core/theme/widgets/enjoy_filter_pill.dart` | Toolbar filter pill (ADR-0018): a paper plate with a line border at radius 11 and a 13.5px label. `EnjoyFilterPill` is the tappable one (label in ink3 plus an optional mono value — the credits start / end date pills); `EnjoyFilterMenu` opens a `MenuAnchor` list (label + current value in ink2, 14px chevron — the credits service type and the vocabulary status / language menus). Height defaults to the Duet `.e-field` 38px; the vocabulary board's `.e-chip` passes its 36px toolbar height |
+| `EnjoyAvatar` / `EnjoyTierBadge` / `EnjoyKeycap` | `core/theme/widgets/enjoy_avatar.dart` | Gradient-initial avatar with an optional logo-gradient ring (e.g. channel avatars in Discover), brand-gradient pill (`leading` icon, `padding` scale, `shape`, solid `color` override — also the hotkeys row's customized badge), paper keycap with a line border and 1px drop |
+| `EnjoyPillBadge` | `core/theme/widgets/enjoy_pill_badge.dart` | 24px stadium status pill (ADR-0018): `emphasized` is the ink fill with a 600 paper label, the default is the quiet twin — sunk fill with an ink2 label. The pill fits its label unless `fillWidth` is set, which stretches it to the width its parent offers |
+| `EnjoyFilterPill` / `EnjoyFilterMenu` | `core/theme/widgets/enjoy_filter_pill.dart` | Toolbar filter pill (ADR-0018): a paper plate with a line border at radius 11 and a 13.5px label. `EnjoyFilterPill` is the tappable one (label in ink3 plus an optional mono value); `EnjoyFilterMenu` opens a `MenuAnchor` list (label + current value in ink2, 14px chevron). Height defaults to the Duet `.e-field` 38px; the vocabulary board's `.e-chip` passes its 36px toolbar height |
 | `EnjoyProgressRingPainter` | `core/theme/widgets/enjoy_progress_ring.dart` | Track circle + progress arc (solid color or a sweep gradient — the `logo` stops for the Today's Goal ring) — Today's Goal ring, record FAB countdown |
 | `EnjoyIconTile` / `EnjoyTint` / `enjoyTintForIcon` | `core/theme/widgets/enjoy_icon_tile.dart` | Colored icon tiles for grouped lists |
 | `EnjoySegmentedControl` / `EnjoySegment` | `core/theme/widgets/enjoy_segmented_control.dart` | Sliding-thumb segmented control — 38 sunk track (radius 12) with a raised thumb (radius 9, lift shadow); 30 compact (+ shared track/thumb helpers for segmented `TabBar`s) |
@@ -173,14 +170,14 @@ Legacy:     `auroraStart`/`auroraEnd`/`aurora` = logo stops · `shadowCard`=lift
 | `EnjoyBottomNav` | `core/theme/widgets/enjoy_bottom_nav.dart` | Full-width paper tab bar with a top line; the selected tab gets a `brandSoft` pill, a filled `brandInk` glyph, and a 600 label |
 | `NavItemPill` | `core/theme/widgets/nav_item_pill.dart` | Sidebar / settings-rail row (ADR-0018) |
 | `showEnjoySheet` / `showEnjoyAdaptiveSheet` / `showEnjoyAlertDialog` / `showEnjoyDialog` | `core/theme/widgets/enjoy_modal.dart` | Popover-surface sheets / dialogs, shared scrim + `enjoyDialogAnimationStyle`; dialog titles are Literata 22 (theme `dialogTheme.titleTextStyle`) |
-| `showEnjoyConfirmDialog` | `core/theme/widgets/enjoy_modal.dart` | Every yes / no confirmation: secondary Cancel + `EnjoyButton.destructive` (delete, remove, discard, sign out, reset) or `EnjoyButton.brand` confirm; resolves `true` only on confirm. `deemphasizeConfirm: true` (implies `destructive`) renders the guardrail layout for high-stakes destructive confirmations — low-emphasis error confirm leading a primary safe action — used by the subscription cancel |
+| `showEnjoyConfirmDialog` | `core/theme/widgets/enjoy_modal.dart` | Every yes / no confirmation: secondary Cancel + `EnjoyButton.destructive` (delete, remove, discard, reset) or `EnjoyButton.brand` confirm; resolves `true` only on confirm. `deemphasizeConfirm: true` (implies `destructive`) renders the guardrail layout for high-stakes destructive confirmations — low-emphasis error confirm leading a primary safe action |
 | `SheetDragHandle` / `PaddedSheetDragHandle` | `core/theme/widgets/sheet_drag_handle.dart` | 36×5 grabber |
 | `MediaCardTile` / `MediaCardRow` | `core/theme/widgets/media_card.dart` (→ `media_card/`) | Poster tile (artwork is the card) with optional discover affordances (adding scrim, in-library chip, custom `meta` slot) / list row |
 | `SettingsRow` / `SettingsRowDivider` / `SettingsValuePill` | `features/settings/presentation/widgets/settings_row.dart` | Grouped-list row with icon tile, value, chevron |
 | `AppNotice` | `core/notices/app_notice.dart` | Dark toast with semantic glyph |
 | `Skeleton` (+ helpers) | `core/theme/widgets/skeleton.dart` | Shimmer placeholders; see [skeleton-loading.md](skeleton-loading.md) |
 | `LoadingIcon` / `SectionLabel` | `core/presentation/` | Inline spinner; in-card section label |
-| `AppSidebar` / `SidebarAccountChip` | `features/player/presentation/widgets/app_sidebar.dart`, `features/auth/presentation/widgets/sidebar_account_chip.dart` | Desktop navigation on the canvas |
+| `AppSidebar` | `features/player/presentation/widgets/app_sidebar.dart` | Desktop navigation on the canvas |
 
 ## ADRs
 

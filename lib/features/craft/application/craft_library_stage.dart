@@ -6,7 +6,6 @@ import 'package:enjoy_player/core/analytics/analytics_events.dart';
 import 'package:enjoy_player/core/analytics/analytics_provider.dart';
 import 'package:enjoy_player/core/config/local_mode.dart';
 import 'package:enjoy_player/core/logging/log.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/craft/application/craft_controller_core.dart';
 import 'package:enjoy_player/features/craft/application/craft_library_repository_provider.dart';
 import 'package:enjoy_player/features/craft/application/craft_timeline_enricher.dart';
@@ -24,8 +23,7 @@ mixin CraftLibraryMixin on CraftControllerCore {
   Future<CraftSaveResult?> saveToLibrary() async {
     if (state.previewAudioBytes == null) return null;
 
-    final sessionUserId =
-        sessionUserIdOf(ref.read(authCtrlProvider)) ?? kLocalSessionId;
+    const sessionUserId = kLocalSessionId;
 
     state = state.copyWith(isSaving: true, clearFailure: true);
 

@@ -11,7 +11,6 @@ import 'package:enjoy_player/features/library/application/library_repository_pro
 import 'package:enjoy_player/features/library/application/library_search_provider.dart';
 import 'package:enjoy_player/features/library/data/library_repository.dart';
 import 'package:enjoy_player/features/library/domain/media.dart';
-import 'package:enjoy_player/features/sync/application/sync_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
@@ -56,7 +55,6 @@ void main() {
         overrides: [
           appDatabaseProvider.overrideWithValue(db),
           mediaLibraryRepositoryProvider.overrideWithValue(repo),
-          syncEnqueueProvider.overrideWithValue((_, _, _) async {}),
         ],
       );
     }

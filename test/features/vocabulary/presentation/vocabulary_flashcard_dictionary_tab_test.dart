@@ -1,7 +1,4 @@
 import 'package:enjoy_player/features/ai/domain/models/dictionary_result.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 import 'package:enjoy_player/features/vocabulary/domain/vocabulary_ai_error.dart';
 import 'package:enjoy_player/features/vocabulary/domain/vocabulary_explanation_codec.dart';
 import 'package:enjoy_player/features/vocabulary/presentation/widgets/vocabulary_flashcard_dictionary_tab.dart';
@@ -10,18 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
-
-class _AuthSignedInCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedIn(
-    profile: UserProfile(id: 'test-user', email: 't@example.com', name: 'Test'),
-  );
-}
-
-class _AuthSignedOutCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedOut();
-}
 
 Widget _wrap(Widget child, {required List<Override> overrides}) {
   return ProviderScope(
@@ -38,9 +23,7 @@ Widget _wrap(Widget child, {required List<Override> overrides}) {
 void main() {
   final l10n = lookupAppLocalizations(const Locale('en'));
 
-  testWidgets('auto-fetches dictionary when signed in and cache empty', (
-    tester,
-  ) async {
+  testWidgets('auto-fetches dictionary when cache is empty', (tester) async {
     var fetchCount = 0;
     await tester.pumpWidget(
       _wrap(
@@ -50,7 +33,7 @@ void main() {
           error: null,
           onFetch: () => fetchCount++,
         ),
-        overrides: [authCtrlProvider.overrideWith(_AuthSignedInCtrl.new)],
+        overrides: const [],
       ),
     );
     await tester.pump();
@@ -73,7 +56,7 @@ void main() {
           error: null,
           onFetch: () {},
         ),
-        overrides: [authCtrlProvider.overrideWith(_AuthSignedInCtrl.new)],
+        overrides: const [],
       ),
     );
     await tester.pump();
@@ -92,7 +75,7 @@ void main() {
           error: 'fetch_failed',
           onFetch: () => fetchCount++,
         ),
-        overrides: [authCtrlProvider.overrideWith(_AuthSignedInCtrl.new)],
+        overrides: const [],
       ),
     );
     await tester.pump();
@@ -106,36 +89,7 @@ void main() {
     expect(fetchCount, 1);
   });
 
-  testWidgets('a credits rejection shows the credits message and the CTA', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      _wrap(
-        FlashcardDictionaryTab(
-          explanation: null,
-          fetchInFlight: false,
-          error: kVocabularyAiErrorCredits,
-          onFetch: () {},
-        ),
-        overrides: [authCtrlProvider.overrideWith(_AuthSignedInCtrl.new)],
-      ),
-    );
-    await tester.pump();
-
-    expect(
-      find.text(l10n.subscriptionCreditsLimitMessageWithPackages),
-      findsOneWidget,
-    );
-    // The account-less build has no plans-and-packages destination, so the CTA
-    // renders nothing; only the credits message and the retry stay.
-    expect(find.text(l10n.subscriptionViewPlansAndPackages), findsNothing);
-    expect(find.text(l10n.vocabularyFetchDictionary), findsOneWidget);
-    expect(find.text(l10n.vocabularyAiFetchFailed), findsNothing);
-  });
-
-  testWidgets('a non-credits failure shows the generic message and no CTA', (
-    tester,
-  ) async {
+  testWidgets('a failure shows the generic message and no CTA', (tester) async {
     await tester.pumpWidget(
       _wrap(
         FlashcardDictionaryTab(
@@ -144,37 +98,13 @@ void main() {
           error: kVocabularyAiErrorFetchFailed,
           onFetch: () {},
         ),
-        overrides: [authCtrlProvider.overrideWith(_AuthSignedInCtrl.new)],
+        overrides: const [],
       ),
     );
     await tester.pump();
 
     expect(find.text(l10n.vocabularyAiFetchFailed), findsOneWidget);
-    expect(
-      find.text(l10n.subscriptionCreditsLimitMessageWithPackages),
-      findsNothing,
-    );
     expect(find.text(l10n.subscriptionViewPlansAndPackages), findsNothing);
-  });
-
-  testWidgets('auto-fetches without an auth session', (tester) async {
-    var fetchCount = 0;
-    await tester.pumpWidget(
-      _wrap(
-        FlashcardDictionaryTab(
-          explanation: null,
-          fetchInFlight: false,
-          error: null,
-          onFetch: () => fetchCount++,
-        ),
-        overrides: [authCtrlProvider.overrideWith(_AuthSignedOutCtrl.new)],
-      ),
-    );
-    await tester.pump();
-    await tester.pump();
-    await tester.pump();
-
-    expect(fetchCount, 1);
   });
 
   testWidgets('renders cached dictionary without fetching', (tester) async {
@@ -195,7 +125,7 @@ void main() {
           error: null,
           onFetch: () => fetchCount++,
         ),
-        overrides: [authCtrlProvider.overrideWith(_AuthSignedInCtrl.new)],
+        overrides: const [],
       ),
     );
     await tester.pump();

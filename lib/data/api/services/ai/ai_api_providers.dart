@@ -8,13 +8,8 @@ library;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:enjoy_player/data/api/api_client_provider.dart';
-import 'package:enjoy_player/data/api/secure_token_store.dart';
 import 'package:enjoy_player/data/api/services/ai/youtube_feed_api.dart';
 
 final youtubeFeedClientProvider = Provider<YoutubeFeedClient>((ref) {
-  final tokens = ref.watch(secureTokenStoreProvider);
-  return YoutubeFeedClient(
-    httpClient: ref.watch(httpClientProvider),
-    getToken: tokens.readAccessToken,
-  );
+  return YoutubeFeedClient(httpClient: ref.watch(httpClientProvider));
 });

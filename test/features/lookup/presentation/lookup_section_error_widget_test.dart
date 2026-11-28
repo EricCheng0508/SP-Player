@@ -1,8 +1,7 @@
 import 'package:enjoy_player/core/errors/app_failure.dart';
-import 'package:enjoy_player/features/auth/presentation/widgets/auth_required_callout.dart';
-import 'package:enjoy_player/features/lookup/application/lookup_credits_exhausted_provider.dart';
+import 'package:enjoy_player/features/lookup/presentation/widgets/auth_required_callout.dart';
+import 'package:enjoy_player/features/lookup/domain/lookup_section_id.dart';
 import 'package:enjoy_player/features/lookup/presentation/lookup_section_error_widget.dart';
-import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_credits_notice.dart';
 import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_error_row.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -47,39 +46,19 @@ void main() {
     l10n = await AppLocalizations.delegate.load(const Locale('en'));
   });
 
-  testWidgets('renders AuthRequiredCallout for AuthFailure', (tester) async {
-    await tester.pumpWidget(_tree(l10n, const AuthFailure('nope')));
-    await tester.pump();
-    expect(find.byType(AuthRequiredCallout), findsOneWidget);
-    expect(find.byType(LookupErrorRow), findsNothing);
-    expect(find.byType(LookupCreditsNotice), findsNothing);
-  });
-
-  testWidgets('renders LookupCreditsNotice for CreditsFailure', (tester) async {
-    await tester.pumpWidget(
-      _tree(l10n, const CreditsFailure('out of credits')),
-    );
-    await tester.pump();
-    expect(find.byType(LookupCreditsNotice), findsOneWidget);
-    expect(find.byType(LookupErrorRow), findsNothing);
-  });
-
   testWidgets('renders LookupErrorRow for other errors', (tester) async {
     await tester.pumpWidget(_tree(l10n, const NetworkFailure('net down')));
     await tester.pump();
     expect(find.byType(LookupErrorRow), findsOneWidget);
-    expect(find.byType(LookupCreditsNotice), findsNothing);
     expect(find.byType(AuthRequiredCallout), findsNothing);
   });
 
-  testWidgets('forwards isRetrying to LookupCreditsNotice', (tester) async {
+  testWidgets('forwards isRetrying to LookupErrorRow', (tester) async {
     await tester.pumpWidget(
-      _tree(l10n, const CreditsFailure('out of credits'), isRetrying: true),
+      _tree(l10n, const NetworkFailure('net down'), isRetrying: true),
     );
     await tester.pump();
-    final notice = tester.widget<LookupCreditsNotice>(
-      find.byType(LookupCreditsNotice),
-    );
-    expect(notice.isRetrying, isTrue);
+    final row = tester.widget<LookupErrorRow>(find.byType(LookupErrorRow));
+    expect(row.isRetrying, isTrue);
   });
 }

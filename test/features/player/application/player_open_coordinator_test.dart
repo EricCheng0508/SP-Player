@@ -790,37 +790,41 @@ void main() {
       await fake.dispose();
     });
 
-    test(
-      'the echo-session read starts while engine.open is still in flight',
-      () async {
-        final openGate = Completer<void>();
-        fake.openDelay = () => openGate.future;
-        db.countingDao.entryGate = Completer<void>();
-        addTearDown(() {
-          if (!db.countingDao.entryGate!.isCompleted) {
-            db.countingDao.entryGate!.complete();
-          }
-          if (!openGate.isCompleted) openGate.complete();
-        });
+    test('the echo-session read completes before engine.open starts', () async {
+      final openGate = Completer<void>();
+      fake.openDelay = () => openGate.future;
+      db.countingDao.entryGate = Completer<void>();
+      addTearDown(() {
+        if (!db.countingDao.entryGate!.isCompleted) {
+          db.countingDao.entryGate!.complete();
+        }
+        if (!openGate.isCompleted) openGate.complete();
+      });
 
-        final controller = container.read(playerControllerProvider.notifier);
-        final open = runPlayerOpen(controller, 'hang-1');
+      final controller = container.read(playerControllerProvider.notifier);
+      final open = runPlayerOpen(controller, 'hang-1');
 
-        await fake.openEntered.future.timeout(const Duration(seconds: 10));
-        expect(fake.openUris, isNotEmpty, reason: 'engine.open was entered');
-        expect(
-          db.countingDao.getLatestCalls,
-          1,
-          reason:
-              'the echo-session read must start before engine.open resolves',
-        );
+      for (var i = 0; i < 100 && db.countingDao.getLatestCalls == 0; i++) {
+        await pumpEventQueue();
+      }
+      expect(
+        db.countingDao.getLatestCalls,
+        1,
+        reason: 'the echo-session read starts before engine.open',
+      );
+      expect(
+        fake.openUris,
+        isEmpty,
+        reason:
+            'the gated read holds the open choreography back — the resume '
+            'position rides Media.start, so engine.open cannot begin first',
+      );
 
-        db.countingDao.entryGate!.complete();
-        openGate.complete();
-        await expectLater(open, completes);
-        expect(controller.session, isNotNull);
-      },
-    );
+      db.countingDao.entryGate!.complete();
+      openGate.complete();
+      await expectLater(open, completes);
+      expect(controller.session, isNotNull);
+    });
 
     test(
       'the overlapped read still drives the position + echo restore',

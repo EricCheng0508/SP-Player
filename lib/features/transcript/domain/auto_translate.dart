@@ -194,9 +194,6 @@ enum FullTranslateBlockReason {
   /// Guard failures: no native language, no primary track, same language.
   noTranslatableSource,
 
-  /// Signed out where auth is still required.
-  auth,
-
   /// Track creation failed.
   trackFailed,
 

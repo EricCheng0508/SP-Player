@@ -7,14 +7,12 @@ import 'package:enjoy_player/core/notices/app_notice.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
-import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 import 'package:enjoy_player/features/discover/application/discover_providers.dart';
 import 'package:enjoy_player/features/player/application/player_controller.dart';
 import 'package:enjoy_player/features/player/application/player_engine_test_double_provider.dart';
 import 'package:enjoy_player/features/player/application/player_state_providers.dart';
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
 import 'package:enjoy_player/features/player/presentation/root_shell.dart';
-import 'package:enjoy_player/features/sync/application/sync_controller.dart';
 import 'package:enjoy_player/features/transcript/application/all_transcripts_provider.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_blur_mode_provider.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_fetch_controller.dart';
@@ -210,7 +208,6 @@ void main() {
       final overrides = <Override>[
         appDatabaseProvider.overrideWithValue(db),
         deviceGlobalAppDatabaseProvider.overrideWithValue(db),
-        syncCtrlProvider.overrideWithValue(0),
         discoverFeedRefreshSchedulerProvider.overrideWithValue(0),
         updateAvailableBadgeProvider.overrideWithValue(false),
         vocabularyReviewSessionProvider.overrideWith(_FakeVocabSession.new),

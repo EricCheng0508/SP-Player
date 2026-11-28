@@ -9,7 +9,7 @@
 #define MyAppName "SP Player"
 #define MyAppPublisher "Enjoy"
 #define MyAppExeName "sp_player.exe"
-#define MyAppVersion "0.10.3"
+#define MyAppVersion "0.10.12"
 
 [Setup]
 AppId={{8F3C2B1A-9D8E-4F7C-A6B5-4D3C2B1A0F9E}}

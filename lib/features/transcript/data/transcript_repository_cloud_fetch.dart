@@ -1,8 +1,8 @@
 part of 'transcript_repository.dart';
 
-/// Enjoy API transcript fetching for [TranscriptRepository]: skip-once-fetched
-/// gating, server JSON → row mapping, batch upsert, and error / success
-/// reporting. The YouTube fallback chain lives in
+/// Cloud transcript fetching for [TranscriptRepository]: skip-once-fetched
+/// gating over the persisted fetch state and the YouTube caption dispatch.
+/// The InnerTube fetch chain itself lives in
 /// `_TranscriptRepositoryYoutubeFetch`.
 extension _TranscriptRepositoryCloudFetch on TranscriptRepository {
   /// Single owner of the skip-once-fetched predicate (issue #718): the
@@ -73,97 +73,8 @@ extension _TranscriptRepositoryCloudFetch on TranscriptRepository {
       }
     }
 
-    final api = _transcriptApi;
-    if (api == null) {
-      return const TranscriptCloudFetchResult(
-        status: TranscriptCloudFetchStatus.skipped,
-      );
-    }
-
-    try {
-      final list = await api.transcripts(targetId: mediaId, targetType: tt);
-      final now = DateTime.now();
-      final mapped = await Future.wait(
-        list.map((item) => _transcriptRowFromServerMap(item, fallbackNow: now)),
-      );
-      final rowsToUpsert = <TranscriptRow>[
-        for (final row in mapped)
-          if (row != null) row,
-      ];
-      if (rowsToUpsert.isNotEmpty) {
-        await _db.transcriptDao.upsertAll(rowsToUpsert);
-      }
-      final storedCount = rowsToUpsert.length;
-
-      if (list.isNotEmpty && storedCount == 0) {
-        return const TranscriptCloudFetchResult(
-          status: TranscriptCloudFetchStatus.error,
-          errorMessage: 'Could not store cloud transcripts',
-        );
-      }
-
-      if (storedCount > 0) {
-        await _ensurePrimaryTranscript(mediaId, targetType: tt);
-        return TranscriptCloudFetchResult(
-          status: TranscriptCloudFetchStatus.success,
-          storedCount: storedCount,
-        );
-      }
-
-      return const TranscriptCloudFetchResult(
-        status: TranscriptCloudFetchStatus.empty,
-      );
-    } on Object catch (e, st) {
-      _log.warning('fetchCloudTranscripts failed for $mediaId', e, st);
-      return TranscriptCloudFetchResult(
-        status: TranscriptCloudFetchStatus.error,
-        errorMessage: e.toString(),
-      );
-    }
-  }
-
-  Future<TranscriptRow?> _transcriptRowFromServerMap(
-    Map<String, dynamic> json, {
-    required DateTime fallbackNow,
-  }) async {
-    final id = json['id'] as String?;
-    final targetType = json['targetType'] as String?;
-    final targetId = json['targetId'] as String?;
-    final language = json['language'] as String?;
-    final rawSource = json['source'] as String?;
-    final timeline = json['timeline'];
-
-    if (id == null ||
-        targetType == null ||
-        targetId == null ||
-        language == null ||
-        rawSource == null) {
-      return null;
-    }
-
-    final source = _normalizeSource(rawSource);
-    final lines = transcriptLinesFromApiTimeline(timeline);
-    if (lines.isEmpty) return null;
-
-    final timelineJson = await encodeTimelineJsonGated(lines);
-    final createdAt = _parseServerDate(json['createdAt'], fallbackNow);
-    final updatedAt = _parseServerDate(json['updatedAt'], fallbackNow);
-    final label = (json['label'] as String?) ?? '';
-    final referenceId = json['referenceId'] as String?;
-
-    return buildTranscriptRow(
-      id: id,
-      targetType: targetType,
-      targetId: targetId,
-      language: language,
-      source: source,
-      timelineJson: timelineJson,
-      referenceId: referenceId,
-      label: label,
-      syncStatus: 'synced',
-      serverUpdatedAt: updatedAt,
-      createdAt: createdAt,
-      updatedAt: updatedAt,
+    return const TranscriptCloudFetchResult(
+      status: TranscriptCloudFetchStatus.skipped,
     );
   }
 }

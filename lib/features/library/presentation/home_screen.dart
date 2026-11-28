@@ -22,8 +22,6 @@ import 'package:enjoy_player/core/theme/widgets/editorial_header.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_page.dart';
 import 'package:enjoy_player/core/theme/widgets/media_card.dart';
 import 'package:enjoy_player/core/theme/widgets/skeleton.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/library/application/continue_practice_provider.dart';
 import 'package:enjoy_player/features/library/presentation/continue_practice_card.dart';
 import 'package:enjoy_player/features/local_components/presentation/setup_wizard.dart';
@@ -208,24 +206,11 @@ class _HomeHeader extends ConsumerWidget {
         : now.hour < 18
         ? l10n.homeGreetingAfternoon
         : l10n.homeGreetingEvening;
-    final name = ref.watch(
-      authCtrlProvider.select(
-        (a) => a.maybeWhen(
-          data: (s) => s is AuthSignedIn ? s.profile.name.trim() : null,
-          orElse: () => null,
-        ),
-      ),
-    );
-    final firstName = (name == null || name.isEmpty)
-        ? null
-        : name.split(_homeNameWhitespaceRegExp).first;
     final locale = Localizations.localeOf(context).toLanguageTag();
     return EditorialHeader(
       widthMode: EditorialHeaderWidthMode.browse,
       overline: cachedDateFormat('MMMMEEEEd', locale).format(now),
-      title: firstName == null
-          ? greeting
-          : l10n.homeGreetingNamed(greeting, firstName),
+      title: greeting,
       trailing: _HomeHeaderActions(
         onCraft: () => context.push('/craft'),
         onImport: (anchor) => showImportChooser(context, ref, anchor: anchor),
@@ -233,8 +218,6 @@ class _HomeHeader extends ConsumerWidget {
     );
   }
 }
-
-final RegExp _homeNameWhitespaceRegExp = RegExp(r'\s+');
 
 /// Home header trailing actions — Craft entry + Import.
 class _HomeHeaderActions extends ConsumerWidget {

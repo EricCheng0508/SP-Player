@@ -8,14 +8,11 @@ import 'package:enjoy_player/core/recovery/recovery_surface.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/discover/application/discover_providers.dart';
 import 'package:enjoy_player/features/discover/domain/discover_channel.dart';
 import 'package:enjoy_player/features/library/application/library_media_provider.dart';
 import 'package:enjoy_player/features/library/domain/media.dart';
 import 'package:enjoy_player/features/player/application/player_engine_test_double_provider.dart';
-import 'package:enjoy_player/features/sync/application/sync_providers.dart';
 import 'package:enjoy_player/features/update/application/update_controller.dart';
 import 'package:enjoy_player/features/update/domain/update_types.dart';
 import 'package:flutter/material.dart';
@@ -40,11 +37,6 @@ ThemeData _testTheme() {
     brightness: Brightness.dark,
     extensions: [EnjoyThemeTokens.build(scheme)],
   );
-}
-
-class _SignedOutAuthCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedOut();
 }
 
 class _NoopUpdateCtrl extends UpdateCtrl {
@@ -102,13 +94,11 @@ void main() {
           overrides: [
             deviceGlobalAppDatabaseProvider.overrideWithValue(db),
             appDatabaseProvider.overrideWithValue(db),
-            authCtrlProvider.overrideWith(_SignedOutAuthCtrl.new),
             appPreferencesCtrlProvider.overrideWith(
               _AlwaysFailingPrefsCtrl.new,
             ),
             updateCtrlProvider.overrideWith(_NoopUpdateCtrl.new),
             playerEngineTestDoubleProvider.overrideWithValue(fakeEngine),
-            syncEnqueueProvider.overrideWithValue((_, _, _) async {}),
             libraryHomeRecentsProvider.overrideWith(
               (ref) => Stream<List<Media>>.value(const []),
             ),

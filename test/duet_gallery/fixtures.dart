@@ -5,9 +5,6 @@ import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/data/db/youtube_subscription_source.dart';
 import 'package:enjoy_player/data/files/file_storage.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 import 'package:enjoy_player/features/discover/application/discover_feed_join.dart';
 import 'package:enjoy_player/features/discover/application/discover_providers.dart';
 import 'package:enjoy_player/features/discover/data/discover_repository.dart';
@@ -24,7 +21,6 @@ import 'package:enjoy_player/features/onboarding/application/onboarding_controll
 import 'package:enjoy_player/features/onboarding/domain/tip_eligibility.dart';
 import 'package:enjoy_player/features/player/application/player_controller.dart';
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
-import 'package:enjoy_player/features/sync/application/sync_controller.dart';
 import 'package:enjoy_player/features/update/application/update_controller.dart';
 import 'package:enjoy_player/features/vocabulary/application/vocabulary_review_session.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
@@ -33,18 +29,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:go_router/go_router.dart';
-
-class SignedInAuthCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedIn(
-    profile: UserProfile(
-      id: 'u1',
-      email: 'an.lee@example.com',
-      name: 'An Lee',
-      subscriptionTier: SubscriptionTier.pro,
-    ),
-  );
-}
 
 class _FakePrefsCtrl extends AppPreferencesCtrl {
   @override
@@ -128,18 +112,15 @@ List<Override> baseOverrides(
   AppDatabase db, {
   List<Media>? recents,
   PlayerController Function()? playerController,
-  AuthCtrl Function()? auth,
   PracticeResume? resume,
   LearningStatistics? statistics,
   VocabularyReviewSession Function()? reviewSession,
 }) => [
   appDatabaseProvider.overrideWithValue(db),
   deviceGlobalAppDatabaseProvider.overrideWithValue(db),
-  authCtrlProvider.overrideWith(auth ?? SignedInAuthCtrl.new),
   appPreferencesCtrlProvider.overrideWith(_FakePrefsCtrl.new),
   continuePracticeResumeProvider.overrideWith((ref) => resume),
   onboardingControllerProvider.overrideWith(_NoOnboarding.new),
-  syncCtrlProvider.overrideWithValue(0),
   discoverFeedRefreshSchedulerProvider.overrideWithValue(0),
   updateAvailableBadgeProvider.overrideWithValue(false),
   vocabularyReviewSessionProvider.overrideWith(

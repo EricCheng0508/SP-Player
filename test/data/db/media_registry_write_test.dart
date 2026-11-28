@@ -13,7 +13,6 @@ import 'package:drift/native.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/media_registry.dart';
 import 'package:enjoy_player/features/library/domain/media.dart';
-import 'package:enjoy_player/features/sync/domain/sync_types.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 final DateTime _base = DateTime(2026, 7, 1);
@@ -454,19 +453,6 @@ void main() {
       final hit = await registry.probeBoth('missing');
       expect(hit.video, isNull);
       expect(hit.audio, isNull);
-    });
-  });
-
-  group('syncEntityTypeOf', () {
-    test('maps kinds onto sync entities', () {
-      expect(
-        MediaRegistry.syncEntityTypeOf(MediaKind.video),
-        SyncEntityType.video,
-      );
-      expect(
-        MediaRegistry.syncEntityTypeOf(MediaKind.audio),
-        SyncEntityType.audio,
-      );
     });
   });
 }

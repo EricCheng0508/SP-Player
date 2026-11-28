@@ -4,14 +4,12 @@ library;
 import 'package:enjoy_player/core/theme/enjoy_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import 'package:enjoy_player/core/errors/app_failure.dart';
 import 'package:enjoy_player/core/interaction/enjoy_tappable.dart';
 import 'package:enjoy_player/core/interaction/haptics.dart';
 import 'package:enjoy_player/core/notices/app_notice.dart';
 import 'package:enjoy_player/features/pronounce/application/pronounce_playback_controller.dart';
-import 'package:enjoy_player/core/errors/ai_failure_messages.dart';
 import 'package:enjoy_player/features/pronounce/domain/pronounce_locale.dart';
 import 'package:enjoy_player/features/pronounce/domain/pronounce_target.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
@@ -95,17 +93,6 @@ class PronounceIconButton extends ConsumerWidget {
           await beforePlay?.call();
         }
         await notifier.play(target);
-      } on AuthFailure {
-        if (!context.mounted) return;
-        AppNotice.info(context, l10n.pronounceSignInRequired);
-      } on CreditsFailure catch (failure) {
-        if (!context.mounted) return;
-        final router = GoRouter.of(context);
-        AppNotice.warning(
-          context,
-          creditsFailureMessage(failure, l10n),
-          action: creditsCtaAction(router, l10n),
-        );
       } on AppFailure {
         if (!context.mounted) return;
         AppNotice.error(context, l10n.pronounceFailed);

@@ -143,6 +143,8 @@ void main() {
       await tester.pump(const Duration(milliseconds: 16));
       await tester.pump(const Duration(milliseconds: 16));
 
+      await tester.pump(const Duration(milliseconds: 226));
+
       expect(find.text('player-placeholder'), findsOneWidget);
       expect(
         router.state.uri.path,

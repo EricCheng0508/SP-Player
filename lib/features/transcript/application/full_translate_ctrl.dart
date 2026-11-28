@@ -19,7 +19,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/application/app_language_catalog.dart';
 import '../../../core/application/app_preferences_provider.dart';
-import '../../../core/config/local_mode.dart';
 import '../../../core/logging/log.dart';
 import '../../../core/riverpod/async_value_x.dart';
 import '../../../data/db/app_database.dart';
@@ -30,8 +29,6 @@ import '../../ai/data/byok/batch_translation.dart';
 import '../../ai/data/byok/byok_translation_capability.dart';
 import '../../ai/data/stub_ai_capabilities.dart';
 import '../../ai/domain/capabilities/llm_capability.dart';
-import '../../auth/application/auth_controller.dart';
-import '../../auth/domain/auth_state.dart';
 import 'transcript_repository_provider.dart';
 import '../domain/auto_translate.dart';
 import 'full_translate_scheduler.dart';
@@ -125,16 +122,6 @@ class FullTranslateCtrl extends _$FullTranslateCtrl {
     if (_running) return;
     _cancelRequested = false;
 
-    if (!kLocalOfflineMode) {
-      final auth = ref.read(authCtrlProvider).valueOrNull;
-      if (auth is! AuthSignedIn) {
-        state = state.copyWith(
-          phase: FullTranslatePhase.paused,
-          blockReason: FullTranslateBlockReason.auth,
-        );
-        return;
-      }
-    }
     final native = ref
         .read(appPreferencesCtrlProvider)
         .valueOrNull

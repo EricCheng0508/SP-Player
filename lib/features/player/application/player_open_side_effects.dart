@@ -1,4 +1,4 @@
-/// Post-open work that is not required for immediate playback (transcripts, sync).
+/// Post-open work that is not required for immediate playback (transcripts).
 library;
 
 import 'dart:async';
@@ -6,16 +6,12 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:enjoy_player/core/logging/log.dart';
-import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/core/utils/youtube_video_identity.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/media_registry_provider.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/library/application/library_repository_provider.dart';
 import 'package:enjoy_player/features/player/application/player_engine.dart';
 import 'package:enjoy_player/features/player/application/player_metadata_notifier.dart';
-import 'package:enjoy_player/features/sync/application/sync_providers.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_fetch_controller.dart';
 
 void schedulePlayerOpenSideEffects(
@@ -23,68 +19,24 @@ void schedulePlayerOpenSideEffects(
   required int openGeneration,
   required bool Function() isStale,
   required String mediaId,
-  required String dexieTargetType,
 }) {
-  final auth = ref.read(authCtrlProvider).valueOrNull;
-  final signedIn = auth is AuthSignedIn;
-
-  unawaited(
-    _runTranscriptResolve(
-      ref,
-      mediaId: mediaId,
-      isStale: isStale,
-      signedIn: signedIn,
-    ),
-  );
-
-  if (signedIn) {
-    unawaited(
-      _runRecordingPull(
-        ref,
-        dexieTargetType: dexieTargetType,
-        mediaId: mediaId,
-        isStale: isStale,
-      ),
-    );
-  }
+  unawaited(_runTranscriptResolve(ref, mediaId: mediaId, isStale: isStale));
 }
 
 Future<void> _runTranscriptResolve(
   Ref ref, {
   required String mediaId,
   required bool Function() isStale,
-  required bool signedIn,
 }) async {
   try {
     if (isStale()) return;
     await ref
         .read(transcriptFetchCtrlProvider(mediaId).notifier)
-        .resolveOnOpen(signedIn: signedIn);
+        .resolveOnOpen();
   } on Object catch (e, st) {
     logNamed(
       'PlayerOpenSideEffects',
     ).warning('transcript resolve failed for $mediaId', e, st);
-  }
-}
-
-Future<void> _runRecordingPull(
-  Ref ref, {
-  required String dexieTargetType,
-  required String mediaId,
-  required bool Function() isStale,
-}) async {
-  try {
-    if (isStale()) return;
-    await ref
-        .read(recordingTargetSyncServiceProvider)
-        .pullRecordingsForTarget(
-          targetType: dexieTargetType,
-          targetId: mediaId,
-        );
-  } on Object catch (e, st) {
-    logNamed(
-      'PlayerOpenSideEffects',
-    ).warning('recording pull failed for $mediaId', e, st);
   }
 }
 

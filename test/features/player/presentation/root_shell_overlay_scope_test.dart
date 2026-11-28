@@ -9,8 +9,6 @@ import 'package:enjoy_player/features/player/application/player_controller.dart'
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
 import 'package:enjoy_player/features/player/presentation/root_shell.dart';
 import 'package:enjoy_player/features/player/presentation/widgets/player_surface_host.dart';
-import 'package:enjoy_player/features/auth/domain/user_profile.dart';
-import 'package:enjoy_player/features/sync/application/sync_controller.dart';
 import 'package:enjoy_player/features/update/application/update_controller.dart';
 import 'package:enjoy_player/features/vocabulary/application/vocabulary_review_session.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
@@ -67,7 +65,6 @@ List<Override> _overrides(AppDatabase db) {
   return [
     appDatabaseProvider.overrideWithValue(db),
     deviceGlobalAppDatabaseProvider.overrideWithValue(db),
-    syncCtrlProvider.overrideWithValue(0),
     discoverFeedRefreshSchedulerProvider.overrideWithValue(0),
     updateAvailableBadgeProvider.overrideWithValue(false),
     vocabularyReviewSessionProvider.overrideWith(_FakeVocabSession.new),

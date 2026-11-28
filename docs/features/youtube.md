@@ -15,7 +15,7 @@ Users **Import → From YouTube URL** and paste a watch URL, short URL, embed UR
 
 Optional **YouTube / Google** sign-in opens a **dedicated** WebView (`/youtube/login`) starting at Google ServiceLogin with `continue=https://m.youtube.com/`. Session cookies (`LOGIN_INFO` / `SID`) on `m.youtube.com` determine logged-in state. Logout clears **all** WebView cookies (see ADR-0015). While that route is open, [`RootShell`](../../lib/features/player/presentation/root_shell.dart) **parks** the permanent player surface ([ADR-0057](../decisions/0057-permanent-player-surface-host.md)) so the player WebView cannot cover the login WebView.
 
-**Session persistence**: cookies live in the app WebView profile (`%LOCALAPPDATA%\…\WebView2` on Windows — see [`windows_webview_environment.dart`](../../lib/core/webview/windows_webview_environment.dart); `{applicationSupport}/WPEWebView` on Linux — see [`linux_webview_environment.dart`](../../lib/core/webview/linux_webview_environment.dart)) and normally survive app restarts until logout or Google expires the session. Enjoy account sign-in is separate. The YouTube sign-in screen is not offered on Linux for now ([ADR-0091](../decisions/0091-youtube-linux-playback.md)).
+**Session persistence**: cookies live in the app WebView profile (`%LOCALAPPDATA%\…\WebView2` on Windows — see [`windows_webview_environment.dart`](../../lib/core/webview/windows_webview_environment.dart); `{applicationSupport}/WPEWebView` on Linux — see [`linux_webview_environment.dart`](../../lib/core/webview/linux_webview_environment.dart)) and normally survive app restarts until logout or Google expires the session. The YouTube sign-in screen is not offered on Linux for now ([ADR-0091](../decisions/0091-youtube-linux-playback.md)).
 
 The **player** WebView does **not** complete Google login inline — see [Player navigation](#player-navigation) below.
 
@@ -36,41 +36,9 @@ While a video is open, the player WebView [`shouldOverrideUrlLoading`](../../lib
 
 ## Transcripts
 
-Captions are fetched **directly from YouTube** (InnerTube `/player` + `fmt=json3`
-timed text) and cached on the worker. The chain has three tiers:
+Captions are fetched **directly from YouTube** (InnerTube `/player` + `fmt=json3` timed text) and stored in local SQLite — no worker cache, no upload ([ADR-0107](../decisions/0107-local-only-no-account-spine.md) removed the worker transcript routes; no request goes to `worker.enjoy.bot`):
 
-1. **Worker GET cache** (`GET /youtube/transcripts?videoId&language`) — fast
-   when another client has already fetched this video. Skipped when the video
-   row's content language is missing / `und` / `mul` / `mis` / `zxx` (there is
-   no useful single `language` to query with).
-2. **Client-side InnerTube fetch** — runs through `YoutubeCaptionFetcher`, which
-   rotates through worker-published (or built-in) client profiles and downloads
-   **every** available caption track in parallel. This is the runtime form of
-   spec 013's FR-001 / FR-002 / FR-004.
-3. **Worker upload** — every track downloaded in Tier 2 is fire-and-forget POSTed
-   back to the worker so the next client (or this client on another device)
-   hits Tier 1 instead. Failed uploads are durably enqueued via `sync_queue`
-   (entity `video`, payload `kind: youtube_upload`; deduped per
-   `videoId/language` so repeated failures refresh one row) through the shared
-   sync enqueue seam — which schedules an **immediate** queue drain when
-   signed in (issue #749), with the [SyncCtrl] periodic drain as the
-   fallback — and re-uploaded by `SyncEngine`, which dispatches the payload to
-   `YoutubeTranscriptsClient.uploadTranscript` (issue #717), with the queue's
-   regular [`SyncRetryPolicy`](../../lib/features/sync/domain/sync_retry_policy.dart)
-   exponential backoff on continued failure (issue #752). See
-   [`transcript_repository.dart`](../../lib/features/transcript/data/transcript_repository.dart).
-
-**Tier 2 always runs for YouTube rows**, even when `videos.language` is empty
-or `und`. An unknown language only narrows the Tier 1 lookup and the
-`preferredLang` hint passed to the fetcher; the fetcher itself still discovers
-all available languages (spec 013 FR-004) and stores them as separate
-`TranscriptRow`s keyed by `(target, source, language)`. The fetcher's own
-preference ranking is alias-aware: tracks matching the requested tag exactly
-rank first, tracks sharing its primary subtag second (so a `no` track still
-counts as preferred for `nb-NO` via `kLanguageTagAliases`, ADR-0087), and
-everything else last
-([`youtube_caption_fetcher_track_selection.dart`](../../lib/features/transcript/data/youtube_caption_fetcher_track_selection.dart),
-#848).
+1. **Direct InnerTube fetch** — runs through `YoutubeCaptionFetcher`, which rotates through the built-in client profiles and downloads **every** available caption track in parallel (the runtime form of spec 013's FR-001 / FR-002 / FR-004). This always runs for YouTube rows, even when `videos.language` is empty or `und`. An unknown language only narrows the `preferredLang` hint passed to the fetcher; the fetcher itself still discovers all available languages (spec 013 FR-004) and stores them as separate `TranscriptRow`s keyed by `(target, source, language)`. The fetcher's own preference ranking is alias-aware: tracks matching the requested tag exactly rank first, tracks sharing its primary subtag second (so a `no` track still counts as preferred for `nb-NO` via `kLanguageTagAliases`, ADR-0087), and everything else last ([`youtube_caption_fetcher_track_selection.dart`](../../lib/features/transcript/data/youtube_caption_fetcher_track_selection.dart), #848).
 
 ### Primary selection
 
@@ -93,13 +61,7 @@ to the source-only `_ensurePrimaryTranscript` used for non-YouTube media.
 
 ### Client profiles
 
-The InnerTube rotation uses a `youtubeProfilesProvider` that lazily fetches
-the worker's `GET /youtube/client-profiles` on first YouTube open, caches the
-result in a 24 h `L1Store`, and **merges** remote entries with the compile-time
-`kBuiltInClientProfiles` via `resolveCaptionClientProfiles`. Remote versions
-win on the same InnerTube `clientName`; missing clients (today often
-`ANDROID_VR` / `MWEB` when the worker only ships `IOS` + `WEB`) are gap-filled
-from built-ins. The resolved ladder is always ordered
+The InnerTube rotation uses `youtubeProfilesProvider`, which resolves the compile-time `kBuiltInClientProfiles` (the worker's `GET /youtube/client-profiles` remote merge was removed with the account spine — [ADR-0107](../decisions/0107-local-only-no-account-spine.md); the provider keeps its `Future` shape because callers consume it as an `AsyncValue`). The resolved ladder is always ordered
 `ios → android_vr → (android) → mweb → web` (see
 [`kPreferredCaptionClientOrder`](../../lib/features/transcript/data/client_profile.dart))
 — **not** by Flutter host OS. Within a process, the last profile that
@@ -107,13 +69,10 @@ returned fetchable tracks is tried first on subsequent videos (session
 sticky via `YoutubeCaptionFetcher._lastSuccessfulCaptionProfileKey`; tests
 reset it through `resetLastSuccessfulCaptionProfile()`).
 
-**Cold-start fallback.** When the worker is unreachable, the cached 24 h
-profile list is stale-but-cached, or the response envelope is malformed,
-the client falls back to `kBuiltInClientProfiles` alone (resolved through
-the same `resolveCaptionClientProfiles`). These compile-time defaults ship
+These compile-time defaults ship
 with **current 2026 YouTube client versions** (iOS `20.12.1`, Android VR
 `1.62.20`, MWEB `2.20251209.01.00`, WEB `2.20250709.00.00`) so the ladder
-keeps working even on a fully offline cold start — refresh them in
+keeps working offline — refresh them in
 [`client_profile.dart`](../../lib/features/transcript/data/client_profile.dart)
 when YouTube ships a new client version, before bumping the spec
 contract.

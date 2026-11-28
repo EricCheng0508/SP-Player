@@ -1,7 +1,5 @@
 import 'package:enjoy_player/core/routing/library_source.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/library/application/library_media_provider.dart';
 import 'package:enjoy_player/features/library/domain/media.dart';
 import 'package:enjoy_player/features/library/presentation/library_screen.dart';
@@ -11,11 +9,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-
-class _SignedOutAuthCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedOut();
-}
 
 Widget _themedRouter({
   required GoRouter router,
@@ -92,7 +85,6 @@ void main() {
         _themedRouter(
           router: router,
           overrides: [
-            authCtrlProvider.overrideWith(_SignedOutAuthCtrl.new),
             libraryFilteredListsProvider.overrideWith(
               (ref) => Stream.value((audio: <Media>[], video: <Media>[])),
             ),

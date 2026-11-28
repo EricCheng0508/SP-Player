@@ -9,7 +9,6 @@ import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/data/db/dexie_target_type_provider.dart';
 import 'package:enjoy_player/data/subtitle/transcript_line.dart';
-import 'package:enjoy_player/features/sync/application/recordings_for_target_provider.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_lines_provider.dart';
 import 'package:enjoy_player/features/transcript/domain/transcript_recording_counts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -90,7 +89,7 @@ Map<int, int>? transcriptLineRecordingCounts(Ref ref, String mediaId) {
   final tt = targetTypeAsync.value;
   if (tt != null) {
     recordingsAsync = ref.watch(
-      recordingsForTargetProvider((targetType: tt, targetId: mediaId)),
+      _recordingsForTargetProvider((targetType: tt, targetId: mediaId)),
     );
     final dictationsAsync = ref.watch(
       _dictationsForTargetProvider((targetType: tt, targetId: mediaId)),
@@ -123,4 +122,14 @@ final _dictationsForTargetProvider = StreamProvider.autoDispose
         target.targetType,
         target.targetId,
       );
+    });
+
+/// `targetType` is Dexie style: `Audio` | `Video`.
+final _recordingsForTargetProvider = StreamProvider.autoDispose
+    .family<List<RecordingRow>, ({String targetType, String targetId})>((
+      ref,
+      target,
+    ) {
+      final db = ref.watch(appDatabaseProvider);
+      return db.recordingDao.watchByTarget(target.targetType, target.targetId);
     });

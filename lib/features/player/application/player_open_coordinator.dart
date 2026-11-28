@@ -152,13 +152,9 @@ final class PlayerOpenDeps {
   /// Frame capture for stored video thumbnails (capability-gated by caller).
   final VideoPosterCaptureService Function() posterService;
 
-  /// Fire-and-forget transcript resolve + recording pull, bound to the
-  /// controller's `Ref` and the per-open staleness check.
-  final void Function({
-    required int openGeneration,
-    required String mediaId,
-    required String dexieTargetType,
-  })
+  /// Fire-and-forget transcript resolve, bound to the controller's `Ref`
+  /// and the per-open staleness check.
+  final void Function({required int openGeneration, required String mediaId})
   scheduleOpenSideEffects;
 
   /// Lazy oEmbed refresh after a YouTube open, with freshness callbacks
@@ -275,11 +271,7 @@ Future<void> runPlayerOpen(
       );
     });
 
-    deps.scheduleOpenSideEffects(
-      openGeneration: gen,
-      mediaId: mediaId,
-      dexieTargetType: dexie,
-    );
+    deps.scheduleOpenSideEffects(openGeneration: gen, mediaId: mediaId);
 
     await steps.run(
       'cancel position tracker',

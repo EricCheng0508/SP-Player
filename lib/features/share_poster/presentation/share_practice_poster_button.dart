@@ -6,11 +6,26 @@ import 'package:enjoy_player/features/player/presentation/widgets/player_top_bar
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:enjoy_player/data/db/app_database.dart';
+import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/data/db/dexie_target_type_provider.dart';
 import 'package:enjoy_player/features/player/application/player_controller.dart';
 import 'package:enjoy_player/features/share_poster/presentation/practice_poster_preview_sheet.dart';
-import 'package:enjoy_player/features/sync/application/recordings_for_target_provider.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
+
+/// Recordings for one Dexie target — file-level family so the provider
+/// identity is stable across rebuilds (an inline provider would be a new
+/// object every build and loop the widget forever).
+final _recordingsForTargetProvider = StreamProvider.autoDispose
+    .family<List<RecordingRow>, ({String targetType, String targetId})>((
+      ref,
+      params,
+    ) {
+      return ref
+          .watch(appDatabaseProvider)
+          .recordingDao
+          .watchByTarget(params.targetType, params.targetId);
+    });
 
 class SharePracticePosterButton extends ConsumerWidget {
   const SharePracticePosterButton({
@@ -44,7 +59,7 @@ class SharePracticePosterButton extends ConsumerWidget {
     if (targetType == null) return const SizedBox.shrink();
 
     final recordingsAsync = ref.watch(
-      recordingsForTargetProvider((targetType: targetType, targetId: mediaId)),
+      _recordingsForTargetProvider((targetType: targetType, targetId: mediaId)),
     );
 
     final hasRecordings = recordingsAsync.maybeWhen(

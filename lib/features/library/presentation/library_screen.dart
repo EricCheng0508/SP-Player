@@ -15,7 +15,6 @@ import 'package:enjoy_player/core/theme/widgets/enjoy_page.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_segmented_control.dart';
 import 'package:enjoy_player/features/library/presentation/library_actions.dart';
 import 'package:enjoy_player/features/library/presentation/widgets/library_search_field.dart';
-import 'package:enjoy_player/features/library/presentation/widgets/playlist_tab_view.dart';
 import 'package:enjoy_player/features/library/application/library_media_provider.dart';
 import 'package:enjoy_player/features/library/presentation/widgets/local_library_tab_view.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';

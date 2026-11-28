@@ -4,7 +4,6 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:enjoy_player/core/theme/enjoy_icons.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/typography.dart';
 import 'package:enjoy_player/core/transcript/transcript_lens_metrics.dart';
@@ -15,7 +14,6 @@ import 'package:enjoy_player/features/transcript/presentation/transcript_blur_te
 import 'package:enjoy_player/features/transcript/presentation/transcript_line_selection_toolbar.dart';
 import 'package:enjoy_player/features/transcript/presentation/transcript_markup.dart';
 import 'package:enjoy_player/features/transcript/presentation/transcript_word_ipa_layer.dart';
-import 'package:enjoy_player/l10n/app_localizations.dart';
 
 class TranscriptTileText extends StatelessWidget {
   const TranscriptTileText({

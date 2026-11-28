@@ -26,14 +26,6 @@ Future<void> _pump(WidgetTester tester, Widget child) async {
 }
 
 void main() {
-  test('lookupErrorUserMessage maps AuthFailure to sign-in message', () async {
-    final l10n = await AppLocalizations.delegate.load(const Locale('en'));
-    expect(
-      lookupErrorUserMessage(const AuthFailure('ignored'), l10n),
-      l10n.lookupCloudRequiresSignIn,
-    );
-  });
-
   test('lookupErrorUserMessage prefers AppFailure.message', () async {
     final l10n = await AppLocalizations.delegate.load(const Locale('en'));
     expect(

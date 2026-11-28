@@ -2,11 +2,11 @@
 
 ## Summary
 
-Vocabulary is Enjoy’s **local-first spaced-repetition (SRS) word book**: save a word while watching/listening (or reading on web), keep every **context** (sentence + locator back into media), review with **3-button flashcards**, optionally **sync** items/contexts to the cloud, and **export Anki CSV** (Pro).
+Vocabulary is Enjoy’s **local-first spaced-repetition (SRS) word book**: save a word while watching/listening, keep every **context** (sentence + locator back into media), review with **3-button flashcards**, and **export Anki CSV**. Everything lives in the single local session database — there is no cloud sync ([ADR-0107](../decisions/0107-local-only-no-account-spine.md)).
 
 This document is the implementation contract for SP Player (Flutter). It describes **what the Enjoy web app actually implements today** (`~/dev/enjoy/apps/web`), not the aspirational marketing copy under `enjoy/apps/docs/**/vocabulary.md`.
 
-**Status in Flutter:** P0–**P4 shipping**. Local Drift schema + SRS + lookup add/remove; Vocabulary destination (`/vocabulary`; Duet layout per the `Vocabulary` board: header with Export to Anki · Pro and Review *n* due, the due card (logo, due count, ~15 s/card estimate) beside the four-status breakdown, an All Words / Review segmented control; All Words is a word table — word, first context sentence, status chip, next review, language code, delete — with search and Status / Language filter menus; Review pairs the due card with the inline Custom review panel), flashcard session (flip/rate/skip/undo, desktop in-session shortcuts); review Context/Dictionary write-through; in-route adaptive practice overlay for clip play + in-session echo recorder; open-in-player to full player; multi-context pager; cloud sync of items/contexts with SRS-preserving conflict resolution ([ADR-0054](../decisions/0054-vocabulary-cloud-sync.md)); Pro-gated Anki CSV export from the Vocabulary header.
+**Status in Flutter:** P0–**P4 shipping**. Local Drift schema + SRS + lookup add/remove; Vocabulary destination (`/vocabulary`; Duet layout per the `Vocabulary` board: header with Export to Anki and Review *n* due, the due card (logo, due count, ~15 s/card estimate) beside the four-status breakdown, an All Words / Review segmented control; All Words is a word table — word, first context sentence, status chip, next review, language code, delete — with search and Status / Language filter menus; Review pairs the due card with the inline Custom review panel), flashcard session (flip/rate/skip/undo, desktop in-session shortcuts); review Context/Dictionary write-through; in-route adaptive practice overlay for clip play + in-session echo recorder; open-in-player to full player; multi-context pager; Anki CSV export from the Vocabulary header.
 
 **Tracking:** [#375](https://github.com/baizhiheizi/enjoy_player/issues/375).
 
@@ -15,9 +15,9 @@ This document is the implementation contract for SP Player (Flutter). It describ
 ## Goals for the Flutter port
 
 1. Behavioral parity with current web code for add / review / list / delete / AI cache / Anki export.
-2. **API- and ID-compatible** schema so multi-device sync can land later without re-keying user data.
+2. **API- and ID-compatible** schema (kept from the web port; the sync fields are dormant — no cloud sync, [ADR-0107](../decisions/0107-local-only-no-account-spine.md)).
 3. Fit existing Flutter architecture: Drift + DAOs, Riverpod, `lib/features/vocabulary/`, wire into lookup sheet without regressing ADR-0042 language catalogs.
-4. Ship in phases (see [Phased plan](#phased-implementation-plan)); defer ebook add and cloud sync until prerequisites exist.
+4. Ship in phases (see [Phased plan](#phased-implementation-plan)); defer ebook add until a reader exists.
 
 ---
 
@@ -35,8 +35,8 @@ This document is the implementation contract for SP Player (Flutter). It describ
 | 3-rating SM-2 variant | **Yes** |
 | Review: due / all / status / language / random N | **Yes** |
 | AI dictionary + contextual translation cached on entities | **Yes** |
-| Sync items + contexts | **Yes** (reviews **not** synced) |
-| Anki CSV export (Pro) | **Yes** |
+| Sync items + contexts | **No** — schema columns retained dormant ([ADR-0107](../decisions/0107-local-only-no-account-spine.md)) |
+| Anki CSV export | **Yes** (no gate) |
 
 ---
 
@@ -51,7 +51,7 @@ This document is the implementation contract for SP Player (Flutter). It describ
 | Add from transcript | Selection → `TextSelectionPanel` → `AddToVocabularyButton` | CTA on existing [dictionary lookup sheet](dictionary-lookup.md) |
 | Add from ebook | Ebook selection toolbar | **Defer** until Flutter ebook exists |
 | Review session | Review tab → options → fullscreen flashcard | Immersive full-window review route (`/vocabulary/review`): `RootShell` hides sidebar / bottom nav and the mini media player bar for the session (shell-covering immersion; still under `ShellRoute`, ADR-0053) |
-| Export Anki | List → Export (Pro) | Same, gated by [subscription](subscription.md) |
+| Export Anki | List → Export | Same, no gate |
 | Extension API-only add | Sidepanel (no Dexie) | Out of scope for player |
 
 ### Primary flows
@@ -96,8 +96,8 @@ Word-level SRS entity. One row per `(normalizedWord, language, targetLanguage)`.
 | `contextsCount` | `number` | Denormalized count of contexts |
 | `explanation` | JSON? | Cached dictionary result (`DictionaryResult` / web `DictionaryResponse`) |
 | `createdAt` / `updatedAt` | ISO 8601 | |
-| `syncStatus` | enum? | `local` \| `synced` \| `pending` (web `SyncableEntity`) |
-| `serverUpdatedAt` | ISO 8601? | Sync bookkeeping |
+| `syncStatus` | enum? | `local` \| `synced` \| `pending` — **dormant** column retained by schema; nothing reads or writes it ([ADR-0107](../decisions/0107-local-only-no-account-spine.md)) |
+| `serverUpdatedAt` | ISO 8601? | Same — dormant sync bookkeeping column |
 
 > **Stale comments in web types** say “UUID v4”. Implementation uses UUID v5 via `generateVocabularyItemId`. Flutter must follow the generator, not the comment.
 
@@ -114,7 +114,7 @@ Many contexts per item (appearances in media/ebook).
 | `sourceId` | `string` | Media / ebook entity id (must match library ids when possible) |
 | `locator` | JSON | `MediaLocator` or `EbookLocator` |
 | `explanation` | JSON? | Cached contextual translation |
-| timestamps + sync fields | | Same syncable pattern as item |
+| timestamps + sync fields | | Same shape as item (sync fields dormant) |
 
 #### `MediaLocator`
 
@@ -155,7 +155,7 @@ One row per rating for **undo**. **Not uploaded** — no API entity.
 | `rating` | `0` \| `1` \| `2` |
 | `at` | ISO timestamp of the action |
 | `easeFactorBefore`, `intervalBefore`, `statusBefore`, `reviewsCountBefore`, `nextReviewAtBefore`, `lastReviewedAtBefore?` | Pre-image for undo |
-| timestamps + `syncStatus` | Local only; never queue for sync |
+| timestamps + `syncStatus` | Local only |
 
 ### Status lifecycle (via SRS only)
 
@@ -210,20 +210,20 @@ uuidv5(
 )
 ```
 
-`stableLocatorJSON` = `JSON.stringify(locator, sortedKeys)` (web sorts `Object.keys(locator)` before stringify). Flutter must produce the **same string** for the same locator fields or sync will fork duplicates.
+`stableLocatorJSON` = `JSON.stringify(locator, sortedKeys)` (web sorts `Object.keys(locator)` before stringify). Flutter must produce the **same string** for the same locator fields or ids will fork duplicates.
 
 ### Duplicate rules (`addVocabularyWithContext`)
 
-Atomic transaction (item + context + sync queue):
+Atomic transaction (item + context):
 
 1. Normalize word; find by `(word, language)` then `targetLanguage`.
-2. If no item: create with defaults below; queue item create.
+2. If no item: create with defaults below.
 3. If item exists: keep it; load contexts for `(itemId, sourceType, sourceId)`.
 4. Duplicate context if same locator:
    - **media:** equal `start` and `duration`
    - **ebook:** `compareEbookLocators` equality
 5. If duplicate context → return `{ item, context, isNew: false }` (no count bump).
-6. Else insert context; if item already existed, `contextsCount++`; queue context create.
+6. Else insert context; if item already existed, `contextsCount++`.
 
 ### New item defaults
 
@@ -238,7 +238,7 @@ Atomic transaction (item + context + sync queue):
 
 ### Delete
 
-Deleting an item **cascades** all local contexts (and should delete local review audit rows). Queue item delete for sync. Document/verify server cascade for orphaned contexts when sync lands.
+Deleting an item **cascades** all local contexts (and deletes local review audit rows). Deletion is local-only.
 
 ---
 
@@ -324,13 +324,13 @@ Web once repaired corrupt rows (`interval < 1` or `nextReviewAt <= lastReviewedA
 
 1. Capture pre-image into `VocabularyReview`.
 2. Apply `calculateNextReview`.
-3. Update item; insert audit; queue item sync (`update`).
+3. Update item; insert audit.
 
 **Undo latest** (atomic):
 
 1. Load latest audit by `(vocabularyItemId, at)` descending.
 2. Restore `*Before` fields onto item.
-3. Delete audit row; re-queue item sync.
+3. Delete audit row.
 4. Session UI keeps a stack of rated item ids for undo order.
 
 ---
@@ -354,7 +354,7 @@ React Query: `use-vocabulary-queries.ts`, `staleTime` 30s; mutations invalidate 
 | Drift tables | `vocabulary_items`, `vocabulary_contexts`, `vocabulary_reviews` under `lib/data/db/tables/` |
 | DAOs | CRUD, due query, add-with-context transaction, undo |
 | Domain | Pure models + `calculateNextReview` (no Flutter imports) |
-| Application | Riverpod notifiers / repositories; sync enqueue when sync lands |
+| Application | Riverpod notifiers / repositories |
 | Presentation | `lib/features/vocabulary/presentation/` |
 
 Suggested feature layout:
@@ -362,7 +362,7 @@ Suggested feature layout:
 ```
 lib/features/vocabulary/
   application/   # notifiers, review session controller
-  data/          # repositories wrapping DAOs + API clients (when sync)
+  data/          # repositories wrapping DAOs
   domain/        # models, srs, normalize, id helpers (or reuse core/ids)
   presentation/  # page, list, flashcard, dialogs
 ```
@@ -378,36 +378,9 @@ Practice: Lifecycle precedes Context / Practice because both call
 
 Persist JSON blobs (`explanation`, `locator`) as text columns with typed encode/decode — same pattern as other Drift JSON fields in the app.
 
-### REST API
+There is **no REST client and no cloud sync** in the Flutter app — the web app's `vocabulary_items` / `vocabulary_contexts` endpoints and the ADR-0054 sync semantics (including the `resolveVocabularyItemConflict` helper, kept as a dormant domain module) were removed with the account spine ([ADR-0107](../decisions/0107-local-only-no-account-spine.md)). Reviews were never synced; they stay device-local undo history.
 
-Client reference: `enjoy/packages/api/src/services/vocabulary.ts`.
-
-| Method | Path | Body / params |
-|--------|------|----------------|
-| List items | `GET /api/v1/mine/vocabulary_items` | `language?`, `limit?` (default 50), `updatedAfter?` |
-| Get item | `GET /api/v1/mine/vocabulary_items/:id` | |
-| Upload item | `POST /api/v1/mine/vocabulary_items` | `{ vocabularyItem: {...} }` |
-| Delete item | `DELETE /api/v1/mine/vocabulary_items/:id` | |
-| List contexts | `GET /api/v1/mine/vocabulary_contexts` | `vocabularyItemId?`, `sourceType?`, `sourceId?`, `limit?`, `updatedAfter?` |
-| Get / upload / delete context | same under `/vocabulary_contexts` | POST body `{ vocabularyContext: {...} }` |
-
-**No** review-audit endpoints.
-
-Cursor pagination: `updatedAfter` ISO timestamp.
-
-### Sync semantics
-
-[ADR-0054](../decisions/0054-vocabulary-cloud-sync.md) extends [ADR-0010](../decisions/0010-cloud-sync-mvp.md) / [sync.md](sync.md) (previously audio/video/recording only) to cover vocabulary items and contexts:
-
-| Entity | Upload / download | Conflict |
-|--------|-------------------|----------|
-| `vocabularyItem` | Yes | Prefer newer SRS: compare `lastReviewedAt`, else higher `reviewsCount`; may keep local SRS while adopting newer server metadata (`resolveVocabularyItemConflict`, [lib/features/vocabulary/domain/vocabulary_item_conflict.dart](../../lib/features/vocabulary/domain/vocabulary_item_conflict.dart)) |
-| `vocabularyContext` | Yes | Last-write-wins on `updatedAt` |
-| `vocabularyReview` | **Never** | Device-local undo history |
-
-Unlike audio/video/recording, vocabulary **auto-pulls on every signed-in `fullSync`** (paged `updatedAfter` cursors) — a documented, narrow exception to [ADR-0013](../decisions/0013-local-first-sync.md)'s no-auto-mirror policy, since a word book is a cross-device dataset rather than local-path media. Words added on another device reach the phone without a cold restart: the periodic 5-minute sync carries the pull, and the Vocabulary board is pull-to-refresh (header refresh button on desktop, issue #1328).
-
-Offline: full local CRUD/review. AI dictionary / contextual translation require network when cache empty.
+Offline: full local CRUD/review. AI dictionary / contextual translation require a configured BYOK endpoint when cache is empty.
 
 ---
 
@@ -443,8 +416,8 @@ Empty states: no words; no due with **Custom review** CTA in the empty panel (no
 
 - Immersive study chrome (no dense AppBar): one header row with close, a 5px accent progress track, tabular `current / total`, quiet **Skip**, and undo. Close tooltip = exit review.
 - **Adaptive study stage:** the card fills the remaining column under the header (and the post-flip rating footer). Front/back share the same stage; fade-only flip. Session start loads contexts for the whole queue in one bulk read (repository `getContextsForItems`, issue #827 B2) — no per-card context queries on the tap-to-first-card path.
-- Front: display-serif hero word; optional cached IPA · POS in mono (no fetch on the front); **Pronounce** as an accent text control under the word (Worker model audio via shared pronounce stack — [ADR-0064](../decisions/0064-word-pronounce-client.md)); locale from the card’s **`item.language`** (bare tags like `ja` resolve to regional Worker locales). Distinct from Context **Play segment** (media clip). Serif italic context quote with word highlight. Quiet flip hint (mobile “Tap to flip”; desktop “Space to flip · 1 / 2 / 3 to rate”) — not a filled pill.
-- Space **toggles** flip; tapping the card also flips / unflips (no **Flip back** control). Flipping prefetches contextual translation **and** dictionary when missing (signed-in).
+- Front: display-serif hero word; optional cached IPA · POS in mono (no fetch on the front); **Pronounce** as an accent text control under the word (Youdao audio via the shared pronounce stack — [ADR-0064](../decisions/0064-word-pronounce-client.md)); locale from the card’s **`item.language`**. Distinct from Context **Play segment** (media clip). Serif italic context quote with word highlight. Quiet flip hint (mobile “Tap to flip”; desktop “Space to flip · 1 / 2 / 3 to rate”) — not a filled pill.
+- Space **toggles** flip; tapping the card also flips / unflips (no **Flip back** control). Flipping prefetches contextual translation **and** dictionary when missing.
 - Back: smaller serif headword + Pronounce icon; compact bordered pill tabs (**Notes hidden until implemented**):
   - **Context** — quote with left rule and word highlight; **context pager** when the item has 2+ contexts; one muted source line + locator; compact icon row (tooltips) for Play segment / Open in player / Echo; contextual translation without a heavy heading. Flip, rate, and session transitions stop any in-flight pronounce playback.
   - **Dictionary** — auto-loads when cache empty (loading spinner while fetching; retry only after failure). Structured senses (IPA single slash pair, POS, definition, translation, examples) when available, rendered through the shared [`DictionarySensesView`](../../lib/features/ai/presentation/widgets/dictionary_senses_view.dart) so the flashcard and the Lookup sheet agree on every style decision.
@@ -456,9 +429,7 @@ Empty states: no words; no due with **Custom review** CTA in the empty panel (no
 
 **Flashcard wiring:** the card's state travels as three bundles — [`FlashcardFetchState`](../../lib/features/vocabulary/presentation/vocabulary_flashcard_state.dart) (in-flight flags + error strings), `FlashcardContextState` (context pager position) and `FlashcardActions` (callbacks + the gate that disables them while a practice sheet owns the input). The session screen builds them once from the session state; the card, its back face and the context tab pass the same objects down, so a new flashcard action or fetch state reaches every layer through one place.
 
-**Failed AI fetches:** the Context and Dictionary tabs share one error surface — [`FlashcardAiErrorRetry`](../../lib/features/vocabulary/presentation/widgets/flashcard_ai_error_retry.dart) — so a failed fetch reads the same on both tabs: the soft-error banner, then the **View plans & packages** CTA when the worker rejected the request for credits, then the tab's own retry action. The error strings are the `kVocabularyAiError*` sentinels from [`vocabulary_ai_error.dart`](../../lib/features/vocabulary/domain/vocabulary_ai_error.dart); the CTA itself comes from the shared credits seam ([subscription.md](subscription.md#credits-error-seam)).
-
-Sharing the surface also aligned the Dictionary tab's geometry with the Context tab's: its credits error now reads **banner → CTA → retry** (the CTA used to sit below the retry), and on *both* its failure paths the retry action is content-width rather than full-width, with an 8 px gap after the banner instead of 12 px. The Context tab's error layout is unchanged — it already matched the shared surface.
+**Failed AI fetches:** the Context and Dictionary tabs share one error surface — [`FlashcardAiErrorRetry`](../../lib/features/vocabulary/presentation/widgets/flashcard_ai_error_retry.dart) — so a failed fetch reads the same on both tabs: the soft-error banner, then the tab's own retry action. The error strings are the `kVocabularyAiError*` sentinels from [`vocabulary_ai_error.dart`](../../lib/features/vocabulary/domain/vocabulary_ai_error.dart). Both tabs render the retry content-width with an 8 px gap after the banner.
 
 ### Word list
 
@@ -558,18 +529,18 @@ Web: `lib/ebook/selection/vocabulary-builder.ts` + Readium locator. Keep types i
 
 When user opens Dictionary / Contextual tabs during review, reuse existing AI services; write-through to the entity so Anki export and offline re-open work.
 
-Auth: same signed-in / credits rules as [dictionary-lookup](dictionary-lookup.md) and [ai](ai.md).
+Auth: AI calls follow the same BYOK rules as [dictionary-lookup](dictionary-lookup.md) and [ai](ai.md) — no sign-in, no credits.
 
 ---
 
-## Anki export (Pro)
+## Anki export
 
 Spec: `enjoy/apps/web/docs/anki-export-data-standard.md`  
 Impl: `enjoy/apps/web/src/lib/anki/export-csv.ts`
 
 | Rule | Detail |
 |------|--------|
-| Gate | `subscriptionTier == pro` ([subscription.md](subscription.md)) |
+| Gate | None — the old Pro gate is retired with the subscription system ([ADR-0107](../decisions/0107-local-only-no-account-spine.md)) |
 | Format | UTF-8 **with BOM** CSV |
 | Columns | `Front`, `Back`, `Tags` |
 | Note type | Anki **Basic** (HTML in fields) |
@@ -588,7 +559,7 @@ Limitations to document in UI: ebook titles often unresolved; rich backs need ca
 
 Web namespace: `locales/*/vocabulary.json` (en, zh, ja, ko, es, fr, de, pt).
 
-Flutter: add ARB keys under `lib/l10n/` matching user-visible strings (stats labels, review modes, rating buttons, empty states, export Pro copy, add-button states). Mirror the English keys in [User-visible string inventory](#user-visible-string-inventory) below; run `flutter gen-l10n`.
+Flutter: add ARB keys under `lib/l10n/` matching user-visible strings (stats labels, review modes, rating buttons, empty states, export copy, add-button states). Mirror the English keys in [User-visible string inventory](#user-visible-string-inventory) below; run `flutter gen-l10n`.
 
 ---
 
@@ -599,7 +570,6 @@ Flutter: add ARB keys under `lib/l10n/` matching user-visible strings (stats lab
 - Review audit / undo is **device-local**.
 - New item `interval = 0` but due in 24h; first rating still forces min interval 1 day.
 - No offline AI fill when `explanation` empty.
-- Pro gate **only** Anki export, not core vocabulary.
 - List search is in-memory on the filtered set (no FTS required for v1).
 - Opening full player from review **ends** the session (confirm dialog).
 - Echo reading from the review practice overlay reuses [shadow-reading](shadow-reading.md) `ShadowReadingPanel`; media clip playback must go through existing `PlayerController` (never construct a second `media_kit` `Player`).
@@ -631,15 +601,17 @@ Flutter: add ARB keys under `lib/l10n/` matching user-visible strings (stats lab
 - [x] Open-in-player confirm (exit review)
 - [x] Shadow reading entry from context tab (hand-off to player + echo; not embedded in flashcard)
 
-### P3 — Sync
+### P3 — Sync (retired)
 
 - [x] New ADR ([ADR-0054](../decisions/0054-vocabulary-cloud-sync.md)) extending ADR-0010 for vocabulary entities
 - [x] API client + queue entity types + download/upload + conflict rules
 - [x] Tests for SRS-preserving merge
 
+Shipped historically; **removed by [ADR-0107](../decisions/0107-local-only-no-account-spine.md)** — no sync client, no queue entities; schema columns retained dormant.
+
 ### P4 — Anki export
 
-- [x] Pro gate + CSV builder + share/save file UX
+- [x] CSV builder + share/save file UX (the Pro gate shipped with the old subscription system and was retired by [ADR-0107](../decisions/0107-local-only-no-account-spine.md))
 - [x] Filter dialog parity with web
 
 ### Explicitly out of scope unless product asks
@@ -653,8 +625,8 @@ Flutter: add ARB keys under `lib/l10n/` matching user-visible strings (stats lab
 
 ## Open decisions (resolve before / during Speckit)
 
-1. **Navigation:** Resolved in [ADR-0053](../decisions/0053-vocabulary-secondary-route.md) — secondary `/vocabulary` route from Profile (not a primary shell tab).
-2. **Sync in v1?** Recommend local-first Drift first; sync as P3 with new ADR — but **IDs/schema API-compatible from day one**.
+1. **Navigation:** Resolved in [ADR-0053](../decisions/0053-vocabulary-secondary-route.md) — secondary `/vocabulary` route (today a desktop sidebar row; on compact widths it highlights the Settings tab).
+2. **Sync in v1?** Resolved: local-first Drift first; sync shipped as P3 with ADR-0054 and was later removed by [ADR-0107](../decisions/0107-local-only-no-account-spine.md) — **IDs/schema API-compatible from day one** survives as the dormant-column policy.
 3. Keep web UX “delete whole item from Already in Vocabulary”? Yes (P0).
 4. Hotkey registration vs in-modal-only shortcuts ([hotkeys.md](hotkeys.md))? In-session only for P1 (ADR-0053).
 5. Home due widget timing (with P1 or later)? Later (not in P1).
@@ -671,8 +643,8 @@ Flutter: add ARB keys under `lib/l10n/` matching user-visible strings (stats lab
 | addWithContext | New item; add second context; exact duplicate no-op; cascade delete |
 | Due query | Boundary on `nextReviewAt`; invalid `nextReviewAt <= lastReviewedAt` excluded |
 | Undo | Restores pre-image; second undo / empty stack |
-| Widget | Add button states; flashcard flip/rate; list filters; Pro export gate |
-| Manual | Add during playback; review due set offline; (later) sync two devices without losing newer SRS |
+| Widget | Add button states; flashcard flip/rate; list filters; Anki export flow |
+| Manual | Add during playback; review due set offline |
 
 Port web fixtures from:
 
@@ -716,12 +688,10 @@ Port web fixtures from:
 | [`vocabulary_context_builder.dart`](../../lib/features/lookup/application/vocabulary_context_builder.dart) | Context **string** for AI |
 | [`lib/features/ai/domain/models/dictionary_result.dart`](../../lib/features/ai/domain/models/dictionary_result.dart) | Dictionary JSON model |
 | [`lib/core/ids/enjoy_ids.dart`](../../lib/core/ids/enjoy_ids.dart) | Shared UUID v5 namespace |
-| [`lib/data/db/`](../../lib/data/db/) | Drift — add vocab tables/DAOs |
-| [`lib/features/sync/`](../../lib/features/sync/) | Extended for vocab entities (ADR-0054) |
-| [`lib/data/api/services/vocabulary_api.dart`](../../lib/data/api/services/vocabulary_api.dart) | Vocabulary REST client |
+| [`lib/data/db/`](../../lib/data/db/) | Drift — vocab tables/DAOs |
 | [dictionary-lookup.md](dictionary-lookup.md), [ADR-0019](../decisions/0019-transcript-dictionary-lookup.md), [ADR-0042](../decisions/0042-multi-language-lookup-catalog.md) | Lookup rules |
-| [ADR-0010](../decisions/0010-cloud-sync-mvp.md), [ADR-0054](../decisions/0054-vocabulary-cloud-sync.md), [sync.md](sync.md) | Sync scope (vocabulary included) |
-| [shadow-reading.md](shadow-reading.md), [subscription.md](subscription.md), [ai.md](ai.md) | Related features |
+| [ADR-0107](../decisions/0107-local-only-no-account-spine.md) | No account / sync spine (retired ADR-0054's client; schema columns dormant) |
+| [shadow-reading.md](shadow-reading.md), [ai.md](ai.md) | Related features |
 
 #### Presentation (`lib/features/vocabulary/presentation/`)
 
@@ -743,7 +713,7 @@ The flashcard and related UI were extracted from a single file into focused modu
 | [`widgets/vocabulary_review_launch.dart`](../../lib/features/vocabulary/presentation/widgets/vocabulary_review_launch.dart) | `startVocabularyReview` — shared review-session launch helper |
 | [`widgets/vocabulary_empty_states.dart`](../../lib/features/vocabulary/presentation/widgets/vocabulary_empty_states.dart) | `VocabularyEmptyState` — reusable empty states (no words / no due / no matches) |
 | [`widgets/flashcard_soft_error.dart`](../../lib/features/vocabulary/presentation/widgets/flashcard_soft_error.dart) | `FlashcardSoftError` — reusable error banner widget |
-| [`widgets/flashcard_ai_error_retry.dart`](../../lib/features/vocabulary/presentation/widgets/flashcard_ai_error_retry.dart) | `FlashcardAiErrorRetry` — the failed-AI-fetch surface shared by the Context and Dictionary tabs: soft-error banner, the credits CTA, and the retry action |
+| [`widgets/flashcard_ai_error_retry.dart`](../../lib/features/vocabulary/presentation/widgets/flashcard_ai_error_retry.dart) | `FlashcardAiErrorRetry` — the failed-AI-fetch surface shared by the Context and Dictionary tabs: soft-error banner and the retry action |
 
 ---
 
@@ -751,7 +721,7 @@ The flashcard and related UI were extracted from a single file into focused modu
 
 Minimum ARB coverage (from web `en/vocabulary.json`):
 
-`title`, `description`, `review`, `allWords`, `total`, `due`, `new`, `learning`, `reviewing`, `mastered`, `noWords`, `noWordsDescription`, `noDueItems`, `noDueItemsDescription`, `selectReviewItems`, `reviewDueItems`, `reviewAll`, `reviewByStatus`, `reviewByLanguage`, `reviewRandom`, `numberOfWords`, `startReview`, `keyboardShortcuts`, `howWellDoYouKnow`, `dontKnow`, `know`, `knowWell`, `skip`, `progress`, `reviewComplete`, `addToVocabulary`, `addContext`, `alreadyInVocabulary`, `adding`, `searchPlaceholder`, `confirmDelete`, `delete`, `exportToAnki`, `proRequired`, `proRequiredDescription`, `upgradeToPro`, `context`, `dictionary`, `notes`, `notesPlaceholder`, `openInPlayer`, `openInPlayerDescription`, `shadowReading`, `contextualTranslation`, `noContextAvailable`, `dictionaryNotAvailable`, relative next-review labels (`overdue`, `today`, `tomorrow`, `inDays`).
+`title`, `description`, `review`, `allWords`, `total`, `due`, `new`, `learning`, `reviewing`, `mastered`, `noWords`, `noWordsDescription`, `noDueItems`, `noDueItemsDescription`, `selectReviewItems`, `reviewDueItems`, `reviewAll`, `reviewByStatus`, `reviewByLanguage`, `reviewRandom`, `numberOfWords`, `startReview`, `keyboardShortcuts`, `howWellDoYouKnow`, `dontKnow`, `know`, `knowWell`, `skip`, `progress`, `reviewComplete`, `addToVocabulary`, `addContext`, `alreadyInVocabulary`, `adding`, `searchPlaceholder`, `confirmDelete`, `delete`, `exportToAnki`, `context`, `dictionary`, `notes`, `notesPlaceholder`, `openInPlayer`, `openInPlayerDescription`, `shadowReading`, `contextualTranslation`, `noContextAvailable`, `dictionaryNotAvailable`, relative next-review labels (`overdue`, `today`, `tomorrow`, `inDays`).
 
 ---
 
@@ -760,7 +730,7 @@ Minimum ARB coverage (from web `en/vocabulary.json`):
 | Decision | When |
 |----------|------|
 | Drift schema + local-first vocab (no sync yet) | P0 ([ADR-0052](../decisions/0052-vocabulary-local-first-schema.md)) |
-| Vocabulary cloud sync + conflict policy | P3 ([ADR-0054](../decisions/0054-vocabulary-cloud-sync.md)) |
+| Vocabulary cloud sync + conflict policy | P3 ([ADR-0054](../decisions/0054-vocabulary-cloud-sync.md)) — **superseded by [ADR-0107](../decisions/0107-local-only-no-account-spine.md)** |
 | Shell navigation / IA for Vocabulary destination | P1 ([ADR-0053](../decisions/0053-vocabulary-secondary-route.md)) |
 
 Does not rewrite ADR-0010 / ADR-0013 — extended/clarified via ADR-0054.
@@ -774,6 +744,6 @@ Does not rewrite ADR-0010 / ADR-0013 — extended/clarified via ADR-0054.
 - [x] Review session supports due/custom selection, flip, 3 ratings, skip, undo; SRS matches web tests.
 - [x] Dictionary / contextual results can persist onto item/context.
 - [x] Context clip playback and open-in-player work without a second `media_kit` Player.
-- [x] Anki CSV export works for Pro with Front/Back/Tags contract.
-- [x] Sync upload/download preserves newer SRS state across devices.
+- [x] Anki CSV export works with the Front/Back/Tags contract.
+- [x] Cloud sync removed by [ADR-0107](../decisions/0107-local-only-no-account-spine.md) — vocabulary is device-local; sync schema columns retained dormant.
 - [x] Docs + tests green; `flutter analyze` / `flutter test` / format + codegen gates pass.

@@ -32,7 +32,7 @@ Separately, ADR-0013 stopped SP Player from auto-mirroring the remote audio/vide
 
 - Multi-device word books converge: adding/reviewing offline on one device and signing in on another pulls the merged word book without losing either device's spaced-repetition progress.
 - Review audits staying local-only means "undo last review" is a per-device action; a review undone on device A does not undo the equivalent review on device B (device B still sees the item update that resulted from that review, until its own next sync reconciles SRS state).
-- `docs/features/sync.md` gains a vocabulary section; `docs/features/vocabulary.md` P3 acceptance criteria are satisfied by this ADR plus the implementation it describes.
+- `docs/features/sync.md` gained a vocabulary section (both feature docs removed in ADR-0107); `docs/features/vocabulary.md` P3 acceptance criteria are satisfied by this ADR plus the implementation it describes.
 - Does not rewrite ADR-0010 or ADR-0013; this ADR extends the former's entity list and carves out a documented, narrow exception to the latter's auto-mirror policy for vocabulary only.
 
 ## References
@@ -40,6 +40,6 @@ Separately, ADR-0013 stopped SP Player from auto-mirroring the remote audio/vide
 - Extends: [ADR-0010](0010-cloud-sync-mvp.md)
 - Clarifies vs: [ADR-0013](0013-local-first-sync.md)
 - Supersedes the "sync deferred" bullet of: [ADR-0052](0052-vocabulary-local-first-schema.md)
-- Feature: [docs/features/vocabulary.md](../features/vocabulary.md), [docs/features/sync.md](../features/sync.md)
+- Feature: [docs/features/vocabulary.md](../features/vocabulary.md), `docs/features/sync.md` (removed in ADR-0107)
 - Spec: `specs/024-vocabulary-sync-anki/`
 - Web reference: `apps/web/src/db/services/sync-utils.ts` (`resolveVocabularyItemConflict`), `apps/web/src/services/vocabulary.ts`

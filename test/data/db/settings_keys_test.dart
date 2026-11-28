@@ -18,6 +18,8 @@ const _knownFamilies = [
   'hotkeys_',
   'ai.',
   'onboarding.',
+  'local_components.',
+  'setup.',
 ];
 
 void main() {

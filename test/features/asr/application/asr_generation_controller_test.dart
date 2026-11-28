@@ -171,50 +171,6 @@ void main() {
     );
   });
 
-  test('maps CreditsFailure to asrErrorCreditsExhausted', () async {
-    final source = File('${tempDir.path}/audio.wav')
-      ..writeAsBytesSync([1, 2, 3]);
-    final container = containerFor(
-      _ThrowingAsrCapability(const CreditsFailure('Daily limit reached')),
-    );
-    addTearDown(container.dispose);
-
-    await container
-        .read(asrGenerationControllerProvider('audio-1').notifier)
-        .generateTranscript(mediaSourceUri: source.path, kind: MediaKind.audio);
-
-    expect(
-      container
-          .read(asrGenerationControllerProvider('audio-1'))
-          .valueOrNull
-          ?.errorMessage,
-      'asrErrorCreditsExhausted',
-    );
-  });
-
-  test('carries the CreditsFailure on the job for the launcher CTA', () async {
-    final source = File('${tempDir.path}/audio.wav')
-      ..writeAsBytesSync([1, 2, 3]);
-    final failure = const CreditsFailure(
-      'HTTP 402',
-      requiredCredits: 1200,
-      usedCredits: 400,
-      limitCredits: 1000,
-    );
-    final container = containerFor(_ThrowingAsrCapability(failure));
-    addTearDown(container.dispose);
-
-    await container
-        .read(asrGenerationControllerProvider('audio-1').notifier)
-        .generateTranscript(mediaSourceUri: source.path, kind: MediaKind.audio);
-
-    final job = container
-        .read(asrGenerationControllerProvider('audio-1'))
-        .valueOrNull;
-    expect(job?.creditsFailure, same(failure));
-    expect(job?.creditsFailure?.remainingCredits, 600);
-  });
-
   test('maps NetworkFailure to asrErrorNetwork', () async {
     final source = File('${tempDir.path}/audio.wav')
       ..writeAsBytesSync([1, 2, 3]);

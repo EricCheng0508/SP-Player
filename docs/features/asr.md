@@ -57,18 +57,11 @@ returns a detected language, both the generated track and the media row use it.
 
 `AsrAudioExtractionException` carries one of `ffmpegUnavailable`,
 `noAudioTrack`, `ffmpegFailed`, `fileTooLarge`, or `unsupportedSource`. The
-presentation boundary maps those reasons, provider setup failures, credit
-failures (including long-form preflight/settlement), provider timeout/retryable
+presentation boundary maps those reasons, provider setup failures, provider
+billing failures (402 from the user’s own endpoint), provider timeout/retryable
 failures, unsupported media, network failures, and no-speech results to
-localized notices; raw exceptions are not displayed.
-
-**Credits exhaustion (spec 045)**: a credits rejection keeps the
-`asrErrorCreditsExhausted` lead-in and carries the parsed worker envelope on
-the job (`AsrGenerationJob.creditsFailure`), so the launcher snackbar shows the
-numbered message (required vs. remaining, reset time) with the
-**View plans & packages** action → `/subscription` when the envelope is
-present. The media item and its state are untouched — Generate can be re-run
-after purchasing.
+localized notices; raw exceptions are not displayed. The media item and its
+state are untouched — Generate can be re-run at any time.
 
 Video extraction runs through FFmpegKit on mobile/macOS and an isolate-backed
 `Process.run` on Windows. Both go through the one shared runner

@@ -1,17 +1,11 @@
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/youtube_subscription_source.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/application/profile_practice_stats_provider.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 import 'package:enjoy_player/features/discover/domain/discover_channel.dart';
 import 'package:enjoy_player/features/discover/domain/feed_entry.dart';
 import 'package:enjoy_player/features/library/application/library_media_provider.dart';
 import 'package:enjoy_player/features/library/domain/learning_statistics.dart';
 import 'package:enjoy_player/features/library/domain/media.dart';
 import 'package:enjoy_player/features/library/domain/practice_resume.dart';
-import 'package:enjoy_player/features/sync/application/sync_providers.dart';
-import 'package:enjoy_player/features/sync/data/sync_queue_repository.dart';
 import 'package:enjoy_player/data/subtitle/transcript_line.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_lines_provider.dart';
 import 'package:enjoy_player/features/vocabulary/application/vocabulary_providers.dart';
@@ -21,20 +15,6 @@ import 'package:enjoy_player/features/vocabulary/domain/vocabulary_stats.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 
 import 'fixtures.dart';
-
-/// The boards' sample account: Alex Chen on the Free plan.
-class BoardAuthCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedIn(
-    profile: UserProfile(
-      id: '10482231',
-      email: 'alex@example.com',
-      name: 'Alex Chen',
-      subscriptionTier: SubscriptionTier.free,
-      goal: 15,
-    ),
-  );
-}
 
 final _now = DateTime(2026, 10, 1, 21, 4);
 
@@ -359,27 +339,6 @@ Future<void> seedBoardData(AppDatabase db) async {
   }
 }
 
-final boardSyncQueue = SyncQueueSnapshot(
-  retryablePending: 3,
-  permanentlyFailed: 1,
-  detailRows: [
-    for (final (i, (type, id, action, retries)) in [
-      ('recording', 'take-4', 'create', 0),
-      ('vocabulary_item', 'w0', 'update', 0),
-      ('video', 'lv7', 'update', 0),
-      ('audio', 'la3', 'create', 5),
-    ].indexed)
-      SyncQueueRow(
-        id: i,
-        entityType: type,
-        entityId: id,
-        action: action,
-        retryCount: retries,
-        createdAt: _now.subtract(Duration(minutes: i * 2)),
-      ),
-  ],
-);
-
 /// Board data layered over [baseOverrides]; later overrides win.
 const _boardStatistics = LearningStatistics(
   today: PeriodStats(recordingDurationMs: 720000, recordingCount: 12),
@@ -434,11 +393,10 @@ class BoardReviewSession extends VocabularyReviewSession {
 }
 
 /// Board data for every app screen; one override per provider.
-List<Override> boardOverrides(AppDatabase db, {AuthCtrl Function()? auth}) => [
+List<Override> boardOverrides(AppDatabase db) => [
   ...baseOverrides(
     db,
     recents: boardRecents(),
-    auth: auth ?? BoardAuthCtrl.new,
     statistics: _boardStatistics,
     reviewSession: BoardReviewSession.new,
     resume: PracticeResume(
@@ -465,7 +423,6 @@ List<Override> boardOverrides(AppDatabase db, {AuthCtrl Function()? auth}) => [
     (ref) =>
         Stream.value((audio: boardAudios.length, video: boardVideos.length)),
   ),
-  profilePracticeStatsProvider.overrideWith((ref) async => _boardStatistics),
   transcriptLinesForMediaProvider('la1').overrideWith(
     (ref) => Stream.value([
       for (final (i, text) in _ferryLines.indexed)
@@ -473,8 +430,4 @@ List<Override> boardOverrides(AppDatabase db, {AuthCtrl Function()? auth}) => [
     ]),
   ),
   vocabularyStatsProvider.overrideWithValue(boardVocabularyStats),
-  syncQueueSnapshotProvider.overrideWith((ref) => Stream.value(boardSyncQueue)),
-  syncLastFullSyncAtProvider.overrideWith(
-    (ref) async => _now.toUtc().toIso8601String(),
-  ),
 ];

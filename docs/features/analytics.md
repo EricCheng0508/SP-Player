@@ -37,7 +37,7 @@ Settings → About → **Usage analytics** (`Switch.adaptive`). Persisted as the
 
 ## Event catalog
 
-Source of truth: [`specs/046-posthog-analytics-integration/contracts/event-catalog.md`](../../specs/046-posthog-analytics-integration/contracts/event-catalog.md); code constants in `lib/core/analytics/analytics_events.dart` (a unit test keeps the two in sync). Journeys covered: practice (shadow reading / word practice / flashcard), transcript generation (ASR / YouTube refresh / subtitle import), dictionary lookup, translation (standard + contextual), craft creation, vocabulary review completion, subscription and credits purchases.
+Source of truth: [`specs/046-posthog-analytics-integration/contracts/event-catalog.md`](../../specs/046-posthog-analytics-integration/contracts/event-catalog.md); code constants in `lib/core/analytics/analytics_events.dart` (a unit test keeps the two in sync). Journeys covered: practice (shadow reading / word practice / flashcard), transcript generation (ASR / YouTube refresh / subtitle import), dictionary lookup, translation (standard + contextual), craft creation, and vocabulary review completion.
 
 House rules:
 

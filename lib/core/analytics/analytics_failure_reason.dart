@@ -18,10 +18,7 @@ AnalyticsFailureReason analyticsFailureReasonFromAppFailure(
     statusCode != null && statusCode >= 500
         ? AnalyticsFailureReason.server
         : AnalyticsFailureReason.network,
-  CreditsFailure() => AnalyticsFailureReason.credits,
   ProviderBillingFailure() => AnalyticsFailureReason.credits,
-  AuthFailure() => AnalyticsFailureReason.auth,
-  SubscriptionConflictFailure() => AnalyticsFailureReason.server,
   FileFailure() ||
   UnsupportedImportFileFailure() => AnalyticsFailureReason.local,
 };

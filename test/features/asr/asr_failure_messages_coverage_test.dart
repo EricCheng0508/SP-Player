@@ -51,30 +51,6 @@ void main() {
   });
 
   group('asrLongFormFailureMessageKey', () {
-    test('maps billing_exhausted to credits exhausted', () {
-      expect(
-        asrLongFormFailureMessageKey(
-          const AsrLongFormJobException(
-            category: 'billing_exhausted',
-            retryable: false,
-          ),
-        ),
-        'asrErrorCreditsExhausted',
-      );
-    });
-
-    test('maps credits_exhausted to credits exhausted', () {
-      expect(
-        asrLongFormFailureMessageKey(
-          const AsrLongFormJobException(
-            category: 'credits_exhausted',
-            retryable: false,
-          ),
-        ),
-        'asrErrorCreditsExhausted',
-      );
-    });
-
     test('maps unsupported_media', () {
       expect(
         asrLongFormFailureMessageKey(
@@ -338,13 +314,6 @@ void main() {
       expect(
         asrMessageForKey(l10n, 'asrErrorByokMissing'),
         l10n.asrErrorByokMissing,
-      );
-    });
-
-    test('resolves asrErrorCreditsExhausted', () {
-      expect(
-        asrMessageForKey(l10n, 'asrErrorCreditsExhausted'),
-        l10n.asrErrorCreditsExhausted,
       );
     });
 

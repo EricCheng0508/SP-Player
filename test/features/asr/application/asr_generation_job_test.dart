@@ -73,9 +73,9 @@ void main() {
         mediaId: 'media-3',
         language: 'zh-CN',
         phase: AsrGenerationPhase.error,
-        errorMessage: 'asrErrorCreditsExhausted',
+        errorMessage: 'asrErrorGeneric',
       );
-      expect(job.errorMessage, 'asrErrorCreditsExhausted');
+      expect(job.errorMessage, 'asrErrorGeneric');
       expect(job.phase, AsrGenerationPhase.error);
     });
 

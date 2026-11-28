@@ -1,5 +1,5 @@
-/// Local transcript repository: track watching, resolution on open, cloud /
-/// YouTube fetching, subtitle import, and auto-translate track management.
+/// Local transcript repository: track watching, resolution on open, YouTube
+/// caption fetching, subtitle import, and auto-translate track management.
 ///
 /// This file is the API surface: the class declaration with every public
 /// member plus the module-private helpers shared by the part files. All
@@ -26,7 +26,6 @@ import '../../../core/ids/enjoy_ids.dart';
 import '../../../core/logging/log.dart';
 import '../../../core/utils/stream_distinct.dart';
 import '../../../core/utils/youtube_video_identity.dart';
-import '../../../data/api/services/transcript_api.dart';
 import '../../../data/db/app_database.dart';
 import '../../../data/db/transcript_row.dart';
 import '../../../data/db/media_registry.dart';
@@ -41,7 +40,6 @@ import '../domain/transcript_fetch_status.dart';
 import '../domain/transcript_track.dart';
 import 'sidecar_subtitle_discovery.dart';
 import 'transcript_timeline_codec.dart';
-import 'transcript_timeline_parse.dart';
 import 'youtube_caption_fetcher.dart';
 
 part 'transcript_repository_auto_translate.dart';
@@ -54,13 +52,12 @@ part 'transcript_repository_tracks.dart';
 part 'transcript_repository_youtube_fetch.dart';
 
 /// Owns transcript rows for a media target: watching tracks, resolving the
-/// primary transcript on open, fetching cloud / YouTube transcripts,
+/// primary transcript on open, fetching YouTube caption transcripts,
 /// importing subtitles, and managing active tracks.
 class TranscriptRepository {
-  TranscriptRepository(this._db, {this._transcriptApi, this._youtubeFetcher});
+  TranscriptRepository(this._db, {this._youtubeFetcher});
 
   final AppDatabase _db;
-  final TranscriptApi? _transcriptApi;
   final YoutubeCaptionFetcher? _youtubeFetcher;
 
   final TranscriptTimelineCache _linesCache = TranscriptTimelineCache();
@@ -111,12 +108,12 @@ class TranscriptRepository {
   ///
   /// 1. Ensures a primary transcript when tracks exist.
   /// 2. Imports adjacent sidecar `.srt` / `.vtt` for local files.
-  /// 3. Optionally fetches cloud / YouTube transcripts when [fetchCloud].
+  /// 3. Optionally fetches YouTube caption transcripts when [fetchCloud].
   ///
-  /// [nativeLanguage] / [learningLanguage] are forwarded to the YouTube
-  /// branch so the post-fetch primary picker can prefer tracks matching the
-  /// video's content language first, then the user's learning language,
-  /// then fall back to source priority.
+  /// [learningLanguage] is forwarded to the YouTube branch so the post-fetch
+  /// primary picker can prefer tracks matching the video's content language
+  /// first, then the user's learning language, then fall back to source
+  /// priority.
   Future<TranscriptResolveResult> resolveOnOpen(
     String mediaId, {
     bool forceCloud = false,
@@ -131,7 +128,7 @@ class TranscriptRepository {
     learningLanguage: learningLanguage,
   );
 
-  /// Fetches transcripts from the Enjoy API and upserts them locally.
+  /// Fetches YouTube caption transcripts and upserts them locally.
   ///
   /// When [force] is false, skips if this target was already fetched once
   /// ([TranscriptFetchStates]). On success, marks fetch state. Errors are

@@ -9,19 +9,9 @@ import 'package:enjoy_player/core/application/app_preferences_provider.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/data/subtitle/transcript_line.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 import 'package:enjoy_player/features/transcript/application/auto_translate_selection_providers.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_repository_provider.dart';
 import 'package:enjoy_player/features/transcript/domain/auto_translate.dart';
-
-class _SignedInAuthCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedIn(
-    profile: UserProfile(id: 'u1', email: 't@example.com', name: 'Test'),
-  );
-}
 
 class _ZhNativePrefsCtrl extends AppPreferencesCtrl {
   @override
@@ -104,7 +94,6 @@ void main() {
         overrides: [
           appDatabaseProvider.overrideWithValue(db),
           transcriptRepositoryProvider.overrideWithValue(repo),
-          authCtrlProvider.overrideWith(_SignedInAuthCtrl.new),
           appPreferencesCtrlProvider.overrideWith(_ZhNativePrefsCtrl.new),
         ],
       );
@@ -183,45 +172,38 @@ void main() {
       await db.close();
     });
 
-    test(
-      'returns predicted AI track id when signed in with native language',
-      () async {
-        container = ProviderContainer(
-          overrides: [
-            appDatabaseProvider.overrideWithValue(db),
-            transcriptRepositoryProvider.overrideWithValue(repo),
-            authCtrlProvider.overrideWith(_SignedInAuthCtrl.new),
-            appPreferencesCtrlProvider.overrideWith(_ZhNativePrefsCtrl.new),
-          ],
-        );
-        await container.read(authCtrlProvider.future);
-        await container.read(appPreferencesCtrlProvider.future);
+    test('returns predicted AI track id for the native language', () async {
+      container = ProviderContainer(
+        overrides: [
+          appDatabaseProvider.overrideWithValue(db),
+          transcriptRepositoryProvider.overrideWithValue(repo),
+          appPreferencesCtrlProvider.overrideWith(_ZhNativePrefsCtrl.new),
+        ],
+      );
+      await container.read(appPreferencesCtrlProvider.future);
 
-        final result = await container.read(
-          autoTranslateSelectionIdProvider(mediaId).future,
-        );
-        expect(result, isNotNull);
-        expect(
-          result,
-          autoTranslateAiTrackId(
-            targetType: 'Video',
-            mediaId: mediaId,
-            targetLanguage: 'zh-CN',
-          ),
-        );
-      },
-    );
+      final result = await container.read(
+        autoTranslateSelectionIdProvider(mediaId).future,
+      );
+      expect(result, isNotNull);
+      expect(
+        result,
+        autoTranslateAiTrackId(
+          targetType: 'Video',
+          mediaId: mediaId,
+          targetLanguage: 'zh-CN',
+        ),
+      );
+    });
 
     test('returns null for unknown media id', () async {
       container = ProviderContainer(
         overrides: [
           appDatabaseProvider.overrideWithValue(db),
           transcriptRepositoryProvider.overrideWithValue(repo),
-          authCtrlProvider.overrideWith(_SignedInAuthCtrl.new),
           appPreferencesCtrlProvider.overrideWith(_ZhNativePrefsCtrl.new),
         ],
       );
-      await container.read(authCtrlProvider.future);
       await container.read(appPreferencesCtrlProvider.future);
       final result = await container.read(
         autoTranslateSelectionIdProvider('nonexistent-media').future,

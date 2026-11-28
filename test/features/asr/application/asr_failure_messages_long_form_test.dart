@@ -12,7 +12,7 @@ void main() {
           retryable: false,
         ),
       ),
-      'asrErrorCreditsExhausted',
+      'asrErrorGeneric',
     );
     expect(
       asrLongFormFailureMessageKey(
@@ -21,7 +21,7 @@ void main() {
           retryable: false,
         ),
       ),
-      'asrErrorCreditsExhausted',
+      'asrErrorGeneric',
     );
     expect(
       asrLongFormFailureMessageKey(

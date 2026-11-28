@@ -4,13 +4,10 @@ import 'package:http/http.dart' as http;
 
 AppFailure mapApiExceptionToAppFailure(ApiException e) {
   if (e.isUnauthorized) {
-    return AuthFailure(e.message, code: AuthFailureCode.sessionRevoked);
+    return NetworkFailure(e.message, statusCode: e.statusCode);
   }
   if (e.statusCode == 402) {
-    if (e.byokProvider) {
-      return ProviderBillingFailure(e.message);
-    }
-    return CreditsFailure.fromApiException(e);
+    return ProviderBillingFailure(e.message);
   }
   return NetworkFailure(e.message, statusCode: e.statusCode);
 }

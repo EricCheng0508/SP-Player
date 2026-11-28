@@ -58,7 +58,6 @@ class _FullTranslateProgressBannerState
         return l10n.fullTranslateBannerPausedFailure(state.failedCount);
       case FullTranslateBlockReason.stopped:
         return l10n.fullTranslateBannerPausedStopped;
-      case FullTranslateBlockReason.auth:
       case FullTranslateBlockReason.noTranslatableSource:
       case FullTranslateBlockReason.trackFailed:
         return l10n.fullTranslateBannerErrorGeneric;

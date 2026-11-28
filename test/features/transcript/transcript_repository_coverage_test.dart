@@ -1,48 +1,64 @@
 /// Additional coverage tests for [TranscriptRepository].
 ///
 /// Targets uncovered branches: resolveOnOpen orchestration, fetchCloudTranscripts
-/// with a real (fake-HTTP) TranscriptApi, primaryTranscriptRowForMedia, watchTracks,
-/// upsertAsrGeneratedTrack edge cases, deleteTranscript edge cases, and internal
-/// helpers (_normalizeSource default, _parseServerDate, _transcriptRowFromServerMap).
+/// with a stubbed [YoutubeCaptionFetcher], primaryTranscriptRowForMedia, watchTracks,
+/// upsertAsrGeneratedTrack edge cases, deleteTranscript edge cases, and the
+/// decoded-timeline cache.
 library;
 
 import 'dart:convert';
 
 import 'package:drift/native.dart';
-import 'package:enjoy_player/data/api/api_client.dart';
-import 'package:enjoy_player/data/api/services/transcript_api.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/subtitle/transcript_line.dart';
+import 'package:enjoy_player/features/transcript/data/client_profile.dart';
 import 'package:enjoy_player/features/transcript/data/transcript_repository.dart';
+import 'package:enjoy_player/features/transcript/data/youtube_caption_fetcher.dart';
 import 'package:enjoy_player/features/transcript/domain/transcript_fetch_status.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
-import 'package:http/testing.dart';
 
-ApiClient _fakeApiClient(MockClient client) {
-  return ApiClient(
-    httpClient: client,
-    getBaseUrl: () async => 'https://fake.test',
-    getAccessToken: () async => 'token',
+class _StubYoutubeCaptionFetcher extends YoutubeCaptionFetcher {
+  _StubYoutubeCaptionFetcher(this._results)
+    : super(httpClient: http.Client(), profiles: kBuiltInClientProfiles);
+
+  final List<AllCaptionsResult> _results;
+  int calls = 0;
+
+  @override
+  Future<AllCaptionsResult> fetchAllSubtitles({
+    required String videoId,
+    String preferredLang = 'en',
+  }) async {
+    calls++;
+    if (_results.length == 1) return _results.single;
+    return _results[calls - 1];
+  }
+}
+
+Future<void> _insertYoutubeVideo(AppDatabase db, String id) async {
+  final now = DateTime.utc(2026, 1, 1);
+  await db.videoDao.insertRow(
+    VideoRow(
+      id: id,
+      vid: 'dQw4w9WgXcQ',
+      provider: 'youtube',
+      title: 'Test Video',
+      description: null,
+      thumbnailUrl: null,
+      durationSeconds: 120,
+      language: 'en',
+      source: 'youtube',
+      localUri: null,
+      md5: null,
+      size: null,
+      mediaUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      syncStatus: null,
+      serverUpdatedAt: null,
+      createdAt: now,
+      updatedAt: now,
+    ),
   );
-}
-
-TranscriptApi _transcriptApiReturning(List<Map<String, dynamic>> items) {
-  final client = MockClient((request) async {
-    return http.Response(
-      jsonEncode(items),
-      200,
-      headers: {'content-type': 'application/json'},
-    );
-  });
-  return TranscriptApi(_fakeApiClient(client));
-}
-
-TranscriptApi _transcriptApiThrowing(String message) {
-  final client = MockClient((request) async {
-    throw Exception(message);
-  });
-  return TranscriptApi(_fakeApiClient(client));
 }
 
 Future<void> _insertAudio(AppDatabase db, String id) async {
@@ -131,36 +147,6 @@ Future<void> _insertTranscriptRow(
   );
 }
 
-Map<String, dynamic> _serverTranscriptItem({
-  required String id,
-  String targetType = 'Audio',
-  required String targetId,
-  String language = 'en',
-  String source = 'official',
-  List<Map<String, dynamic>>? timeline,
-  String? createdAt,
-  String? updatedAt,
-  String? label,
-  String? referenceId,
-}) {
-  return {
-    'id': id,
-    'targetType': targetType,
-    'targetId': targetId,
-    'language': language,
-    'source': source,
-    'timeline':
-        timeline ??
-        [
-          {'text': 'line1', 'start': 0, 'duration': 1000},
-        ],
-    if (createdAt != null) 'createdAt': createdAt,
-    if (updatedAt != null) 'updatedAt': updatedAt,
-    if (label != null) 'label': label,
-    if (referenceId != null) 'referenceId': referenceId,
-  };
-}
-
 void main() {
   group('resolveOnOpen', () {
     late AppDatabase db;
@@ -190,10 +176,12 @@ void main() {
       expect(result.errorMessage, isNull);
     });
 
-    test('reports error message when cloud fetch fails', () async {
-      await _insertAudio(db, 'a2');
-      final api = _transcriptApiThrowing('network down');
-      final repo = TranscriptRepository(db, transcriptApi: api);
+    test('reports error message when the YouTube fetch fails', () async {
+      await _insertYoutubeVideo(db, 'a2');
+      final fetcher = _StubYoutubeCaptionFetcher([
+        const AllCaptionsResult(error: 'network down'),
+      ]);
+      final repo = TranscriptRepository(db, youtubeFetcher: fetcher);
 
       final result = await repo.resolveOnOpen('a2', fetchCloud: true);
 
@@ -202,14 +190,25 @@ void main() {
     });
 
     test('persists fetch outcome on non-skipped cloud status', () async {
-      await _insertAudio(db, 'a3');
-      final api = _transcriptApiReturning([]);
-      final repo = TranscriptRepository(db, transcriptApi: api);
+      await _insertYoutubeVideo(db, 'a3');
+      final fetcher = _StubYoutubeCaptionFetcher([
+        const AllCaptionsResult(
+          results: [
+            CaptionFetchResult(
+              subtitles: [],
+              language: 'en',
+              fetchProfile: 'ios',
+            ),
+          ],
+          fetchProfile: 'ios',
+        ),
+      ]);
+      final repo = TranscriptRepository(db, youtubeFetcher: fetcher);
 
       await repo.resolveOnOpen('a3', fetchCloud: true);
 
       final state = await db.transcriptFetchStateDao.getForTarget(
-        'Audio',
+        'Video',
         'a3',
       );
       expect(state, isNotNull);
@@ -257,214 +256,61 @@ void main() {
     });
 
     test('skips when prior fetch state is non-error and not forced', () async {
-      await _insertAudio(db, 'b1');
+      await _insertYoutubeVideo(db, 'b1');
       await db.transcriptFetchStateDao.upsertOutcome(
-        targetType: 'Audio',
+        targetType: 'Video',
         targetId: 'b1',
         lastFetchedAt: DateTime.utc(2026),
         lastStatus: 'success',
       );
 
-      final api = _transcriptApiReturning([
-        _serverTranscriptItem(id: 'x', targetId: 'b1'),
+      final fetcher = _StubYoutubeCaptionFetcher([
+        const AllCaptionsResult(error: 'should not be called'),
       ]);
-      final repo = TranscriptRepository(db, transcriptApi: api);
+      final repo = TranscriptRepository(db, youtubeFetcher: fetcher);
       final result = await repo.fetchCloudTranscripts('b1');
 
       expect(result.status, TranscriptCloudFetchStatus.skipped);
+      expect(fetcher.calls, 0);
     });
 
     test('retries when prior fetch state is error and not forced', () async {
-      await _insertAudio(db, 'b2');
+      await _insertYoutubeVideo(db, 'b2');
       await db.transcriptFetchStateDao.upsertOutcome(
-        targetType: 'Audio',
+        targetType: 'Video',
         targetId: 'b2',
         lastFetchedAt: DateTime.utc(2026),
         lastStatus: 'error',
         lastError: 'prev failure',
       );
 
-      final api = _transcriptApiReturning([
-        _serverTranscriptItem(id: 'x2', targetId: 'b2'),
+      final fetcher = _StubYoutubeCaptionFetcher([
+        const AllCaptionsResult(
+          results: [
+            CaptionFetchResult(
+              subtitles: [
+                TranscriptLine(text: 'hi', startMs: 0, durationMs: 1000),
+              ],
+              source: 'official',
+              language: 'en',
+              fetchProfile: 'ios',
+            ),
+          ],
+          fetchProfile: 'ios',
+        ),
       ]);
-      final repo = TranscriptRepository(db, transcriptApi: api);
+      final repo = TranscriptRepository(db, youtubeFetcher: fetcher);
       final result = await repo.fetchCloudTranscripts('b2');
 
       expect(result.status, TranscriptCloudFetchStatus.success);
       expect(result.storedCount, 1);
     });
 
-    test('returns skipped when api is null', () async {
+    test('returns skipped for targets without cloud transcripts', () async {
       await _insertAudio(db, 'b3');
       final repo = TranscriptRepository(db);
       final result = await repo.fetchCloudTranscripts('b3');
       expect(result.status, TranscriptCloudFetchStatus.skipped);
-    });
-
-    test('stores transcripts and returns success', () async {
-      await _insertAudio(db, 'b4');
-      final api = _transcriptApiReturning([
-        _serverTranscriptItem(
-          id: 'srv-1',
-          targetId: 'b4',
-          language: 'en',
-          source: 'official',
-          label: 'English',
-        ),
-        _serverTranscriptItem(
-          id: 'srv-2',
-          targetId: 'b4',
-          language: 'es',
-          source: 'auto',
-          label: 'Spanish',
-        ),
-      ]);
-      final repo = TranscriptRepository(db, transcriptApi: api);
-      final result = await repo.fetchCloudTranscripts('b4', force: true);
-
-      expect(result.status, TranscriptCloudFetchStatus.success);
-      expect(result.storedCount, 2);
-
-      final rows = await db.transcriptDao.listForTarget('Audio', 'b4');
-      expect(rows, hasLength(2));
-    });
-
-    test('returns empty when api returns empty list', () async {
-      await _insertAudio(db, 'b5');
-      final api = _transcriptApiReturning([]);
-      final repo = TranscriptRepository(db, transcriptApi: api);
-      final result = await repo.fetchCloudTranscripts('b5', force: true);
-
-      expect(result.status, TranscriptCloudFetchStatus.empty);
-    });
-
-    test('returns error when api throws', () async {
-      await _insertAudio(db, 'b6');
-      final api = _transcriptApiThrowing('timeout');
-      final repo = TranscriptRepository(db, transcriptApi: api);
-      final result = await repo.fetchCloudTranscripts('b6', force: true);
-
-      expect(result.status, TranscriptCloudFetchStatus.error);
-      expect(result.errorMessage, contains('timeout'));
-    });
-
-    test('returns error when all server items fail to produce rows', () async {
-      await _insertAudio(db, 'b7');
-      final api = _transcriptApiReturning([
-        {'id': null, 'targetType': 'Audio', 'targetId': 'b7'},
-        {'id': 'x', 'targetType': null, 'targetId': 'b7'},
-      ]);
-      final repo = TranscriptRepository(db, transcriptApi: api);
-      final result = await repo.fetchCloudTranscripts('b7', force: true);
-
-      expect(result.status, TranscriptCloudFetchStatus.error);
-      expect(result.errorMessage, 'Could not store cloud transcripts');
-    });
-
-    test('normalizes unknown source to official', () async {
-      await _insertAudio(db, 'b8');
-      final api = _transcriptApiReturning([
-        _serverTranscriptItem(
-          id: 'srv-unk',
-          targetId: 'b8',
-          source: 'mystery_source',
-        ),
-      ]);
-      final repo = TranscriptRepository(db, transcriptApi: api);
-      final result = await repo.fetchCloudTranscripts('b8', force: true);
-
-      expect(result.status, TranscriptCloudFetchStatus.success);
-      final rows = await db.transcriptDao.listForTarget('Audio', 'b8');
-      expect(rows.single.source, 'official');
-    });
-
-    test('parses server dates from string fields', () async {
-      await _insertAudio(db, 'b9');
-      final api = _transcriptApiReturning([
-        _serverTranscriptItem(
-          id: 'srv-dates',
-          targetId: 'b9',
-          createdAt: '2025-06-15T10:30:00.000Z',
-          updatedAt: '2025-07-01T12:00:00.000Z',
-        ),
-      ]);
-      final repo = TranscriptRepository(db, transcriptApi: api);
-      await repo.fetchCloudTranscripts('b9', force: true);
-
-      final row = await db.transcriptDao.getById('srv-dates');
-      expect(row, isNotNull);
-      expect(
-        row!.createdAt.millisecondsSinceEpoch,
-        DateTime.utc(2025, 6, 15, 10, 30).millisecondsSinceEpoch,
-      );
-      expect(
-        row.serverUpdatedAt!.millisecondsSinceEpoch,
-        DateTime.utc(2025, 7, 1, 12).millisecondsSinceEpoch,
-      );
-    });
-
-    test('uses fallback date when server date is not a string', () async {
-      await _insertAudio(db, 'b10');
-      final api = _transcriptApiReturning([
-        {
-          'id': 'srv-nodate',
-          'targetType': 'Audio',
-          'targetId': 'b10',
-          'language': 'en',
-          'source': 'official',
-          'timeline': [
-            {'text': 'hi', 'start': 0, 'duration': 500},
-          ],
-          'createdAt': 12345,
-          'updatedAt': null,
-        },
-      ]);
-      final repo = TranscriptRepository(db, transcriptApi: api);
-      await repo.fetchCloudTranscripts('b10', force: true);
-
-      final row = await db.transcriptDao.getById('srv-nodate');
-      expect(row, isNotNull);
-      expect(
-        row!.createdAt.isAfter(
-          DateTime.now().subtract(const Duration(minutes: 1)),
-        ),
-        isTrue,
-      );
-    });
-
-    test('skips items with empty timeline', () async {
-      await _insertAudio(db, 'b11');
-      final api = _transcriptApiReturning([
-        _serverTranscriptItem(
-          id: 'srv-empty-tl',
-          targetId: 'b11',
-          timeline: [],
-        ),
-        _serverTranscriptItem(id: 'srv-good', targetId: 'b11', language: 'fr'),
-      ]);
-      final repo = TranscriptRepository(db, transcriptApi: api);
-      final result = await repo.fetchCloudTranscripts('b11', force: true);
-
-      expect(result.status, TranscriptCloudFetchStatus.success);
-      expect(result.storedCount, 1);
-      final rows = await db.transcriptDao.listForTarget('Audio', 'b11');
-      expect(rows, hasLength(1));
-      expect(rows.single.id, 'srv-good');
-    });
-
-    test('sets primary transcript after successful cloud fetch', () async {
-      await _insertAudio(db, 'b12');
-      final api = _transcriptApiReturning([
-        _serverTranscriptItem(id: 'srv-pri', targetId: 'b12'),
-      ]);
-      final repo = TranscriptRepository(db, transcriptApi: api);
-      await repo.fetchCloudTranscripts('b12', force: true);
-
-      final session = await db.echoSessionDao.getLatestForTarget(
-        'Audio',
-        'b12',
-      );
-      expect(session?.transcriptId, 'srv-pri');
     });
   });
 
@@ -1021,7 +867,7 @@ void main() {
     });
   });
 
-  group('fetchCloudTranscripts with Video target (non-YouTube)', () {
+  group('fetchCloudTranscripts with Video target', () {
     late AppDatabase db;
 
     setUp(() {
@@ -1030,21 +876,20 @@ void main() {
 
     tearDown(() => db.close());
 
-    test('uses transcript api for non-YouTube video', () async {
-      await _insertVideo(db, 'v1');
-      final api = _transcriptApiReturning([
-        _serverTranscriptItem(
-          id: 'srv-v1',
-          targetType: 'Video',
-          targetId: 'v1',
-        ),
-      ]);
-      final repo = TranscriptRepository(db, transcriptApi: api);
-      final result = await repo.fetchCloudTranscripts('v1', force: true);
+    test(
+      'returns skipped for a non-YouTube video even with a fetcher',
+      () async {
+        await _insertVideo(db, 'v1');
+        final fetcher = _StubYoutubeCaptionFetcher([
+          const AllCaptionsResult(error: 'should not be called'),
+        ]);
+        final repo = TranscriptRepository(db, youtubeFetcher: fetcher);
+        final result = await repo.fetchCloudTranscripts('v1', force: true);
 
-      expect(result.status, TranscriptCloudFetchStatus.success);
-      expect(result.storedCount, 1);
-    });
+        expect(result.status, TranscriptCloudFetchStatus.skipped);
+        expect(fetcher.calls, 0);
+      },
+    );
 
     test('returns skipped for YouTube video when fetcher is null', () async {
       final now = DateTime.utc(2026, 1, 1);
@@ -1087,14 +932,16 @@ void main() {
     tearDown(() => db.close());
 
     test('persists error status with error message', () async {
-      await _insertAudio(db, 'p1');
-      final api = _transcriptApiThrowing('server error');
-      final repo = TranscriptRepository(db, transcriptApi: api);
+      await _insertYoutubeVideo(db, 'p1');
+      final fetcher = _StubYoutubeCaptionFetcher([
+        const AllCaptionsResult(error: 'server error'),
+      ]);
+      final repo = TranscriptRepository(db, youtubeFetcher: fetcher);
 
       await repo.resolveOnOpen('p1', fetchCloud: true);
 
       final state = await db.transcriptFetchStateDao.getForTarget(
-        'Audio',
+        'Video',
         'p1',
       );
       expect(state, isNotNull);
@@ -1103,16 +950,28 @@ void main() {
     });
 
     test('persists success status', () async {
-      await _insertAudio(db, 'p2');
-      final api = _transcriptApiReturning([
-        _serverTranscriptItem(id: 'srv-p2', targetId: 'p2'),
+      await _insertYoutubeVideo(db, 'p2');
+      final fetcher = _StubYoutubeCaptionFetcher([
+        const AllCaptionsResult(
+          results: [
+            CaptionFetchResult(
+              subtitles: [
+                TranscriptLine(text: 'hi', startMs: 0, durationMs: 1000),
+              ],
+              source: 'official',
+              language: 'en',
+              fetchProfile: 'ios',
+            ),
+          ],
+          fetchProfile: 'ios',
+        ),
       ]);
-      final repo = TranscriptRepository(db, transcriptApi: api);
+      final repo = TranscriptRepository(db, youtubeFetcher: fetcher);
 
       await repo.resolveOnOpen('p2', fetchCloud: true);
 
       final state = await db.transcriptFetchStateDao.getForTarget(
-        'Audio',
+        'Video',
         'p2',
       );
       expect(state, isNotNull);

@@ -23,5 +23,5 @@ YouTube/Netflix video ids are globally unique. Treating `videos.user_id` as libr
 
 ## Related
 
-- [sync.md](../features/sync.md)
+- `sync.md` (removed in ADR-0107)
 - [ADR-0013](0013-local-first-sync.md)

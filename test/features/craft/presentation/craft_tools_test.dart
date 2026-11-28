@@ -8,9 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:enjoy_player/core/application/app_preferences_provider.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_button.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 import 'package:enjoy_player/features/craft/application/craft_controller.dart';
 import 'package:enjoy_player/features/craft/domain/craft_synthesizer.dart';
 import 'package:enjoy_player/features/craft/domain/craft_translator.dart';
@@ -22,18 +19,6 @@ import 'package:enjoy_player/features/craft/presentation/widgets/craft_preview_p
 import 'package:enjoy_player/features/craft/application/craft_library_repository_provider.dart';
 import 'package:enjoy_player/features/craft/data/craft_library_repository.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
-
-class _AuthSignedInCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedIn(
-    profile: UserProfile(id: 'test-user', email: 't@example.com', name: 'Test'),
-  );
-}
-
-class _AuthSignedOutCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedOut();
-}
 
 class _FakePrefsCtrl extends AppPreferencesCtrl {
   @override
@@ -98,11 +83,7 @@ Widget _harness({required List<Override> overrides, required Widget child}) {
   );
 }
 
-List<Override> _baseOverrides({
-  AuthCtrl Function()? auth,
-  CraftTranslator? translator,
-}) => [
-  authCtrlProvider.overrideWith(auth ?? _AuthSignedInCtrl.new),
+List<Override> _baseOverrides({CraftTranslator? translator}) => [
   appPreferencesCtrlProvider.overrideWith(_FakePrefsCtrl.new),
   craftTranslatorProvider.overrideWithValue(translator ?? _FakeTranslator()),
   craftSynthesizerProvider.overrideWithValue(_FakeSynthesizer()),
@@ -568,7 +549,6 @@ void main() {
       await tester.pumpAndSettle();
 
       final controller = container.read(craftControllerProvider.notifier);
-      await container.read(authCtrlProvider.future);
       controller.setSynthText('Hello world, this is a test sentence');
       await tester.pumpAndSettle();
       await controller.synthesize();
@@ -591,41 +571,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('EN'), findsOneWidget);
-    });
-
-    testWidgets('signed-out failure offers the sign-in action', (tester) async {
-      late ProviderContainer container;
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: _baseOverrides(auth: _AuthSignedOutCtrl.new),
-          child: MaterialApp(
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: Scaffold(
-              body: SingleChildScrollView(
-                child: Consumer(
-                  builder: (context, ref, _) {
-                    container = ProviderScope.containerOf(context);
-                    return const SynthesizeTool();
-                  },
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      final controller = container.read(craftControllerProvider.notifier);
-      await container.read(authCtrlProvider.future);
-      controller.setSynthText('Hello world, this is a test sentence');
-      await tester.pumpAndSettle();
-
-      await controller.synthesize();
-      await tester.pumpAndSettle();
-
-      expect(find.text('Sign in to use Craft'), findsOneWidget);
-      expect(find.widgetWithText(EnjoyButton, 'Sign in'), findsOneWidget);
     });
   });
 }

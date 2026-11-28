@@ -1,4 +1,3 @@
-import 'package:enjoy_player/core/theme/enjoy_icons.dart';
 import 'package:drift/native.dart';
 import 'package:enjoy_player/core/cache/lru_store.dart';
 import 'package:enjoy_player/core/errors/app_failure.dart';
@@ -9,30 +8,14 @@ import 'package:enjoy_player/features/ai/application/ai_kind_policies.dart';
 import 'package:enjoy_player/features/ai/application/ai_result_cache.dart';
 import 'package:enjoy_player/features/ai/domain/capabilities/dictionary_capability.dart';
 import 'package:enjoy_player/features/ai/domain/models/dictionary_result.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 import 'package:enjoy_player/features/lookup/domain/lookup_request.dart';
 import 'package:enjoy_player/features/lookup/presentation/sections/dictionary_lookup_section.dart';
-import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_credits_notice.dart';
 import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_error_row.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
-
-class _AuthSignedInCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedIn(
-    profile: UserProfile(id: 'tester', email: 't@example.com', name: 'Tester'),
-  );
-}
-
-class _AuthSignedOutCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedOut();
-}
 
 class _FakeDictionaryCapability implements DictionaryCapability {
   _FakeDictionaryCapability(this._resultOrError);
@@ -120,7 +103,6 @@ void main() {
   );
 
   List<Override> baseOverrides({DictionaryCapability? capability}) => [
-    authCtrlProvider.overrideWith(_AuthSignedInCtrl.new),
     appDatabaseProvider.overrideWithValue(db),
     aiDictionaryCacheProvider.overrideWithValue(dictCache),
     if (capability != null)
@@ -202,78 +184,6 @@ void main() {
     final headwordBottom = tester.getBottomLeft(find.text('hello')).dy;
     final senseTop = tester.getTopLeft(find.text('a greeting')).dy;
     expect(senseTop - headwordBottom, moreOrLessEquals(12, epsilon: 0.01));
-  });
-
-  testWidgets('shows AuthRequiredCallout on AuthFailure', (tester) async {
-    await tester.pumpWidget(
-      _harness(
-        overrides: [
-          authCtrlProvider.overrideWith(_AuthSignedOutCtrl.new),
-          appDatabaseProvider.overrideWithValue(db),
-          aiDictionaryCacheProvider.overrideWithValue(dictCache),
-          dictionaryCapabilityProvider.overrideWithValue(
-            _FakeDictionaryCapability(const AuthFailure('nope')),
-          ),
-        ],
-        child: const DictionaryLookupSection(request: request),
-      ),
-    );
-    await _expand(tester);
-
-    expect(find.byType(LookupErrorRow), findsNothing);
-    expect(find.text('Sign in'), findsOneWidget);
-  });
-
-  testWidgets('shows compact credits notice without in-section CTA on '
-      'CreditsFailure', (tester) async {
-    await tester.pumpWidget(
-      _harness(
-        overrides: baseOverrides(
-          capability: _FakeDictionaryCapability(
-            const CreditsFailure('out of credits'),
-          ),
-        ),
-        child: const DictionaryLookupSection(request: request),
-      ),
-    );
-    await _expand(tester);
-
-    expect(find.byType(LookupCreditsNotice), findsOneWidget);
-    expect(find.byType(LookupErrorRow), findsNothing);
-    expect(find.byIcon(EnjoyIcons.wallet), findsOneWidget);
-    expect(
-      find.text(
-        lookupAppLocalizations(
-          const Locale('en'),
-        ).subscriptionViewPlansAndPackages,
-      ),
-      findsNothing,
-    );
-    expect(find.text('Retry'), findsOneWidget);
-  });
-
-  testWidgets('shows the numbered credits message when the 402 carries the '
-      'worker envelope (no raw status leak)', (tester) async {
-    await tester.pumpWidget(
-      _harness(
-        overrides: baseOverrides(
-          capability: _FakeDictionaryCapability(
-            const CreditsFailure(
-              'HTTP 402',
-              requiredCredits: 750,
-              usedCredits: 800,
-              limitCredits: 1000,
-            ),
-          ),
-        ),
-        child: const DictionaryLookupSection(request: request),
-      ),
-    );
-    await _expand(tester);
-
-    expect(find.textContaining('750'), findsOneWidget);
-    expect(find.textContaining('200'), findsOneWidget);
-    expect(find.text('HTTP 402'), findsNothing);
   });
 
   testWidgets('shows plain error row for generic failure', (tester) async {

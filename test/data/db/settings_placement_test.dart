@@ -47,7 +47,11 @@ void main() {
       'craft.preferences_v1': SettingsScope.user,
       'hotkeys_custom_bindings': SettingsScope.user,
       'ai.modality_configs_v1': SettingsScope.user,
+      'ai.saved_speech_endpoints': SettingsScope.device,
+      'ai.cloud_profiles_v1': SettingsScope.device,
       'onboarding.tip_progress_v1': SettingsScope.user,
+      'local_components.root': SettingsScope.device,
+      'setup.wizard_completed_v1': SettingsScope.device,
     };
 
     test('every declared key has the expected scope', () {

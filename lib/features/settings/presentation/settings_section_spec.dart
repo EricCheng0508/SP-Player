@@ -124,9 +124,6 @@ class SettingsSectionSpec {
 
 bool _alwaysVisible() => true;
 
-/// 本地版：账号与云同步分区整体下线（无登录、无云端）。
-bool _hidden() => false;
-
 /// Every top-level Settings section, in any order — **ordering derives from
 /// the domain registry**: [visibleSettingsSections] walks `kSettingsRegistry`
 /// section headers and resolves each through this list, so the rail, the
@@ -252,14 +249,6 @@ final List<SettingsSectionSpec> kSettingsSectionSpecs = [
     hint: (l10n) => l10n.settingsSectionDeveloperHint,
     isVisible: () => !kReleaseMode,
     rows: [
-      SettingsRowSpec(
-        rowId: 'apiBaseUrl',
-        title: (l10n) => l10n.settingsApiBaseUrl,
-      ),
-      SettingsRowSpec(
-        rowId: 'aiApiBaseUrl',
-        title: (l10n) => l10n.settingsAiApiBaseUrl,
-      ),
       SettingsRowSpec(
         rowId: 'aiPlayground',
         title: (l10n) => l10n.settingsAiPlaygroundTileTitle,

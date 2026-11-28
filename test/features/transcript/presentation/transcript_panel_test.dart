@@ -3,9 +3,6 @@ import 'package:enjoy_player/core/theme/widgets/skeleton.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/data/subtitle/transcript_line.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_fetch_controller.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_lines_provider.dart';
 import 'package:enjoy_player/features/transcript/application/video_row_for_media_provider.dart';
@@ -46,13 +43,6 @@ Widget _wrap({required ProviderContainer container, required Widget child}) {
   );
 }
 
-class _SignedInAuthCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedIn(
-    profile: UserProfile(id: 'u1', email: 't@example.com', name: 'Test'),
-  );
-}
-
 void main() {
   late AppDatabase db;
 
@@ -72,7 +62,6 @@ void main() {
           overrides: [
             appDatabaseProvider.overrideWithValue(db),
             deviceGlobalAppDatabaseProvider.overrideWithValue(db),
-            authCtrlProvider.overrideWith(_SignedInAuthCtrl.new),
             transcriptLinesForMediaProvider(
               'm1',
             ).overrideWith((ref) => const Stream<List<TranscriptLine>>.empty()),
@@ -108,7 +97,6 @@ void main() {
         overrides: [
           appDatabaseProvider.overrideWithValue(db),
           deviceGlobalAppDatabaseProvider.overrideWithValue(db),
-          authCtrlProvider.overrideWith(_SignedInAuthCtrl.new),
           transcriptLinesForMediaProvider(
             'm1',
           ).overrideWith((ref) => Stream.error(Exception('boom'))),
@@ -150,7 +138,6 @@ void main() {
           overrides: [
             appDatabaseProvider.overrideWithValue(db),
             deviceGlobalAppDatabaseProvider.overrideWithValue(db),
-            authCtrlProvider.overrideWith(_SignedInAuthCtrl.new),
             transcriptLinesForMediaProvider(
               'm1',
             ).overrideWith((ref) => Stream.value(<TranscriptLine>[])),
@@ -195,7 +182,6 @@ void main() {
           overrides: [
             appDatabaseProvider.overrideWithValue(db),
             deviceGlobalAppDatabaseProvider.overrideWithValue(db),
-            authCtrlProvider.overrideWith(_SignedInAuthCtrl.new),
             transcriptLinesForMediaProvider(
               'm1',
             ).overrideWith((ref) => Stream.value(<TranscriptLine>[])),
@@ -241,7 +227,6 @@ void main() {
           overrides: [
             appDatabaseProvider.overrideWithValue(db),
             deviceGlobalAppDatabaseProvider.overrideWithValue(db),
-            authCtrlProvider.overrideWith(_SignedInAuthCtrl.new),
             transcriptLinesForMediaProvider(
               'm1',
             ).overrideWith((ref) => Stream.value(<TranscriptLine>[])),
@@ -294,7 +279,6 @@ void main() {
         overrides: [
           appDatabaseProvider.overrideWithValue(db),
           deviceGlobalAppDatabaseProvider.overrideWithValue(db),
-          authCtrlProvider.overrideWith(_SignedInAuthCtrl.new),
           transcriptLinesForMediaProvider(
             'm1',
           ).overrideWith((ref) => Stream.value(<TranscriptLine>[])),

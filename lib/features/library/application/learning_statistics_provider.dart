@@ -1,51 +1,37 @@
-/// Fetches `/api/v1/mine/stats` when the user is signed in.
+/// Learning statistics aggregated from the local recordings table.
 library;
 
-import 'dart:async';
-
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:logging/logging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import 'package:enjoy_player/core/logging/log.dart';
-import 'package:enjoy_player/core/riverpod/async_value_x.dart';
-import 'package:enjoy_player/core/utils/client_timezone.dart';
-import 'package:enjoy_player/data/api/services/api_providers.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
+import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/features/library/domain/learning_statistics.dart';
 
 part 'learning_statistics_provider.g.dart';
 
-final Logger _statsLog = logNamed('stats');
-
 @riverpod
 Future<LearningStatistics?> learningStatistics(Ref ref) async {
-  final signedInUserId = ref.watch(
-    authCtrlProvider.select((a) {
-      final v = a.valueOrNull;
-      return v is AuthSignedIn ? v.profile.id : null;
-    }),
-  );
-  if (signedInUserId == null) return null;
+  final db = ref.watch(appDatabaseProvider);
+  final rows = await db.select(db.recordings).get();
 
-  final api = ref.watch(statsApiProvider);
-  final sw = Stopwatch()..start();
-  _statsLog.info('stats: learningStatistics request start');
-  try {
-    final json = await api
-        .learningStatistics(timezone: await clientTimezoneId())
-        .timeout(const Duration(seconds: 15));
-    _statsLog.info(
-      'stats: learningStatistics done in ${sw.elapsedMilliseconds}ms',
+  final now = DateTime.now();
+  final todayStart = DateTime(now.year, now.month, now.day);
+  final weekStart = todayStart.subtract(Duration(days: now.weekday - 1));
+  final monthStart = DateTime(now.year, now.month);
+
+  PeriodStats periodFrom(DateTime start) {
+    final recorded = rows.where((row) => !row.createdAt.isBefore(start));
+    return PeriodStats(
+      recordingDurationMs: recorded.fold<int>(
+        0,
+        (total, row) => total + row.duration,
+      ),
+      recordingCount: recorded.length,
     );
-    return LearningStatistics.fromJson(json);
-  } catch (e, st) {
-    _statsLog.warning(
-      'stats: learningStatistics failed after ${sw.elapsedMilliseconds}ms',
-      e,
-      st,
-    );
-    return LearningStatistics.empty();
   }
+
+  return LearningStatistics(
+    today: periodFrom(todayStart),
+    week: periodFrom(weekStart),
+    month: periodFrom(monthStart),
+  );
 }

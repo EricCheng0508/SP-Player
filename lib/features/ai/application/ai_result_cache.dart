@@ -20,11 +20,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:enjoy_player/core/cache/lru_store.dart';
 import 'package:enjoy_player/core/logging/log.dart';
-import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/ai/application/ai_kind_policies.dart';
 import 'package:enjoy_player/features/ai/domain/ai_kind.dart';
 import 'package:enjoy_player/features/ai/domain/models/contextual_translation_result.dart';
@@ -187,7 +184,7 @@ class AiResultCache<V extends Object> {
     );
   }
 
-  /// Drops L1 and every L2 row. Used on sign-out / user-id change.
+  /// Drops L1 and every L2 row.
   Future<void> clear() async {
     _l1.clear();
     for (final kind in _policies.keys) {
@@ -249,10 +246,8 @@ void aiCacheStartupPrune(Ref ref) {
 }
 
 /// Shared construction for the per-kind caches: same L1 sizing (256
-/// entries / 30 min TTL), same policies, and the sign-out / user-change
-/// clear listener so we never serve a previous user's cached results (R7).
-/// L2 is naturally scoped by the active `appDatabaseProvider`; the
-/// listener ensures the in-memory L1 is also dropped.
+/// entries / 30 min TTL) and same policies. L2 is naturally scoped by the
+/// active `appDatabaseProvider`, and the startup prune keeps L2 bounded.
 AiResultCache<V> _buildPerUserCache<V extends Object>(
   Ref ref, {
   required V Function(Map<String, dynamic> json) fromJson,
@@ -266,20 +261,6 @@ AiResultCache<V> _buildPerUserCache<V extends Object>(
     fromJson: fromJson,
     toJson: toJson,
   );
-
-  ref.listen(authCtrlProvider, (prev, next) {
-    final prevState = prev?.valueOrNull;
-    final nextState = next.valueOrNull;
-    final wasSignedIn = prevState is AuthSignedIn;
-    final isSignedIn = nextState is AuthSignedIn;
-    final userChanged =
-        wasSignedIn &&
-        isSignedIn &&
-        prevState.profile.id != nextState.profile.id;
-    if (!isSignedIn || userChanged) {
-      unawaited(cache.clear());
-    }
-  });
 
   ref.watch(aiCacheStartupPruneProvider);
   return cache;

@@ -13,14 +13,11 @@
 ///   tokens.txt
 library;
 
-import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:logging/logging.dart';
 import 'package:sherpa_onnx/sherpa_onnx.dart' as sherpa;
-
-import 'package:enjoy_player/core/logging/log.dart';
 
 final Logger _log = Logger('sherpa-streaming');
 

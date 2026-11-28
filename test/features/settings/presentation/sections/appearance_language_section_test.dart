@@ -8,17 +8,10 @@ import 'package:enjoy_player/core/application/app_preferences_provider.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/core/theme/widgets/sheet_drag_handle.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/sections/appearance_language_section.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/settings_row.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
-
-class _SignedOutAuthCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedOut();
-}
 
 /// Seeds a real (in-memory) [AppPreferencesCtrl] with the given learning
 /// language so `setLocale`/`setLearningLanguage` continue to exercise their
@@ -45,7 +38,6 @@ Widget _harness({required AppDatabase db, required String learningLanguage}) {
     overrides: [
       deviceGlobalAppDatabaseProvider.overrideWithValue(db),
       appDatabaseProvider.overrideWithValue(db),
-      authCtrlProvider.overrideWith(_SignedOutAuthCtrl.new),
       appPreferencesCtrlProvider.overrideWith(
         () => _SeededPrefsCtrl(learningLanguage),
       ),

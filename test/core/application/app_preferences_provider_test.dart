@@ -6,60 +6,9 @@ import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/data/db/settings_keys.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/auth/domain/update_profile_request.dart';
-import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-const _kProfile = UserProfile(
-  id: 'user-1',
-  email: 'test@example.com',
-  name: 'Test',
-  locale: 'en-US',
-  learningLanguage: 'ja-JP',
-  nativeLanguage: 'zh-CN',
-);
-
-const _kEmptyProfile = UserProfile(
-  id: 'user-1',
-  email: 'test@example.com',
-  name: 'Test',
-);
-
-class _SignedInAuthCtrl extends AuthCtrl {
-  _SignedInAuthCtrl([UserProfile? profile]) : _profile = profile ?? _kProfile;
-
-  final UserProfile _profile;
-  final List<UpdateProfileRequest> updateProfileCalls = [];
-  final List<Locale?> syncLocaleCalls = [];
-
-  @override
-  Future<AuthState> build() async => AuthSignedIn(profile: _profile);
-
-  @override
-  Future<void> updateProfile(UpdateProfileRequest request) async {
-    updateProfileCalls.add(request);
-  }
-
-  @override
-  Future<void> syncLocaleToServerIfSignedIn(Locale? locale) async {
-    syncLocaleCalls.add(locale);
-  }
-}
-
-class _SignedOutAuthCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedOut();
-
-  @override
-  Future<void> updateProfile(UpdateProfileRequest request) async {}
-
-  @override
-  Future<void> syncLocaleToServerIfSignedIn(Locale? locale) async {}
-}
 
 Future<void> _pump() async {
   await Future<void>.delayed(Duration.zero);
@@ -274,34 +223,16 @@ void main() {
       await db.close();
     });
 
-    Future<ProviderContainer> signedInContainer({
-      UserProfile profile = _kProfile,
-      AppDatabase? database,
-    }) async {
+    Future<ProviderContainer> localContainer({AppDatabase? database}) async {
       final container = ProviderContainer(
-        overrides: [
-          authCtrlProvider.overrideWith(() => _SignedInAuthCtrl(profile)),
-          appDatabaseProvider.overrideWithValue(database ?? db),
-        ],
+        overrides: [appDatabaseProvider.overrideWithValue(database ?? db)],
       );
-      await container.read(authCtrlProvider.future);
-      return container;
-    }
-
-    Future<ProviderContainer> signedOutContainer() async {
-      final container = ProviderContainer(
-        overrides: [
-          authCtrlProvider.overrideWith(_SignedOutAuthCtrl.new),
-          appDatabaseProvider.overrideWithValue(db),
-        ],
-      );
-      await container.read(authCtrlProvider.future);
       return container;
     }
 
     group('build', () {
-      test('uses the local session DB when no auth state exists', () async {
-        final container = await signedOutContainer();
+      test('builds defaults from an empty local session DB', () async {
+        final container = await localContainer();
         addTearDown(container.dispose);
 
         final state = await container.read(appPreferencesCtrlProvider.future);
@@ -318,7 +249,7 @@ void main() {
         );
       });
 
-      test('reads and normalizes stored prefs when signed in', () async {
+      test('reads and normalizes stored prefs', () async {
         await db.settingsDao.setValue(SettingsKeys.prefsLocale.name, 'en-US');
         await db.settingsDao.setValue(
           SettingsKeys.prefsLearningLanguage.name,
@@ -329,7 +260,7 @@ void main() {
           'zh-CN',
         );
 
-        final container = await signedInContainer();
+        final container = await localContainer();
         addTearDown(container.dispose);
 
         await container.read(appPreferencesCtrlProvider.future);
@@ -340,13 +271,13 @@ void main() {
         expect(settled.nativeLanguage, 'zh-CN');
       });
 
-      test('reads stored theme mode when signed in', () async {
+      test('reads stored theme mode', () async {
         await db.settingsDao.setValue(
           SettingsKeys.prefsThemeMode.name,
           'light',
         );
 
-        final container = await signedInContainer();
+        final container = await localContainer();
         addTearDown(container.dispose);
 
         await container.read(appPreferencesCtrlProvider.future);
@@ -365,7 +296,7 @@ void main() {
           'zh-CN',
         );
 
-        final container = await signedInContainer(profile: _kEmptyProfile);
+        final container = await localContainer();
         addTearDown(container.dispose);
 
         await container.read(appPreferencesCtrlProvider.future);
@@ -387,7 +318,7 @@ void main() {
           'en-US',
         );
 
-        final container = await signedInContainer(profile: _kEmptyProfile);
+        final container = await localContainer();
         addTearDown(container.dispose);
 
         await container.read(appPreferencesCtrlProvider.future);
@@ -401,7 +332,7 @@ void main() {
       });
 
       test('defaults learning language when DB value is null', () async {
-        final container = await signedInContainer(profile: _kEmptyProfile);
+        final container = await localContainer();
         addTearDown(container.dispose);
 
         await container.read(appPreferencesCtrlProvider.future);
@@ -412,7 +343,7 @@ void main() {
       });
 
       test('defaults locale when DB value is null', () async {
-        final container = await signedInContainer(profile: _kEmptyProfile);
+        final container = await localContainer();
         addTearDown(container.dispose);
 
         await container.read(appPreferencesCtrlProvider.future);
@@ -425,7 +356,7 @@ void main() {
       test('normalizes locale raw value in DB', () async {
         await db.settingsDao.setValue(SettingsKeys.prefsLocale.name, 'en');
 
-        final container = await signedInContainer(profile: _kEmptyProfile);
+        final container = await localContainer();
         addTearDown(container.dispose);
 
         await container.read(appPreferencesCtrlProvider.future);
@@ -438,7 +369,7 @@ void main() {
       test('falls back to default locale for unsupported raw value', () async {
         await db.settingsDao.setValue(SettingsKeys.prefsLocale.name, 'fr-FR');
 
-        final container = await signedInContainer(profile: _kEmptyProfile);
+        final container = await localContainer();
         addTearDown(container.dispose);
 
         await container.read(appPreferencesCtrlProvider.future);
@@ -457,7 +388,7 @@ void main() {
         );
         addTearDown(countingDb.close);
 
-        final container = await signedInContainer(database: countingDb);
+        final container = await localContainer(database: countingDb);
         addTearDown(container.dispose);
 
         await container.read(appPreferencesCtrlProvider.future);
@@ -490,7 +421,7 @@ void main() {
           'light',
         );
 
-        final container = await signedInContainer(database: countingDb);
+        final container = await localContainer(database: countingDb);
         addTearDown(container.dispose);
 
         await container.read(appPreferencesCtrlProvider.future);
@@ -507,7 +438,7 @@ void main() {
 
     group('setLocale', () {
       test('updates state and persists to DB', () async {
-        final container = await signedInContainer();
+        final container = await localContainer();
         addTearDown(container.dispose);
         await container.read(appPreferencesCtrlProvider.future);
         await _pump();
@@ -526,7 +457,7 @@ void main() {
       });
 
       test('null locale resolves to default', () async {
-        final container = await signedInContainer();
+        final container = await localContainer();
         addTearDown(container.dispose);
         await container.read(appPreferencesCtrlProvider.future);
         await _pump();
@@ -539,23 +470,8 @@ void main() {
         expect(state!.locale, kAppDefaultDisplayLocale);
       });
 
-      test('syncs locale to server when signed in', () async {
-        final container = await signedInContainer();
-        addTearDown(container.dispose);
-        await container.read(appPreferencesCtrlProvider.future);
-        await _pump();
-
-        await container
-            .read(appPreferencesCtrlProvider.notifier)
-            .setLocale(const Locale('zh', 'CN'));
-
-        final authCtrl =
-            container.read(authCtrlProvider.notifier) as _SignedInAuthCtrl;
-        expect(authCtrl.syncLocaleCalls, contains(const Locale('zh', 'CN')));
-      });
-
       test('unsupported locale resolves to default', () async {
-        final container = await signedInContainer();
+        final container = await localContainer();
         addTearDown(container.dispose);
         await container.read(appPreferencesCtrlProvider.future);
         await _pump();
@@ -571,7 +487,7 @@ void main() {
 
     group('setLearningLanguage', () {
       test('updates state and persists canonical tag', () async {
-        final container = await signedInContainer();
+        final container = await localContainer();
         addTearDown(container.dispose);
         await container.read(appPreferencesCtrlProvider.future);
         await _pump();
@@ -590,7 +506,7 @@ void main() {
       });
 
       test('rejects unsupported learning language tag', () async {
-        final container = await signedInContainer();
+        final container = await localContainer();
         addTearDown(container.dispose);
         await container.read(appPreferencesCtrlProvider.future);
         await _pump();
@@ -613,7 +529,7 @@ void main() {
           'en-US',
         );
 
-        final container = await signedInContainer();
+        final container = await localContainer();
         addTearDown(container.dispose);
         await container.read(appPreferencesCtrlProvider.future);
         await _pump();
@@ -638,7 +554,7 @@ void main() {
           'en-US',
         );
 
-        final container = await signedInContainer();
+        final container = await localContainer();
         addTearDown(container.dispose);
         await container.read(appPreferencesCtrlProvider.future);
         await _pump();
@@ -653,25 +569,8 @@ void main() {
         expect(storedNative, isNot('en-US'));
       });
 
-      test('syncs language fields to server when signed in', () async {
-        final container = await signedInContainer();
-        addTearDown(container.dispose);
-        await container.read(appPreferencesCtrlProvider.future);
-        await _pump();
-
-        await container
-            .read(appPreferencesCtrlProvider.notifier)
-            .setLearningLanguage('fr-FR');
-
-        final authCtrl =
-            container.read(authCtrlProvider.notifier) as _SignedInAuthCtrl;
-        expect(authCtrl.updateProfileCalls, isNotEmpty);
-        final lastCall = authCtrl.updateProfileCalls.last;
-        expect(lastCall.learningLanguage, 'fr-FR');
-      });
-
       test('canonicalizes case-insensitive input', () async {
-        final container = await signedInContainer();
+        final container = await localContainer();
         addTearDown(container.dispose);
         await container.read(appPreferencesCtrlProvider.future);
         await _pump();
@@ -696,7 +595,7 @@ void main() {
           'zh-CN',
         );
 
-        final container = await signedInContainer();
+        final container = await localContainer();
         addTearDown(container.dispose);
         await container.read(appPreferencesCtrlProvider.future);
         await _pump();
@@ -724,7 +623,7 @@ void main() {
           'zh-CN',
         );
 
-        final container = await signedInContainer();
+        final container = await localContainer();
         addTearDown(container.dispose);
         await container.read(appPreferencesCtrlProvider.future);
         await _pump();
@@ -747,7 +646,7 @@ void main() {
           'zh-CN',
         );
 
-        final container = await signedInContainer(profile: _kEmptyProfile);
+        final container = await localContainer();
         addTearDown(container.dispose);
         await container.read(appPreferencesCtrlProvider.future);
         await _pump();
@@ -759,303 +658,11 @@ void main() {
         final state = container.read(appPreferencesCtrlProvider).valueOrNull;
         expect(state!.nativeLanguage, 'zh-CN');
       });
-
-      test('syncs language fields to server when signed in', () async {
-        await db.settingsDao.setValue(
-          SettingsKeys.prefsLearningLanguage.name,
-          'ja-JP',
-        );
-        await db.settingsDao.setValue(
-          SettingsKeys.prefsNativeLanguage.name,
-          'zh-CN',
-        );
-
-        final container = await signedInContainer();
-        addTearDown(container.dispose);
-        await container.read(appPreferencesCtrlProvider.future);
-        await _pump();
-
-        await container
-            .read(appPreferencesCtrlProvider.notifier)
-            .setNativeLanguage('en-US');
-
-        final authCtrl =
-            container.read(authCtrlProvider.notifier) as _SignedInAuthCtrl;
-        expect(authCtrl.updateProfileCalls, isNotEmpty);
-        final lastCall = authCtrl.updateProfileCalls.last;
-        expect(lastCall.nativeLanguage, 'en-US');
-        expect(lastCall.learningLanguage, 'ja-JP');
-      });
-    });
-
-    group('applyFromUserProfile', () {
-      test('applies locale from profile', () async {
-        final container = await signedInContainer();
-        addTearDown(container.dispose);
-        await container.read(appPreferencesCtrlProvider.future);
-        await _pump();
-
-        await container
-            .read(appPreferencesCtrlProvider.notifier)
-            .applyFromUserProfile(
-              const UserProfile(
-                id: 'user-1',
-                email: 'test@example.com',
-                name: 'Test',
-                locale: 'zh-CN',
-                learningLanguage: 'ko-KR',
-                nativeLanguage: 'en-US',
-              ),
-            );
-
-        final state = container.read(appPreferencesCtrlProvider).valueOrNull;
-        expect(state!.locale, const Locale('zh', 'CN'));
-        expect(state.learningLanguage, 'ko-KR');
-        expect(state.nativeLanguage, 'en-US');
-      });
-
-      test('preserves current locale when profile locale is null', () async {
-        await db.settingsDao.setValue(SettingsKeys.prefsLocale.name, 'en-US');
-
-        final container = await signedInContainer();
-        addTearDown(container.dispose);
-        await container.read(appPreferencesCtrlProvider.future);
-        await _pump();
-
-        await container
-            .read(appPreferencesCtrlProvider.notifier)
-            .applyFromUserProfile(
-              const UserProfile(
-                id: 'user-1',
-                email: 'test@example.com',
-                name: 'Test',
-                learningLanguage: 'fr-FR',
-                nativeLanguage: 'zh-CN',
-              ),
-            );
-
-        final state = container.read(appPreferencesCtrlProvider).valueOrNull;
-        expect(state!.locale, const Locale('en', 'US'));
-      });
-
-      test('preserves current locale when profile locale is blank', () async {
-        await db.settingsDao.setValue(SettingsKeys.prefsLocale.name, 'en-US');
-
-        final container = await signedInContainer();
-        addTearDown(container.dispose);
-        await container.read(appPreferencesCtrlProvider.future);
-        await _pump();
-
-        await container
-            .read(appPreferencesCtrlProvider.notifier)
-            .applyFromUserProfile(
-              const UserProfile(
-                id: 'user-1',
-                email: 'test@example.com',
-                name: 'Test',
-                locale: '  ',
-                learningLanguage: 'fr-FR',
-                nativeLanguage: 'zh-CN',
-              ),
-            );
-
-        final state = container.read(appPreferencesCtrlProvider).valueOrNull;
-        expect(state!.locale, const Locale('en', 'US'));
-      });
-
-      test('canonicalizes learning language from profile', () async {
-        final container = await signedInContainer();
-        addTearDown(container.dispose);
-        await container.read(appPreferencesCtrlProvider.future);
-        await _pump();
-
-        await container
-            .read(appPreferencesCtrlProvider.notifier)
-            .applyFromUserProfile(
-              const UserProfile(
-                id: 'user-1',
-                email: 'test@example.com',
-                name: 'Test',
-                learningLanguage: 'EN-gb',
-                nativeLanguage: 'zh-CN',
-              ),
-            );
-
-        final state = container.read(appPreferencesCtrlProvider).valueOrNull;
-        expect(state!.learningLanguage, 'en-GB');
-      });
-
-      test('coerces native when it equals learning from profile', () async {
-        final container = await signedInContainer();
-        addTearDown(container.dispose);
-        await container.read(appPreferencesCtrlProvider.future);
-        await _pump();
-
-        await container
-            .read(appPreferencesCtrlProvider.notifier)
-            .applyFromUserProfile(
-              const UserProfile(
-                id: 'user-1',
-                email: 'test@example.com',
-                name: 'Test',
-                learningLanguage: 'en-US',
-                nativeLanguage: 'en-US',
-              ),
-            );
-
-        final state = container.read(appPreferencesCtrlProvider).valueOrNull;
-        expect(state!.nativeLanguage, isNot('en-US'));
-        expect(kSupportedNativeLanguageTags, contains(state.nativeLanguage));
-      });
-
-      test('persists all fields to DB', () async {
-        final container = await signedInContainer();
-        addTearDown(container.dispose);
-        await container.read(appPreferencesCtrlProvider.future);
-        await _pump();
-
-        await container
-            .read(appPreferencesCtrlProvider.notifier)
-            .applyFromUserProfile(
-              const UserProfile(
-                id: 'user-1',
-                email: 'test@example.com',
-                name: 'Test',
-                locale: 'zh-CN',
-                learningLanguage: 'ko-KR',
-                nativeLanguage: 'en-US',
-              ),
-            );
-
-        final storedLocale = await db.settingsDao.getValue(
-          SettingsKeys.prefsLocale.name,
-        );
-        final storedLearn = await db.settingsDao.getValue(
-          SettingsKeys.prefsLearningLanguage.name,
-        );
-        final storedNative = await db.settingsDao.getValue(
-          SettingsKeys.prefsNativeLanguage.name,
-        );
-        expect(storedLocale, 'zh-CN');
-        expect(storedLearn, 'ko-KR');
-        expect(storedNative, 'en-US');
-      });
-
-      test('patches server when profile tags differ from canonical', () async {
-        final container = await signedInContainer();
-        addTearDown(container.dispose);
-        await container.read(appPreferencesCtrlProvider.future);
-        await _pump();
-
-        await container
-            .read(appPreferencesCtrlProvider.notifier)
-            .applyFromUserProfile(
-              const UserProfile(
-                id: 'user-1',
-                email: 'test@example.com',
-                name: 'Test',
-                learningLanguage: 'eng',
-                nativeLanguage: 'zho',
-              ),
-            );
-
-        final authCtrl =
-            container.read(authCtrlProvider.notifier) as _SignedInAuthCtrl;
-        expect(authCtrl.updateProfileCalls, isNotEmpty);
-      });
-
-      test(
-        'does not patch server when profile tags are already canonical',
-        () async {
-          final container = await signedInContainer();
-          addTearDown(container.dispose);
-          await container.read(appPreferencesCtrlProvider.future);
-          await _pump();
-
-          final authCtrl =
-              container.read(authCtrlProvider.notifier) as _SignedInAuthCtrl;
-          final callsBefore = authCtrl.updateProfileCalls.length;
-
-          await container
-              .read(appPreferencesCtrlProvider.notifier)
-              .applyFromUserProfile(
-                const UserProfile(
-                  id: 'user-1',
-                  email: 'test@example.com',
-                  name: 'Test',
-                  learningLanguage: 'ja-JP',
-                  nativeLanguage: 'zh-CN',
-                ),
-              );
-
-          expect(authCtrl.updateProfileCalls.length, callsBefore);
-        },
-      );
-
-      test('uses previous learning when profile learning is null', () async {
-        await db.settingsDao.setValue(
-          SettingsKeys.prefsLearningLanguage.name,
-          'ko-KR',
-        );
-        await db.settingsDao.setValue(
-          SettingsKeys.prefsNativeLanguage.name,
-          'zh-CN',
-        );
-
-        final container = await signedInContainer(profile: _kEmptyProfile);
-        addTearDown(container.dispose);
-        await container.read(appPreferencesCtrlProvider.future);
-        await _pump();
-
-        await container
-            .read(appPreferencesCtrlProvider.notifier)
-            .applyFromUserProfile(
-              const UserProfile(
-                id: 'user-1',
-                email: 'test@example.com',
-                name: 'Test',
-                nativeLanguage: 'zh-CN',
-              ),
-            );
-
-        final state = container.read(appPreferencesCtrlProvider).valueOrNull;
-        expect(state!.learningLanguage, 'ko-KR');
-      });
-
-      test('uses previous native when profile native is null', () async {
-        await db.settingsDao.setValue(
-          SettingsKeys.prefsLearningLanguage.name,
-          'ja-JP',
-        );
-        await db.settingsDao.setValue(
-          SettingsKeys.prefsNativeLanguage.name,
-          'en-US',
-        );
-
-        final container = await signedInContainer(profile: _kEmptyProfile);
-        addTearDown(container.dispose);
-        await container.read(appPreferencesCtrlProvider.future);
-        await _pump();
-
-        await container
-            .read(appPreferencesCtrlProvider.notifier)
-            .applyFromUserProfile(
-              const UserProfile(
-                id: 'user-1',
-                email: 'test@example.com',
-                name: 'Test',
-                learningLanguage: 'ja-JP',
-              ),
-            );
-
-        final state = container.read(appPreferencesCtrlProvider).valueOrNull;
-        expect(state!.nativeLanguage, 'en-US');
-      });
     });
 
     group('setThemeMode', () {
-      test('persists when signed in', () async {
-        final container = await signedInContainer();
+      test('persists light mode to the local session DB', () async {
+        final container = await localContainer();
         addTearDown(container.dispose);
         await container.read(appPreferencesCtrlProvider.future);
 
@@ -1071,64 +678,21 @@ void main() {
         );
       });
 
-      test(
-        'persists to the local session DB without an auth session',
-        () async {
-          final container = await signedOutContainer();
-          addTearDown(container.dispose);
-          await container.read(appPreferencesCtrlProvider.future);
-
-          await container
-              .read(appPreferencesCtrlProvider.notifier)
-              .setThemeMode(ThemeMode.dark);
-
-          final state = container.read(appPreferencesCtrlProvider).valueOrNull;
-          expect(state!.themeMode, ThemeMode.dark);
-          expect(
-            await db.settingsDao.getValue(SettingsKeys.prefsThemeMode.name),
-            'dark',
-          );
-        },
-      );
-    });
-
-    group('signed-out server sync', () {
-      test(
-        'setLearningLanguage does not call server when signed out',
-        () async {
-          final container = await signedOutContainer();
-          addTearDown(container.dispose);
-          await container.read(appPreferencesCtrlProvider.future);
-
-          await container
-              .read(appPreferencesCtrlProvider.notifier)
-              .setLearningLanguage('ko-KR');
-
-          final state = container.read(appPreferencesCtrlProvider).valueOrNull;
-          expect(state!.learningLanguage, 'ko-KR');
-        },
-      );
-
-      test('setNativeLanguage does not call server when signed out', () async {
-        await db.settingsDao.setValue(
-          SettingsKeys.prefsLearningLanguage.name,
-          'ja-JP',
-        );
-        await db.settingsDao.setValue(
-          SettingsKeys.prefsNativeLanguage.name,
-          'zh-CN',
-        );
-
-        final container = await signedOutContainer();
+      test('persists dark mode to the local session DB', () async {
+        final container = await localContainer();
         addTearDown(container.dispose);
         await container.read(appPreferencesCtrlProvider.future);
 
         await container
             .read(appPreferencesCtrlProvider.notifier)
-            .setNativeLanguage('zh-CN');
+            .setThemeMode(ThemeMode.dark);
 
         final state = container.read(appPreferencesCtrlProvider).valueOrNull;
-        expect(state!.nativeLanguage, 'zh-CN');
+        expect(state!.themeMode, ThemeMode.dark);
+        expect(
+          await db.settingsDao.getValue(SettingsKeys.prefsThemeMode.name),
+          'dark',
+        );
       });
     });
 
@@ -1157,85 +721,44 @@ void main() {
         expect(a, isNot(equals(c)));
       });
 
-      test(
-        'cold-start applyFromUserProfile skips SQLite writes when stored prefs match profile',
-        () async {
-          final counter = _SettingsSelectCounter();
-          final countedDb = AppDatabase(
-            executor: NativeDatabase.memory().interceptWith(counter),
-          );
-          addTearDown(countedDb.close);
+      test('cold-start build skips SQLite writes when stored prefs are already '
+          'canonical', () async {
+        final counter = _SettingsSelectCounter();
+        final countedDb = AppDatabase(
+          executor: NativeDatabase.memory().interceptWith(counter),
+        );
+        addTearDown(countedDb.close);
 
-          await countedDb.settingsDao.setValue(
-            SettingsKeys.prefsLocale.name,
-            'en-US',
-          );
-          await countedDb.settingsDao.setValue(
-            SettingsKeys.prefsLearningLanguage.name,
-            'ja-JP',
-          );
-          await countedDb.settingsDao.setValue(
-            SettingsKeys.prefsNativeLanguage.name,
-            'zh-CN',
-          );
-          counter.writeCount = 0;
+        await countedDb.settingsDao.setValue(
+          SettingsKeys.prefsLocale.name,
+          'en-US',
+        );
+        await countedDb.settingsDao.setValue(
+          SettingsKeys.prefsLearningLanguage.name,
+          'ja-JP',
+        );
+        await countedDb.settingsDao.setValue(
+          SettingsKeys.prefsNativeLanguage.name,
+          'zh-CN',
+        );
+        counter.writeCount = 0;
 
-          final container = await signedInContainer(database: countedDb);
-          addTearDown(container.dispose);
+        final container = await localContainer(database: countedDb);
+        addTearDown(container.dispose);
 
-          var emissions = 0;
-          final sub = container.listen(
-            appPreferencesCtrlProvider,
-            (_, _) => emissions++,
-          );
-          addTearDown(sub.close);
+        var emissions = 0;
+        final sub = container.listen(
+          appPreferencesCtrlProvider,
+          (_, _) => emissions++,
+        );
+        addTearDown(sub.close);
 
-          await container.read(appPreferencesCtrlProvider.future);
-          await _pump();
+        await container.read(appPreferencesCtrlProvider.future);
+        await _pump();
 
-          expect(counter.writeCount, 0);
-          expect(emissions, lessThanOrEqualTo(1));
-        },
-      );
-
-      test(
-        'unrelated UserProfile updates do not rebuild AppPreferencesCtrl',
-        () async {
-          final counter = _SettingsSelectCounter();
-          final countedDb = AppDatabase(
-            executor: NativeDatabase.memory().interceptWith(counter),
-          );
-          addTearDown(countedDb.close);
-
-          await countedDb.settingsDao.setValue(
-            SettingsKeys.prefsLocale.name,
-            'en-US',
-          );
-          await countedDb.settingsDao.setValue(
-            SettingsKeys.prefsLearningLanguage.name,
-            'ja-JP',
-          );
-          await countedDb.settingsDao.setValue(
-            SettingsKeys.prefsNativeLanguage.name,
-            'zh-CN',
-          );
-
-          final container = await signedInContainer(database: countedDb);
-          addTearDown(container.dispose);
-          await container.read(appPreferencesCtrlProvider.future);
-          await _pump();
-
-          final selectsBefore = counter.selectCount;
-          final authCtrl =
-              container.read(authCtrlProvider.notifier) as _SignedInAuthCtrl;
-          authCtrl.state = AsyncData(
-            AuthSignedIn(profile: _kProfile.copyWith(name: 'Renamed')),
-          );
-          await _pump();
-
-          expect(counter.selectCount, selectsBefore);
-        },
-      );
+        expect(counter.writeCount, 0);
+        expect(emissions, lessThanOrEqualTo(1));
+      });
     });
   });
 }

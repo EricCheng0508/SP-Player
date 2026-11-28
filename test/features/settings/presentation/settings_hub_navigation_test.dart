@@ -13,29 +13,13 @@ import 'package:enjoy_player/core/application/app_preferences_provider.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 import 'package:enjoy_player/features/settings/domain/settings_search_entry.dart';
 import 'package:enjoy_player/features/settings/presentation/settings_screen.dart';
 import 'package:enjoy_player/features/settings/presentation/settings_section_page.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/sections/appearance_language_section.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/sections/recording_section.dart';
 import 'package:enjoy_player/features/shadow_reading/application/recording_input_device_controller.dart';
-import 'package:enjoy_player/features/sync/application/sync_providers.dart';
-import 'package:enjoy_player/features/sync/data/sync_queue_repository.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
-
-const _fakeProfile = UserProfile(
-  id: 'user-1',
-  email: 'reader@example.com',
-  name: 'Reader',
-);
-
-class _SignedInAuthCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedIn(profile: _fakeProfile);
-}
 
 class _StaticPrefsCtrl extends AppPreferencesCtrl {
   @override
@@ -91,21 +75,10 @@ Future<AppLocalizations> _pumpHub(WidgetTester tester, AppDatabase db) async {
       overrides: [
         deviceGlobalAppDatabaseProvider.overrideWithValue(db),
         appDatabaseProvider.overrideWithValue(db),
-        authCtrlProvider.overrideWith(_SignedInAuthCtrl.new),
         appPreferencesCtrlProvider.overrideWith(_StaticPrefsCtrl.new),
         recordingInputDeviceCtrlProvider.overrideWith(
           _FakeRecordingInputDeviceCtrl.new,
         ),
-        syncQueueSnapshotProvider.overrideWith(
-          (ref) => Stream.value(
-            const SyncQueueSnapshot(
-              retryablePending: 0,
-              permanentlyFailed: 0,
-              detailRows: [],
-            ),
-          ),
-        ),
-        syncLastFullSyncAtProvider.overrideWith((ref) async => null),
       ],
       child: MaterialApp.router(
         theme: ThemeData(

@@ -4,9 +4,6 @@ import 'package:drift/native.dart';
 import 'package:enjoy_player/core/theme/widgets/skeleton.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 import 'package:enjoy_player/features/player/application/open_media_provider.dart';
 import 'package:enjoy_player/features/player/application/player_engine_test_double_provider.dart';
 import 'package:enjoy_player/features/player/domain/player_launch_request.dart';
@@ -19,13 +16,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../support/fake_player_engine.dart';
-
-class _SignedInAuthCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedIn(
-    profile: UserProfile(id: 'u1', email: 't@example.com', name: 'Test'),
-  );
-}
 
 Widget _wrap({required ProviderContainer container, required Widget child}) {
   return UncontrolledProviderScope(
@@ -66,7 +56,6 @@ void main() {
         final container = ProviderContainer(
           overrides: [
             appDatabaseProvider.overrideWithValue(db),
-            authCtrlProvider.overrideWith(_SignedInAuthCtrl.new),
             playerEngineTestDoubleProvider.overrideWithValue(fake),
             openMediaLaunchProvider.overrideWith((ref, request) async {
               await Completer<void>().future;
@@ -100,7 +89,6 @@ void main() {
         final container = ProviderContainer(
           overrides: [
             appDatabaseProvider.overrideWithValue(db),
-            authCtrlProvider.overrideWith(_SignedInAuthCtrl.new),
             playerEngineTestDoubleProvider.overrideWithValue(fake),
             openMediaLaunchProvider.overrideWith((ref, request) async {
               expect(request.mediaId, 'custom-media-id');
@@ -128,7 +116,6 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           appDatabaseProvider.overrideWithValue(db),
-          authCtrlProvider.overrideWith(_SignedInAuthCtrl.new),
           playerEngineTestDoubleProvider.overrideWithValue(fake),
           openMediaLaunchProvider.overrideWith((ref, request) async {
             throw const YouTubePlaybackUnavailableException(

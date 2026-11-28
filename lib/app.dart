@@ -25,7 +25,6 @@ import 'package:enjoy_player/core/routing/app_router.dart';
 import 'package:enjoy_player/core/theme/app_theme.dart';
 import 'package:enjoy_player/core/theme/widgets/skeleton.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/hotkeys/presentation/app_hotkeys_keyboard_listener.dart';
 import 'package:enjoy_player/features/update/presentation/update_prompt_host.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
@@ -81,13 +80,8 @@ class _EnjoyAppState extends ConsumerState<EnjoyApp>
   /// real-UI frame — never on the boot skeleton).
   bool _windowRevealed = false;
 
-  /// Reveal requires the router branch to stay painted for a few consecutive
-  /// frames: prefs resolving can flip straight back into the auth-loading
-  /// branch, and revealing that frame re-introduces the dark skeleton flash.
-  bool _onLoadingBranch = false;
-
-  /// Keeps locale/prefs visible while [appPreferencesCtrlProvider] reloads after
-  /// auth-scoped DB switches (signed-in), avoiding a full-app loading flash.
+  /// Keeps locale/prefs visible while [appPreferencesCtrlProvider] reloads
+  /// (e.g. after a settings reset), avoiding a full-app loading flash.
   AppPreferencesState? _lastResolvedPrefs;
 
   /// Logger for app-lifecycle shutdown.
@@ -229,7 +223,6 @@ class _EnjoyAppState extends ConsumerState<EnjoyApp>
     required ThemeMode themeMode,
     required AppPreferencesState prefs,
   }) {
-    _onLoadingBranch = false;
     if (!_windowRevealed) {
       _windowRevealed = true;
       logNamed('boot-timing').info('[boot-timing] router-ready at build');
@@ -343,21 +336,9 @@ class _EnjoyAppState extends ConsumerState<EnjoyApp>
     }
 
     if (prefsProj.isLoading && !hasResolved) {
-      _onLoadingBranch = true;
       logNamed(
         'boot-timing',
       ).info('[boot-timing] loading-branch (prefs) at build');
-      return _loadingBranch(lightTheme, darkTheme, themeMode);
-    }
-
-    final authBootstrapping = ref.watch(
-      authCtrlProvider.select((auth) => auth.isLoading && !auth.hasValue),
-    );
-    if (authBootstrapping) {
-      _onLoadingBranch = true;
-      logNamed(
-        'boot-timing',
-      ).info('[boot-timing] loading-branch (auth) at build');
       return _loadingBranch(lightTheme, darkTheme, themeMode);
     }
 

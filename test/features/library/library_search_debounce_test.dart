@@ -3,18 +3,8 @@ import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/files/file_storage.dart';
 import 'package:enjoy_player/features/library/application/library_search_provider.dart';
 import 'package:enjoy_player/features/library/data/library_repository.dart';
-import 'package:enjoy_player/features/sync/domain/sync_types.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-class _RecordingEnqueue {
-  final List<({SyncEntityType type, String id, SyncAction action})> calls =
-      <({SyncEntityType type, String id, SyncAction action})>[];
-
-  Future<void> call(SyncEntityType type, String id, SyncAction action) async {
-    calls.add((type: type, id: id, action: action));
-  }
-}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -103,64 +93,24 @@ void main() {
     });
   });
 
-  group('MediaLibraryRepository.deleteMedia atomicity', () {
-    test('sync enqueue and local delete are in one transaction', () async {
+  group('MediaLibraryRepository.deleteMedia', () {
+    test('removes the row', () async {
       final db = AppDatabase(executor: NativeDatabase.memory());
       addTearDown(db.close);
-      final enqueue = _RecordingEnqueue();
-      final repo = MediaLibraryRepository(
-        db,
-        FileStorage(),
-        enqueueSync: enqueue.call,
-      );
+      final repo = MediaLibraryRepository(db, FileStorage());
 
-      final id = 'v1';
+      const id = 'v1';
       await db.videoDao.insertRow(_videoRow(id, 'V1', 'hash-1'));
       await repo.deleteMedia(id);
 
-      expect(enqueue.calls, hasLength(1));
-      expect(enqueue.calls.single.type, SyncEntityType.video);
-      expect(enqueue.calls.single.action, SyncAction.delete);
-
       expect(await db.videoDao.getById(id), isNull);
-    });
-
-    test('failed sync enqueue rolls back the local delete', () async {
-      final db = AppDatabase(executor: NativeDatabase.memory());
-      addTearDown(db.close);
-
-      Future<void> throwingEnqueue(
-        SyncEntityType type,
-        String id,
-        SyncAction action,
-      ) async {
-        throw StateError('enqueue offline');
-      }
-
-      final repo = MediaLibraryRepository(
-        db,
-        FileStorage(),
-        enqueueSync: throwingEnqueue,
-      );
-      final id = 'a1';
-      await db.audioDao.insertRow(_audioRow(id, 'A1', 'hash-a'));
-
-      await expectLater(repo.deleteMedia(id), throwsA(isA<StateError>()));
-
-      expect(await db.audioDao.getById(id), isNotNull);
     });
 
     test('delete on an unknown id is a no-op', () async {
       final db = AppDatabase(executor: NativeDatabase.memory());
       addTearDown(db.close);
-      final enqueue = _RecordingEnqueue();
-      final repo = MediaLibraryRepository(
-        db,
-        FileStorage(),
-        enqueueSync: enqueue.call,
-      );
-      await repo.deleteMedia('does-not-exist');
-      expect(enqueue.calls, isEmpty);
+      final repo = MediaLibraryRepository(db, FileStorage());
+      await expectLater(repo.deleteMedia('does-not-exist'), completes);
     });
   });
 }
@@ -176,29 +126,6 @@ VideoRow _videoRow(String id, String title, String md5) => VideoRow(
   language: 'und',
   source: null,
   localUri: 'file:///x.mp4',
-  md5: md5,
-  size: 0,
-  mediaUrl: null,
-  syncStatus: null,
-  serverUpdatedAt: null,
-  createdAt: DateTime(2026, 1, 1),
-  updatedAt: DateTime(2026, 1, 1),
-);
-
-AudioRow _audioRow(String id, String title, String md5) => AudioRow(
-  id: id,
-  aid: md5,
-  provider: 'user',
-  title: title,
-  description: null,
-  thumbnailUrl: null,
-  durationSeconds: 0,
-  language: 'und',
-  translationKey: null,
-  sourceText: null,
-  voice: null,
-  source: null,
-  localUri: 'file:///x.mp3',
   md5: md5,
   size: 0,
   mediaUrl: null,

@@ -1410,8 +1410,7 @@ Future<String> insertYoutubeRow(
 
 /// Returns a fixed metadata patch instead of hitting oEmbed / the DB write.
 class _FakeYoutubeRefreshRepository extends MediaLibraryRepository {
-  _FakeYoutubeRefreshRepository(AppDatabase db)
-    : super(db, FileStorage(), enqueueSync: null);
+  _FakeYoutubeRefreshRepository(AppDatabase db) : super(db, FileStorage());
 
   final List<String> refreshCalls = [];
 
@@ -1426,8 +1425,7 @@ class _FakeYoutubeRefreshRepository extends MediaLibraryRepository {
 
 /// Throws like a failing oEmbed fetch / DB write would.
 class _ThrowingYoutubeRefreshRepository extends MediaLibraryRepository {
-  _ThrowingYoutubeRefreshRepository(AppDatabase db)
-    : super(db, FileStorage(), enqueueSync: null);
+  _ThrowingYoutubeRefreshRepository(AppDatabase db) : super(db, FileStorage());
 
   final List<String> refreshCalls = [];
 

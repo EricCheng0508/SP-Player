@@ -10,10 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:enjoy_player/core/notices/app_notice.dart';
-import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_modal.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 import '../application/transcript_fetch_controller.dart';
 import '../application/transcript_repository_provider.dart';
@@ -28,10 +25,9 @@ Future<void> refreshCloudTranscripts(
   String mediaId,
 ) async {
   final l10n = AppLocalizations.of(context)!;
-  final signedIn = ref.read(authCtrlProvider).valueOrNull is AuthSignedIn;
   await ref
       .read(transcriptFetchCtrlProvider(mediaId).notifier)
-      .refreshFromCloud(signedIn: signedIn);
+      .refreshFromCloud();
   if (context.mounted) {
     final status = ref.read(transcriptFetchStatusProvider(mediaId));
     if (status.status != TranscriptFetchStatus.error) {

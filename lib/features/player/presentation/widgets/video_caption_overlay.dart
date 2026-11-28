@@ -91,7 +91,7 @@ class VideoCaptionOverlay extends ConsumerWidget {
       return Stack(
         alignment: Alignment.center,
         children: [
-          for (final offset in offsets)
+          for (final _ in offsets)
             Text(
               text,
               textAlign: TextAlign.center,

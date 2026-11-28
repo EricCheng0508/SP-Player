@@ -8,7 +8,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:enjoy_player/core/logging/log.dart';
-import 'package:enjoy_player/core/config/local_mode.dart';
 import 'package:enjoy_player/core/release/distribution_channel.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/data/db/settings_keys.dart';
@@ -28,10 +27,7 @@ class UpdateCtrl extends _$UpdateCtrl {
   UpdateCheckResult? build() => null;
 
   Future<void> bootstrap() async {
-    // Local builds never check the upstream appcast: it would only find the
-    // official release (which would overwrite this fork) and it triggers a
-    // firewall prompt on every launch.
-    if (kLocalOfflineMode || !isDirectDistributionChannel) return;
+    if (!isDirectDistributionChannel) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(checkForUpdatesStartup());
     });
@@ -39,14 +35,14 @@ class UpdateCtrl extends _$UpdateCtrl {
 
   /// Runs on every app launch (no debounce). Always refreshes badge state.
   Future<UpdateCheckResult> checkForUpdatesStartup() async {
-    if (kLocalOfflineMode || !isDirectDistributionChannel) {
+    if (!isDirectDistributionChannel) {
       return const UpdateCheckResult.upToDate();
     }
     return _runCheck(persistLastCheck: true);
   }
 
   Future<UpdateCheckResult> checkForUpdatesManual() async {
-    if (kLocalOfflineMode || !isDirectDistributionChannel) {
+    if (!isDirectDistributionChannel) {
       return const UpdateCheckResult.upToDate();
     }
     return _runCheck(persistLastCheck: true, force: true);

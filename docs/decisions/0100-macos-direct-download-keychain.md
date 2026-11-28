@@ -157,7 +157,7 @@ Only the synchronizable **delete** is entitlement-gated, which is why the
 
 * Issue #1044 — the report this ADR answers.
 * Issue #1033 — the macOS report whose side note surfaced the `-34018`.
-* [`docs/features/auth.md`](../features/auth.md) — secure-storage
+* `docs/features/auth.md` (removed in ADR-0107) — secure-storage
   configuration.
 * [`docs/packaging.md`](../packaging.md) — Apple signing and notarization.
 * `0bd28bc3` — "fix(macos): restore keychain access and resilient auth

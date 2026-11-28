@@ -1,5 +1,4 @@
 import 'package:drift/native.dart';
-import 'package:enjoy_player/core/errors/app_failure.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/features/ai/application/ai_capability_providers.dart';
@@ -30,19 +29,6 @@ final class _FakeDictionary implements DictionaryCapability {
       senses: const [DictionarySense(definition: 'test sense')],
     );
   }
-}
-
-/// Always rejected with the worker 402 envelope.
-final class _CreditsExhaustedDictionary implements DictionaryCapability {
-  const _CreditsExhaustedDictionary();
-
-  @override
-  Future<DictionaryResult> lookupDictionary({
-    required String word,
-    required String sourceLanguage,
-    required String targetLanguage,
-    bool? forceRefresh,
-  }) async => throw const CreditsFailure('HTTP 402');
 }
 
 /// Deletes the saved row between the lookup and the persist.
@@ -121,47 +107,6 @@ void main() {
     expect(item.reviewsCount, added.item.reviewsCount);
     expect(item.easeFactor, added.item.easeFactor);
   });
-
-  test(
-    'credits rejection sets the credits error token, not fetch_failed',
-    () async {
-      final creditsContainer = ProviderContainer(
-        overrides: [
-          appDatabaseProvider.overrideWithValue(db),
-          dictionaryCapabilityProvider.overrideWithValue(
-            const _CreditsExhaustedDictionary(),
-          ),
-        ],
-      );
-      addTearDown(creditsContainer.dispose);
-
-      final repo = VocabularyRepository(db);
-      await repo.addWithContext(
-        word: 'hello',
-        language: 'en',
-        targetLanguage: 'zh',
-        text: 'Hello world.',
-        sourceType: VocabularySourceType.video,
-        sourceId: 'v1',
-        mediaLocator: const MediaLocator(start: 0, duration: 1000),
-        now: DateTime.utc(2020, 1, 1),
-      );
-
-      final session = creditsContainer.read(
-        vocabularyReviewSessionProvider.notifier,
-      );
-      await session.start(
-        const ReviewSelectionOptions(mode: VocabularyReviewMode.all),
-        now: DateTime.utc(2030, 1, 1),
-      );
-      session.flip();
-      await session.fetchDictionary();
-
-      final state = creditsContainer.read(vocabularyReviewSessionProvider);
-      expect(state.dictionaryError, 'credits');
-      expect(state.dictionaryFetchInFlight, isFalse);
-    },
-  );
 
   test('persist returning null sets the persist_failed token', () async {
     final repo = VocabularyRepository(db);

@@ -27,4 +27,4 @@ SP Player previously allowed signed-out (guest) usage of home, library, discover
 
 - [ADR-0012](0012-per-user-sqlite-isolation.md) — per-user Drift files; device-global DB file retained for device-global settings
 - [ADR-0027](0027-native-auth-v2.md) — native sign-in hub
-- [docs/features/auth.md](../features/auth.md)
+- `docs/features/auth.md` (removed in ADR-0107)

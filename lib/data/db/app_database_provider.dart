@@ -1,15 +1,14 @@
-/// Provides [AppDatabase] for the current auth session (per-user SQLite file).
+/// Provides [AppDatabase] for the single local session (no account system).
 library;
 
 import 'dart:async';
-import 'dart:collection';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
+
+import 'package:enjoy_player/core/config/local_mode.dart';
 
 import 'app_database.dart';
 import 'settings_keys.dart';
@@ -20,7 +19,7 @@ part 'app_database_provider.g.dart';
 /// [SettingsScope].
 ///
 /// Single place mapping settings scope → database provider, so feature code
-/// cannot hand a device-scoped key to the per-user database (or vice versa)
+/// cannot hand a device-scoped key to the session database (or vice versa)
 /// by accident. `SettingsDao`'s placement assert backstops direct DAO access
 /// in debug builds.
 AppDatabase settingsDatabaseFor(Ref ref, SettingKey<dynamic> key) {
@@ -29,28 +28,13 @@ AppDatabase settingsDatabaseFor(Ref ref, SettingKey<dynamic> key) {
       : ref.watch(appDatabaseProvider);
 }
 
-/// Maximum number of per-user [AppDatabase] instances kept open simultaneously.
-///
-/// Only the device-global settings DB and the most recently used per-user DB
-/// need to be live at the same time — signing in as a new user closes the
-/// previous one. Two is enough because the device-global DB is owned by
-/// [deviceGlobalAppDatabaseProvider] (a separate keep-alive provider with its
-/// own onDispose), and only one per-user DB is "current" at a time. Anything
-/// older is evicted.
-const int _kMaxUserSessionDatabases = 2;
-
 /// Process-wide device-global [AppDatabase] (`enjoy_player.sqlite`) — Drift
 /// warns when two instances wrap the same `driftDatabase(name: …)` executor.
 AppDatabase? _deviceGlobalDatabaseInstance;
 int _deviceGlobalDatabaseRefCount = 0;
 
-/// One [AppDatabase] per signed-in session name — avoids constructing a new
-/// [AppDatabase] on every [appDatabase] rebuild (Drift multiple-instances warning).
-///
-/// Bounded to [_kMaxUserSessionDatabases] entries; the oldest is evicted (and
-/// closed) before inserting a new one.
-final LinkedHashMap<String, AppDatabase> _userSessionDatabases =
-    LinkedHashMap<String, AppDatabase>();
+/// The single local session database instance (`enjoy_player_local.sqlite`).
+AppDatabase? _localDatabaseInstance;
 
 AppDatabase _acquireDeviceGlobalDatabase() {
   _deviceGlobalDatabaseRefCount++;
@@ -64,19 +48,18 @@ Future<void> _releaseDeviceGlobalDatabase() async {
   _deviceGlobalDatabaseRefCount--;
 }
 
-/// Closes every open device-global / per-user [AppDatabase] and clears caches.
+/// Closes every open device-global / local [AppDatabase] and clears caches.
 Future<void> closeAndClearAllAppDatabases() async {
   debugOnShutdownDatabaseClose?.call();
   _deviceGlobalDatabaseRefCount = 0;
   final deviceGlobal = _deviceGlobalDatabaseInstance;
   _deviceGlobalDatabaseInstance = null;
-
-  final userDbs = List<AppDatabase>.from(_userSessionDatabases.values);
-  _userSessionDatabases.clear();
+  final local = _localDatabaseInstance;
+  _localDatabaseInstance = null;
 
   final toClose = <AppDatabase>{};
   if (deviceGlobal != null) toClose.add(deviceGlobal);
-  toClose.addAll(userDbs);
+  if (local != null) toClose.add(local);
 
   for (final db in toClose) {
     try {
@@ -94,20 +77,12 @@ Future<void> closeAndClearAllAppDatabases() async {
 @visibleForTesting
 void Function()? debugOnShutdownDatabaseClose;
 
-/// Drift file base name for the active session, or `null` when no session can
-/// be opened (signed out on an account-enabled build).
-String? _signedInSessionDbBaseName(AsyncValue<AuthState> auth) {
-  final userId = sessionUserIdOf(auth);
-  if (userId == null) return null;
-  final safe = _sanitizeUserIdForDbName(userId);
-  return '${AppDatabase.deviceGlobalDatabaseName}_$safe';
-}
+/// Drift file base name for the single local session.
+String get _localSessionDbBaseName =>
+    '${AppDatabase.deviceGlobalDatabaseName}_$kLocalSessionId';
 
-/// Device-global Drift DB (`enjoy_player`) — API base URL, diagnostics, and
-/// other settings that must be readable before sign-in (ADR-0012, ADR-0031).
-///
-/// Kept separate from [appDatabaseProvider] so [ApiBaseUrl] does not depend on
-/// auth-scoped DB (avoids Riverpod cycles with [authCtrlProvider]).
+/// Device-global Drift DB (`enjoy_player`) — diagnostics and other settings
+/// that must be readable before the session DB exists (ADR-0012, ADR-0031).
 @Riverpod(keepAlive: true)
 AppDatabase deviceGlobalAppDatabase(Ref ref) {
   final db = _acquireDeviceGlobalDatabase();
@@ -129,47 +104,18 @@ Future<T> withDeviceGlobalAppDatabaseForBootstrap<T>(
   }
 }
 
-/// Per-user library + prefs (`enjoy_player_<userId>`). Requires sign-in
-/// (ADR-0031 login-only access); use [deviceGlobalAppDatabaseProvider] for
-/// device-global settings.
-///
-/// The account-less build resolves this to the single local session
-/// (`enjoy_player_local`) without waiting for an auth state — see
-/// [sessionUserIdOf].
+/// Local library + prefs (`enjoy_player_local`) — the only session database
+/// in the account-less build.
 @Riverpod(keepAlive: true)
 AppDatabase appDatabase(Ref ref) {
-  final sessionName = ref.watch(
-    authCtrlProvider.select(_signedInSessionDbBaseName),
+  final db = _localDatabaseInstance ??= AppDatabase(
+    name: _localSessionDbBaseName,
   );
-  if (sessionName == null) {
-    throw StateError(
-      'appDatabaseProvider requires AuthSignedIn; '
-      'use deviceGlobalAppDatabaseProvider for device-global settings.',
-    );
-  }
-
-  final existing = _userSessionDatabases.remove(sessionName);
-  if (existing != null) {
-    _userSessionDatabases[sessionName] = existing;
-    ref.onDispose(() {
-      unawaited(_userSessionDatabases.remove(sessionName)?.close());
-    });
-    return existing;
-  }
-
-  while (_userSessionDatabases.length >= _kMaxUserSessionDatabases) {
-    final oldestKey = _userSessionDatabases.keys.first;
-    final oldest = _userSessionDatabases.remove(oldestKey);
-    unawaited(oldest?.close());
-  }
-
-  final db = AppDatabase(name: sessionName);
-  _userSessionDatabases[sessionName] = db;
   ref.onDispose(() {
-    unawaited(_userSessionDatabases.remove(sessionName)?.close());
+    if (identical(_localDatabaseInstance, db)) {
+      _localDatabaseInstance = null;
+      unawaited(db.close());
+    }
   });
   return db;
 }
-
-String _sanitizeUserIdForDbName(String id) =>
-    id.replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '_');

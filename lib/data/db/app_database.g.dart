@@ -12530,7 +12530,6 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final RecordingDao recordingDao = RecordingDao(this as AppDatabase);
   late final DictationDao dictationDao = DictationDao(this as AppDatabase);
-  late final SyncQueueDao syncQueueDao = SyncQueueDao(this as AppDatabase);
   late final SettingsDao settingsDao = SettingsDao(this as AppDatabase);
   late final YoutubeChannelSubscriptionDao youtubeChannelSubscriptionDao =
       YoutubeChannelSubscriptionDao(this as AppDatabase);
@@ -18764,18 +18763,6 @@ class DictationDaoManager {
   DictationDaoManager(this._db);
   $$DictationsTableTableManager get dictations =>
       $$DictationsTableTableManager(_db.attachedDatabase, _db.dictations);
-}
-
-mixin _$SyncQueueDaoMixin on DatabaseAccessor<AppDatabase> {
-  $SyncQueueTable get syncQueue => attachedDatabase.syncQueue;
-  SyncQueueDaoManager get managers => SyncQueueDaoManager(this);
-}
-
-class SyncQueueDaoManager {
-  final _$SyncQueueDaoMixin _db;
-  SyncQueueDaoManager(this._db);
-  $$SyncQueueTableTableManager get syncQueue =>
-      $$SyncQueueTableTableManager(_db.attachedDatabase, _db.syncQueue);
 }
 
 mixin _$SettingsDaoMixin on DatabaseAccessor<AppDatabase> {

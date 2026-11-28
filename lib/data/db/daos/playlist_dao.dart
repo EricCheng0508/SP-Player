@@ -5,7 +5,7 @@ part of '../app_database.dart';
 class PlaylistDao extends DatabaseAccessor<AppDatabase> {
   PlaylistDao(super.db);
 
-  AppDatabase get _db => db as AppDatabase;
+  AppDatabase get _db => db;
 
   /// All playlists in creation order, with item counts (GROUP BY single query).
   Stream<List<PlaylistWithCount>> watchPlaylists() {

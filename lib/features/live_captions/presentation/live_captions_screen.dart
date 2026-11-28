@@ -18,7 +18,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:enjoy_player/core/theme/enjoy_icons.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
-import 'package:enjoy_player/core/theme/typography.dart';
 import 'package:enjoy_player/features/live_captions/application/live_captions_controller.dart';
 import 'package:enjoy_player/features/live_captions/data/live_captions_store.dart';
 import 'package:enjoy_player/features/live_captions/data/sherpa_streaming_asr.dart';
@@ -260,109 +259,6 @@ class _LiveCaptionsScreenState extends ConsumerState<LiveCaptionsScreen> {
         ),
       ),
     );
-  }
-}
-
-// ---------------------------------------------------------------------------
-final class _SessionCard extends StatelessWidget {
-  const _SessionCard({
-    required this.session,
-    required this.selected,
-    required this.inProgress,
-    required this.onTap,
-    required this.onDelete,
-    required this.onExport,
-  });
-
-  final LiveCaptionSession session;
-  final bool selected;
-  final bool inProgress;
-  final VoidCallback onTap;
-  final VoidCallback onDelete;
-  final VoidCallback onExport;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = EnjoyThemeTokens.of(context);
-    final preview = session.lines.isEmpty ? '（暂无内容）' : session.lines.first.text;
-    return Material(
-      color: selected ? t.sunk : Colors.transparent,
-      borderRadius: BorderRadius.circular(10),
-      child: EnjoyPressable(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: selected ? t.brandInk : t.line,
-              width: selected ? 1.2 : 1,
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    session.title,
-                    style: enjoyMonoStyle(
-                      context,
-                      size: 12.5,
-                      weight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  if (inProgress)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 1,
-                      ),
-                      decoration: ShapeDecoration(
-                        color: t.youSoft,
-                        shape: const StadiumBorder(),
-                      ),
-                      child: Text(
-                        '进行中',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: t.youInk,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  const Spacer(),
-                  _CardMenu(onDelete: onDelete, onExport: onExport),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                preview,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: t.ink2),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '${_fmtDuration(session.duration)} · ${session.lines.length} 句'
-                '${session.translated ? ' · 已译' : ''}',
-                style: enjoyMonoStyle(context, size: 11, color: t.ink3),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  static String _fmtDuration(Duration d) {
-    final m = d.inMinutes;
-    final s = d.inSeconds % 60;
-    return s == 0 ? '$m 分钟' : '$m 分 ${s.toString().padLeft(2, '0')} 秒';
   }
 }
 

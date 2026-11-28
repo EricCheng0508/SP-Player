@@ -39,7 +39,7 @@ Default filename: `EnjoyPlayer-diagnostics-<date>.zip`. On iOS and Android, the 
 
 - Authorization headers, bearer tokens, and common cookie names are redacted before write.
 - Long absolute paths are truncated to `.../<basename>`.
-- Logs may include YouTube video IDs and media UUIDs needed for playback/sync debugging.
+- Logs may include YouTube video IDs and media UUIDs needed for playback debugging.
 - Turn off diagnostic logging after collecting a report unless actively troubleshooting.
 
 ## Framework error routing

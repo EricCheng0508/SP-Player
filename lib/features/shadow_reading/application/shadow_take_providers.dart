@@ -3,7 +3,7 @@
 /// Three seams the panel used to reach past:
 ///
 /// * it constructed [ShadowTakeStore] itself, handing it a raw
-///   [AppDatabase] and the sync-enqueue callback;
+///   [AppDatabase];
 /// * it read `appDatabaseProvider` and drove `recordingDao.watchByEchoRegion`
 ///   straight from `build`;
 /// * it repeated `recordingDao.listByEchoRegion` in both hotkey handlers.
@@ -11,10 +11,8 @@
 /// All of it now comes from this module, so presentation never names a
 /// database handle. Tests override one provider each.
 ///
-/// Hand-written providers, not `@riverpod` annotations, for the same reason
-/// `sync_providers.dart` and `cloud_providers.dart` are: `riverpod_generator`
-/// raises `InvalidTypeException` on a Drift row type and on the
-/// function-typed `SyncEnqueueFn`.
+/// Hand-written providers, not `@riverpod` annotations, because
+/// `riverpod_generator` raises `InvalidTypeException` on a Drift row type.
 library;
 
 import 'package:flutter/foundation.dart';
@@ -23,11 +21,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:enjoy_player/core/echo/echo_region_key.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
-import 'package:enjoy_player/features/sync/application/sync_providers.dart';
 
 import 'shadow_take_store.dart';
 
-/// Builds [ShadowTakeStore]s bound to the app's database and sync seam.
+/// Builds [ShadowTakeStore]s bound to the app's database.
 ///
 /// A factory rather than a store provider on purpose. [ShadowTakeStore] owns a
 /// [MicRecorder] that is recreated after every stop (`record` on Windows keeps
@@ -39,10 +36,7 @@ import 'shadow_take_store.dart';
 /// the same recorder. The panel keeps owning its store (and disposing it in its
 /// own `dispose`) while the *wiring* moves here.
 final shadowTakeStoreFactoryProvider = Provider<ShadowTakeStoreFactory>((ref) {
-  return ShadowTakeStoreFactory(
-    db: ref.watch(appDatabaseProvider),
-    enqueueSync: ref.read(syncEnqueueProvider),
-  );
+  return ShadowTakeStoreFactory(db: ref.watch(appDatabaseProvider));
 });
 
 /// Identity of one echo region's recording window.

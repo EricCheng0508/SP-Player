@@ -12,8 +12,6 @@ import 'package:enjoy_player/core/audio/mic_recorder.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/features/shadow_reading/application/shadow_take_providers.dart';
-import 'package:enjoy_player/features/sync/application/sync_providers.dart';
-import 'package:enjoy_player/features/sync/domain/sync_types.dart';
 
 class _FakeMicRecorder implements MicRecorder {
   final startedPaths = <String>[];
@@ -77,21 +75,14 @@ void main() {
   late AppDatabase db;
   late Directory tempDir;
   late _FakeMicRecorder recorder;
-  late List<(SyncEntityType, String, SyncAction)> syncCalls;
   late ProviderContainer container;
 
   setUp(() async {
     db = AppDatabase(executor: NativeDatabase.memory());
     tempDir = await Directory.systemTemp.createTemp('shadow_take_providers');
     recorder = _FakeMicRecorder();
-    syncCalls = [];
     container = ProviderContainer(
-      overrides: [
-        appDatabaseProvider.overrideWithValue(db),
-        syncEnqueueProvider.overrideWithValue((type, id, action) async {
-          syncCalls.add((type, id, action));
-        }),
-      ],
+      overrides: [appDatabaseProvider.overrideWithValue(db)],
     );
   });
 
@@ -103,39 +94,34 @@ void main() {
     }
   });
 
-  /// The factory must bind the container's database and sync seam, so a take
-  /// persisted through a store it built still lands in the test database and
-  /// still enqueues.
-  test(
-    'factory-built store persists through the container database and sync seam',
-    () async {
-      final factory = container.read(shadowTakeStoreFactoryProvider);
-      final store = factory(
-        recorderFactory: () => recorder,
-        takeDirectory: tempDir,
-      );
-      addTearDown(store.dispose);
+  /// The factory must bind the container's database, so a take persisted
+  /// through a store it built still lands in the test database.
+  test('factory-built store persists through the container database', () async {
+    final factory = container.read(shadowTakeStoreFactoryProvider);
+    final store = factory(
+      recorderFactory: () => recorder,
+      takeDirectory: tempDir,
+    );
+    addTearDown(store.dispose);
 
-      await store.start(device: null);
-      final path = recorder.startedPaths.last;
-      await File(path).writeAsBytes(buildPcm16Wav([0, 120, -120, 40]));
-      recorder.armedPath = path;
+    await store.start(device: null);
+    final path = recorder.startedPaths.last;
+    await File(path).writeAsBytes(buildPcm16Wav([0, 120, -120, 40]));
+    recorder.armedPath = path;
 
-      final result = await store.stopAndPersist(
-        region: EchoRegionKey.fromSeconds(
-          targetType: 'transcript',
-          targetId: 'media-1',
-          language: 'en',
-          referenceText: 'hello',
-          startSec: 1,
-          endSec: 3,
-        ),
-      );
-      expect(result.row.targetId, 'media-1');
-      expect(syncCalls, isNotEmpty);
-      expect(container.read(appDatabaseProvider), same(db));
-    },
-  );
+    final result = await store.stopAndPersist(
+      region: EchoRegionKey.fromSeconds(
+        targetType: 'transcript',
+        targetId: 'media-1',
+        language: 'en',
+        referenceText: 'hello',
+        startSec: 1,
+        endSec: 3,
+      ),
+    );
+    expect(result.row.targetId, 'media-1');
+    expect(container.read(appDatabaseProvider), same(db));
+  });
 
   /// Two stores from one factory are distinct objects: the panel owns its
   /// store (recorder + `_active`), so sharing would cross-talk between

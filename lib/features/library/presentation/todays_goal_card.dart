@@ -12,8 +12,6 @@ import 'package:enjoy_player/core/theme/typography.dart';
 import 'package:enjoy_player/core/theme/widgets/editorial_header.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_card.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_progress_ring.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/library/application/goal_progress.dart';
 import 'package:enjoy_player/features/library/application/learning_statistics_provider.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
@@ -42,13 +40,6 @@ class TodaysGoalCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final statsAsync = ref.watch(learningStatisticsProvider);
-    final profileGoal = ref.watch(
-      authCtrlProvider.select(
-        (a) => a.whenOrNull(
-          data: (auth) => auth is AuthSignedIn ? auth.profile.goal : null,
-        ),
-      ),
-    );
 
     return statsAsync.when(
       skipLoadingOnReload: true,
@@ -56,7 +47,6 @@ class TodaysGoalCard extends ConsumerWidget {
         if (stats == null) return const SizedBox.shrink();
         final progress = computeGoalProgress(
           recordingDurationMs: stats.today.recordingDurationMs,
-          goalMinutes: profileGoal,
         );
         return _GoalCardChrome(
           semanticsLabel:

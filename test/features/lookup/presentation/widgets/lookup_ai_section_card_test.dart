@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:drift/native.dart';
 import 'package:enjoy_player/core/cache/lru_store.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
@@ -10,15 +12,12 @@ import 'package:enjoy_player/features/ai/domain/capabilities/dictionary_capabili
 import 'package:enjoy_player/features/ai/domain/capabilities/translation_capability.dart';
 import 'package:enjoy_player/features/ai/domain/models/dictionary_result.dart';
 import 'package:enjoy_player/features/ai/domain/models/translation_result.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/auth/domain/user_profile.dart';
-import 'package:enjoy_player/features/auth/presentation/widgets/auth_required_callout.dart';
-import 'package:enjoy_player/features/lookup/application/lookup_credits_exhausted_provider.dart';
 import 'package:enjoy_player/features/lookup/application/lookup_section_providers.dart';
 import 'package:enjoy_player/features/lookup/domain/lookup_request.dart';
+import 'package:enjoy_player/features/lookup/domain/lookup_section_id.dart';
 import 'package:enjoy_player/features/lookup/presentation/sections/dictionary_lookup_section.dart';
 import 'package:enjoy_player/features/lookup/presentation/sections/translation_lookup_section.dart';
+import 'package:enjoy_player/features/lookup/presentation/widgets/auth_required_callout.dart';
 import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_ai_section_card.dart';
 import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_error_row.dart';
 import 'package:enjoy_player/features/lookup/presentation/widgets/lookup_section_shimmer.dart';
@@ -27,13 +26,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
-
-class _AuthSignedInCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedIn(
-    profile: UserProfile(id: 'tester', email: 't@example.com', name: 'Tester'),
-  );
-}
 
 class _FlakyTranslationCapability implements TranslationCapability {
   _FlakyTranslationCapability(this._outcomes);
@@ -104,19 +96,17 @@ void main() {
   testWidgets('the card renders the shimmer until the value arrives', (
     tester,
   ) async {
+    final value = Completer<String>();
     await tester.pumpWidget(
       _harness(
-        overrides: [
-          authCtrlProvider.overrideWith(_AuthSignedInCtrl.new),
-          appDatabaseProvider.overrideWithValue(db),
-        ],
+        overrides: [appDatabaseProvider.overrideWithValue(db)],
         child: LookupAiSectionCard<String>(
           title: 'Section',
           initiallyExpanded: true,
           leading: const Icon(Icons.book),
           surface: AuthRequiredSurface.lookupTranslation,
           section: LookupSectionId.translation,
-          provider: FutureProvider<String>((ref) async => 'value'),
+          provider: FutureProvider<String>((ref) => value.future),
           onRetry: () {},
           bodyBuilder: (context, data, value) => Text(data),
         ),
@@ -127,6 +117,7 @@ void main() {
     expect(find.byType(LookupSectionShimmer), findsOneWidget);
     expect(find.text('value'), findsNothing);
 
+    value.complete('value');
     await tester.pumpAndSettle();
     expect(find.text('value'), findsOneWidget);
   });
@@ -134,10 +125,7 @@ void main() {
   testWidgets('the card renders the shared error surface', (tester) async {
     await tester.pumpWidget(
       _harness(
-        overrides: [
-          authCtrlProvider.overrideWith(_AuthSignedInCtrl.new),
-          appDatabaseProvider.overrideWithValue(db),
-        ],
+        overrides: [appDatabaseProvider.overrideWithValue(db)],
         child: LookupAiSectionCard<String>(
           title: 'Section',
           initiallyExpanded: true,
@@ -166,7 +154,6 @@ void main() {
     await tester.pumpWidget(
       _harness(
         overrides: [
-          authCtrlProvider.overrideWith(_AuthSignedInCtrl.new),
           appDatabaseProvider.overrideWithValue(db),
           translationCapabilityProvider.overrideWithValue(capability),
         ],
@@ -223,7 +210,6 @@ void main() {
     await tester.pumpWidget(
       _harness(
         overrides: [
-          authCtrlProvider.overrideWith(_AuthSignedInCtrl.new),
           appDatabaseProvider.overrideWithValue(db),
           aiDictionaryCacheProvider.overrideWithValue(cache),
           dictionaryCapabilityProvider.overrideWithValue(capability),
@@ -292,7 +278,6 @@ void main() {
     await tester.pumpWidget(
       _harness(
         overrides: [
-          authCtrlProvider.overrideWith(_AuthSignedInCtrl.new),
           appDatabaseProvider.overrideWithValue(db),
           aiTranslationCacheProvider.overrideWithValue(cache),
           translationCapabilityProvider.overrideWithValue(capability),

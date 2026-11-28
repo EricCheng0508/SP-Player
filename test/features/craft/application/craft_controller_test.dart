@@ -7,7 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:enjoy_player/core/application/app_preferences_provider.dart';
 import 'package:enjoy_player/core/config/local_mode.dart';
-import 'package:enjoy_player/core/errors/app_failure.dart';
 import 'package:enjoy_player/data/api/api_exception.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
@@ -15,9 +14,6 @@ import 'package:enjoy_player/data/db/settings_keys.dart';
 import 'package:enjoy_player/data/files/file_storage.dart';
 import 'package:enjoy_player/features/ai/domain/byok_not_configured_failure.dart';
 import 'package:enjoy_player/features/ai/domain/modality_kind.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 import 'package:enjoy_player/features/craft/application/craft_controller.dart';
 import 'package:enjoy_player/features/craft/application/craft_preferences_provider.dart';
 import 'package:enjoy_player/features/craft/application/craft_timeline_enricher.dart';
@@ -35,18 +31,6 @@ import 'package:enjoy_player/features/craft/data/craft_library_repository.dart';
 import 'package:enjoy_player/features/craft/domain/craft_edit_source.dart';
 import 'package:forced_alignment/forced_alignment.dart';
 
-class _SignedInAuthCtrl extends AuthCtrl {
-  _SignedInAuthCtrl(this.profile);
-  final UserProfile profile;
-  @override
-  Future<AuthState> build() async => AuthSignedIn(profile: profile);
-}
-
-class _SignedOutAuthCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedOut();
-}
-
 /// Resolved app prefs without the real controller's server-sync pipeline.
 class _FixedPrefsCtrl extends AppPreferencesCtrl {
   @override
@@ -55,14 +39,6 @@ class _FixedPrefsCtrl extends AppPreferencesCtrl {
     learningLanguage: 'en-US',
     nativeLanguage: 'zh-CN',
   );
-}
-
-class _TogglableAuthCtrl extends AuthCtrl {
-  _TogglableAuthCtrl(this.profile);
-  final UserProfile profile;
-  @override
-  Future<AuthState> build() async => AuthSignedIn(profile: profile);
-  void forceSignedOut() => state = const AsyncData(AuthSignedOut());
 }
 
 class _FakeTranslator implements CraftTranslator {
@@ -273,8 +249,6 @@ class _FakeTranscriber implements CraftTranscriber {
   }
 }
 
-const _profile = UserProfile(id: 'user-1', email: 'a@b.com', name: 'Tester');
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -296,7 +270,7 @@ void main() {
     await db.close();
   });
 
-  ProviderContainer container({UserProfile? profile = _profile}) {
+  ProviderContainer container() {
     return ProviderContainer(
       overrides: [
         craftTranslatorProvider.overrideWithValue(translator),
@@ -308,17 +282,12 @@ void main() {
         ),
         appDatabaseProvider.overrideWithValue(db),
         appPreferencesCtrlProvider.overrideWith(_FixedPrefsCtrl.new),
-        if (profile == null)
-          authCtrlProvider.overrideWith(_SignedOutAuthCtrl.new)
-        else
-          authCtrlProvider.overrideWith(() => _SignedInAuthCtrl(profile)),
       ],
     );
   }
 
   /// Mirrors the CraftScreen subscriber: keeps the autoDispose controller
   /// alive across awaits so preference hydration applies as in production.
-  /// Call after auth has resolved — Craft is only reachable when signed in.
   CraftController notifierOf(ProviderContainer c) {
     c.listen(craftControllerProvider, (_, _) {});
     return c.read(craftControllerProvider.notifier);
@@ -589,31 +558,6 @@ void main() {
       expect(stateOf(c).translatedText, isNull);
     });
 
-    test('maps a credits rejection to CraftCreditsFailure and keeps source '
-        'text for retry (spec 045)', () async {
-      translator = _FakeTranslator(
-        error: const CreditsFailure(
-          'HTTP 402',
-          requiredCredits: 900,
-          usedCredits: 800,
-          limitCredits: 1000,
-        ),
-      );
-      final c = container();
-      addTearDown(c.dispose);
-      final n = notifierOf(c);
-      n.setSourceLanguage('en');
-      n.setTargetLanguage('fr');
-      n.setSourceText('long enough text');
-      await n.translate();
-
-      final failure = stateOf(c).failure;
-      expect(failure, isA<CraftCreditsFailure>());
-      expect(failure!.action, CraftFailureAction.retry);
-      expect(stateOf(c).sourceText, 'long enough text');
-      expect(stateOf(c).isTranslating, isFalse);
-    });
-
     test('clears a prior failure when a later translation succeeds', () async {
       translator = _FakeTranslator(result: 'Bonjour');
       final c = container();
@@ -670,7 +614,6 @@ void main() {
       final c = container();
       addTearDown(c.dispose);
       final n = notifierOf(c);
-      await c.read(authCtrlProvider.future);
       n.setSynthText('long enough text');
       await n.synthesize();
       expect(stateOf(c).hasPreview, isTrue);
@@ -686,7 +629,6 @@ void main() {
       final c = container();
       addTearDown(c.dispose);
       final n = notifierOf(c);
-      await c.read(authCtrlProvider.future);
       n.setSynthText('long enough text');
       await n.synthesize();
       expect(stateOf(c).hasPreview, isTrue);
@@ -701,7 +643,6 @@ void main() {
     test('returns early when normalized text is too short', () async {
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final n = notifierOf(c);
       n.setSynthText('short');
       await n.synthesize();
@@ -710,10 +651,9 @@ void main() {
       expect(stateOf(c).failure, isNull);
     });
 
-    test('synthesizes without an auth session on the local build', () async {
-      final c = container(profile: null);
+    test('synthesizes on the local build', () async {
+      final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final n = notifierOf(c);
       n.setSynthText('long enough text');
       await n.synthesize();
@@ -733,7 +673,6 @@ void main() {
         );
         final c = container();
         addTearDown(c.dispose);
-        await c.read(authCtrlProvider.future);
         final n = notifierOf(c);
         n.setSynthLanguage('en-US');
         n.setSelectedVoice('en-US-JennyNeural');
@@ -760,7 +699,6 @@ void main() {
       );
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final n = notifierOf(c);
       n.setSynthText('long enough text');
       await n.synthesize();
@@ -777,7 +715,6 @@ void main() {
       );
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final n = notifierOf(c);
       n.setSynthText('long enough text');
       await n.synthesize();
@@ -793,7 +730,6 @@ void main() {
       );
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final n = notifierOf(c);
       n.setSynthText('long enough text');
       await n.synthesize();
@@ -809,7 +745,6 @@ void main() {
     test('returns null when there is no preview audio', () async {
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final result = await notifierOf(c).saveToLibrary();
       expect(result, isNull);
       expect(repo.findExistingCalls, 0);
@@ -818,28 +753,14 @@ void main() {
       expect(stateOf(c).failure, isNull);
     });
 
-    test('saves on the local session after the auth session drops', () async {
-      final auth = _TogglableAuthCtrl(_profile);
-      final c = ProviderContainer(
-        overrides: [
-          craftTranslatorProvider.overrideWithValue(translator),
-          craftSynthesizerProvider.overrideWithValue(synthesizer),
-          craftLibraryRepositoryProvider.overrideWithValue(repo),
-          craftTimelineEnricherProvider.overrideWithValue(
-            CraftTimelineEnricher(enabled: false),
-          ),
-          appDatabaseProvider.overrideWithValue(db),
-          authCtrlProvider.overrideWith(() => auth),
-        ],
-      );
+    test('saves on the local session', () async {
+      final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final n = notifierOf(c);
       n.setSynthText('long enough text');
       await n.synthesize();
       expect(stateOf(c).hasPreview, isTrue);
 
-      auth.forceSignedOut();
       final result = await n.saveToLibrary();
       expect(result?.mediaId, 'media-new');
       expect(repo.importCalls, 1);
@@ -850,7 +771,6 @@ void main() {
       repo.existingId = 'media-existing';
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final n = notifierOf(c);
       n.setSynthText('long enough text');
       await n.synthesize();
@@ -879,7 +799,6 @@ void main() {
       repo.importResultId = 'media-123';
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final n = notifierOf(c);
       n.setScreenMode(CraftScreenMode.advanced);
       n.setSynthLanguage('en-US');
@@ -895,7 +814,7 @@ void main() {
       expect(stateOf(c).isSaving, isFalse);
       expect(repo.importCalls, 1);
       expect(repo.lastImportSourceFlag, 'craft-direct');
-      expect(repo.lastImportSignedInUserId, 'user-1');
+      expect(repo.lastImportSignedInUserId, kLocalSessionId);
       expect(repo.lastImportVoice, 'en-US-JennyNeural');
       expect(repo.lastImportLearningLanguage, 'en-US');
 
@@ -911,7 +830,6 @@ void main() {
         synthesizer = _FakeSynthesizer(wordBoundaries: const []);
         final c = container();
         addTearDown(c.dispose);
-        await c.read(authCtrlProvider.future);
         final n = notifierOf(c);
         n.setSynthText('long enough text');
         await n.synthesize();
@@ -993,11 +911,9 @@ void main() {
             craftLibraryRepositoryProvider.overrideWithValue(repo),
             craftTimelineEnricherProvider.overrideWithValue(enricher),
             appDatabaseProvider.overrideWithValue(db),
-            authCtrlProvider.overrideWith(() => _SignedInAuthCtrl(_profile)),
           ],
         );
         addTearDown(c.dispose);
-        await c.read(authCtrlProvider.future);
         final n = notifierOf(c);
         n.setScreenMode(CraftScreenMode.advanced);
         n.setSelectedVoice('en-US-JennyNeural');
@@ -1042,11 +958,9 @@ void main() {
             craftLibraryRepositoryProvider.overrideWithValue(repo),
             craftTimelineEnricherProvider.overrideWithValue(enricher),
             appDatabaseProvider.overrideWithValue(db),
-            authCtrlProvider.overrideWith(() => _SignedInAuthCtrl(_profile)),
           ],
         );
         addTearDown(c.dispose);
-        await c.read(authCtrlProvider.future);
         final n = notifierOf(c);
         n.setSynthText('long enough text');
         await n.synthesize();
@@ -1063,7 +977,6 @@ void main() {
       translator = _FakeTranslator(result: 'Bonjour le monde');
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final n = notifierOf(c);
       n.setScreenMode(CraftScreenMode.advanced);
       n.setSourceLanguage('en');
@@ -1083,7 +996,6 @@ void main() {
       () async {
         final c = container();
         addTearDown(c.dispose);
-        await c.read(authCtrlProvider.future);
         final n = notifierOf(c);
         n.setScreenMode(CraftScreenMode.advanced);
         n.setSynthText('long enough text');
@@ -1099,7 +1011,6 @@ void main() {
       final longText = 'a' * 6000;
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final n = notifierOf(c);
       n.setSynthText(longText);
       await n.synthesize();
@@ -1114,7 +1025,6 @@ void main() {
       repo.importError = StateError('disk full');
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final n = notifierOf(c);
       n.setSynthText('long enough text');
       await n.synthesize();
@@ -1131,7 +1041,6 @@ void main() {
       synthesizer = _FakeSynthesizer(audioBytes: bytes, format: 'mp3');
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final n = notifierOf(c);
       n.setSynthText('long enough text');
       await n.synthesize();
@@ -1147,7 +1056,6 @@ void main() {
       repo.importError = StateError('disk full');
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final n = notifierOf(c);
       n.setSynthText('long enough text');
       await n.synthesize();
@@ -1214,7 +1122,6 @@ void main() {
       () async {
         final c = container();
         addTearDown(c.dispose);
-        await c.read(authCtrlProvider.future);
         final n = notifierOf(c);
 
         final audio = Uint8List.fromList(const [1, 2, 3]);
@@ -1236,7 +1143,6 @@ void main() {
         translator = _FakeTranslator(result: 'Hoy tuve un gran día.');
         final c = container();
         addTearDown(c.dispose);
-        await c.read(authCtrlProvider.future);
         final n = notifierOf(c);
 
         n.setSourceLanguage('en');
@@ -1259,7 +1165,6 @@ void main() {
       transcriber = _FakeTranscriber(result: 'short');
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final n = notifierOf(c);
 
       await n.stopCapture(Uint8List.fromList(const [1]));
@@ -1275,7 +1180,6 @@ void main() {
       transcriber = _FakeTranscriber(error: Exception('ASR down'));
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final n = notifierOf(c);
 
       await n.stopCapture(Uint8List.fromList(const [1]));
@@ -1284,34 +1188,10 @@ void main() {
       expect(stateOf(c).failure, isA<CraftAsrFailure>());
     });
 
-    test('ASR credits rejection → CraftCreditsFailure', () async {
-      transcriber = _FakeTranscriber(
-        error: const CreditsFailure(
-          'HTTP 402',
-          requiredCredits: 900,
-          usedCredits: 800,
-          limitCredits: 1000,
-        ),
-      );
-      final c = container();
-      addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
-      final n = notifierOf(c);
-
-      await n.stopCapture(Uint8List.fromList(const [1]));
-      await Future<void>.delayed(Duration.zero);
-
-      final s = stateOf(c);
-      expect(s.failure, isA<CraftCreditsFailure>());
-      expect(s.isTranscribing, isFalse);
-      expect(translator.callCount, 0);
-    });
-
     test('rewrite translator throws → CraftTranslateFailure', () async {
       translator = _FakeTranslator(error: StateError('boom'));
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final n = notifierOf(c);
 
       n.setSourceLanguage('en');
@@ -1326,32 +1206,6 @@ void main() {
       expect(s.translatedText, isNull);
       expect(s.rawTranscript, 'I had a great day today.');
     });
-
-    test('rewrite credits rejection → CraftCreditsFailure', () async {
-      translator = _FakeTranslator(
-        error: const CreditsFailure(
-          'HTTP 402',
-          requiredCredits: 900,
-          usedCredits: 800,
-          limitCredits: 1000,
-        ),
-      );
-      final c = container();
-      addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
-      final n = notifierOf(c);
-
-      n.setSourceLanguage('en');
-      n.setTargetLanguage('es');
-      await n.stopCapture(Uint8List.fromList(const [1, 2, 3]));
-      await Future<void>.delayed(Duration.zero);
-
-      final s = stateOf(c);
-      expect(s.failure, isA<CraftCreditsFailure>());
-      expect(s.isTranslating, isFalse);
-      expect(s.isTranscribing, isFalse);
-      expect(s.translatedText, isNull);
-    });
   });
 
   group('resetForNextCapture', () {
@@ -1359,7 +1213,6 @@ void main() {
       translator = _FakeTranslator(result: 'Hola mundo.');
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final n = notifierOf(c);
 
       n.setSourceLanguage('en');
@@ -1396,7 +1249,6 @@ void main() {
       translator = _FakeTranslator(result: 'Hola mundo hoy.');
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final n = notifierOf(c);
 
       n.setSourceLanguage('en');
@@ -1422,7 +1274,6 @@ void main() {
       translator = _FakeTranslator(result: 'Hola mundo hoy.');
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final n = notifierOf(c);
 
       n.setSourceLanguage('en');
@@ -1443,7 +1294,6 @@ void main() {
       translator = _FakeTranslator(result: 'Hola mundo hoy.');
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final n = notifierOf(c);
 
       n.setSourceLanguage('en');
@@ -1467,7 +1317,6 @@ void main() {
     test('re-runs rewrite on existing transcript', () async {
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final n = notifierOf(c);
 
       n.setSourceLanguage('en');
@@ -1487,7 +1336,6 @@ void main() {
     test('uses edited raw transcript and clears dirty', () async {
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final n = notifierOf(c);
 
       n.setSourceLanguage('en');
@@ -1519,7 +1367,6 @@ void main() {
     test('no-ops when normalized transcript is below min length', () async {
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final n = notifierOf(c);
 
       n.setSourceLanguage('en');
@@ -1556,7 +1403,6 @@ void main() {
       translator = _FakeTranslator(result: ' rewritten result');
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final n = notifierOf(c);
 
       n.setSourceLanguage('en');
@@ -1721,7 +1567,6 @@ void main() {
       repo.updateResultId = 'media-direct';
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final n = notifierOf(c);
 
       final ok = await n.loadForEdit('media-direct');
@@ -1749,7 +1594,6 @@ void main() {
       repo.updateError = StateError('disk full');
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final n = notifierOf(c);
 
       await n.loadForEdit('media-direct');
@@ -1796,7 +1640,6 @@ void main() {
 
         final c = container();
         addTearDown(c.dispose);
-        await c.read(authCtrlProvider.future);
         notifierOf(c);
         await pumpEventQueue();
 
@@ -1807,21 +1650,6 @@ void main() {
         expect(s.selectedVoice, 'en-US-GuyNeural');
       },
     );
-
-    test('signed-out build does not touch the DB and uses fallbacks', () async {
-      final c = container(profile: null);
-      addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
-      notifierOf(c);
-      await pumpEventQueue();
-
-      final s = stateOf(c);
-      expect(s.sourceLanguage, 'en-US');
-      expect(s.targetLanguage, 'en-US');
-      expect(s.style, TranslationStyle.auto);
-      expect(s.screenMode, CraftScreenMode.express);
-      expect(await storedRaw(), isNull);
-    });
 
     test('rebuild re-applies hydration', () async {
       const persisted = CraftPreferences(
@@ -1835,7 +1663,6 @@ void main() {
 
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       notifierOf(c);
       await pumpEventQueue();
       expect(stateOf(c).screenMode, CraftScreenMode.advanced);
@@ -1855,7 +1682,6 @@ void main() {
 
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final n = notifierOf(c);
       n.setStyle(TranslationStyle.casual);
       await pumpEventQueue();
@@ -1891,7 +1717,6 @@ void main() {
 
         final c = container();
         addTearDown(c.dispose);
-        await c.read(authCtrlProvider.future);
         await pumpEventQueue();
 
         final ok = await notifierOf(c).loadForEdit('media-direct');
@@ -1910,7 +1735,6 @@ void main() {
     test('setStyle persists under the current screen mode', () async {
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       await pumpEventQueue();
       final n = notifierOf(c);
       CraftPreferences prefsOf() => c.read(craftPreferencesCtrlProvider);
@@ -1938,7 +1762,6 @@ void main() {
       );
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final n = notifierOf(c);
       await pumpEventQueue();
 
@@ -1951,7 +1774,6 @@ void main() {
     test('startCapture and useTextInput keep the chosen style', () async {
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final n = notifierOf(c);
 
       n.setStyle(TranslationStyle.casual);
@@ -1967,7 +1789,6 @@ void main() {
       () async {
         final c = container();
         addTearDown(c.dispose);
-        await c.read(authCtrlProvider.future);
         await pumpEventQueue();
         final n = notifierOf(c);
 
@@ -1989,7 +1810,6 @@ void main() {
       );
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       await pumpEventQueue();
       final n = notifierOf(c);
 
@@ -2011,7 +1831,6 @@ void main() {
       );
       final c = container();
       addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
       final n = notifierOf(c);
       await pumpEventQueue();
 

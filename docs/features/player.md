@@ -5,7 +5,7 @@
 - `PlayerController` owns playback via injectable `PlayerEngine` (production: `MediaKitPlayerEngine` wrapping a single `mk.Player`, ADR-0003). Open flow is split for clarity:
   - [`resolvePlaybackOpen`](../../lib/features/player/application/playback_open_resolver.dart) — loads rows + `PlayableSource`, throws `MediaNeedsRelocateException` when needed.
   - [`ensureEngineForPlayableSource`](../../lib/features/player/application/engine_swap_coordinator.dart) — swaps MediaKit vs YouTube engine; the install publishes through `PlayerEngineIdentity`, which bumps `playerEngineRevProvider` on the identity change (issue #751).
-  - [`schedulePlayerOpenSideEffects`](../../lib/features/player/application/player_open_side_effects.dart) — cloud transcript fetch + recording pull when signed in.
+  - [`schedulePlayerOpenSideEffects`](../../lib/features/player/application/player_open_side_effects.dart) — post-open transcript resolve.
   - [`VideoPosterCaptureService`](../../lib/features/player/application/video_poster_capture_service.dart) — optional JPEG poster capture + Drift thumbnail update.
 - Restores position + echo flags from `echo_sessions`.
 - Debounced persistence via `PlaybackSessionPersister`; embedded subtitle discovery via `EmbeddedTrackSync`.

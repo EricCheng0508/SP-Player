@@ -11,31 +11,17 @@ void main() {
         surface: 'Fetch',
         call: () async => 'value',
         onSuccess: consumed.add,
-        onCredits: (failure, st) => 'credits',
         onGeneric: (error, st) => 'generic',
       );
       expect(result, 'value');
       expect(consumed, ['value']);
     });
 
-    test('routes CreditsFailure to onCredits', () async {
-      final result = await runAiCall<String>(
-        logLabel: 'test',
-        surface: 'Fetch',
-        call: () async =>
-            throw const CreditsFailure('out of credits', requiredCredits: 2),
-        onCredits: (failure, st) => 'credits:${failure.requiredCredits}',
-        onGeneric: (error, st) => 'generic',
-      );
-      expect(result, 'credits:2');
-    });
-
-    test('routes non-credits errors to onGeneric', () async {
+    test('routes errors to onGeneric', () async {
       final result = await runAiCall<String>(
         logLabel: 'test',
         surface: 'Fetch',
         call: () async => throw const NetworkFailure('boom'),
-        onCredits: (failure, st) => 'credits',
         onGeneric: (error, st) => 'generic:${error is NetworkFailure}',
       );
       expect(result, 'generic:true');
@@ -47,7 +33,6 @@ void main() {
         surface: 'Fetch',
         call: () async => 'value',
         onSuccess: (_) => throw const NetworkFailure('boom'),
-        onCredits: (failure, st) => 'credits',
         onGeneric: (error, st) => 'generic',
       );
       expect(result, 'generic');

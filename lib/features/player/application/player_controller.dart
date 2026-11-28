@@ -172,17 +172,13 @@ class PlayerController extends _$PlayerController implements PlayerOpenScope {
     blurMode: () => ref.read(transcriptBlurModeProvider.notifier),
     posterService: () => ref.read(videoPosterCaptureServiceProvider),
     scheduleOpenSideEffects:
-        ({
-          required int openGeneration,
-          required String mediaId,
-          required String dexieTargetType,
-        }) => schedulePlayerOpenSideEffects(
-          ref,
-          openGeneration: openGeneration,
-          isStale: () => isOpenStale(openGeneration),
-          mediaId: mediaId,
-          dexieTargetType: dexieTargetType,
-        ),
+        ({required int openGeneration, required String mediaId}) =>
+            schedulePlayerOpenSideEffects(
+              ref,
+              openGeneration: openGeneration,
+              isStale: () => isOpenStale(openGeneration),
+              mediaId: mediaId,
+            ),
     scheduleYoutubeMetadata:
         ({
           required int openGeneration,

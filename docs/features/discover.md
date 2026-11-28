@@ -4,7 +4,7 @@
 
 **Discover** helps users find YouTube videos to practice with when they do not already have a URL. Browse **recommended channels** (bundled catalog), **subscribe** to YouTube channels, handles, and playlists locally, view a merged **timeline** of recent uploads (fetched via a server-side RSSHub proxy), and **Add to library** to start echo / transcript workflows.
 
-Discover feeds are **not** library items until imported. Subscriptions are **Enjoy-local** — not YouTube account subscriptions. They are also **per-device**: the sync schema declares subscription variants (ADR-0010, ADR-0013), but nothing enqueues, uploads, or pulls them yet (issue #1176), so a subscription added on one device does not appear on another.
+Discover feeds are **not** library items until imported. Subscriptions are **Enjoy-local** — not YouTube account subscriptions. They live entirely in the single local session database (`enjoy_player_local.sqlite`); there is no account or cloud sync ([ADR-0107](../decisions/0107-local-only-no-account-spine.md)), so a subscription added on one device does not appear on another.
 
 ## Navigation
 
@@ -79,7 +79,7 @@ The client requests JSON Feed v1.1 format (via `?format=json`). See the [worker 
 - `date_published` — published timestamp (ISO 8601)
 - `attachments[].duration_in_seconds` — video duration
 
-The refresh client ([`YoutubeFeedClient`](../../lib/data/api/services/ai/youtube_feed_api.dart), provided by `youtubeFeedClientProvider` with bearer auth from `SecureTokenStore.readAccessToken`) handles:
+The refresh client ([`YoutubeFeedClient`](../../lib/data/api/services/ai/youtube_feed_api.dart), provided by `youtubeFeedClientProvider` — requests are unauthenticated; the worker feed needs no token) handles:
 - HTTP status codes → typed exceptions (404 → notFound, 410 → sourceUnavailable, 429 → rateLimited, 502 → upstreamFailure)
 - Handle-to-ID canonicalization: when subscribing via @handle, the client extracts the canonical channel ID from `home_page_url` and uses `/youtube/channel/{id}` for subsequent refreshes
 - Network errors → networkError exception
@@ -178,7 +178,7 @@ The join sits strictly above the append-only feed cache, so ADR-0046 is untouche
 
 ## Add to library
 
-Uses the same path as **Import → From YouTube URL**: oEmbed metadata, `videos` row with `provider: youtube`, optional sync enqueue when signed in. Duplicate video ids show **In library** instead of add. Media content language comes from an explicit import choice (or `und`), not from the subscription row.
+Uses the same path as **Import → From YouTube URL**: oEmbed metadata, `videos` row with `provider: youtube`. Duplicate video ids show **In library** instead of add. Media content language comes from an explicit import choice (or `und`), not from the subscription row.
 
 `DiscoverRepository` takes `libraryRepository` as a **required constructor argument**; the old `bindLibraryRepository` setter is gone, so a half-wired repository (one where "add to library" throws until something binds it) can no longer be constructed.
 
@@ -191,8 +191,8 @@ No caption availability in the worker feed. After import, transcript loading fol
 - **Fixed feed size.** The RSSHub proxy returns a fixed set of entries (~15–50 per feed). Pagination and `since`-based incremental refresh are deferred to a follow-up enhancement.
 - **View count not available.** JSON Feed v1.1 does not expose view counts; the client cannot display per-video view counts from the worker feed.
 - **Worker dependency.** Initial subscription requires worker connectivity for feed fetching. Cached entries remain fully browsable offline.
-- **Subscriptions do not sync across devices.** `SyncYoutubeSubscriptionUpsert` / `SyncYoutubeSubscriptionDelete` and their serializers are declared ([`upsert_jobs.dart`](../../lib/features/sync/domain/sync_queue_job/upsert_jobs.dart)), but no producer enqueues them, the engine consumer drops them, and the download service never pulls them — [ADR-0021](../decisions/0021-youtube-discover-rss.md) keeps subscriptions local-only until that lands. Moving devices means re-adding channels by hand.
-- Subscriptions and feed cache live in the signed-in per-user SQLite file (`enjoy_player_<userId>`)
+- **Subscriptions do not sync across devices.** There is no account or cloud sync — subscriptions are local-only by design ([ADR-0107](../decisions/0107-local-only-no-account-spine.md)). Moving devices means re-adding channels by hand.
+- Subscriptions and feed cache live in the single local session SQLite file (`enjoy_player_local.sqlite`)
 - No hard upper bound on per-channel cache size in v1; users bound growth by unsubscribing (see [ADR-0046](../decisions/0046-discover-feed-append-only.md))
 
 ## Related

@@ -39,7 +39,6 @@ part 'daos/dictation_dao.dart';
 part 'daos/echo_session_dao.dart';
 part 'daos/recording_dao.dart';
 part 'daos/settings_dao.dart';
-part 'daos/sync_queue_dao.dart';
 part 'daos/transcript_dao.dart';
 part 'daos/transcript_fetch_state_dao.dart';
 part 'daos/video_dao.dart';
@@ -80,7 +79,6 @@ final _log = logNamed('db.app_database');
     EchoSessionDao,
     RecordingDao,
     DictationDao,
-    SyncQueueDao,
     SettingsDao,
     YoutubeChannelSubscriptionDao,
     YoutubeFeedEntryDao,

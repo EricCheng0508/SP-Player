@@ -246,7 +246,11 @@ void main() {
 
     expect(fake.playOrPauseCallCount, 0);
     await tester.tapAt(tester.getCenter(find.byType(PlayerSurfaceTarget)));
-    await tester.pump();
+
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(fake.playOrPauseCallCount, 0);
+
+    await tester.pump(const Duration(milliseconds: 300));
     expect(fake.playOrPauseCallCount, 1);
   });
 

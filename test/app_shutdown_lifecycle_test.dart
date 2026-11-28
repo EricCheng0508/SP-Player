@@ -6,7 +6,7 @@
 /// fires during a normal app quit (Riverpod only disposes when its
 /// [ProviderContainer] is torn down — tests and hot restart, not normal quit),
 /// so the two Drift worker isolates (`enjoy_player.sqlite` +
-/// `enjoy_player_<userId>.sqlite`) were killed mid-shutdown and raced
+/// `enjoy_player_local.sqlite`) were killed mid-shutdown and raced
 /// `sqlite3_finalize` on stale prepared-statement handles. The macOS crash
 /// signature was
 ///   `EXC_BAD_ACCESS (SIGSEGV) — sqlite3_finalize + 36 — DartWorker`,
@@ -23,8 +23,6 @@ import 'package:enjoy_player/core/application/app_preferences_provider.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/player/application/player_engine_test_double_provider.dart';
 import 'package:enjoy_player/features/update/application/update_controller.dart';
 import 'package:enjoy_player/features/update/domain/update_types.dart';
@@ -37,11 +35,6 @@ import 'package:path_provider_platform_interface/path_provider_platform_interfac
 
 import 'support/fake_player_engine.dart';
 import 'support/test_path_provider.dart';
-
-class _SignedOutAuthCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedOut();
-}
 
 class _NoopUpdateCtrl extends UpdateCtrl {
   @override
@@ -114,7 +107,6 @@ void main() {
         overrides: [
           deviceGlobalAppDatabaseProvider.overrideWithValue(deviceGlobal),
           appDatabaseProvider.overrideWithValue(perUser),
-          authCtrlProvider.overrideWith(_SignedOutAuthCtrl.new),
           appPreferencesCtrlProvider.overrideWith(
             _NeverCompletingPrefsCtrl.new,
           ),
@@ -182,7 +174,6 @@ void main() {
           overrides: [
             deviceGlobalAppDatabaseProvider.overrideWithValue(db),
             appDatabaseProvider.overrideWithValue(db),
-            authCtrlProvider.overrideWith(_SignedOutAuthCtrl.new),
             appPreferencesCtrlProvider.overrideWith(
               _NeverCompletingPrefsCtrl.new,
             ),

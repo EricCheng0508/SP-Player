@@ -25,6 +25,6 @@ Separately, the same change introduced `kGoogleWebClientId` (`google_auth_config
 ## Consequences
 
 - No backend work needed to host `apple-app-site-association` or `assetlinks.json` — one fewer moving part for the mobile deep-link story.
-- Windows requires the single-instance forwarding workaround documented in [`docs/features/auth.md`](../features/auth.md#deep-links-pkce-callback) (`SendAppLinkToInstance`) since the OS always launches a fresh process for a registered custom-scheme URL; a universal/app link would not have needed this on iOS/macOS, but Windows never supported universal links anyway.
+- Windows requires the single-instance forwarding workaround documented in `docs/features/auth.md` (removed in ADR-0107; the `SendAppLinkToInstance` single-instance forwarding note went with it) since the OS always launches a fresh process for a registered custom-scheme URL; a universal/app link would not have needed this on iOS/macOS, but Windows never supported universal links anyway.
 - `enjoy_web`'s `config/native_auth_clients.yml` only needs to whitelist the one custom-scheme redirect URI.
 - If a future universal/app-link requirement re-emerges (e.g. an OS deprecates custom URL schemes), it will need its own ADR rather than reviving this superseded decision.

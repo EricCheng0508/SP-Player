@@ -5,7 +5,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../data/db/app_database_provider.dart';
 import '../../../data/files/file_storage.dart';
-import '../../sync/application/sync_providers.dart';
 import '../../transcript/application/transcript_repository_provider.dart';
 import '../data/craft_library_repository.dart';
 
@@ -17,7 +16,6 @@ CraftLibraryRepository craftLibraryRepository(Ref ref) {
   return CraftLibraryRepository(
     db,
     FileStorage(),
-    enqueueSync: ref.read(syncEnqueueProvider),
     decodeTimelineLines: ref
         .read(transcriptRepositoryProvider)
         .linesForRowPreloaded,

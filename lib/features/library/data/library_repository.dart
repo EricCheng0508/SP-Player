@@ -24,25 +24,19 @@ import 'package:enjoy_player/data/files/media_duration_probe.dart';
 import 'package:enjoy_player/data/files/media_resolver.dart';
 import 'package:enjoy_player/features/library/domain/media.dart';
 import 'package:enjoy_player/features/library/data/youtube_oembed_api.dart';
-import 'package:enjoy_player/features/sync/domain/sync_types.dart';
 import 'package:http/http.dart' as http;
 
 typedef YoutubeMetadataPatch = ({String title, String? thumbnailUrl});
 
 class MediaLibraryRepository {
-  MediaLibraryRepository(
-    AppDatabase db,
-    this._storage, {
-    this._enqueueSync,
-    this._oembedClient,
-  }) : _db = db,
-       _registry = MediaRegistry(db);
+  MediaLibraryRepository(AppDatabase db, this._storage, {this._oembedClient})
+    : _db = db,
+      _registry = MediaRegistry(db);
 
   static final Logger _log = logNamed('library.repository');
 
   final AppDatabase _db;
   final FileStorage _storage;
-  final SyncEnqueueFn? _enqueueSync;
   final http.Client? _oembedClient;
 
   /// The registry is `const`-constructible and stateless; one field replaces
@@ -110,7 +104,6 @@ class MediaLibraryRepository {
         : enjoyAudioId(aid: contentKey);
     final existingVideo = isVideo ? await _registry.getVideoById(id) : null;
     final existingAudio = isVideo ? null : await _registry.getAudioById(id);
-    final isUpdate = existingVideo != null || existingAudio != null;
     final previousUri = existingVideo?.localUri ?? existingAudio?.localUri;
     final description =
         existingVideo?.description ?? existingAudio?.description;
@@ -182,8 +175,6 @@ class MediaLibraryRepository {
       id: id,
       previousUri: previousUri,
       fileUri: result.fileUri,
-      entityType: MediaRegistry.syncEntityTypeOf(kind),
-      isUpdate: isUpdate,
     );
   }
 
@@ -243,7 +234,6 @@ class MediaLibraryRepository {
       updatedAt: now,
     );
     await _registry.upsertVideo(row);
-    await _enqueueSync?.call(SyncEntityType.video, rowId, SyncAction.create);
     return rowId;
   }
 
@@ -272,7 +262,6 @@ class MediaLibraryRepository {
       title: title,
       thumbnailUrl: thumb,
     );
-    await _enqueueYoutubeMetadataSync(row);
     return (title: title, thumbnailUrl: thumb);
   }
 
@@ -338,17 +327,10 @@ class MediaLibraryRepository {
       title: resolvedTitle,
       thumbnailUrl: resolvedThumb,
     );
-    await _enqueueYoutubeMetadataSync(row);
   }
 
-  Future<void> _enqueueYoutubeMetadataSync(VideoRow row) async {
-    final status = row.syncStatus?.trim();
-    if (status == null || status.isEmpty) return;
-    await _enqueueSync?.call(SyncEntityType.video, row.id, SyncAction.update);
-  }
-
-  /// Bumps library-row [updatedAt] so Home "Recent media" ranks recently opened
-  /// items without enqueueing a cloud sync update.
+  /// Bumps library-row [updatedAt] so Home "Recent media" ranks recently
+  /// opened items.
   ///
   /// Failures are swallowed (logged) so fire-and-forget callers from
   /// [PlayerController.openMedia] cannot fail tests or tear-down when the DB
@@ -365,14 +347,7 @@ class MediaLibraryRepository {
     String? localUri;
     await _db.transaction(() async {
       localUri = await _registry.localUriOf(id);
-      final kind = await _registry.deleteById(id);
-      if (kind != null) {
-        await _enqueueSync?.call(
-          MediaRegistry.syncEntityTypeOf(kind),
-          id,
-          SyncAction.delete,
-        );
-      }
+      await _registry.deleteById(id);
     });
     await _maybeDeleteAppManagedMedia(localUri);
   }
@@ -399,11 +374,6 @@ class MediaLibraryRepository {
     if (kind == MediaKind.video) {
       await _db.transcriptFetchStateDao.clearForTarget('video', id);
     }
-    await _enqueueSync?.call(
-      MediaRegistry.syncEntityTypeOf(kind),
-      id,
-      SyncAction.update,
-    );
   }
 
   /// Renames an existing audio or video row.
@@ -411,8 +381,7 @@ class MediaLibraryRepository {
   /// This method owns the input contract: [title] is trimmed, a blank title
   /// throws [FileFailure], a row that already holds the trimmed title is a
   /// no-op, and a missing row throws [FileFailure]. Title changes do not
-  /// touch transcript fetch state (unlike [updateMediaLanguage]) — only the
-  /// sync queue is notified so other devices pick the new title up.
+  /// touch transcript fetch state (unlike [updateMediaLanguage]).
   Future<void> updateMediaTitle(String id, String title) async {
     final trimmed = title.trim();
     if (trimmed.isEmpty) {
@@ -424,13 +393,7 @@ class MediaLibraryRepository {
       throw const FileFailure('Media not found.');
     }
     if (current == trimmed) return;
-    final kind = await _registry.updateTitle(id, trimmed, probed: hit);
-    if (kind == null) throw const FileFailure('Media not found.');
-    await _enqueueSync?.call(
-      MediaRegistry.syncEntityTypeOf(kind),
-      id,
-      SyncAction.update,
-    );
+    await _registry.updateTitle(id, trimmed, probed: hit);
   }
 
   /// Link or copy a user-picked file when its chunked SHA-256 matches the
@@ -446,12 +409,10 @@ class MediaLibraryRepository {
       if (video == null && audio == null) {
         throw const FileFailure('Media not found.');
       }
-      final kind = video != null ? MediaKind.video : MediaKind.audio;
       await _relocateLinkedFile(
         mediaId: mediaId,
         md5: video?.md5 ?? audio?.md5,
         previousUri: video?.localUri ?? audio?.localUri,
-        kind: kind,
         picked: picked,
         persist: (result) async {
           await _registry.updateLocalFile(
@@ -474,18 +435,11 @@ class MediaLibraryRepository {
     required String id,
     required String? previousUri,
     required String fileUri,
-    required SyncEntityType entityType,
-    required bool isUpdate,
   }) async {
     if (previousUri != null && previousUri != fileUri) {
       await _maybeDeleteAppManagedMedia(previousUri);
     }
     unawaited(probeAndPatchMediaDuration(_db, id, fileUri));
-    await _enqueueSync?.call(
-      entityType,
-      id,
-      isUpdate ? SyncAction.update : SyncAction.create,
-    );
     return id;
   }
 
@@ -493,7 +447,6 @@ class MediaLibraryRepository {
     required String mediaId,
     required String? md5,
     required String? previousUri,
-    required MediaKind kind,
     required XFile picked,
     required Future<void> Function(FileImportResult result) persist,
   }) async {
@@ -511,10 +464,5 @@ class MediaLibraryRepository {
     if (previousUri != null && previousUri != result.fileUri) {
       await _maybeDeleteAppManagedMedia(previousUri);
     }
-    await _enqueueSync?.call(
-      MediaRegistry.syncEntityTypeOf(kind),
-      mediaId,
-      SyncAction.update,
-    );
   }
 }

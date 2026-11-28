@@ -26,11 +26,7 @@ void main() {
       );
     });
 
-    test('credits and BYOK billing both map to credits', () {
-      expect(
-        analyticsFailureReasonFromAppFailure(const CreditsFailure('402')),
-        AnalyticsFailureReason.credits,
-      );
+    test('BYOK billing maps to credits', () {
       expect(
         analyticsFailureReasonFromAppFailure(
           const ProviderBillingFailure('provider 402'),
@@ -39,21 +35,12 @@ void main() {
       );
     });
 
-    test('auth failures map to auth', () {
+    test('sub-5xx status codes (e.g. 401) map to network', () {
       expect(
         analyticsFailureReasonFromAppFailure(
-          const AuthFailure('revoked', code: AuthFailureCode.sessionRevoked),
+          const NetworkFailure('HTTP 401', statusCode: 401),
         ),
-        AnalyticsFailureReason.auth,
-      );
-    });
-
-    test('server-side rejections map to server', () {
-      expect(
-        analyticsFailureReasonFromAppFailure(
-          const SubscriptionConflictFailure('409'),
-        ),
-        AnalyticsFailureReason.server,
+        AnalyticsFailureReason.network,
       );
     });
 

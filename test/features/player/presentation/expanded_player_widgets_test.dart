@@ -2,9 +2,6 @@ import 'package:enjoy_player/core/theme/enjoy_icons.dart';
 import 'package:drift/native.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 import 'package:enjoy_player/features/player/application/player_preferences_provider.dart';
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
 import 'package:enjoy_player/features/player/presentation/expanded_player_widgets.dart';
@@ -15,13 +12,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-
-class _SignedInAuthCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedIn(
-    profile: UserProfile(id: 'u1', email: 't@test.com', name: 'Test'),
-  );
-}
 
 Widget _wrap({required ProviderContainer container, required Widget child}) {
   final router = GoRouter(
@@ -56,7 +46,6 @@ ProviderContainer _containerFor(AppDatabase db) {
     overrides: [
       appDatabaseProvider.overrideWithValue(db),
       deviceGlobalAppDatabaseProvider.overrideWithValue(db),
-      authCtrlProvider.overrideWith(_SignedInAuthCtrl.new),
     ],
   );
 }
@@ -270,10 +259,7 @@ void main() {
 
   test('PlayerPreferencesCtrl reports defaults after construction', () async {
     final container = ProviderContainer(
-      overrides: [
-        appDatabaseProvider.overrideWithValue(db),
-        authCtrlProvider.overrideWith(_SignedInAuthCtrl.new),
-      ],
+      overrides: [appDatabaseProvider.overrideWithValue(db)],
     );
     addTearDown(container.dispose);
     final initial = container.read(playerPreferencesCtrlProvider);

@@ -41,5 +41,5 @@ First real-world Linux smoke (release AppImage and dev builds) showed both Enjoy
 
 - [ADR-0034 — custom-scheme-only PKCE callback](0034-custom-scheme-only-pkce-callback.md)
 - [ADR-0048 — Linux as a first-class supported desktop platform](0048-linux-platform-support.md)
-- [docs/features/auth.md — Deep links (PKCE callback)](../features/auth.md#deep-links-pkce-callback)
+- `docs/features/auth.md` — Deep links (PKCE callback) section (file removed in ADR-0107)
 - [docs/features/linux-platform.md — Troubleshooting](../features/linux-platform.md#troubleshooting)

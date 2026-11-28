@@ -16,7 +16,6 @@ import 'package:enjoy_player/features/asr/data/asr_audio_extractor.dart';
 import 'package:enjoy_player/features/library/domain/media.dart'
     as library_media;
 import 'package:enjoy_player/features/player/domain/playable_source.dart';
-import 'package:enjoy_player/core/errors/ai_failure_messages.dart';
 import 'package:enjoy_player/features/transcript/presentation/import_subtitle_language_dialog.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
@@ -89,11 +88,6 @@ Future<void> launchAsrGeneration(
   if (job?.phase == AsrGenerationPhase.success) {
     AppNotice.successGlobal(l10n.asrStatusSuccess);
   } else if (job?.phase == AsrGenerationPhase.error) {
-    final failure = job!.creditsFailure;
-    AppNotice.errorGlobal(
-      failure != null && failure.requiredCredits != null
-          ? creditsFailureMessage(failure, l10n)
-          : asrMessageForKey(l10n, job.errorMessage),
-    );
+    AppNotice.errorGlobal(asrMessageForKey(l10n, job!.errorMessage));
   }
 }

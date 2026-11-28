@@ -33,10 +33,19 @@ void main() {
       expect(uri.toString(), 'https://api.openai.com/v1');
     });
 
+    test('accepts plain-http base URLs for local model servers', () {
+      final uri = guardByokBaseUrl(
+        baseUrl: 'http://127.0.0.1:8000/v1',
+        path: 'audio/speech',
+        purpose: 'OpenAI speech synthesis',
+      );
+      expect(uri.toString(), 'http://127.0.0.1:8000/v1/audio/speech');
+    });
+
     test('throws ApiException(400) when the base URL is rejected', () {
       expect(
         () => guardByokBaseUrl(
-          baseUrl: 'http://api.openai.com/v1',
+          baseUrl: 'not-a-url',
           path: 'audio/speech',
           purpose: 'OpenAI speech synthesis',
         ),

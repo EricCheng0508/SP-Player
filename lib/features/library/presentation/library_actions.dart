@@ -22,7 +22,6 @@ import 'package:enjoy_player/core/platform/mobile_platform.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_button.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_modal.dart';
 import 'package:enjoy_player/core/theme/widgets/sheet_drag_handle.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
 import 'package:enjoy_player/features/library/application/library_media_provider.dart';
 import 'package:enjoy_player/features/library/application/library_repository_provider.dart';
 import 'package:enjoy_player/features/library/presentation/widgets/content_language_picker.dart';
@@ -117,19 +116,17 @@ Future<void> _dismissImportDialog({
 }
 
 /// Runs [import] behind the shared blocking-progress scaffold: shows the
-/// progress dialog, waits a frame, checks auth, then dismisses the dialog
-/// and either opens the player or surfaces an error notice.
+/// progress dialog, waits a frame, then dismisses the dialog and either
+/// opens the player or surfaces an error notice.
 Future<void> _runBlockingImport(
-  BuildContext context,
-  WidgetRef ref, {
+  BuildContext context, {
   required String Function(AppLocalizations) progressLabel,
   required Future<String> Function(String signedInUserId) import,
   required String Function(AppLocalizations) importFailureLabel,
   required String unsupportedFileLabel,
 }) async {
   final l10n = AppLocalizations.of(context)!;
-  final sessionUserId =
-      sessionUserIdOf(ref.read(authCtrlProvider)) ?? kLocalSessionId;
+  const sessionUserId = kLocalSessionId;
   final dialogContextCompleter = Completer<BuildContext>();
   _importUiLog.info('blocking import: showing dialog');
   final dialogFuture = _showImportProgressDialog(
@@ -196,7 +193,6 @@ Future<void> importMediaFromPicker(BuildContext context, WidgetRef ref) async {
   final repository = ref.read(mediaLibraryRepositoryProvider);
   await _runBlockingImport(
     context,
-    ref,
     progressLabel: (d) => d.importingMedia,
     import: (userId) => repository.importMedia(
       XFile(path),
@@ -399,7 +395,6 @@ Future<void> importYoutubeFromDialog(
   final container = ProviderScope.containerOf(context, listen: false);
   await _runBlockingImport(
     context,
-    ref,
     progressLabel: (d) => d.youtubeImporting,
     import: (userId) async {
       final id = await repository.importYoutubeVideo(

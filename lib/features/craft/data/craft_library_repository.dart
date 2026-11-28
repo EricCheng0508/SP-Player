@@ -18,7 +18,6 @@ import 'package:enjoy_player/data/files/file_storage.dart';
 import 'package:enjoy_player/data/files/media_duration_probe.dart';
 import 'package:enjoy_player/data/subtitle/transcript_line.dart';
 import 'package:enjoy_player/features/craft/domain/craft_edit_source.dart';
-import 'package:enjoy_player/features/sync/domain/sync_types.dart';
 import 'package:enjoy_player/features/transcript/data/transcript_timeline_codec.dart';
 
 /// Decodes a transcript row's timeline through the shared codec (memoized +
@@ -40,13 +39,11 @@ class CraftLibraryRepository {
   CraftLibraryRepository(
     this._db,
     this._storage, {
-    this._enqueueSync,
     DecodeTimelineLines? decodeTimelineLines,
   }) : _decodeTimelineLines = decodeTimelineLines ?? _decodeTimelineLinesGated;
 
   final AppDatabase _db;
   final FileStorage _storage;
-  final SyncEnqueueFn? _enqueueSync;
   final DecodeTimelineLines _decodeTimelineLines;
 
   /// Content hash over the dedupe key — one definition shared by the
@@ -178,7 +175,6 @@ class CraftLibraryRepository {
 
     unawaited(probeAndPatchMediaDuration(_db, id, importResult.localPath));
 
-    await _enqueueSync?.call(SyncEntityType.audio, id, SyncAction.create);
     return id;
   }
 
@@ -304,7 +300,6 @@ class CraftLibraryRepository {
 
     unawaited(probeAndPatchMediaDuration(_db, mediaId, importResult.localPath));
 
-    await _enqueueSync?.call(SyncEntityType.audio, mediaId, SyncAction.update);
     return mediaId;
   }
 
@@ -329,7 +324,6 @@ class CraftLibraryRepository {
         updatedAt: now,
       ),
     );
-    await _enqueueSync?.call(SyncEntityType.audio, mediaId, SyncAction.update);
   }
 
   /// Trims normalized text to ~40 chars for the audio title.

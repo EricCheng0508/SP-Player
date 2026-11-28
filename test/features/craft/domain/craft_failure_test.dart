@@ -1,4 +1,3 @@
-import 'package:enjoy_player/core/errors/app_failure.dart';
 import 'package:enjoy_player/features/craft/domain/craft_failure.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 import 'package:enjoy_player/l10n/app_localizations_en.dart';
@@ -84,14 +83,6 @@ void main() {
         const CraftVendorUnsupportedLanguageFailure(language: 'fr'),
         const CraftAsrFailure(),
         const CraftEmptyTranscriptFailure(),
-        const CraftCreditsFailure(
-          CreditsFailure(
-            'HTTP 402',
-            requiredCredits: 900,
-            usedCredits: 800,
-            limitCredits: 1000,
-          ),
-        ),
       ];
 
       for (final f in failures) {
@@ -100,22 +91,6 @@ void main() {
         expect(msg, isNot(contains('Exception')));
         expect(msg, isNot(contains('Error:')));
       }
-    });
-
-    test('CraftCreditsFailure renders the numbered envelope message', () {
-      const f = CraftCreditsFailure(
-        CreditsFailure(
-          'HTTP 402',
-          requiredCredits: 900,
-          usedCredits: 800,
-          limitCredits: 1000,
-        ),
-      );
-      final msg = f.message(l10n);
-      expect(msg, contains('900'));
-      expect(msg, contains('200'));
-      expect(msg, isNot(contains('HTTP 402')));
-      expect(f.action, CraftFailureAction.retry);
     });
 
     test('CraftSameLanguageFailure uses the same-language hint string', () {

@@ -58,7 +58,7 @@ final class FullTranslateCtrlProvider
   }
 }
 
-String _$fullTranslateCtrlHash() => r'47ec96b6390f0f0342fc088ff1405c6b9ba8c008';
+String _$fullTranslateCtrlHash() => r'4f3c7c0b175a56b1142ca6a70d8ec23206ac7e63';
 
 final class FullTranslateCtrlFamily extends $Family
     with

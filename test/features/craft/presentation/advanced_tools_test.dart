@@ -7,9 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:enjoy_player/core/application/app_preferences_provider.dart';
 import 'package:enjoy_player/core/theme/app_theme.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
-import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 import 'package:enjoy_player/features/craft/application/craft_controller.dart';
 import 'package:enjoy_player/features/craft/domain/craft_synthesizer.dart';
 import 'package:enjoy_player/features/craft/domain/craft_translator.dart';
@@ -20,13 +17,6 @@ import 'package:enjoy_player/features/craft/presentation/translate_tool.dart';
 import 'package:enjoy_player/features/craft/application/craft_library_repository_provider.dart';
 import 'package:enjoy_player/features/craft/data/craft_library_repository.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
-
-class _AuthSignedInCtrl extends AuthCtrl {
-  @override
-  Future<AuthState> build() async => const AuthSignedIn(
-    profile: UserProfile(id: 'test-user', email: 't@example.com', name: 'Test'),
-  );
-}
 
 class _FakePrefsCtrl extends AppPreferencesCtrl {
   @override
@@ -84,7 +74,6 @@ Widget _harness({required List<Override> overrides, required Widget child}) {
 }
 
 List<Override> _baseOverrides() => [
-  authCtrlProvider.overrideWith(_AuthSignedInCtrl.new),
   appPreferencesCtrlProvider.overrideWith(_FakePrefsCtrl.new),
   craftTranslatorProvider.overrideWithValue(_FakeTranslator()),
   craftSynthesizerProvider.overrideWithValue(_FakeSynthesizer()),

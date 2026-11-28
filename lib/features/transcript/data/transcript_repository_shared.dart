@@ -1,9 +1,9 @@
 part of 'transcript_repository.dart';
 
 /// Module-private helpers shared by the [TranscriptRepository] part files:
-/// track-summary mapping, source normalization / ordering, and robust server
-/// date parsing. (Timeline decoding, cache keying, and the preload threshold
-/// live in `transcript_timeline_codec.dart` — issue #766.)
+/// track-summary mapping and source normalization / ordering. (Timeline
+/// decoding, cache keying, and the preload threshold live in
+/// `transcript_timeline_codec.dart` — issue #766.)
 
 TranscriptTrack _trackFromSummary(TranscriptTrackSummary summary) {
   return TranscriptTrack(
@@ -65,13 +65,6 @@ String _normalizeSource(String raw) {
     default:
       return 'official';
   }
-}
-
-DateTime _parseServerDate(dynamic v, DateTime fallback) {
-  if (v is String) {
-    return DateTime.tryParse(v) ?? fallback;
-  }
-  return fallback;
 }
 
 Future<void> _assignPrimaryTranscriptIfAbsent(

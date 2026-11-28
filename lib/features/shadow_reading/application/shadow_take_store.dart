@@ -3,10 +3,10 @@
 /// A deep module behind a small interface: `start` / `cancel` /
 /// `stopAndPersist` / `deleteTake`. It hides take-path construction and
 /// identity (uuid filename = row id), WAV hashing / duration parsing, the
-/// silence heuristic, 18-field [RecordingRow] construction, Drift insert, and
-/// sync enqueue; the microphone lifecycle itself (permission, the shared
-/// config, the recreate-after-stop workaround) lives in [MicCaptureSession].
-/// The panel shrinks to view + callbacks; tests exercise the seam directly.
+/// silence heuristic, 18-field [RecordingRow] construction, and Drift insert;
+/// the microphone lifecycle itself (permission, the shared config, the
+/// recreate-after-stop workaround) lives in [MicCaptureSession]. The panel
+/// shrinks to view + callbacks; tests exercise the seam directly.
 library;
 
 import 'dart:async';
@@ -26,7 +26,6 @@ import 'package:enjoy_player/core/audio/wav_signal_peak.dart';
 import 'package:enjoy_player/core/echo/echo_region_key.dart';
 import 'package:enjoy_player/core/logging/log.dart';
 import 'package:enjoy_player/data/db/app_database.dart';
-import 'package:enjoy_player/features/sync/domain/sync_types.dart';
 
 final _log = logNamed('ShadowTakeStore');
 
@@ -51,7 +50,7 @@ final class TakeFileMissingException implements Exception {
   String toString() => 'recording wav missing at path: $path';
 }
 
-/// Builds stores already bound to the app's database and sync seam.
+/// Builds stores already bound to the app's database.
 ///
 /// Supplied by `shadowTakeStoreFactoryProvider` so callers that own a store
 /// for their own lifetime (the shadow-reading panel) never wire the handles
@@ -61,24 +60,17 @@ final class TakeFileMissingException implements Exception {
 /// A class rather than a function typedef because a provider returning a
 /// function type trips `riverpod_generator`'s type resolution.
 class ShadowTakeStoreFactory {
-  const ShadowTakeStoreFactory({
-    required AppDatabase db,
-    required SyncEnqueueFn enqueueSync,
-  })
+  const ShadowTakeStoreFactory({required AppDatabase db})
     // ignore: prefer_initializing_formals
-    : _db = db,
-       // ignore: prefer_initializing_formals
-       _enqueueSync = enqueueSync;
+    : _db = db;
 
   final AppDatabase _db;
-  final SyncEnqueueFn _enqueueSync;
 
   ShadowTakeStore call({
     MicRecorder Function()? recorderFactory,
     Directory? takeDirectory,
   }) => ShadowTakeStore(
     db: _db,
-    enqueueSync: _enqueueSync,
     recorderFactory: recorderFactory,
     takeDirectory: takeDirectory,
   );
@@ -110,18 +102,15 @@ _TakeAudioFacts _readTakeAudioFacts(String wavPath) {
 class ShadowTakeStore {
   ShadowTakeStore({
     required AppDatabase db,
-    required SyncEnqueueFn enqueueSync,
     MicRecorder Function()? recorderFactory,
     Directory? takeDirectory,
   }) {
     _db = db;
-    _enqueueSync = enqueueSync;
     _takeDirectoryOverride = takeDirectory;
     _capture = MicCaptureSession(recorderFactory: recorderFactory);
   }
 
   late final AppDatabase _db;
-  late final SyncEnqueueFn _enqueueSync;
   late final Directory? _takeDirectoryOverride;
   late final MicCaptureSession _capture;
 
@@ -150,7 +139,7 @@ class ShadowTakeStore {
 
   /// Stops the capture and persists it as a [RecordingRow]. Returns the row
   /// plus a silence verdict; throws [TakeFileMissingException] when nothing
-  /// was captured, or propagates DB / sync errors for the caller to surface.
+  /// was captured, or propagates DB errors for the caller to surface.
   Future<TakePersistResult> stopAndPersist({
     required EchoRegionKey region,
   }) async {
@@ -164,10 +153,9 @@ class ShadowTakeStore {
     return _persistRecording(path, region);
   }
 
-  /// Removes a persisted take: sync-enqueue delete, file GC, then DAO delete.
+  /// Removes a persisted take: file GC, then DAO delete.
   /// Callers stop any preview playback of [row] first (a presentation concern).
   Future<void> deleteTake(RecordingRow row) async {
-    await _enqueueSync(SyncEntityType.recording, row.id, SyncAction.delete);
     final lp = row.localPath;
     if (lp != null && lp.isNotEmpty) {
       await _deleteFileIfExists(lp);
@@ -262,7 +250,6 @@ class ShadowTakeStore {
       updatedAt: now,
     );
     await _db.recordingDao.insertRow(row);
-    await _enqueueSync(SyncEntityType.recording, id, SyncAction.create);
     return TakePersistResult(row: row, looksSilent: looksSilent);
   }
 }

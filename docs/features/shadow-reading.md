@@ -110,7 +110,7 @@ The optional **pronunciation assessment** path runs after a take lands:
 
 Silent FFmpeg WAV normalize is auto-detected and the resample chain is retried (see commit history around Azure assessment). Zero-score runs are persisted and logged.
 
-**Credits rejection (spec 045)**: when the token request is rejected because Enjoy credits are exhausted (worker 402), the controller returns the dedicated `credits` failure kind carrying the envelope, and the flow shows the shared friendly message — required vs. remaining credits and reset time when provided — with the **View plans & packages** snackbar action. The recording is kept and re-assessment works after purchase; the raw status string never reaches the user.
+Assessment failures (network, provider billing/402 from the user’s own Azure endpoint, provider setup) surface through the same flow’s typed outcome with localized copy; the recording is kept and can be re-assessed.
 
 ## Related
 

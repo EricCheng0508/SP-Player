@@ -167,14 +167,6 @@ const List<SettingsEntryDescriptor> kSettingsRegistry = [
   ),
   SettingsEntryDescriptor(
     sectionId: SettingsSectionIds.developer,
-    rowId: 'apiBaseUrl',
-  ),
-  SettingsEntryDescriptor(
-    sectionId: SettingsSectionIds.developer,
-    rowId: 'aiApiBaseUrl',
-  ),
-  SettingsEntryDescriptor(
-    sectionId: SettingsSectionIds.developer,
     rowId: 'aiPlayground',
   ),
   SettingsEntryDescriptor(

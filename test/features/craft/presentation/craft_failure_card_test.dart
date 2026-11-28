@@ -4,7 +4,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:enjoy_player/core/errors/app_failure.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_button.dart';
 import 'package:enjoy_player/features/craft/domain/craft_failure.dart';
 import 'package:enjoy_player/features/craft/presentation/widgets/craft_failure_card.dart';
@@ -186,65 +185,6 @@ void main() {
     await tester.tap(find.widgetWithText(EnjoyButton, 'Retry'));
     await tester.pump();
     expect(retried, 1);
-  });
-
-  testWidgets('CraftFailureCard shows the credits CTA alongside Retry for '
-      'CraftCreditsFailure', (tester) async {
-    var retried = 0;
-    final l10n = AppLocalizationsEn();
-    await tester.pumpWidget(
-      wrap(
-        CraftFailureCard(
-          failure: const CraftCreditsFailure(
-            CreditsFailure(
-              'HTTP 402',
-              requiredCredits: 1500,
-              usedCredits: 0,
-              limitCredits: 1000,
-            ),
-          ),
-          l10n: l10n,
-          onRetry: () => retried++,
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.textContaining('1500'), findsOneWidget);
-    expect(find.text('HTTP 402'), findsNothing);
-    expect(find.text('Retry'), findsOneWidget);
-    expect(find.text(l10n.subscriptionViewPlansAndPackages), findsOneWidget);
-
-    await tester.tap(find.widgetWithText(EnjoyButton, 'Retry'));
-    await tester.pump();
-    expect(retried, 1);
-  });
-
-  testWidgets('CraftInlineFailure shows the credits CTA and no Retry', (
-    tester,
-  ) async {
-    final l10n = AppLocalizationsEn();
-    await tester.pumpWidget(
-      wrap(
-        CraftInlineFailure(
-          failure: const CraftCreditsFailure(
-            CreditsFailure(
-              'HTTP 402',
-              requiredCredits: 1500,
-              usedCredits: 0,
-              limitCredits: 1000,
-            ),
-          ),
-          l10n: l10n,
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.textContaining('1500'), findsOneWidget);
-    expect(find.text('HTTP 402'), findsNothing);
-    expect(find.text('Retry'), findsNothing);
-    expect(find.text(l10n.subscriptionViewPlansAndPackages), findsOneWidget);
   });
 
   testWidgets('CraftInlineFailure renders no action for a retry failure', (

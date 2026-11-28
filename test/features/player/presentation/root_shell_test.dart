@@ -13,9 +13,7 @@ import 'package:enjoy_player/features/player/application/player_state_providers.
 import 'package:enjoy_player/features/player/domain/playback_session.dart';
 import 'package:enjoy_player/features/player/presentation/root_shell.dart';
 import 'package:enjoy_player/features/player/presentation/widgets/player_dock.dart';
-import 'package:enjoy_player/features/auth/domain/user_profile.dart';
 import 'package:enjoy_player/features/discover/application/discover_providers.dart';
-import 'package:enjoy_player/features/sync/application/sync_controller.dart';
 import 'package:enjoy_player/features/transcript/application/all_transcripts_provider.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_blur_mode_provider.dart';
 import 'package:enjoy_player/features/transcript/application/transcript_fetch_controller.dart';
@@ -111,28 +109,8 @@ GoRouter _router({required String initial}) {
             builder: (_, _) => const Scaffold(body: Text('library-page')),
           ),
           GoRoute(
-            path: '/profile',
-            builder: (_, _) => const Scaffold(body: Text('profile-page')),
-          ),
-          GoRoute(
             path: '/settings',
             builder: (_, _) => const Scaffold(body: Text('settings-page')),
-          ),
-          GoRoute(
-            path: '/subscription',
-            builder: (_, _) => const Scaffold(body: Text('subscription-page')),
-          ),
-          GoRoute(
-            path: '/credits',
-            builder: (_, _) => const Scaffold(body: Text('credits-page')),
-          ),
-          GoRoute(
-            path: '/vocabulary',
-            builder: (_, _) => const Scaffold(body: Text('vocabulary-page')),
-          ),
-          GoRoute(
-            path: '/cloud',
-            builder: (_, _) => const Scaffold(body: Text('cloud-page')),
           ),
           GoRoute(
             path: '/player/:mediaId',
@@ -168,7 +146,6 @@ List<Override> _shellOverrides(
     appDatabaseProvider.overrideWithValue(db),
     deviceGlobalAppDatabaseProvider.overrideWithValue(db),
     continuePracticeResumeProvider.overrideWith((ref) => null),
-    syncCtrlProvider.overrideWithValue(0),
     discoverFeedRefreshSchedulerProvider.overrideWithValue(0),
     updateAvailableBadgeProvider.overrideWithValue(updateBadge),
     vocabularyReviewSessionProvider.overrideWith(
@@ -285,7 +262,7 @@ void main() {
       expect(findChromeIcon(EnjoyChromeGlyph.home), findsOneWidget);
       expect(findChromeIcon(EnjoyChromeGlyph.compass), findsOneWidget);
       expect(findChromeIcon(EnjoyChromeGlyph.library), findsOneWidget);
-      expect(findChromeIcon(EnjoyChromeGlyph.user), findsOneWidget);
+      expect(findChromeIcon(EnjoyChromeGlyph.gear), findsOneWidget);
     });
 
     shellTest('floats bottom nav over a transparent scaffold with extendBody', (
@@ -341,19 +318,7 @@ void main() {
       expect(findChromeIcon(EnjoyChromeGlyph.library), findsOneWidget);
     });
 
-    shellTest('selects Profile icon at /profile', (tester) async {
-      final router = _router(initial: '/profile');
-      await _pump(
-        tester,
-        router: router,
-        overrides: _shellOverrides(db),
-        surface: const Size(400, 900),
-      );
-
-      expect(findChromeIcon(EnjoyChromeGlyph.user), findsOneWidget);
-    });
-
-    shellTest('selects Profile icon at /settings', (tester) async {
+    shellTest('selects Settings icon at /settings', (tester) async {
       final router = _router(initial: '/settings');
       await _pump(
         tester,
@@ -362,36 +327,11 @@ void main() {
         surface: const Size(400, 900),
       );
 
-      expect(findChromeIcon(EnjoyChromeGlyph.user), findsOneWidget);
+      expect(find.text('settings-page'), findsOneWidget);
+      expect(findFilledChromeIcon(EnjoyChromeGlyph.gear), findsOneWidget);
     });
 
-    shellTest('selects Profile icon at /subscription', (tester) async {
-      final router = _router(initial: '/subscription');
-      await _pump(
-        tester,
-        router: router,
-        overrides: _shellOverrides(db),
-        surface: const Size(400, 900),
-      );
-
-      expect(find.text('subscription-page'), findsOneWidget);
-      expect(findFilledChromeIcon(EnjoyChromeGlyph.user), findsOneWidget);
-    });
-
-    shellTest('selects Profile icon at /credits', (tester) async {
-      final router = _router(initial: '/credits');
-      await _pump(
-        tester,
-        router: router,
-        overrides: _shellOverrides(db),
-        surface: const Size(400, 900),
-      );
-
-      expect(find.text('credits-page'), findsOneWidget);
-      expect(findFilledChromeIcon(EnjoyChromeGlyph.user), findsOneWidget);
-    });
-
-    shellTest('selects Profile icon at /vocabulary', (tester) async {
+    shellTest('selects Settings icon at /vocabulary', (tester) async {
       final router = _router(initial: '/vocabulary');
       await _pump(
         tester,
@@ -401,19 +341,7 @@ void main() {
       );
 
       expect(find.text('vocabulary-page'), findsOneWidget);
-      expect(findFilledChromeIcon(EnjoyChromeGlyph.user), findsOneWidget);
-    });
-
-    shellTest('selects Library icon at /cloud', (tester) async {
-      final router = _router(initial: '/cloud');
-      await _pump(
-        tester,
-        router: router,
-        overrides: _shellOverrides(db),
-        surface: const Size(400, 900),
-      );
-
-      expect(findChromeIcon(EnjoyChromeGlyph.library), findsOneWidget);
+      expect(findFilledChromeIcon(EnjoyChromeGlyph.gear), findsOneWidget);
     });
 
     shellTest('does not render bottom nav on /player/abc', (tester) async {
@@ -531,7 +459,7 @@ void main() {
       expect(router.state.uri.path, '/library');
     });
 
-    shellTest('tapping bottom-nav Profile navigates to /profile', (
+    shellTest('tapping bottom-nav Settings navigates to /settings', (
       tester,
     ) async {
       final router = _router(initial: '/');
@@ -542,10 +470,10 @@ void main() {
         surface: const Size(400, 900),
       );
 
-      await tester.tap(findChromeIcon(EnjoyChromeGlyph.user));
+      await tester.tap(findChromeIcon(EnjoyChromeGlyph.gear));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
-      expect(router.state.uri.path, '/profile');
+      expect(router.state.uri.path, '/settings');
     });
 
     shellTest('tapping bottom-nav Home navigates back to /', (tester) async {
@@ -563,7 +491,7 @@ void main() {
       expect(router.state.uri.path, '/');
     });
 
-    shellTest('updateAvailableBadgeProvider=true shows profile semantics', (
+    shellTest('updateAvailableBadgeProvider=true shows settings semantics', (
       tester,
     ) async {
       final router = _router(initial: '/');
@@ -575,7 +503,7 @@ void main() {
       );
 
       expect(find.text('home-page'), findsOneWidget);
-      expect(findChromeIcon(EnjoyChromeGlyph.user), findsWidgets);
+      expect(findChromeIcon(EnjoyChromeGlyph.gear), findsWidgets);
     });
 
     shellTest('shows transport on /player/ with an active session', (
@@ -656,8 +584,8 @@ void main() {
       expect(find.byIcon(EnjoyIcons.mic), findsNothing);
     });
 
-    shellTest('renders AppBackground and shell at /profile', (tester) async {
-      final router = _router(initial: '/profile');
+    shellTest('renders AppBackground and shell at /settings', (tester) async {
+      final router = _router(initial: '/settings');
       await _pump(
         tester,
         router: router,
@@ -665,8 +593,8 @@ void main() {
         surface: const Size(400, 900),
       );
 
-      expect(find.text('profile-page'), findsOneWidget);
-      expect(findChromeIcon(EnjoyChromeGlyph.user), findsOneWidget);
+      expect(find.text('settings-page'), findsOneWidget);
+      expect(findChromeIcon(EnjoyChromeGlyph.gear), findsOneWidget);
     });
   });
 

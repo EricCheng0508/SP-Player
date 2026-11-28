@@ -8,29 +8,20 @@ part of 'app_database_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Device-global Drift DB (`enjoy_player`) — API base URL, diagnostics, and
-/// other settings that must be readable before sign-in (ADR-0012, ADR-0031).
-///
-/// Kept separate from [appDatabaseProvider] so [ApiBaseUrl] does not depend on
-/// auth-scoped DB (avoids Riverpod cycles with [authCtrlProvider]).
+/// Device-global Drift DB (`enjoy_player`) — diagnostics and other settings
+/// that must be readable before the session DB exists (ADR-0012, ADR-0031).
 
 @ProviderFor(deviceGlobalAppDatabase)
 final deviceGlobalAppDatabaseProvider = DeviceGlobalAppDatabaseProvider._();
 
-/// Device-global Drift DB (`enjoy_player`) — API base URL, diagnostics, and
-/// other settings that must be readable before sign-in (ADR-0012, ADR-0031).
-///
-/// Kept separate from [appDatabaseProvider] so [ApiBaseUrl] does not depend on
-/// auth-scoped DB (avoids Riverpod cycles with [authCtrlProvider]).
+/// Device-global Drift DB (`enjoy_player`) — diagnostics and other settings
+/// that must be readable before the session DB exists (ADR-0012, ADR-0031).
 
 final class DeviceGlobalAppDatabaseProvider
     extends $FunctionalProvider<AppDatabase, AppDatabase, AppDatabase>
     with $Provider<AppDatabase> {
-  /// Device-global Drift DB (`enjoy_player`) — API base URL, diagnostics, and
-  /// other settings that must be readable before sign-in (ADR-0012, ADR-0031).
-  ///
-  /// Kept separate from [appDatabaseProvider] so [ApiBaseUrl] does not depend on
-  /// auth-scoped DB (avoids Riverpod cycles with [authCtrlProvider]).
+  /// Device-global Drift DB (`enjoy_player`) — diagnostics and other settings
+  /// that must be readable before the session DB exists (ADR-0012, ADR-0031).
   DeviceGlobalAppDatabaseProvider._()
     : super(
         from: null,
@@ -67,35 +58,20 @@ final class DeviceGlobalAppDatabaseProvider
 String _$deviceGlobalAppDatabaseHash() =>
     r'86a373429642aeb371e25fd31d82629a0bef6491';
 
-/// Per-user library + prefs (`enjoy_player_<userId>`). Requires sign-in
-/// (ADR-0031 login-only access); use [deviceGlobalAppDatabaseProvider] for
-/// device-global settings.
-///
-/// The account-less build resolves this to the single local session
-/// (`enjoy_player_local`) without waiting for an auth state — see
-/// [sessionUserIdOf].
+/// Local library + prefs (`enjoy_player_local`) — the only session database
+/// in the account-less build.
 
 @ProviderFor(appDatabase)
 final appDatabaseProvider = AppDatabaseProvider._();
 
-/// Per-user library + prefs (`enjoy_player_<userId>`). Requires sign-in
-/// (ADR-0031 login-only access); use [deviceGlobalAppDatabaseProvider] for
-/// device-global settings.
-///
-/// The account-less build resolves this to the single local session
-/// (`enjoy_player_local`) without waiting for an auth state — see
-/// [sessionUserIdOf].
+/// Local library + prefs (`enjoy_player_local`) — the only session database
+/// in the account-less build.
 
 final class AppDatabaseProvider
     extends $FunctionalProvider<AppDatabase, AppDatabase, AppDatabase>
     with $Provider<AppDatabase> {
-  /// Per-user library + prefs (`enjoy_player_<userId>`). Requires sign-in
-  /// (ADR-0031 login-only access); use [deviceGlobalAppDatabaseProvider] for
-  /// device-global settings.
-  ///
-  /// The account-less build resolves this to the single local session
-  /// (`enjoy_player_local`) without waiting for an auth state — see
-  /// [sessionUserIdOf].
+  /// Local library + prefs (`enjoy_player_local`) — the only session database
+  /// in the account-less build.
   AppDatabaseProvider._()
     : super(
         from: null,
@@ -129,4 +105,4 @@ final class AppDatabaseProvider
   }
 }
 
-String _$appDatabaseHash() => r'798886c51a483a4cf3d0a80d1bbbc5a9a764439f';
+String _$appDatabaseHash() => r'bba216cf0ec3c3fec415df723f3a8e8d3cefdf07';

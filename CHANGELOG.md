@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.12] - 2026-11-28
+
+### Added
+
+- **Qwen3-ASR engine foundation (ADR-0106)** — component specs for the qwen3-asr-wgpu native sidecar + 0.6B English model (installed-priority resolution, Whisper sidecar kept as code-level fallback), bundled with new component specs for vocal separation (HTDemucs) and the CTC transcript aligner; both optional engines surface in a new collapsible "可选增强组件" group on the speech card.
+- **Full-video batch translation** — a manual "翻译全片" action in the ⋯ menu translates the whole video in merged batches (~20 lines per request, 6 concurrent), persists progress per batch to the database, and resumes on next open ("继续翻译 / 重新翻译"), with a three-state progress banner (start / running / interrupted-resume) and estimated-minutes info line.
+- **Stage breadcrumb progress banner** — subtitle generation shows 提取音频 → 识别 → 对齐 → 断句 with a determinate bar during audio extraction, a wall-clock recognition estimate, and an engine/elapsed info line.
+- **Empty-transcript align entry** — when no subtitles exist yet, "对齐已有字幕 / 台本" lets you jump straight from an SRT/TXT script.
+
+### Changed
+
+- **Settings → AI speech card reworked** — the Qwen runtime+model pair renders as one merged engine row (~1.7 GB); the local/cloud toggle and the Azure cloud speech block are removed (TTS keeps using Windows system voices); the Whisper transition rows no longer appear; the streaming engine row is labelled Nemotron-3.5 0.6B ahead of the components-v2 file swap.
+- **Direct SRT download** — "下载字幕" in the ⋯ menu saves the bilingual .srt immediately; the format-picker dialog is removed (SRT-only, no VTT), and exporting an AI (translated) track is gated on full-video translation completion.
+- **Merged upstream v0.10.9–v0.10.11** (batching translation transport, AI engine card reorg, sherpa-onnx live-captions component, transcript search, and more).
+
 ## [0.10.8] - 2026-11-25
 
 ### Added

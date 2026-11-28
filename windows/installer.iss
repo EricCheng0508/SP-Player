@@ -1,23 +1,27 @@
 ; SP Player installer script (Inno Setup 6)
 ; Bundles the Flutter Windows Release output into a single setup.exe.
+; All paths are relative to this script (repo portable — no machine-specific
+; absolute paths): {#SourcePath} is the directory containing this script.
+
+#define AppVersion "0.10.11"
 
 [Setup]
 AppName=SP Player
-AppVersion=0.10.3
+AppVersion={#AppVersion}
 AppPublisher=EricCheng0508
 AppPublisherURL=https://github.com/EricCheng0508/SP-Player
 DefaultDirName={autopf}\SP Player
 DefaultGroupName=SP Player
 UninstallDisplayName=SP Player
-OutputDir=D:\Tool\sp-components
-OutputBaseFilename=SPPlayer-Setup-0.10.3
+OutputDir={#SourcePath}\..\build\installer
+OutputBaseFilename=SPPlayer-Setup-{#AppVersion}
 Compression=lzma2/normal
 SolidCompression=yes
 LZMANumBlockThreads=8
 ArchitecturesInstallIn64BitMode=x64compatible
 ArchitecturesAllowed=x64compatible
 PrivilegesRequired=admin
-SetupIconFile=D:\code\idea\enjoy_player\windows\runner\resources\app_icon.ico
+SetupIconFile={#SourcePath}\runner\resources\app_icon.ico
 WizardStyle=modern
 DisableProgramGroupPage=yes
 
@@ -25,7 +29,10 @@ DisableProgramGroupPage=yes
 Name: "desktopicon"; Description: "Create a &desktop shortcut"; GroupDescription: "Additional:"
 
 [Files]
-Source: "D:\code\idea\enjoy_player\build\windows\x64\runner\Release\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs ignoreversion
+; App binary only. The local-component models (components\) are NOT bundled —
+; they are ~4.7 GB, past GitHub's 2 GiB per-asset limit; the first-run wizard
+; downloads them from the `components-v1` release instead.
+Source: "{#SourcePath}\..\build\windows\x64\runner\Release\*"; DestDir: "{app}"; Excludes: "components"; Flags: recursesubdirs createallsubdirs ignoreversion
 
 [Icons]
 Name: "{group}\SP Player"; Filename: "{app}\sp_player.exe"

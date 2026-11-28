@@ -15,6 +15,7 @@ final class _MotionTokens {
     required this.motionMedium,
     required this.motionLens,
     required this.motionMargin,
+    required this.motionPress,
   });
 
   factory _MotionTokens.build() => const _MotionTokens(
@@ -25,6 +26,7 @@ final class _MotionTokens {
     motionMedium: Duration(milliseconds: 220),
     motionLens: Duration(milliseconds: 280),
     motionMargin: Duration(milliseconds: 220),
+    motionPress: Duration(milliseconds: 90),
   );
 
   /// Micro-interactions: 160ms.
@@ -48,6 +50,9 @@ final class _MotionTokens {
   /// Side margin open/close slide: 220ms.
   final Duration motionMargin;
 
+  /// Press-in snap feedback: 90ms (deliberately faster than [motionFast]).
+  final Duration motionPress;
+
   _MotionTokens copyWith({
     Duration? motionFast,
     Duration? motionStandard,
@@ -56,6 +61,7 @@ final class _MotionTokens {
     Duration? motionMedium,
     Duration? motionLens,
     Duration? motionMargin,
+    Duration? motionPress,
   }) {
     return _MotionTokens(
       motionFast: motionFast ?? this.motionFast,
@@ -65,6 +71,7 @@ final class _MotionTokens {
       motionMedium: motionMedium ?? this.motionMedium,
       motionLens: motionLens ?? this.motionLens,
       motionMargin: motionMargin ?? this.motionMargin,
+      motionPress: motionPress ?? this.motionPress,
     );
   }
 
@@ -91,6 +98,9 @@ final class _MotionTokens {
       motionMargin: Duration(
         milliseconds: _lerpMs(motionMargin, other.motionMargin, t).round(),
       ),
+      motionPress: Duration(
+        milliseconds: _lerpMs(motionPress, other.motionPress, t).round(),
+      ),
     );
   }
 }
@@ -103,4 +113,5 @@ extension MotionTokenAccessors on EnjoyThemeTokens {
   Duration get motionMedium => _motion.motionMedium;
   Duration get motionLens => _motion.motionLens;
   Duration get motionMargin => _motion.motionMargin;
+  Duration get motionPress => _motion.motionPress;
 }

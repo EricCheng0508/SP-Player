@@ -138,7 +138,7 @@ class DockRecordingControls extends StatelessWidget {
       return Center(child: group);
     }
     return SizedBox(
-      height: 76,
+      height: 64,
       child: Row(
         children: [
           Expanded(

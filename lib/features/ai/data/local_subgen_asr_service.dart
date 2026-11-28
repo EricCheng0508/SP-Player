@@ -13,14 +13,17 @@
 library;
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
+import 'package:enjoy_player/core/platform/hidden_process.dart';
 import 'package:enjoy_player/features/local_components/data/component_store.dart';
 import 'package:enjoy_player/features/local_components/domain/component_catalog.dart';
 
 const _healthUrl = 'http://127.0.0.1:8000/health';
+const _servicePort = 8000;
 
 /// Legacy dev checkout (kept as last-resort fallback).
 const kSubgenDir = r'D:\Tool\subgen';
@@ -44,6 +47,44 @@ Future<bool> isLocalAsrUp({
   }
 }
 
+/// Throughput large-v3-turbo gets on a CPU-only box, measured warm on the
+/// reference laptop (i7-1360P, int8): a 60 s clip takes 30–36 s, so ~1.8 s of
+/// audio per wall-clock second and a 5-minute clip in ~2.5–3 minutes.
+///
+/// Cold model load and a busy CPU both land well under this, which is why the
+/// first pass of a session drifts — [AsrRecognitionProgress] re-calibrates
+/// from the real duration afterwards.
+const double kCpuRealtimeFactor = 1.8;
+
+/// Same model on CUDA (f16). Rough, but the right order of magnitude — the
+/// estimator re-calibrates from the first real pass anyway.
+const double kCudaRealtimeFactor = 18;
+
+/// Realtime factor for the device the service actually loaded on, from
+/// `/health` (`{"ok":true,"model":…,"device":"cpu"}`).
+///
+/// Returns null when the service is not answering, so the caller keeps
+/// whatever estimate it already has.
+Future<double?> localAsrRealtimeFactor() async {
+  try {
+    final client = _probeClient ??= http.Client();
+    final response = await client
+        .get(Uri.parse(_healthUrl))
+        .timeout(const Duration(milliseconds: 1200));
+    if (response.statusCode != 200) return null;
+    final decoded = jsonDecode(response.body);
+    if (decoded is! Map) return null;
+    final device = '${decoded['device'] ?? ''}'.toLowerCase();
+    if (device.contains('cuda') || device.contains('gpu')) {
+      return kCudaRealtimeFactor;
+    }
+    if (device.contains('cpu')) return kCpuRealtimeFactor;
+    return null;
+  } on Object {
+    return null;
+  }
+}
+
 Future<void>? _ensureFuture;
 
 /// Idempotent, single-flight: probes the service, spawns it if down, then
@@ -55,8 +96,55 @@ Future<void> ensureLocalAsrService() {
   return _ensureFuture ??= _ensure().whenComplete(() => _ensureFuture = null);
 }
 
+/// Whether a process is listening on the service port.
+///
+/// `/health` is served by the same blocking worker that runs transcription,
+/// so a busy service answers late or not at all inside the 900 ms probe
+/// budget. Liveness and readiness are two different questions: the port being
+/// open proves the process exists, and spawning a second copy of a service
+/// that is merely busy only produces a port-bind failure (which used to show
+/// up as a console window flashing on screen).
+Future<bool> _serviceIsListening({
+  Duration timeout = const Duration(milliseconds: 400),
+}) async {
+  try {
+    final socket = await Socket.connect(
+      InternetAddress.loopbackIPv4,
+      _servicePort,
+      timeout: timeout,
+    );
+    socket.destroy();
+    return true;
+  } on Object {
+    return false;
+  }
+}
+
+/// Waits for `/health` to answer, up to [timeout].
+Future<void> _waitUntilReady(Duration timeout) async {
+  final deadline = DateTime.now().add(timeout);
+  while (DateTime.now().isBefore(deadline)) {
+    await Future<void>.delayed(const Duration(seconds: 1));
+    if (await isLocalAsrUp(timeout: const Duration(milliseconds: 500))) {
+      return;
+    }
+  }
+  throw TimeoutException(
+    'Local ASR service did not become ready within ${timeout.inSeconds}s',
+  );
+}
+
 Future<void> _ensure() async {
   if (await isLocalAsrUp()) return;
+
+  // A busy service is not a missing service. Mid-transcription the health
+  // probe times out while the model is very much loaded, so check the socket
+  // before concluding anything is wrong.
+  if (await _serviceIsListening()) {
+    // The request we are about to send queues behind the running one, so
+    // there is nothing left to wait for.
+    return;
+  }
 
   var spawned = false;
   try {
@@ -72,16 +160,7 @@ Future<void> _ensure() async {
     );
   }
 
-  final deadline = DateTime.now().add(_kReadyTimeout);
-  while (DateTime.now().isBefore(deadline)) {
-    await Future<void>.delayed(const Duration(seconds: 1));
-    if (await isLocalAsrUp(timeout: const Duration(milliseconds: 500))) {
-      return;
-    }
-  }
-  throw TimeoutException(
-    'Local ASR service did not become ready within ${_kReadyTimeout.inSeconds}s',
-  );
+  await _waitUntilReady(_kReadyTimeout);
 }
 
 /// Spawns the managed frozen service when the component store has it.
@@ -101,13 +180,13 @@ Future<bool> _spawnManaged() async {
   }
 
   try {
-    await Process.start(
+    // Console-subsystem binary: spawn it windowless, or Windows pops a black
+    // console window (see [spawnHidden] for why dart:io cannot do this).
+    return await spawnHidden(
       exe,
       args,
       workingDirectory: File(exe).parent.path,
-      mode: ProcessStartMode.detached,
     );
-    return true;
   } on Object {
     return false;
   }
@@ -118,13 +197,11 @@ Future<bool> _spawnLegacyDev() async {
   final pythonw = File('$kSubgenDir\\.venv\\Scripts\\pythonw.exe');
   try {
     if (!pythonw.existsSync()) return false;
-    await Process.start(
+    return await spawnHidden(
       pythonw.path,
       [r'serve.py', '--port', '8000'],
       workingDirectory: kSubgenDir,
-      mode: ProcessStartMode.detached,
     );
-    return true;
   } on Object {
     return false;
   }

@@ -89,6 +89,7 @@ void main() {
     expect(container.read(karaokeHighlightSettingsProvider).value, isTrue);
     expect(container.read(transcriptPlaybackHighlightProvider('m1')), (
       cueIndex: 0,
+      visibleCueIndex: 0,
       wordIndex: 0,
     ));
   });
@@ -116,6 +117,7 @@ void main() {
 
     expect(container.read(transcriptPlaybackHighlightProvider('m1')), (
       cueIndex: 0,
+      visibleCueIndex: 0,
       wordIndex: null,
     ));
   });
@@ -147,6 +149,7 @@ void main() {
 
     expect(container.read(transcriptPlaybackHighlightProvider('m1')), (
       cueIndex: 0,
+      visibleCueIndex: 0,
       wordIndex: null,
     ));
   });

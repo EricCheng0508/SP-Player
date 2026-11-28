@@ -36,6 +36,11 @@ enum ComponentKind {
 
   /// omniASR-CTC-300M-v2 weights for transcript matching (P1).
   ctcAlignerModel,
+
+  /// sherpa-onnx streaming zipformer (bilingual zh-en, int8) for the live
+  /// captions real-time engine — sub-second latency, no server process.
+  /// ADR-0106 P1 plans an upgrade to Nemotron-3.5-ASR-Streaming 0.6B.
+  liveAsr,
 }
 
 /// One downloadable file of a [ComponentSpec].
@@ -313,6 +318,40 @@ const kComponentSpecs = <ComponentSpec>[
       ),
     ],
     sizeHint: '约 2.5 GB',
+  ),
+  ComponentSpec(
+    kind: ComponentKind.liveAsr,
+    displayName: '流式识别引擎（实时字幕）',
+    installDirName: 'live-asr',
+    host: kHfOfficial,
+    files: [
+      ComponentFile(
+        remotePath:
+            'csukuangfj/sherpa-onnx-streaming-zipformer-bilingual-zh-en-2023-02-20/resolve/main/encoder-epoch-99-avg-1.int8.onnx',
+        relativePath: 'encoder-epoch-99-avg-1.int8.onnx',
+        minBytes: 150 * 1024 * 1024,
+      ),
+      ComponentFile(
+        remotePath:
+            'csukuangfj/sherpa-onnx-streaming-zipformer-bilingual-zh-en-2023-02-20/resolve/main/decoder-epoch-99-avg-1.int8.onnx',
+        relativePath: 'decoder-epoch-99-avg-1.int8.onnx',
+        minBytes: 10 * 1024 * 1024,
+      ),
+      ComponentFile(
+        remotePath:
+            'csukuangfj/sherpa-onnx-streaming-zipformer-bilingual-zh-en-2023-02-20/resolve/main/joiner-epoch-99-avg-1.int8.onnx',
+        relativePath: 'joiner-epoch-99-avg-1.int8.onnx',
+        minBytes: 3 * 1024 * 1024,
+      ),
+      ComponentFile(
+        remotePath:
+            'csukuangfj/sherpa-onnx-streaming-zipformer-bilingual-zh-en-2023-02-20/resolve/main/tokens.txt',
+        relativePath: 'tokens.txt',
+        minBytes: 1024,
+      ),
+    ],
+    sizeHint: '约 200 MB',
+    optional: true,
   ),
 ];
 

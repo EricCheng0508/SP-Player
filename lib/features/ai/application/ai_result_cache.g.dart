@@ -236,3 +236,57 @@ final class AiContextualTranslationCacheProvider
 
 String _$aiContextualTranslationCacheHash() =>
     r'402ac37f3c32a217b2177e184d97e9a4a68e0ca2';
+
+/// Per-user typed `LineExplanation` cache.
+
+@ProviderFor(aiExplainCache)
+final aiExplainCacheProvider = AiExplainCacheProvider._();
+
+/// Per-user typed `LineExplanation` cache.
+
+final class AiExplainCacheProvider
+    extends
+        $FunctionalProvider<
+          AiResultCache<LineExplanation>,
+          AiResultCache<LineExplanation>,
+          AiResultCache<LineExplanation>
+        >
+    with $Provider<AiResultCache<LineExplanation>> {
+  /// Per-user typed `LineExplanation` cache.
+  AiExplainCacheProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'aiExplainCacheProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$aiExplainCacheHash();
+
+  @$internal
+  @override
+  $ProviderElement<AiResultCache<LineExplanation>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  AiResultCache<LineExplanation> create(Ref ref) {
+    return aiExplainCache(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AiResultCache<LineExplanation> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AiResultCache<LineExplanation>>(
+        value,
+      ),
+    );
+  }
+}
+
+String _$aiExplainCacheHash() => r'c784b8f0825ec94410f94c353e83fa9de9069b49';

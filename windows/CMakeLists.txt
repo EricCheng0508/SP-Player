@@ -7,6 +7,15 @@ if(POLICY CMP0175)
 endif()
 project(sp_player LANGUAGES CXX)
 
+# Suppress benign third-party MSVC warnings: flutter_inappwebview_windows
+# and the WebView2 headers emit C4458 (local shadows member) and C4244
+# (int64 -> int narrowing) by the hundreds. They are plugin-side style
+# issues, not app defects; silencing just these two keeps our own warnings
+# visible. Targets created after this line (all plugins) inherit the flags.
+if(MSVC)
+  add_compile_options(/wd4458 /wd4244)
+endif()
+
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
 set(BINARY_NAME "sp_player")
@@ -57,6 +66,15 @@ add_subdirectory(${FLUTTER_MANAGED_DIR})
 # Application build; see runner/CMakeLists.txt.
 add_subdirectory("runner")
 
+# System-audio capture helper for live captions (WASAPI loopback / mic →
+# 16 kHz mono PCM on stdout). Built alongside the app and installed next to
+# sp_player.exe; the Dart side launches it as a subprocess.
+add_executable(sp_audio_capture "audio_capture/sp_audio_capture.cpp")
+target_compile_definitions(sp_audio_capture PRIVATE UNICODE _UNICODE)
+target_compile_options(sp_audio_capture PRIVATE /W3 /EHsc /utf-8)
+target_compile_features(sp_audio_capture PRIVATE cxx_std_17)
+target_link_libraries(sp_audio_capture PRIVATE ole32)
+
 
 # Generated plugin build rules, which manage building the plugins and adding
 # them to the application.
@@ -99,6 +117,10 @@ if(EXISTS "${FFMPEG_WIN_EXE}")
     DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
     COMPONENT Runtime)
 endif()
+
+install(TARGETS sp_audio_capture
+  RUNTIME DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+  COMPONENT Runtime)
 
 # Copy the native assets provided by the build.dart from all packages.
 set(NATIVE_ASSETS_DIR "${PROJECT_BUILD_DIR}native_assets/windows/")

@@ -233,7 +233,20 @@ class EngineSwapCoordinator {
       if (!youtubeAvailability.canPlay) return false;
     }
 
-    if (owned != null && haveYt == wantYt) return false;
+    if (owned != null && haveYt == wantYt) {
+      // The identity module's lazy-default tail can allocate a MediaKit engine
+      // into the owned slot outside this choreography (any transport read of
+      // `activeEngine` before the first open — e.g. the transport dock's
+      // playing/buffering watches). That allocation never arms the gate, so
+      // the no-swap fast path must arm it here or the video stage never mounts
+      // and the open plays into a black, unallocated stage. Arming is safe:
+      // `owned` being MediaKit means no YouTube WebView detach is pending.
+      if (owned case final MediaKitPlayerEngine mk
+          when !mk.nativeBackendAllowed) {
+        mk.prepareNativeBackend();
+      }
+      return false;
+    }
     if (steps.isStale()) return false;
 
     final next = wantYt
@@ -309,12 +322,13 @@ class EngineSwapCoordinator {
     required bool swappedAfterInstall,
     required Duration openTimeout,
     required Duration engineCommandTimeout,
+    Duration? startAt,
   }) async {
     final firstTimeout = swappedAfterInstall
         ? engineCommandTimeout
         : openTimeout;
     try {
-      await engine.open(playable).timeout(firstTimeout);
+      await engine.open(playable, startAt: startAt).timeout(firstTimeout);
     } on TimeoutException {
       _swapLog.warning(
         'engine.open timed out after $firstTimeout '
@@ -324,7 +338,7 @@ class EngineSwapCoordinator {
       if (_isStale(openGeneration)) return;
       final retryEngine = _getActiveEngine();
       try {
-        await retryEngine.open(playable).timeout(openTimeout);
+        await retryEngine.open(playable, startAt: startAt).timeout(openTimeout);
       } on TimeoutException {
         _swapLog.severe(
           'engine.open retry timed out after $openTimeout '

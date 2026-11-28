@@ -5,13 +5,9 @@ library;
 import 'dart:async';
 
 import 'package:enjoy_player/core/logging/log.dart';
-import 'package:enjoy_player/core/riverpod/async_value_x.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/craft/application/craft_controller_core.dart';
 import 'package:enjoy_player/features/craft/application/craft_preferences_provider.dart';
 import 'package:enjoy_player/features/craft/application/craft_service_providers.dart';
-import 'package:enjoy_player/features/craft/domain/craft_failure.dart';
 import 'package:enjoy_player/features/craft/domain/craft_job_state.dart';
 import 'package:enjoy_player/features/craft/domain/craft_request.dart';
 import 'package:enjoy_player/features/craft/domain/craft_stage.dart';
@@ -54,12 +50,6 @@ mixin CraftSynthesizeMixin on CraftControllerCore {
   Future<void> synthesize() async {
     final normalized = normalizeCraftText(state.synthText);
     if (normalized.length < craftMinTextLength) return;
-
-    final auth = ref.read(authCtrlProvider).valueOrNull;
-    if (auth is! AuthSignedIn) {
-      state = state.copyWith(failure: const CraftSignInRequiredFailure());
-      return;
-    }
 
     state = state.copyWith(
       isSynthesizing: true,

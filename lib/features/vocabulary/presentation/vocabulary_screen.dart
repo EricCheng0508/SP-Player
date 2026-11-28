@@ -180,6 +180,7 @@ class _VocabularyScreenState extends ConsumerState<VocabularyScreen> {
     double inset, {
     required bool compact,
   }) {
+    final t = EnjoyThemeTokens.of(context);
     if (visible.isEmpty) {
       return const [
         SliverToBoxAdapter(
@@ -193,7 +194,6 @@ class _VocabularyScreenState extends ConsumerState<VocabularyScreen> {
         ),
       ];
     }
-    final t = EnjoyThemeTokens.of(context);
     return [
       SliverPadding(
         padding: EdgeInsets.symmetric(horizontal: inset),
@@ -242,7 +242,6 @@ class _HeaderActions extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final t = EnjoyThemeTokens.of(context);
     final cs = Theme.of(context).colorScheme;
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -266,30 +265,7 @@ class _HeaderActions extends ConsumerWidget {
           EnjoyButton.secondary(
             icon: EnjoyIcons.download,
             onPressed: () => showVocabularyAnkiExportDialog(context),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(l10n.vocabularyExportToAnki),
-                const SizedBox(width: 8),
-                Container(
-                  height: 20,
-                  padding: const EdgeInsets.symmetric(horizontal: 7),
-                  alignment: Alignment.center,
-                  decoration: ShapeDecoration(
-                    gradient: t.brand,
-                    shape: const StadiumBorder(),
-                  ),
-                  child: Text(
-                    l10n.vocabularyProBadge,
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            child: Text(l10n.vocabularyExportToAnki),
           ),
           const SizedBox(width: 8),
         ],

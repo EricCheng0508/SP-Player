@@ -218,6 +218,7 @@ class PlayerController extends _$PlayerController implements PlayerOpenScope {
     required bool swappedAfterInstall,
     required Duration openTimeout,
     required Duration engineCommandTimeout,
+    Duration? startAt,
   }) => _engineSwap.openEngineWithRetry(
     engine: engine,
     playable: playable,
@@ -225,6 +226,7 @@ class PlayerController extends _$PlayerController implements PlayerOpenScope {
     swappedAfterInstall: swappedAfterInstall,
     openTimeout: openTimeout,
     engineCommandTimeout: engineCommandTimeout,
+    startAt: startAt,
   );
 
   /// The live engine — one precedence, resolved by [engineIdentity] (issue

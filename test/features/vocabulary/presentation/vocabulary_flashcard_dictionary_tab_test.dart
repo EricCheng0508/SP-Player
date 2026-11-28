@@ -126,7 +126,10 @@ void main() {
       find.text(l10n.subscriptionCreditsLimitMessageWithPackages),
       findsOneWidget,
     );
-    expect(find.text(l10n.subscriptionViewPlansAndPackages), findsOneWidget);
+    // The account-less build has no plans-and-packages destination, so the CTA
+    // renders nothing; only the credits message and the retry stay.
+    expect(find.text(l10n.subscriptionViewPlansAndPackages), findsNothing);
+    expect(find.text(l10n.vocabularyFetchDictionary), findsOneWidget);
     expect(find.text(l10n.vocabularyAiFetchFailed), findsNothing);
   });
 
@@ -154,7 +157,7 @@ void main() {
     expect(find.text(l10n.subscriptionViewPlansAndPackages), findsNothing);
   });
 
-  testWidgets('does not auto-fetch when signed out', (tester) async {
+  testWidgets('auto-fetches without an auth session', (tester) async {
     var fetchCount = 0;
     await tester.pumpWidget(
       _wrap(
@@ -169,9 +172,9 @@ void main() {
     );
     await tester.pump();
     await tester.pump();
+    await tester.pump();
 
-    expect(fetchCount, 0);
-    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(fetchCount, 1);
   });
 
   testWidgets('renders cached dictionary without fetching', (tester) async {

@@ -4,6 +4,7 @@ library;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/utils/remote_thumbnail_url.dart';
 
 class YoutubeVideoPoster extends StatefulWidget {
@@ -62,7 +63,7 @@ class _YoutubeVideoPosterState extends State<YoutubeVideoPoster> {
 
     return AnimatedOpacity(
       opacity: widget.visible ? 1 : 0,
-      duration: const Duration(milliseconds: 220),
+      duration: EnjoyThemeTokens.of(context).motionMedium,
       onEnd: () {
         if (!widget.visible && mounted && !_fadedOut) {
           setState(() => _fadedOut = true);

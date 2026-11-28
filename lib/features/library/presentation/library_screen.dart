@@ -15,6 +15,7 @@ import 'package:enjoy_player/core/theme/widgets/enjoy_page.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_segmented_control.dart';
 import 'package:enjoy_player/features/library/presentation/library_actions.dart';
 import 'package:enjoy_player/features/library/presentation/widgets/library_search_field.dart';
+import 'package:enjoy_player/features/library/presentation/widgets/playlist_tab_view.dart';
 import 'package:enjoy_player/features/library/application/library_media_provider.dart';
 import 'package:enjoy_player/features/library/presentation/widgets/local_library_tab_view.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
@@ -36,7 +37,8 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
   @override
   void initState() {
     super.initState();
-    _localKindController = TabController(length: 2, vsync: this);
+    // 视频 / 音频 / 播放列表
+    _localKindController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -75,6 +77,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
               label: l10n.libraryTabAudio,
               count: counts?.audio,
             ),
+            EnjoySegment(value: 2, label: l10n.libraryTabPlaylists),
           ],
           onChanged: (i) {
             if (controller.index != i) _setKindIndex(i);
@@ -94,7 +97,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
   }) {
     final duration = reduceMotion
         ? Duration.zero
-        : const Duration(milliseconds: 220);
+        : EnjoyThemeTokens.of(context).motionMedium;
 
     final child = switch (source) {
       LibrarySource.local => LocalLibraryTabView(
@@ -103,7 +106,6 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
       ),
       LibrarySource.cloud => const SizedBox.shrink(),
     };
-
     return AnimatedSwitcher(
       duration: duration,
       switchInCurve: Curves.easeOutCubic,

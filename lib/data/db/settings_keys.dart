@@ -274,6 +274,25 @@ abstract final class SettingsKeys {
   );
 
   /// JSON blob: per-modality AI provider config (BYOK non-secrets only).
+  /// Saved custom speech endpoints (JSON array of {label, baseUrl}) shown in
+  /// the AI settings endpoint picker. Device-scoped: endpoints are not
+  /// account data and keys never live here (ByokSecretStore owns them).
+  static const aiSavedSpeechEndpoints = SettingKey<String>(
+    name: 'ai.saved_speech_endpoints',
+    scope: SettingsScope.device,
+    codec: StringSettingCodec(),
+    defaultValue: '',
+  );
+
+  /// Saved cloud service profiles (speech / llm) for the AI settings screen,
+  /// JSON encoded. Keys are not stored here (ByokSecretStore owns them).
+  static const aiCloudProfilesV1 = SettingKey<String>(
+    name: 'ai.cloud_profiles_v1',
+    scope: SettingsScope.device,
+    codec: StringSettingCodec(),
+    defaultValue: '',
+  );
+
   static const aiModalityConfigsV1 = SettingKey<Map<String, dynamic>?>(
     name: 'ai.modality_configs_v1',
     scope: SettingsScope.user,
@@ -383,6 +402,8 @@ abstract final class SettingsKeys {
     craftPreferencesV1,
     hotkeysCustomBindings,
     aiModalityConfigsV1,
+    aiSavedSpeechEndpoints,
+    aiCloudProfilesV1,
     onboardingTipProgressV1,
     localComponentsRoot,
     setupWizardCompletedV1,

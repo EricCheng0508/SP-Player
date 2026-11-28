@@ -1,6 +1,7 @@
 /// Video surface + transcript side panel (desktop-friendly split).
 library;
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -9,7 +10,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:enjoy_player/core/interaction/haptics.dart';
 import 'package:enjoy_player/core/interaction/mouse_tracker_safe.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
+import 'package:enjoy_player/core/window/desktop_window.dart' show isDesktop;
 import 'package:enjoy_player/core/transcript/transcript_lens_metrics.dart';
+import 'package:enjoy_player/core/window/window_fullscreen_provider.dart';
 import 'package:enjoy_player/features/player/application/player_controller.dart';
 import 'package:enjoy_player/features/player/application/player_engine.dart';
 import 'package:enjoy_player/features/player/application/player_engine_capabilities_provider.dart';
@@ -25,7 +28,7 @@ import 'package:enjoy_player/features/player/presentation/widgets/youtube_open_i
 import 'package:enjoy_player/features/player/presentation/widgets/youtube_video_poster.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
-class VideoPlayerLayout extends StatefulWidget {
+class VideoPlayerLayout extends ConsumerStatefulWidget {
   const VideoPlayerLayout({
     required this.engine,
     required this.transcript,
@@ -44,13 +47,33 @@ class VideoPlayerLayout extends StatefulWidget {
   final ValueChanged<double>? onTranscriptSplitWidthCommitted;
 
   @override
-  State<VideoPlayerLayout> createState() => _VideoPlayerLayoutState();
+  ConsumerState<VideoPlayerLayout> createState() => _VideoPlayerLayoutState();
 }
 
-class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
-  /// Transcript may use at most this fraction of total width (video keeps >=50%).
-  static const double _kMaxTranscriptFraction = 0.5;
+/// Transcript may use at most this fraction of total width (video keeps >=50%).
+const double kMaxTranscriptFraction = 0.5;
 
+/// Transcript column width (px) for a [totalWidth]-px layout row, honoring a
+/// persisted [widthPx] (`null` uses the default share). Shared with the
+/// local-video loading body so the open-in-flight frame matches the chrome
+/// geometry exactly — the loading → chrome hand-off must not reflow.
+double transcriptColumnWidthFor(
+  BuildContext context,
+  double totalWidth,
+  double? widthPx,
+) {
+  final t = EnjoyThemeTokens.of(context);
+  final maxW = totalWidth * kMaxTranscriptFraction;
+  final minW = math.min(t.videoColumnMin, maxW);
+  final defaultW = (totalWidth * t.videoColumnShare).clamp(
+    t.videoColumnMin,
+    t.videoColumnMax,
+  );
+  final raw = widthPx ?? defaultW;
+  return raw.clamp(minW, maxW);
+}
+
+class _VideoPlayerLayoutState extends ConsumerState<VideoPlayerLayout> {
   /// Hit target for the invisible resize strip.
   static const double _kSplitterHitWidth = 12;
 
@@ -85,19 +108,11 @@ class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
   }
 
   double _transcriptWidthForTotal(double totalWidth, double? widthPx) {
-    final t = EnjoyThemeTokens.of(context);
-    final maxW = totalWidth * _kMaxTranscriptFraction;
-    final minW = math.min(t.videoColumnMin, maxW);
-    final defaultW = (totalWidth * t.videoColumnShare).clamp(
-      t.videoColumnMin,
-      t.videoColumnMax,
-    );
-    final raw = widthPx ?? defaultW;
-    return raw.clamp(minW, maxW);
+    return transcriptColumnWidthFor(context, totalWidth, widthPx);
   }
 
   void _applyDragDelta(double totalWidth, double deltaDx) {
-    final maxW = totalWidth * _kMaxTranscriptFraction;
+    final maxW = totalWidth * kMaxTranscriptFraction;
     final minW = math.min(EnjoyThemeTokens.of(context).videoColumnMin, maxW);
     final current = _transcriptWidthForTotal(
       totalWidth,
@@ -109,9 +124,21 @@ class _VideoPlayerLayoutState extends State<VideoPlayerLayout> {
   @override
   Widget build(BuildContext context) {
     final transportInset = MediaQuery.paddingOf(context).bottom;
+    // OS window fullscreen = true video fullscreen: the stage takes the whole
+    // surface; transcript panel and aspect-ratio letterboxing are dropped.
+    final fullscreen = ref.watch(windowFullscreenProvider);
     return LayoutBuilder(
       builder: (context, constraints) {
         final useSideBySide = constraints.maxWidth > constraints.maxHeight;
+
+        if (fullscreen) {
+          return SizedBox.expand(
+            child: _VideoColumn(
+              engine: widget.engine,
+              bottomInset: transportInset,
+            ),
+          );
+        }
 
         if (useSideBySide) {
           final total = constraints.maxWidth;
@@ -242,6 +269,7 @@ class _VideoPausedTitleOverlay extends ConsumerWidget {
     final chrome = ref.watch(playerControllerProvider.select(playbackChromeOf));
     final isVisible = !isPlaying || isBuffering;
     final title = chrome?.mediaTitle ?? '';
+    final t = EnjoyThemeTokens.of(context);
 
     return Align(
       alignment: Alignment.topCenter,
@@ -249,7 +277,7 @@ class _VideoPausedTitleOverlay extends ConsumerWidget {
         ignoring: !isVisible,
         child: AnimatedOpacity(
           opacity: isVisible ? 1.0 : 0.0,
-          duration: const Duration(milliseconds: 200),
+          duration: t.motionMedium,
           child: DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -306,6 +334,24 @@ class _VideoStageWithChromeState extends ConsumerState<_VideoStageWithChrome> {
   /// State's `ref`, so it is allocated once per engine.
   PlayerSurfaceOverlayBuilder? _overlayBuilder;
 
+  /// Single-tap (play/pause) is deferred briefly so a double-tap can claim
+  /// it — double-tap toggles video fullscreen instead.
+  Timer? _stageTapDebounce;
+
+  void _handleStageTap() {
+    _stageTapDebounce?.cancel();
+    _stageTapDebounce = Timer(const Duration(milliseconds: 260), () {
+      if (!mounted) return;
+      ref.read(playerControllerProvider.notifier).togglePlay();
+    });
+  }
+
+  void _handleStageDoubleTap() {
+    _stageTapDebounce?.cancel();
+    if (!isDesktop) return;
+    unawaited(ref.read(windowFullscreenProvider.notifier).toggle());
+  }
+
   void _rebuildOverlayBuilder() {
     final isYoutube = ref.read(playerEnginePlaysYoutubeProvider);
     _overlayBuilder = (ctx) => MouseRegion(
@@ -317,11 +363,8 @@ class _VideoStageWithChromeState extends ConsumerState<_VideoStageWithChrome> {
             Positioned.fill(
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onTap: Haptics.wrapTap(
-                  ctx,
-                  () =>
-                      ref.read(playerControllerProvider.notifier).togglePlay(),
-                ),
+                onTap: Haptics.wrapTap(ctx, _handleStageTap),
+                onDoubleTap: Haptics.wrapTap(ctx, _handleStageDoubleTap),
                 child: const ColoredBox(color: Colors.transparent),
               ),
             ),
@@ -353,6 +396,12 @@ class _VideoStageWithChromeState extends ConsumerState<_VideoStageWithChrome> {
   void initState() {
     super.initState();
     _rebuildOverlayBuilder();
+  }
+
+  @override
+  void dispose() {
+    _stageTapDebounce?.cancel();
+    super.dispose();
   }
 
   @override
@@ -403,6 +452,7 @@ class _ResizeSplitter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = EnjoyThemeTokens.of(context);
     return MouseRegion(
       onEnter: (_) => onHover(true),
       onExit: (_) => onHover(false),
@@ -419,14 +469,12 @@ class _ResizeSplitter extends StatelessWidget {
             message: semanticLabel,
             child: Center(
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 160),
+                duration: t.motionFast,
                 curve: Curves.easeOut,
                 width: hovered ? 4 : 3,
                 height: 88,
                 decoration: BoxDecoration(
-                  color: EnjoyThemeTokens.of(
-                    context,
-                  ).ink3.withValues(alpha: hovered ? 0.65 : 0.25),
+                  color: t.ink3.withValues(alpha: hovered ? 0.65 : 0.25),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),

@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:enjoy_player/core/theme/enjoy_icons.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/anchored_popover_route.dart';
+import 'package:enjoy_player/core/window/window_fullscreen_provider.dart';
 import 'package:enjoy_player/features/player/application/echo_mode_provider.dart';
 import 'package:enjoy_player/features/player/application/player_controller.dart';
 import 'package:enjoy_player/features/player/application/player_margin_provider.dart';
@@ -46,16 +47,16 @@ Future<void> openPlayerMargin(
     ).read(playerMarginProvider.notifier).show(entry);
     return;
   }
+  final t = EnjoyThemeTokens.of(context);
   await Navigator.of(context, rootNavigator: true).push(
     AnchoredPopoverRoute<void>(
       barrierLabel: entry.label,
       alignment: Alignment.centerRight,
-      transitionDuration: const Duration(milliseconds: 220),
-      reverseTransitionDuration: const Duration(milliseconds: 180),
+      transitionDuration: t.motionMedium,
+      reverseTransitionDuration: t.motionExit,
       slideOffset: const Offset(1, 0),
       slideCurve: Curves.easeOutCubic,
       builder: (context) {
-        final t = EnjoyThemeTokens.of(context);
         return SizedBox(
           width: t.marginWidth,
           child: Semantics(
@@ -120,7 +121,10 @@ class _PlayerMarginLayoutState extends ConsumerState<PlayerMarginLayout> {
     });
     return LayoutBuilder(
       builder: (context, constraints) {
-        final docked = constraints.maxWidth >= t.breakpointMarginDrawer;
+        // True video fullscreen: no docked margin — the stage owns the screen.
+        final fullscreen = ref.watch(windowFullscreenProvider);
+        final docked =
+            !fullscreen && constraints.maxWidth >= t.breakpointMarginDrawer;
         final entry = ref.watch(playerMarginProvider);
         if (_lastDocked != null && _lastDocked != docked && !docked) {
           // Crossing under the breakpoint while a panel is docked: close it

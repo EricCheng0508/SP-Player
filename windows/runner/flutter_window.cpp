@@ -27,14 +27,10 @@ bool FlutterWindow::OnCreate() {
   RegisterPlugins(flutter_controller_->engine());
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
-  flutter_controller_->engine()->SetNextFrameCallback([&]() {
-    this->Show();
-  });
-
-  // Flutter can complete the first frame before the "show window" callback is
-  // registered. The following call ensures a frame is pending to ensure the
-  // window is shown. It is a no-op if the first frame hasn't completed yet.
-  flutter_controller_->ForceRedraw();
+  // NOTE: window visibility is owned by window_manager (Dart): the window
+  // stays hidden until the real router UI is ready. The template's
+  // SetNextFrameCallback -> Show() displayed the engine's FIRST frame here,
+  // which is the dark boot skeleton, causing a cover flash on every launch.
 
   return true;
 }

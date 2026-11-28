@@ -119,6 +119,7 @@ class EnjoyThemeTokens extends ThemeExtension<EnjoyThemeTokens> {
     Duration? motionMedium,
     Duration? motionLens,
     Duration? motionMargin,
+    Duration? motionPress,
     Color? echoActive,
     Color? blurActive,
     Color? scoreGood,
@@ -294,6 +295,7 @@ class EnjoyThemeTokens extends ThemeExtension<EnjoyThemeTokens> {
         motionMedium: motionMedium,
         motionLens: motionLens,
         motionMargin: motionMargin,
+        motionPress: motionPress,
       ),
       _elevation.copyWith(
         elevationNone: elevationNone,

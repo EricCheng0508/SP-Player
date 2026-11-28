@@ -235,6 +235,47 @@ final class ContextualTranslationServiceProvider
 String _$contextualTranslationServiceHash() =>
     r'cfbbd8c8b0565ef6c78480c31eafc0a2fb1c7e19';
 
+@ProviderFor(explainService)
+final explainServiceProvider = ExplainServiceProvider._();
+
+final class ExplainServiceProvider
+    extends $FunctionalProvider<ExplainService, ExplainService, ExplainService>
+    with $Provider<ExplainService> {
+  ExplainServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'explainServiceProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$explainServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<ExplainService> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ExplainService create(Ref ref) {
+    return explainService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ExplainService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ExplainService>(value),
+    );
+  }
+}
+
+String _$explainServiceHash() => r'8cd1cf5f4dd30c4a23c988c93146a1055275bb5b';
+
 @ProviderFor(ttsService)
 final ttsServiceProvider = TtsServiceProvider._();
 

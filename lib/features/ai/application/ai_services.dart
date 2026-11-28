@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:enjoy_player/features/ai/application/ai_api_failures.dart';
 import 'package:enjoy_player/features/ai/application/ai_capability_providers.dart';
+import 'package:enjoy_player/features/ai/domain/capabilities/asr_capability.dart';
 import 'package:enjoy_player/features/ai/domain/chat_message.dart';
 import 'package:enjoy_player/features/ai/domain/models/asr_request.dart';
 import 'package:enjoy_player/features/ai/domain/models/asr_result.dart';
@@ -9,6 +10,7 @@ import 'package:enjoy_player/features/ai/domain/models/assessment_request.dart';
 import 'package:enjoy_player/features/ai/domain/models/assessment_result.dart';
 import 'package:enjoy_player/features/ai/domain/models/contextual_translation_result.dart';
 import 'package:enjoy_player/features/ai/domain/models/dictionary_result.dart';
+import 'package:enjoy_player/features/ai/domain/models/line_explanation.dart';
 import 'package:enjoy_player/features/ai/domain/models/translation_result.dart';
 import 'package:enjoy_player/features/ai/domain/models/tts_request.dart';
 import 'package:enjoy_player/features/ai/domain/models/tts_result.dart';
@@ -22,6 +24,21 @@ final class AsrService {
 
   Future<AsrResult> transcribe(AsrRequest request) =>
       guardAiCall(() => _ref.read(asrCapabilityProvider).transcribe(request));
+
+  /// See `AsrThroughputHint` — a hint for the progress estimator, never a
+  /// correctness dependency. Null for any backend that cannot answer.
+  Future<double?> expectedRealtimeFactor() async {
+    // Declared as Object so the `is` test below can narrow to the unrelated
+    // [AsrThroughputHint] interface — promotion cannot jump between
+    // unrelated interfaces.
+    final Object capability = _ref.read(asrCapabilityProvider);
+    if (capability is! AsrThroughputHint) return null;
+    try {
+      return await capability.expectedRealtimeFactor();
+    } on Object {
+      return null;
+    }
+  }
 }
 
 final class ChatService {
@@ -110,6 +127,30 @@ final class DictionaryService {
   );
 }
 
+final class ExplainService {
+  ExplainService(this._ref);
+
+  final Ref _ref;
+
+  Future<LineExplanation> explain({
+    required String sentence,
+    required String sourceLanguage,
+    required String targetLanguage,
+    String? context,
+    bool? forceRefresh,
+  }) => guardAiCall(
+    () => _ref
+        .read(lineExplanationCapabilityProvider)
+        .explainSentence(
+          sentence: sentence,
+          sourceLanguage: sourceLanguage,
+          targetLanguage: targetLanguage,
+          context: context,
+          forceRefresh: forceRefresh,
+        ),
+  );
+}
+
 final class TtsService {
   TtsService(this._ref);
 
@@ -144,6 +185,9 @@ DictionaryService dictionaryService(Ref ref) => DictionaryService(ref);
 @Riverpod(keepAlive: true)
 ContextualTranslationService contextualTranslationService(Ref ref) =>
     ContextualTranslationService(ref);
+
+@Riverpod(keepAlive: true)
+ExplainService explainService(Ref ref) => ExplainService(ref);
 
 @Riverpod(keepAlive: true)
 TtsService ttsService(Ref ref) => TtsService(ref);

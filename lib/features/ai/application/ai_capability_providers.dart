@@ -4,15 +4,20 @@ import 'package:enjoy_player/data/api/api_client_provider.dart';
 import 'package:enjoy_player/data/api/byok_secret_store.dart';
 import 'package:enjoy_player/features/ai/application/ai_modality_config_controller.dart';
 import 'package:enjoy_player/features/ai/application/ai_modality_configs.dart';
+import 'package:enjoy_player/features/ai/data/batching/batching_translation_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_asr_azure_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_asr_openai_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_assessment_azure_capability.dart';
+import 'package:enjoy_player/features/ai/data/byok/byok_batch_translation_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_contextual_translation_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_dictionary_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_llm_capability.dart';
+import 'package:enjoy_player/features/ai/data/byok/byok_line_explanation_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_tts_azure_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_tts_openai_capability.dart';
 import 'package:enjoy_player/features/ai/data/byok/byok_translation_capability.dart';
+import 'package:enjoy_player/features/ai/data/local/local_assessment_capability.dart';
+import 'package:enjoy_player/features/ai/data/local/local_tts_capability.dart';
 import 'package:enjoy_player/features/ai/data/local_qwen_asr_capability.dart';
 import 'package:enjoy_player/features/ai/data/local_qwen_asr_service.dart';
 import 'package:enjoy_player/features/ai/data/local_subgen_asr_capability.dart';
@@ -24,6 +29,7 @@ import 'package:enjoy_player/features/ai/domain/capabilities/assessment_capabili
 import 'package:enjoy_player/features/ai/domain/capabilities/contextual_translation_capability.dart';
 import 'package:enjoy_player/features/ai/domain/capabilities/dictionary_capability.dart';
 import 'package:enjoy_player/features/ai/domain/capabilities/llm_capability.dart';
+import 'package:enjoy_player/features/ai/domain/capabilities/line_explanation_capability.dart';
 import 'package:enjoy_player/features/ai/domain/capabilities/translation_capability.dart';
 import 'package:enjoy_player/features/ai/domain/capabilities/tts_capability.dart';
 import 'package:enjoy_player/features/ai/domain/speech_byok_kind.dart';
@@ -106,7 +112,11 @@ TtsCapability resolveTtsCapability(Ref ref, AIServiceConfig config) {
   switch (config.provider) {
     case AIProvider.byok:
       final speechByok = config.speechByok;
-      if (speechByok == null) return const ByokNotConfiguredTtsCapability();
+      if (speechByok == null) {
+        // 本地版：TTS 未配置时默认走 Windows SAPI 本地合成，零配置可用；
+        // 配置了 Azure / OpenAI 兼容语音的用户仍以配置为准。
+        return const LocalTtsCapability();
+      }
       return switch (speechByok.kind) {
         SpeechByokKind.openAiCompatible => ByokTtsOpenAiCapability(
           config: speechByok,
@@ -129,7 +139,12 @@ AssessmentCapability resolveAssessmentCapability(
     case AIProvider.byok:
       final speechByok = config.speechByok;
       if (speechByok == null) {
-        return const ByokNotConfiguredAssessmentCapability();
+        // 本地版：发音评分未配置 Azure 时默认走本地评估
+        // (faster-whisper 识别 + 单词对齐算分)，零配置可用；
+        // 配置了 Azure 的用户仍以配置为准(音素级诊断)。
+        return LocalAssessmentCapability(
+          httpClient: ref.read(httpClientProvider),
+        );
       }
       return ByokAssessmentAzureCapability(
         config: speechByok,
@@ -163,7 +178,12 @@ TranslationCapability translationCapability(Ref ref) {
   final config = c.translation.llmByok == null && c.llm.llmByok != null
       ? c.llm
       : c.translation;
-  return resolveTranslationCapability(ref, config);
+  // 传输层合批：把并发到达的逐句请求合并为一次编号列表 LLM 调用，
+  // system prompt 与往返开销按屏摊薄（逐句请求 xN → 整屏 1 次）。
+  return BatchingTranslationCapability(
+    resolveTranslationCapability(ref, config),
+    ByokBatchTranslationCapability(resolveLlmCapability(ref, config)),
+  );
 }
 
 @Riverpod(keepAlive: true)
@@ -179,6 +199,12 @@ DictionaryCapability dictionaryCapability(Ref ref) {
 ContextualTranslationCapability contextualTranslationCapability(Ref ref) {
   final c = ref.watch(aiModalityConfigsProvider);
   return resolveContextualTranslationCapability(ref, c.llm);
+}
+
+@Riverpod(keepAlive: true)
+LineExplanationCapability lineExplanationCapability(Ref ref) {
+  final c = ref.watch(aiModalityConfigsProvider);
+  return ByokLineExplanationCapability(resolveLlmCapability(ref, c.llm));
 }
 
 @Riverpod(keepAlive: true)

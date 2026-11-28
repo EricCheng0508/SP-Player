@@ -4,8 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/features/ai/domain/models/dictionary_result.dart';
 import 'package:enjoy_player/features/ai/presentation/widgets/dictionary_senses_view.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/presentation/widgets/auth_required_callout.dart';
 import 'package:enjoy_player/features/vocabulary/domain/vocabulary_explanation_codec.dart';
 import 'package:enjoy_player/features/vocabulary/presentation/widgets/flashcard_ai_error_retry.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
@@ -41,11 +39,10 @@ class _FlashcardDictionaryTabState
     }
   }
 
-  void _maybeAutoload({required bool signedIn}) {
+  void _maybeAutoload() {
     if (!mounted || _autoloadRequested) return;
     if (decodeDictionaryExplanation(widget.explanation) != null) return;
     if (widget.fetchInFlight || widget.error != null) return;
-    if (!signedIn) return;
     _autoloadRequested = true;
     widget.onFetch();
   }
@@ -54,28 +51,13 @@ class _FlashcardDictionaryTabState
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final result = decodeDictionaryExplanation(widget.explanation);
-    final authLoading = ref.watch(
-      authCtrlProvider.select((auth) => auth.isLoading),
-    );
-    final signedIn = ref.watch(authIsSignedInProvider);
 
     if (result != null) {
       return _DictionaryResultView(result: result);
     }
 
-    if (authLoading) {
-      return _DictionaryLoading(label: l10n.vocabularyFetching);
-    }
-
-    if (!signedIn) {
-      return const AuthRequiredCallout(
-        surface: AuthRequiredSurface.lookupDictionary,
-        compact: true,
-      );
-    }
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _maybeAutoload(signedIn: signedIn);
+      _maybeAutoload();
     });
 
     if (widget.fetchInFlight || widget.error == null) {

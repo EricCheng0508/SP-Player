@@ -64,6 +64,16 @@ final class TranscriptAutoScrollController {
 
   ScrollController get scrollController => _scrollController;
 
+  /// Whether the scroll position has laid-out dimensions. Slots build during
+  /// sliver layout, so a rebuild that recreates the scrollable (e.g. toggling
+  /// blur mode) exposes a position whose extents are still null — reading
+  /// [ScrollPosition.maxScrollExtent] there throws on its null check.
+  bool get _positionReady {
+    if (!_scrollController.hasClients) return false;
+    final pos = _scrollController.position;
+    return pos.hasContentDimensions && pos.hasViewportDimension;
+  }
+
   void dispose() {
     _scrollGeneration++;
     _scrollController.dispose();
@@ -82,6 +92,28 @@ final class TranscriptAutoScrollController {
   /// Re-enables auto-follow after the user manually scrolled away.
   void resumeAutoFollow() {
     _suppressAutoScroll = false;
+  }
+
+  /// Re-syncs the viewport to the active cue after the host list re-enters
+  /// the tree (e.g. the transcript panel is torn down during video fullscreen
+  /// and rebuilt on exit). Without this the fresh list sits at its restored
+  /// offset and only re-joins the cue on the NEXT cue change. Deliberately
+  /// bypasses the playing gate: the cue at the paused position is still the
+  /// current line and must be scrolled into view (paused + exit fullscreen).
+  void resyncToActiveCue() {
+    if (!_positionReady) {
+      // The scrollable's dimensions may not exist until a frame after the
+      // first layout; retry instead of silently dropping the sync.
+      _scrollGeneration++;
+      final generation = _scrollGeneration;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!isMounted() || generation != _scrollGeneration) return;
+        resyncToActiveCue();
+      });
+      return;
+    }
+    resumeAutoFollow();
+    scheduleScrollIntoView(force: true, ignorePlaying: true);
   }
 
   GlobalKey scrollKeyForEcho(EchoState echo) {
@@ -105,7 +137,7 @@ final class TranscriptAutoScrollController {
   int scrollFocusLineIndex() {
     final lineCount = this.lineCount();
     if (lineCount <= 0) return 0;
-    if (!_scrollController.hasClients) return 0;
+    if (!_positionReady) return 0;
     final pos = _scrollController.position;
     if (pos.maxScrollExtent <= 0) return 0;
     final ratio = (pos.pixels / pos.maxScrollExtent).clamp(0.0, 1.0);
@@ -131,13 +163,21 @@ final class TranscriptAutoScrollController {
     return false;
   }
 
-  void scheduleScrollIntoView({bool force = false}) {
-    final playingAsync = ref().read(playerIsPlayingProvider);
-    final playing = switch (playingAsync) {
-      AsyncData(:final value) => value,
-      _ => false,
-    };
-    if (!playing) return;
+  void scheduleScrollIntoView({
+    bool force = false,
+    bool ignorePlaying = false,
+  }) {
+    // Follow the playhead only while playing: while paused the user may be
+    // browsing, and cue changes don't happen anyway. Explicit resyncs
+    // (panel rebuild after fullscreen) pass [ignorePlaying] to override.
+    if (!ignorePlaying) {
+      final playingAsync = ref().read(playerIsPlayingProvider);
+      final playing = switch (playingAsync) {
+        AsyncData(:final value) => value,
+        _ => false,
+      };
+      if (!playing) return;
+    }
 
     final echo =
         activeEchoForTranscript(ref().read(echoModeProvider), lineCount()) ??
@@ -173,7 +213,7 @@ final class TranscriptAutoScrollController {
 
   /// Whether the active cue line is roughly within the visible viewport.
   bool _isActiveCueVisible(int activeLineIndex) {
-    if (!_scrollController.hasClients) return true;
+    if (!_positionReady) return true;
     final pos = _scrollController.position;
     if (_activeLineScrollKeyIndex == activeLineIndex) {
       final ro = _activeLineScrollKey?.currentContext?.findRenderObject();
@@ -196,11 +236,11 @@ final class TranscriptAutoScrollController {
   /// Uses raw line index (single-line tile height) so tall echo cards do not
   /// inflate the estimate and overshoot off-screen.
   void _jumpToLineIndexEstimate(int lineIndex, {required double alignment}) {
-    if (!_scrollController.hasClients || lineIndex < 0) return;
+    if (lineIndex < 0) return;
 
     final lineCount = this.lineCount();
     if (lineCount <= 0) return;
-
+    if (!_positionReady) return;
     final pos = _scrollController.position;
     final ratio = lineIndex / lineCount;
     final estimated = ratio * pos.maxScrollExtent;

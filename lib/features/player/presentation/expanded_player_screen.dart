@@ -34,6 +34,10 @@ class _ExpandedPlayerScreenState extends ConsumerState<ExpandedPlayerScreen> {
     final cs = Theme.of(context).colorScheme;
     final mediaId = widget.mediaId;
 
+    // Hard swap, no crossfade: a crossfade superimposes the outgoing skeleton
+    // on the playing video for its whole duration — visible ghosting (user
+    // report). Geometry is identical between the two bodies, so the single-
+    // frame swap reads as the skeleton simply becoming the real content.
     if (chrome != null && chrome.mediaId == mediaId) {
       return ExpandedPlayerChromeBody(mediaId: mediaId, chrome: chrome);
     }

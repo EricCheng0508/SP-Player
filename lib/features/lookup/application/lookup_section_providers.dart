@@ -11,6 +11,7 @@ import 'package:enjoy_player/features/ai/application/ai_result_cache.dart';
 import 'package:enjoy_player/features/ai/application/ai_services.dart';
 import 'package:enjoy_player/features/ai/domain/ai_kind.dart';
 import 'package:enjoy_player/features/ai/domain/models/dictionary_result.dart';
+import 'package:enjoy_player/features/ai/domain/models/line_explanation.dart';
 import 'package:enjoy_player/features/ai/domain/models/translation_result.dart';
 import 'package:enjoy_player/features/lookup/application/lookup_section_params.dart';
 
@@ -46,6 +47,17 @@ String lookupContextualTranslationCacheKey(LookupContextualParams params) =>
       kind: AiKind.contextualTranslation.wire,
       payload: {
         'text': params.text,
+        'sourceLanguage': params.sourceLanguage,
+        'targetLanguage': params.targetLanguage,
+        'context': params.context ?? '',
+      },
+    );
+
+String lookupExplainCacheKey(LookupExplainParams params) =>
+    AiCacheFingerprint.fingerprint(
+      kind: AiKind.explain.wire,
+      payload: {
+        'sentence': params.text,
         'sourceLanguage': params.sourceLanguage,
         'targetLanguage': params.targetLanguage,
         'context': params.context ?? '',
@@ -122,3 +134,4 @@ Future<DictionaryResult> lookupSheetDictionary(
       );
   return result;
 }
+

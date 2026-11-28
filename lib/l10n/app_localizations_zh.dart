@@ -9,7 +9,7 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
-  String get appTitle => 'Enjoy 播放器';
+  String get appTitle => 'SP Player';
 
   @override
   String get libraryTitle => '资料库';
@@ -140,6 +140,68 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get transcriptFetchingSubtitles => '正在获取字幕…';
+
+  @override
+  String get transcriptSearchHint => '搜索字幕';
+
+  @override
+  String get transcriptSearchNoMatches => '没有匹配的句子';
+
+  @override
+  String get lookupSectionExplain => '讲解这句';
+
+  @override
+  String get lookupExplainRun => '开始讲解';
+
+  @override
+  String get libraryTabPlaylists => '播放列表';
+
+  @override
+  String get playlistCreateButton => '新建播放列表';
+
+  @override
+  String get playlistRename => '重命名';
+
+  @override
+  String get playlistDelete => '删除播放列表';
+
+  @override
+  String get playlistNameHint => '播放列表名称';
+
+  @override
+  String get playlistSave => '保存';
+
+  @override
+  String get playlistEmptyTitle => '还没有播放列表';
+
+  @override
+  String get playlistEmptyHint => '创建一个播放列表，把媒体分组按顺序播放。';
+
+  @override
+  String playlistItemCount(int count) {
+    return '$count 个条目';
+  }
+
+  @override
+  String get playlistAddMedia => '添加媒体';
+
+  @override
+  String get playlistPlayAll => '播放全部';
+
+  @override
+  String get playlistRemoveItem => '移出播放列表';
+
+  @override
+  String get playlistMoveUp => '上移';
+
+  @override
+  String get playlistMoveDown => '下移';
+
+  @override
+  String get playlistMissingMedia => '媒体已不在媒体库中';
+
+  @override
+  String get playlistPickerNoMedia => '先导入媒体，再在这里添加。';
 
   @override
   String get asrStatusExtracting => 'Extracting audio…';
@@ -527,7 +589,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsSectionAbout => '关于';
 
   @override
-  String get settingsAboutSubtitle => 'Enjoy 播放器 — 本地字幕与跟读练习。';
+  String get settingsAboutSubtitle => 'SP Player — 本地字幕与跟读练习。';
 
   @override
   String get settingsThemeRowTitle => '主题';
@@ -742,6 +804,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get subtitlesAutoTranslateRetranslateLine => '重新翻译此行';
 
   @override
+  String get subtitlesAutoTranslateRetranslateAll => '重新翻译';
+
+  @override
   String get subtitlesAutoTranslateBlockedStalePrimary =>
       '主字幕已更改，自动翻译将根据新的主字幕重建。';
 
@@ -912,13 +977,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsSectionAi => 'AI';
 
   @override
-  String get settingsSectionAiHint => '选择 Enjoy AI 或自备 API 密钥。';
+  String get settingsSectionAiHint => '为各功能配置你自己的 API 密钥；识别与翻译默认使用本地组件。';
 
   @override
   String get settingsAiProvidersTileTitle => 'AI 提供商';
 
   @override
-  String get settingsAiProvidersTileSubtitle => '默认使用 Enjoy AI，也可为各功能配置自己的密钥';
+  String get settingsAiProvidersTileSubtitle => '为各功能配置自己的 API 密钥';
 
   @override
   String get settingsAiProvidersTitle => 'AI 提供商';
@@ -927,11 +992,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsAiProvidersSubtitle => '配置 SP Player 各 AI 功能的调用方式。';
 
   @override
-  String get settingsAiProvidersPrivacyNotice =>
-      'API 密钥仅安全存储在本设备，不会同步到 Enjoy 云端。';
+  String get settingsAiProvidersPrivacyNotice => 'API 密钥仅安全存储在本设备，不会上传到任何云端。';
 
   @override
-  String get settingsAiProvidersEnjoyAi => 'Enjoy AI';
+  String get settingsAiProvidersEnjoyAi => '默认';
 
   @override
   String get settingsAiProvidersByok => '自备密钥';
@@ -943,16 +1007,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsAiProvidersModalityLlmHint => '对话、翻译、词典与语境翻译';
 
   @override
-  String get settingsAiProvidersModalityAsr => '语音识别';
+  String get settingsAiProvidersModalityAsr => '语音识别（生成字幕）';
 
   @override
-  String get settingsAiProvidersModalityAsrHint => '将音频转写为文字';
+  String get settingsAiProvidersModalityAsrHint => '识别视频语音，生成本地字幕';
 
   @override
-  String get settingsAiProvidersModalityTts => '文字转语音';
+  String get settingsAiProvidersModalityTts => '文字转语音（Craft 合成）';
 
   @override
-  String get settingsAiProvidersModalityTtsHint => '将文字合成为语音';
+  String get settingsAiProvidersModalityTtsHint => 'Craft 用它把文本合成为练习音频';
 
   @override
   String get settingsAiProvidersModalityAssessment => '发音评估';
@@ -1017,17 +1081,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsAiProvidersSaveSuccess => 'AI 提供商设置已保存。';
 
   @override
-  String get settingsAiProvidersRemoveByok => '移除 BYOK';
+  String get settingsAiProvidersRemoveByok => '移除';
 
   @override
-  String get settingsAiProvidersRemoveByokTitle => '移除 BYOK 凭据？';
+  String get settingsAiProvidersRemoveByokTitle => '移除已保存的密钥？';
 
   @override
-  String get settingsAiProvidersRemoveByokBody =>
-      '将删除本设备上保存的 API 密钥，并将该功能恢复为 Enjoy AI。';
+  String get settingsAiProvidersRemoveByokBody => '将删除本设备上保存的 API 密钥。';
 
   @override
-  String get settingsAiProvidersRemoveByokSuccess => 'BYOK 凭据已移除。';
+  String get settingsAiProvidersRemoveByokSuccess => '已移除保存的密钥。';
 
   @override
   String get settingsAiProvidersCancel => '取消';
@@ -1059,13 +1122,27 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingsAiProvidersSpeechKindHintAzure =>
-      'Azure 语音：发音评分（跟读打分）必须使用此项；也支持语音转文字。';
+      'Azure 语音：音素级发音诊断；也支持语音转文字。不配置则跟读打分自动走本地评估。';
 
   @override
   String get settingsAiProvidersSpeechWhisperModelLabel => 'Whisper 模型';
 
   @override
   String get settingsAiProvidersSpeechWhisperModelHint => 'whisper-1';
+
+  @override
+  String get settingsAiEngineLocal => '本地（默认）';
+
+  @override
+  String get settingsAiEngineCloud => '自定义云端';
+
+  @override
+  String get settingsAiProvidersTtsLocalHint =>
+      '使用 Windows 系统自带语音合成，无需下载；音色跟随系统已安装的语音包（设置 → 时间和语言 → 语音 可添加更多）。';
+
+  @override
+  String get settingsAiProvidersAsrLocalHint =>
+      '使用本地组件离线识别，无需联网；未安装时首次使用会引导下载。';
 
   @override
   String get settingsAiProvidersSpeechTtsModelLabel => 'TTS 模型';
@@ -1291,6 +1368,24 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get hotkeysDescToggleFullscreen => '切换全屏';
+
+  @override
+  String get hotkeysDescSearchTranscript => '搜索字幕 (Ctrl+F)';
+
+  @override
+  String get hotkeysDescSeekBack => '快退 3 秒';
+
+  @override
+  String get hotkeysDescSeekForward => '快进 3 秒';
+
+  @override
+  String get hotkeysDescVolumeUp => '增大音量';
+
+  @override
+  String get hotkeysDescVolumeDown => '减小音量';
+
+  @override
+  String get hotkeysDescToggleMute => '静音切换';
 
   @override
   String get hotkeysDescPrevLine => '播放上一句';
@@ -2304,7 +2399,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get aiPlaygroundIntro =>
-      '通过 Enjoy 云端或「设置 → AI 提供商」中的 BYOK 凭据测试各 AI 能力。翻译与词典跟随 LLM 提供商。';
+      '通过「设置 → AI 提供商」中的凭据测试各 AI 能力。翻译与词典跟随 LLM 提供商。';
 
   @override
   String get aiPlaygroundActiveProviders => '当前提供商';
@@ -2364,7 +2459,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get aiPlaygroundAssessmentTtsNote =>
-      'Enjoy TTS 尚未接入；可在 AI 提供商中配置 TTS BYOK。评测使用上方所示提供商。';
+      'TTS 尚未接入；可在 AI 提供商中配置 TTS BYOK。评测使用上方所示提供商。';
 
   @override
   String get aiPlaygroundOutput => '输出';
@@ -4259,6 +4354,36 @@ class AppLocalizationsZh extends AppLocalizations {
   String get playerMore => '更多';
 
   @override
+  String get playerMoreDescEditTranscript => '在编辑器中修改当前字幕稿的文字与时间';
+
+  @override
+  String get playerMoreDescAddSubtitleFile => '从电脑选择 .srt / .vtt 等字幕文件，导入为新字幕轨';
+
+  @override
+  String get playerMoreDescEmbeddedSubtitles =>
+      '提取视频文件（MKV/MP4 等）内部自带的字幕轨，无需语音识别';
+
+  @override
+  String get playerMoreDescAiTranscript =>
+      '用本地语音识别生成或重新生成字幕；老视频重新转写后可享受最新的对轴校准';
+
+  @override
+  String get playerMoreDescWordTimings => '为每个词添加精确时间与音标，用于卡拉OK式逐词高亮和跟读练习';
+
+  @override
+  String get playerMoreDescRefreshFromCloud =>
+      '重新从云端拉取字幕稿（YouTube 官方字幕，或登录后云同步的字幕）';
+
+  @override
+  String get playerMoreDescDownloadTranscript => '把当前字幕稿导出为 .srt 字幕文件保存到电脑';
+
+  @override
+  String get playerMoreDescEditDetails => '修改这个视频的标题、封面等信息';
+
+  @override
+  String get playerMoreDescExportLoopClip => '把当前 Echo 循环片段单独导出为视频片段（有循环激活时可用）';
+
+  @override
   String get playerMoreTranscriptSection => '字幕文本';
 
   @override
@@ -4736,7 +4861,7 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   AppLocalizationsZhCn() : super('zh_CN');
 
   @override
-  String get appTitle => 'Enjoy 播放器';
+  String get appTitle => 'SP Player';
 
   @override
   String get libraryTitle => '资料库';
@@ -4867,6 +4992,68 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get transcriptFetchingSubtitles => '正在获取字幕…';
+
+  @override
+  String get transcriptSearchHint => '搜索字幕';
+
+  @override
+  String get transcriptSearchNoMatches => '没有匹配的句子';
+
+  @override
+  String get lookupSectionExplain => '讲解这句';
+
+  @override
+  String get lookupExplainRun => '开始讲解';
+
+  @override
+  String get libraryTabPlaylists => '播放列表';
+
+  @override
+  String get playlistCreateButton => '新建播放列表';
+
+  @override
+  String get playlistRename => '重命名';
+
+  @override
+  String get playlistDelete => '删除播放列表';
+
+  @override
+  String get playlistNameHint => '播放列表名称';
+
+  @override
+  String get playlistSave => '保存';
+
+  @override
+  String get playlistEmptyTitle => '还没有播放列表';
+
+  @override
+  String get playlistEmptyHint => '创建一个播放列表，把媒体分组按顺序播放。';
+
+  @override
+  String playlistItemCount(int count) {
+    return '$count 个条目';
+  }
+
+  @override
+  String get playlistAddMedia => '添加媒体';
+
+  @override
+  String get playlistPlayAll => '播放全部';
+
+  @override
+  String get playlistRemoveItem => '移出播放列表';
+
+  @override
+  String get playlistMoveUp => '上移';
+
+  @override
+  String get playlistMoveDown => '下移';
+
+  @override
+  String get playlistMissingMedia => '媒体已不在媒体库中';
+
+  @override
+  String get playlistPickerNoMedia => '先导入媒体，再在这里添加。';
 
   @override
   String get asrStatusExtracting => '正在提取音频…';
@@ -5215,7 +5402,7 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String get settingsSectionAbout => '关于';
 
   @override
-  String get settingsAboutSubtitle => 'Enjoy 播放器 — 本地字幕与跟读练习';
+  String get settingsAboutSubtitle => 'SP Player — 本地字幕与跟读练习';
 
   @override
   String get settingsThemeRowTitle => '主题';
@@ -5430,6 +5617,9 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String get subtitlesAutoTranslateRetranslateLine => '重新翻译此行';
 
   @override
+  String get subtitlesAutoTranslateRetranslateAll => '重新翻译';
+
+  @override
   String get subtitlesAutoTranslateBlockedStalePrimary =>
       '主字幕已更改，自动翻译将根据新的主字幕重建。';
 
@@ -5600,7 +5790,7 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String get settingsSectionAi => 'AI';
 
   @override
-  String get settingsSectionAiHint => '选择 Enjoy AI 或自备 API 密钥。';
+  String get settingsSectionAiHint => '为各功能配置你自己的 API 密钥；识别与翻译默认使用本地组件。';
 
   @override
   String get settingsAiProvidersTileTitle => 'AI 提供商';
@@ -5611,7 +5801,7 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get settingsAiProvidersSpeechKindHintAzure =>
-      'Azure 语音：发音评分（跟读打分）必须使用此项；也支持语音转文字。';
+      'Azure 语音：音素级发音诊断；也支持语音转文字。不配置则跟读打分自动走本地评估。';
 
   @override
   String byokNotConfiguredMessage(String modality) {
@@ -5804,6 +5994,24 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get hotkeysDescToggleFullscreen => '切换全屏';
+
+  @override
+  String get hotkeysDescSearchTranscript => '搜索字幕 (Ctrl+F)';
+
+  @override
+  String get hotkeysDescSeekBack => '快退 3 秒';
+
+  @override
+  String get hotkeysDescSeekForward => '快进 3 秒';
+
+  @override
+  String get hotkeysDescVolumeUp => '增大音量';
+
+  @override
+  String get hotkeysDescVolumeDown => '减小音量';
+
+  @override
+  String get hotkeysDescToggleMute => '静音切换';
 
   @override
   String get hotkeysDescPrevLine => '播放上一句';
@@ -8317,6 +8525,36 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get playerMore => '更多';
+
+  @override
+  String get playerMoreDescEditTranscript => '在编辑器中修改当前字幕稿的文字与时间';
+
+  @override
+  String get playerMoreDescAddSubtitleFile => '从电脑选择 .srt / .vtt 等字幕文件，导入为新字幕轨';
+
+  @override
+  String get playerMoreDescEmbeddedSubtitles =>
+      '提取视频文件（MKV/MP4 等）内部自带的字幕轨，无需语音识别';
+
+  @override
+  String get playerMoreDescAiTranscript =>
+      '用本地语音识别生成或重新生成字幕；老视频重新转写后可享受最新的对轴校准';
+
+  @override
+  String get playerMoreDescWordTimings => '为每个词添加精确时间与音标，用于卡拉OK式逐词高亮和跟读练习';
+
+  @override
+  String get playerMoreDescRefreshFromCloud =>
+      '重新从云端拉取字幕稿（YouTube 官方字幕，或登录后云同步的字幕）';
+
+  @override
+  String get playerMoreDescDownloadTranscript => '把当前字幕稿导出为 .srt 字幕文件保存到电脑';
+
+  @override
+  String get playerMoreDescEditDetails => '修改这个视频的标题、封面等信息';
+
+  @override
+  String get playerMoreDescExportLoopClip => '把当前 Echo 循环片段单独导出为视频片段（有循环激活时可用）';
 
   @override
   String get playerMoreTranscriptSection => '字幕文本';

@@ -275,6 +275,40 @@ class AutoTranslateCtrl extends _$AutoTranslateCtrl {
     unawaited(_translateLine(lineIndex, forceRefresh: false));
   }
 
+  /// Clears every translated line of the AI track so the whole translation
+  /// regenerates through the normal visibility-driven flow (viewport lines
+  /// re-request immediately, the rest translate as the user scrolls).
+  Future<void> retranslateAll() async {
+    final aiId = state.aiTranscriptId;
+    final primaryId = state.primaryTranscriptId;
+    if (aiId == null || primaryId == null) return;
+    if (state.status != AutoTranslateStatus.active) return;
+
+    final repo = _repo();
+    final primary = await repo.contentById(primaryId);
+    if (primary == null) return;
+    final lineCount = primary.lines.length;
+    if (lineCount == 0) return;
+
+    _verifiedNonStalePair = null;
+    _queue.clear();
+    // Empty text also clears the line's source key, so the reuse cache
+    // cannot resurrect the previous wording for any line.
+    for (var i = 0; i < lineCount; i++) {
+      await repo.updateAutoTranslateLineText(
+        aiTranscriptId: aiId,
+        lineIndex: i,
+        text: '',
+      );
+    }
+    await repo.flushAutoTranslateWrites();
+    if (!ref.mounted) return;
+    state = state.copyWith(
+      failedLineIndexes: const {},
+      inFlightIndexes: const {},
+    );
+  }
+
   /// Re-translates a single cue (force-refresh). Preserves all other lines.
   Future<void> retranslateLine(int lineIndex) async {
     final aiId = state.aiTranscriptId;

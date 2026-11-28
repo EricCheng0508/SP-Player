@@ -11,6 +11,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:enjoy_player/core/analytics/analytics.dart';
 import 'package:enjoy_player/core/analytics/analytics_provider.dart';
+import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/player/player_surface_overlay_coordinator.dart';
 import 'package:enjoy_player/core/player/player_surface_overlay_navigator_observer.dart';
 import 'package:enjoy_player/core/routing/auth_redirect.dart';
@@ -27,6 +28,7 @@ import 'package:enjoy_player/features/discover/presentation/channel_feed_screen.
 import 'package:enjoy_player/features/discover/presentation/discover_screen.dart';
 import 'package:enjoy_player/features/library/presentation/home_screen.dart';
 import 'package:enjoy_player/features/library/presentation/library_screen.dart';
+import 'package:enjoy_player/features/live_captions/presentation/live_captions_screen.dart';
 import 'package:enjoy_player/features/player/application/leave_player_route_observer.dart';
 import 'package:enjoy_player/features/player/application/leave_player_session.dart';
 import 'package:enjoy_player/features/player/application/player_controller.dart';
@@ -57,18 +59,28 @@ CustomTransitionPage<void> _shellPage({
     key: key,
     child: child,
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      final curved = CurvedAnimation(
+      // Staggered fade-through (mirrors Material's FadeThroughTransition):
+      // the covered route fades OUT during the FIRST half, the incoming one
+      // fades IN during the SECOND half — never simultaneously. A
+      // simultaneous crossfade superimposes both pages mid-transition and
+      // reads as ghosting (user report). The opaque fill behind the child
+      // also guarantees the outgoing content can never bleed through.
+      final inCurve = CurvedAnimation(
         parent: animation,
-        curve: Curves.easeOutCubic,
+        curve: const Interval(0.5, 1.0, curve: Curves.easeOutCubic),
       );
-      return FadeTransition(
-        opacity: curved,
-        child: SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(0, 0.02),
-            end: Offset.zero,
-          ).animate(curved),
-          child: child,
+      final outCurve = CurvedAnimation(
+        parent: secondaryAnimation,
+        curve: const Interval(0.0, 0.5, curve: Curves.easeIn),
+      );
+      return ColoredBox(
+        color: EnjoyThemeTokens.of(context).canvas,
+        child: FadeTransition(
+          opacity: Tween<double>(begin: 1.0, end: 0.0).animate(outCurve),
+          child: FadeTransition(
+            opacity: Tween<double>(begin: 0.0, end: 1.0).animate(inCurve),
+            child: child,
+          ),
         ),
       );
     },
@@ -89,8 +101,11 @@ GoRouter appRouter(Ref ref) {
     coordinator: coordinator,
   );
   final leavePlayerObserver = LeavePlayerRouteObserver(
-    onLeftPlayerRoute: () =>
-        scheduleMicrotask(() => unawaited(clearLivePlaybackSession(ref))),
+    onLeftPlayerRoute: () => scheduleMicrotask(
+      // Deferred: pause now, teardown after the exit fade — an immediate
+      // clear blanks the video stage mid-transition.
+      () => unawaited(clearLivePlaybackSessionDeferredWith(ref.read)),
+    ),
   );
   final rootScreenObserver = AnalyticsScreenObserver(
     ref.read(analyticsProvider),
@@ -201,8 +216,13 @@ GoRouter appRouter(Ref ref) {
                         child: child,
                       );
                     },
-                transitionDuration: const Duration(milliseconds: 220),
-                reverseTransitionDuration: const Duration(milliseconds: 180),
+                // Zero-duration in both directions: the split video+transcript
+                // stage must appear in a single frame. A 220 ms fade-in over
+                // the page's dark backdrop reads as a full-black flash before
+                // the layout settles; on pop the fade blanks the stage too.
+                // Audio keeps playing through the instant swap either way.
+                transitionDuration: Duration.zero,
+                reverseTransitionDuration: Duration.zero,
               );
             },
             routes: [
@@ -218,70 +238,114 @@ GoRouter appRouter(Ref ref) {
           GoRoute(
             name: 'youtube-login',
             path: '/youtube/login',
-            builder: (context, state) => const YoutubeLoginScreen(),
+            pageBuilder: (context, state) => _shellPage(
+              key: const ValueKey<String>('shell-youtube-login'),
+              child: const YoutubeLoginScreen(),
+            ),
           ),
           GoRoute(
             name: 'craft',
             path: '/craft',
-            builder: (context, state) => const CraftScreen(),
+            pageBuilder: (context, state) => _shellPage(
+              key: const ValueKey<String>('shell-craft'),
+              child: const CraftScreen(),
+            ),
           ),
           GoRoute(
             name: 'craft-history',
             path: '/craft/history',
-            builder: (context, state) => const CraftHistoryScreen(),
+            pageBuilder: (context, state) => _shellPage(
+              key: const ValueKey<String>('shell-craft-history'),
+              child: const CraftHistoryScreen(),
+            ),
+          ),
+          GoRoute(
+            name: 'live-captions',
+            path: '/live-captions',
+            pageBuilder: (context, state) => _shellPage(
+              key: const ValueKey<String>('shell-live-captions'),
+              child: const LiveCaptionsScreen(),
+            ),
           ),
           GoRoute(
             name: 'settings',
             path: '/settings',
-            builder: (context, state) => const SettingsScreen(),
+            pageBuilder: (context, state) => _shellPage(
+              key: const ValueKey<String>('shell-settings'),
+              child: const SettingsScreen(),
+            ),
           ),
           GoRoute(
             name: 'settings-keyboard',
             path: '/settings/keyboard',
-            builder: (context, state) => const HotkeysSettingsScreen(),
+            pageBuilder: (context, state) => _shellPage(
+              key: const ValueKey<String>('shell-settings-keyboard'),
+              child: const HotkeysSettingsScreen(),
+            ),
           ),
           GoRoute(
             name: 'settings-ai-providers',
             path: '/settings/ai-providers',
-            builder: (context, state) => const AiProvidersScreen(),
+            pageBuilder: (context, state) => _shellPage(
+              key: const ValueKey<String>('shell-settings-ai-providers'),
+              child: const AiProvidersScreen(),
+            ),
           ),
           GoRoute(
             name: 'settings-appearance-language',
             path: '/settings/appearance-language',
-            builder: (context, state) => const SettingsSectionPageScreen(
-              sectionId: SettingsSectionIds.appearanceLanguage,
+            pageBuilder: (context, state) => _shellPage(
+              key: const ValueKey<String>('shell-settings-appearance-language'),
+              child: const SettingsSectionPageScreen(
+                sectionId: SettingsSectionIds.appearanceLanguage,
+              ),
             ),
           ),
           GoRoute(
             name: 'settings-recording',
             path: '/settings/recording',
-            builder: (context, state) => const SettingsSectionPageScreen(
-              sectionId: SettingsSectionIds.recording,
+            pageBuilder: (context, state) => _shellPage(
+              key: const ValueKey<String>('shell-settings-recording'),
+              child: const SettingsSectionPageScreen(
+                sectionId: SettingsSectionIds.recording,
+              ),
             ),
           ),
           GoRoute(
             name: 'settings-developer',
             path: '/settings/developer',
-            builder: (context, state) => const SettingsSectionPageScreen(
-              sectionId: SettingsSectionIds.developer,
+            pageBuilder: (context, state) => _shellPage(
+              key: const ValueKey<String>('shell-settings-developer'),
+              child: const SettingsSectionPageScreen(
+                sectionId: SettingsSectionIds.developer,
+              ),
             ),
           ),
           GoRoute(
             name: 'settings-about',
             path: '/settings/about',
-            builder: (context, state) => const SettingsSectionPageScreen(
-              sectionId: SettingsSectionIds.about,
+            pageBuilder: (context, state) => _shellPage(
+              key: const ValueKey<String>('shell-settings-about'),
+              child: const SettingsSectionPageScreen(
+                sectionId: SettingsSectionIds.about,
+              ),
             ),
           ),
           GoRoute(
             name: 'settings-ai-playground',
             path: '/settings/ai-playground',
-            builder: (context, state) => const AiPlaygroundScreen(),
+            pageBuilder: (context, state) => _shellPage(
+              key: const ValueKey<String>('shell-settings-ai-playground'),
+              child: const AiPlaygroundScreen(),
+            ),
           ),
           GoRoute(
             name: 'vocabulary',
             path: '/vocabulary',
-            builder: (context, state) => const VocabularyScreen(),
+            pageBuilder: (context, state) => _shellPage(
+              key: const ValueKey<String>('shell-vocabulary'),
+              child: const VocabularyScreen(),
+            ),
           ),
           GoRoute(
             name: 'vocabulary-review',
@@ -295,7 +359,10 @@ GoRouter appRouter(Ref ref) {
               }
               return true;
             },
-            builder: (context, state) => const VocabularyReviewSessionScreen(),
+            pageBuilder: (context, state) => _shellPage(
+              key: const ValueKey<String>('shell-vocabulary-review'),
+              child: const VocabularyReviewSessionScreen(),
+            ),
           ),
         ],
       ),

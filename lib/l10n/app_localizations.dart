@@ -333,6 +333,126 @@ abstract class AppLocalizations {
   /// **'Fetching subtitles…'**
   String get transcriptFetchingSubtitles;
 
+  /// No description provided for @transcriptSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search transcript'**
+  String get transcriptSearchHint;
+
+  /// No description provided for @transcriptSearchNoMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching lines'**
+  String get transcriptSearchNoMatches;
+
+  /// No description provided for @lookupSectionExplain.
+  ///
+  /// In en, this message translates to:
+  /// **'Explain this sentence'**
+  String get lookupSectionExplain;
+
+  /// No description provided for @lookupExplainRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Explain'**
+  String get lookupExplainRun;
+
+  /// No description provided for @libraryTabPlaylists.
+  ///
+  /// In en, this message translates to:
+  /// **'Playlists'**
+  String get libraryTabPlaylists;
+
+  /// No description provided for @playlistCreateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'New playlist'**
+  String get playlistCreateButton;
+
+  /// No description provided for @playlistRename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename playlist'**
+  String get playlistRename;
+
+  /// No description provided for @playlistDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete playlist'**
+  String get playlistDelete;
+
+  /// No description provided for @playlistNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist name'**
+  String get playlistNameHint;
+
+  /// No description provided for @playlistSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get playlistSave;
+
+  /// No description provided for @playlistEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No playlists yet'**
+  String get playlistEmptyTitle;
+
+  /// No description provided for @playlistEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a playlist to group media and play them in order.'**
+  String get playlistEmptyHint;
+
+  /// No description provided for @playlistItemCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items'**
+  String playlistItemCount(int count);
+
+  /// No description provided for @playlistAddMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Add media'**
+  String get playlistAddMedia;
+
+  /// No description provided for @playlistPlayAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Play all'**
+  String get playlistPlayAll;
+
+  /// No description provided for @playlistRemoveItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from playlist'**
+  String get playlistRemoveItem;
+
+  /// No description provided for @playlistMoveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get playlistMoveUp;
+
+  /// No description provided for @playlistMoveDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get playlistMoveDown;
+
+  /// No description provided for @playlistMissingMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Media no longer in library'**
+  String get playlistMissingMedia;
+
+  /// No description provided for @playlistPickerNoMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Import media first, then add it here.'**
+  String get playlistPickerNoMedia;
+
   /// No description provided for @asrStatusExtracting.
   ///
   /// In en, this message translates to:
@@ -1467,6 +1587,12 @@ abstract class AppLocalizations {
   /// **'Re-translate this line'**
   String get subtitlesAutoTranslateRetranslateLine;
 
+  /// No description provided for @subtitlesAutoTranslateRetranslateAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-translate'**
+  String get subtitlesAutoTranslateRetranslateAll;
+
   /// No description provided for @subtitlesAutoTranslateBlockedStalePrimary.
   ///
   /// In en, this message translates to:
@@ -1782,7 +1908,7 @@ abstract class AppLocalizations {
   /// Subtitle under the AI settings section header.
   ///
   /// In en, this message translates to:
-  /// **'Choose Enjoy AI or bring your own API keys.'**
+  /// **'Configure your own API keys per feature; speech recognition and translation use local components by default.'**
   String get settingsSectionAiHint;
 
   /// Settings tile title for AI provider configuration.
@@ -1794,7 +1920,7 @@ abstract class AppLocalizations {
   /// Settings tile subtitle for AI provider configuration.
   ///
   /// In en, this message translates to:
-  /// **'Enjoy AI by default, or use your own keys per feature'**
+  /// **'Configure your own API keys per feature'**
   String get settingsAiProvidersTileSubtitle;
 
   /// Screen title for AI provider settings.
@@ -1812,13 +1938,13 @@ abstract class AppLocalizations {
   /// Privacy notice on the AI providers settings screen.
   ///
   /// In en, this message translates to:
-  /// **'API keys are stored securely on this device only and are never synced to Enjoy cloud.'**
+  /// **'API keys are stored securely on this device only and are never uploaded to any cloud.'**
   String get settingsAiProvidersPrivacyNotice;
 
   /// Label when a modality uses Enjoy cloud AI.
   ///
   /// In en, this message translates to:
-  /// **'Enjoy AI'**
+  /// **'Default'**
   String get settingsAiProvidersEnjoyAi;
 
   /// Label when a modality uses BYOK credentials.
@@ -1842,7 +1968,7 @@ abstract class AppLocalizations {
   /// Card title for ASR modality.
   ///
   /// In en, this message translates to:
-  /// **'Speech recognition'**
+  /// **'Speech recognition (subtitles)'**
   String get settingsAiProvidersModalityAsr;
 
   /// Card subtitle for ASR modality.
@@ -1986,25 +2112,25 @@ abstract class AppLocalizations {
   /// Remove BYOK credentials action.
   ///
   /// In en, this message translates to:
-  /// **'Remove BYOK'**
+  /// **'Remove'**
   String get settingsAiProvidersRemoveByok;
 
   /// Confirm dialog title for removing BYOK.
   ///
   /// In en, this message translates to:
-  /// **'Remove BYOK credentials?'**
+  /// **'Remove the saved key?'**
   String get settingsAiProvidersRemoveByokTitle;
 
   /// Confirm dialog body for removing BYOK.
   ///
   /// In en, this message translates to:
-  /// **'This deletes the saved API key on this device and reverts the feature to Enjoy AI.'**
+  /// **'This deletes the API key saved on this device.'**
   String get settingsAiProvidersRemoveByokBody;
 
   /// Success notice after removing BYOK.
   ///
   /// In en, this message translates to:
-  /// **'BYOK credentials removed.'**
+  /// **'Saved key removed.'**
   String get settingsAiProvidersRemoveByokSuccess;
 
   /// Cancel action in BYOK dialogs.
@@ -2064,7 +2190,7 @@ abstract class AppLocalizations {
   /// Hint under the speech provider segmented button, Azure option.
   ///
   /// In en, this message translates to:
-  /// **'Azure Speech: required for pronunciation scoring. Also supports speech-to-text.'**
+  /// **'Azure Speech: phoneme-level pronunciation diagnosis. Also supports speech-to-text. Without it, take scoring falls back to local assessment.'**
   String get settingsAiProvidersSpeechKindHintAzure;
 
   /// Label for Whisper model field in ASR BYOK form
@@ -2078,6 +2204,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'whisper-1'**
   String get settingsAiProvidersSpeechWhisperModelHint;
+
+  /// No description provided for @settingsAiEngineLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Local (default)'**
+  String get settingsAiEngineLocal;
+
+  /// No description provided for @settingsAiEngineCloud.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom cloud'**
+  String get settingsAiEngineCloud;
+
+  /// No description provided for @settingsAiProvidersTtsLocalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Uses the built-in Windows speech synthesis — no download needed. Voices follow your installed system voice packs (Settings → Time & language → Speech).'**
+  String get settingsAiProvidersTtsLocalHint;
+
+  /// No description provided for @settingsAiProvidersAsrLocalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline recognition via the local components; no network needed. First use guides you through the download.'**
+  String get settingsAiProvidersAsrLocalHint;
 
   /// Label for OpenAI-compatible TTS model field
   ///
@@ -2498,6 +2648,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Toggle fullscreen'**
   String get hotkeysDescToggleFullscreen;
+
+  /// No description provided for @hotkeysDescSearchTranscript.
+  ///
+  /// In en, this message translates to:
+  /// **'Search transcript (Ctrl+F)'**
+  String get hotkeysDescSearchTranscript;
+
+  /// No description provided for @hotkeysDescSeekBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Seek back 3 seconds'**
+  String get hotkeysDescSeekBack;
+
+  /// No description provided for @hotkeysDescSeekForward.
+  ///
+  /// In en, this message translates to:
+  /// **'Seek forward 3 seconds'**
+  String get hotkeysDescSeekForward;
+
+  /// No description provided for @hotkeysDescVolumeUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Volume up'**
+  String get hotkeysDescVolumeUp;
+
+  /// No description provided for @hotkeysDescVolumeDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Volume down'**
+  String get hotkeysDescVolumeDown;
+
+  /// No description provided for @hotkeysDescToggleMute.
+  ///
+  /// In en, this message translates to:
+  /// **'Mute / unmute'**
+  String get hotkeysDescToggleMute;
 
   /// No description provided for @hotkeysDescPrevLine.
   ///
@@ -4440,7 +4626,7 @@ abstract class AppLocalizations {
   /// No description provided for @aiPlaygroundIntro.
   ///
   /// In en, this message translates to:
-  /// **'Exercise AI modalities using Enjoy cloud or your BYOK credentials from Settings → AI providers. Translation and dictionary follow the LLM provider.'**
+  /// **'Exercise AI modalities with your credentials from Settings → AI providers. Translation and dictionary follow the LLM provider.'**
   String get aiPlaygroundIntro;
 
   /// No description provided for @aiPlaygroundActiveProviders.
@@ -4554,7 +4740,7 @@ abstract class AppLocalizations {
   /// No description provided for @aiPlaygroundAssessmentTtsNote.
   ///
   /// In en, this message translates to:
-  /// **'Enjoy TTS is not wired yet; configure TTS BYOK under AI providers for synthesis. Assessment uses the provider shown above.'**
+  /// **'TTS is not wired yet; configure TTS BYOK under AI providers for synthesis. Assessment uses the provider shown above.'**
   String get aiPlaygroundAssessmentTtsNote;
 
   /// No description provided for @aiPlaygroundOutput.
@@ -8081,6 +8267,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'More'**
   String get playerMore;
+
+  /// No description provided for @playerMoreDescEditTranscript.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit the text and timing of the current transcript in the editor'**
+  String get playerMoreDescEditTranscript;
+
+  /// No description provided for @playerMoreDescAddSubtitleFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a .srt / .vtt subtitle file from your computer and import it as a new track'**
+  String get playerMoreDescAddSubtitleFile;
+
+  /// No description provided for @playerMoreDescEmbeddedSubtitles.
+  ///
+  /// In en, this message translates to:
+  /// **'Extract subtitle tracks embedded inside the video file (MKV/MP4) - no speech recognition needed'**
+  String get playerMoreDescEmbeddedSubtitles;
+
+  /// No description provided for @playerMoreDescAiTranscript.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate or regenerate subtitles with local speech recognition; old videos get the latest timing calibration by re-transcribing'**
+  String get playerMoreDescAiTranscript;
+
+  /// No description provided for @playerMoreDescWordTimings.
+  ///
+  /// In en, this message translates to:
+  /// **'Add word-by-word timing and phonetics, for karaoke-style highlighting and shadowing practice'**
+  String get playerMoreDescWordTimings;
+
+  /// No description provided for @playerMoreDescRefreshFromCloud.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-fetch transcripts from the cloud (YouTube official captions, or subtitles synced while signed in)'**
+  String get playerMoreDescRefreshFromCloud;
+
+  /// No description provided for @playerMoreDescDownloadTranscript.
+  ///
+  /// In en, this message translates to:
+  /// **'Export the current transcript as a .srt subtitle file on your computer'**
+  String get playerMoreDescDownloadTranscript;
+
+  /// No description provided for @playerMoreDescEditDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit the title, cover and other details of this video'**
+  String get playerMoreDescEditDetails;
+
+  /// No description provided for @playerMoreDescExportLoopClip.
+  ///
+  /// In en, this message translates to:
+  /// **'Save the active Echo loop as a separate video clip (enabled while a loop is active)'**
+  String get playerMoreDescExportLoopClip;
 
   /// Section heading in the player's More menu and the phone Subtitles sheet.
   ///

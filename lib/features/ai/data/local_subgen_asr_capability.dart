@@ -20,13 +20,17 @@ import 'package:logging/logging.dart';
 
 final Logger _log = logNamed('local.subgen');
 
-final class LocalSubgenAsrCapability implements AsrCapability {
+final class LocalSubgenAsrCapability
+    implements AsrCapability, AsrThroughputHint {
   LocalSubgenAsrCapability({http.Client? httpClient}) : _httpClient = httpClient;
 
   static const baseUrl = 'http://127.0.0.1:8000/v1';
   static const model = 'large-v3-turbo';
 
   final http.Client? _httpClient;
+
+  @override
+  Future<double?> expectedRealtimeFactor() => localAsrRealtimeFactor();
 
   @override
   Future<AsrResult> transcribe(AsrRequest request) async {
@@ -38,7 +42,7 @@ final class LocalSubgenAsrCapability implements AsrCapability {
       _log.warning('ensureLocalAsrService failed: $e');
       throw const ApiException(
         message:
-            '本地语音识别服务未能自动启动:请到「设置 → 本地组件」确认已安装识别组件,'
+            '本地语音识别服务未能自动启动:请到「设置 → AI 提供商 → 语音服务」确认已安装识别组件,'
             '然后点「重试识别」。',
         statusCode: 503,
       );
@@ -72,7 +76,7 @@ final class LocalSubgenAsrCapability implements AsrCapability {
       );
       throw const ApiException(
         message:
-            '本地语音识别服务连接失败:服务可能已退出,请到「设置 → 本地组件」检查,'
+            '本地语音识别服务连接失败:服务可能已退出,请到「设置 → AI 提供商 → 语音服务」检查,'
             '然后点「重试识别」。',
         statusCode: 503,
       );

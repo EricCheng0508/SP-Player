@@ -51,6 +51,31 @@ final Map<String, _Press> _linuxPresses = {
     LogicalKeyboardKey.f11,
     PhysicalKeyboardKey.f11,
   ),
+  'player.searchTranscript': _press(
+    LogicalKeyboardKey.keyF,
+    PhysicalKeyboardKey.keyF,
+    [_ctrl],
+  ),
+  'player.seekBack': _press(
+    LogicalKeyboardKey.arrowLeft,
+    PhysicalKeyboardKey.arrowLeft,
+  ),
+  'player.seekForward': _press(
+    LogicalKeyboardKey.arrowRight,
+    PhysicalKeyboardKey.arrowRight,
+  ),
+  'player.volumeDown': _press(
+    LogicalKeyboardKey.arrowDown,
+    PhysicalKeyboardKey.arrowDown,
+  ),
+  'player.volumeUp': _press(
+    LogicalKeyboardKey.arrowUp,
+    PhysicalKeyboardKey.arrowUp,
+  ),
+  'player.toggleMute': _press(
+    LogicalKeyboardKey.keyM,
+    PhysicalKeyboardKey.keyM,
+  ),
   'player.prevLine': _press(LogicalKeyboardKey.keyA, PhysicalKeyboardKey.keyA),
   'player.nextLine': _press(LogicalKeyboardKey.keyD, PhysicalKeyboardKey.keyD),
   'player.replayLine': _press(

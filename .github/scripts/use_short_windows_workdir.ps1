@@ -19,7 +19,16 @@
 # Note: github.workspace (Actions context) stays at the original checkout
 # with .git. Steps that need git (e.g. `gh release create --generate-notes`)
 # must use working-directory: ${{ github.workspace }} and read build
-# outputs from $env:GITHUB_WORKSPACE (the short path).
+# outputs from $env:BUILD_WS (the short path).
+#
+# IMPORTANT: the short path is exported as BUILD_WS, NOT by overwriting
+# GITHUB_WORKSPACE via GITHUB_ENV. GITHUB_WORKSPACE is a runner-reserved
+# default: it is re-injected (original long path) into every step's process
+# env AFTER GITHUB_ENV is applied, so overwriting it silently reverts and
+# any `$env:GITHUB_WORKSPACE` in a run script sees the long path again
+# while the env-context `{{ env.GITHUB_WORKSPACE }}` seen in step headers
+# shows the short one. Reference the short path through BUILD_WS in run
+# scripts, and through `working-directory: ${{ env.BUILD_WS }}` for cwd.
 $ErrorActionPreference = 'Stop'
 
 $shortRoot = 'C:\e'
@@ -49,6 +58,6 @@ if ($LASTEXITCODE -ge 8) {
   throw "robocopy $workspace -> $shortPath failed with exit code $LASTEXITCODE"
 }
 
-"GITHUB_WORKSPACE=$shortPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+"BUILD_WS=$shortPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 Write-Host "Staged $workspace -> $shortPath"
 exit 0

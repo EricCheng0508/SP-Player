@@ -51,7 +51,7 @@ final class _LayoutTokens {
     tabBarSafeInset: 26,
     playerTopBarHeight: 60,
     subpageHeaderHeight: 64,
-    rulerHitHeight: 34,
+    rulerHitHeight: 28,
     transcriptMaxListen: 700,
     transcriptMaxEcho: 760,
     videoColumnMin: 300,

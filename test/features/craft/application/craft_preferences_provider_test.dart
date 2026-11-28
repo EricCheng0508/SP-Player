@@ -108,7 +108,7 @@ void main() {
       await notifier.load();
     });
 
-    test('returns defaults without touching the DB when signed out', () async {
+    test('returns defaults when the session DB has no row', () async {
       final c = container(profile: null);
       addTearDown(c.dispose);
       await c.read(authCtrlProvider.future);
@@ -200,25 +200,28 @@ void main() {
       );
     });
 
-    test('setters update state but write nothing when signed out', () async {
-      final c = container(profile: null);
-      addTearDown(c.dispose);
-      await c.read(authCtrlProvider.future);
-      final notifier = c.read(craftPreferencesCtrlProvider.notifier);
-      await notifier.setScreenMode(CraftScreenMode.advanced);
-      await notifier.setStyleFor(
-        CraftScreenMode.advanced,
-        TranslationStyle.formal,
-      );
-      expect(
-        c.read(craftPreferencesCtrlProvider).screenMode,
-        CraftScreenMode.advanced,
-      );
-      expect(
-        c.read(craftPreferencesCtrlProvider).advancedStyle,
-        TranslationStyle.formal,
-      );
-      expect(await storedRaw(), isNull);
-    });
+    test(
+      'setters persist on the local session without an auth session',
+      () async {
+        final c = container(profile: null);
+        addTearDown(c.dispose);
+        await c.read(authCtrlProvider.future);
+        final notifier = c.read(craftPreferencesCtrlProvider.notifier);
+        await notifier.setScreenMode(CraftScreenMode.advanced);
+        await notifier.setStyleFor(
+          CraftScreenMode.advanced,
+          TranslationStyle.formal,
+        );
+        final prefs = c.read(craftPreferencesCtrlProvider);
+        expect(prefs.screenMode, CraftScreenMode.advanced);
+        expect(prefs.advancedStyle, TranslationStyle.formal);
+        expect(
+          CraftPreferences.fromJson(
+            jsonDecode((await storedRaw())!) as Map<String, dynamic>,
+          ),
+          prefs,
+        );
+      },
+    );
   });
 }

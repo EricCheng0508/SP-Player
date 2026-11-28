@@ -14,7 +14,6 @@ import 'package:enjoy_player/core/presentation/loading_icon.dart';
 import 'package:enjoy_player/core/theme/enjoy_icons.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_segmented_control.dart';
-import 'package:enjoy_player/data/api/api_client_provider.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/settings_row.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 
@@ -70,14 +69,9 @@ class _NetworkSectionBodyState extends ConsumerState<NetworkSectionBody> {
       _results = const [];
     });
     try {
-      final apiBase = await ref.read(apiBaseUrlProvider.future);
       final results = await probeConnectivity(
         coordinator: ref.read(systemProxyCoordinatorProvider),
         targets: [
-          ProxyProbeTarget(
-            label: l10n.settingsNetworkTestApi,
-            uri: Uri.parse(apiBase),
-          ),
           ProxyProbeTarget(
             label: l10n.settingsNetworkTestYoutube,
             uri: Uri.parse(_kYoutubeProbeUrl),

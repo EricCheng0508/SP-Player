@@ -83,10 +83,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.ensureVisible(find.text('Remove BYOK'));
-    await tester.tap(find.text('Remove BYOK'));
+    final l10n = lookupAppLocalizations(const Locale('en'));
+    await tester.ensureVisible(find.text(l10n.settingsAiProvidersRemoveByok));
+    await tester.tap(find.text(l10n.settingsAiProvidersRemoveByok));
     await tester.pumpAndSettle();
 
-    expect(find.text('Remove BYOK credentials?'), findsOneWidget);
+    expect(find.text(l10n.settingsAiProvidersRemoveByokTitle), findsOneWidget);
   });
 }

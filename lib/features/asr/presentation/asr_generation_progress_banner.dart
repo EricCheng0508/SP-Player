@@ -1,12 +1,14 @@
 /// Live progress banner for an in-flight ASR generation pass.
 ///
 /// ADR-0106 §5: instead of a bare spinner the pipeline renders as a stage
-/// breadcrumb — 提取音频 → 识别 → 对齐 → 断句 — with a determinate bar
-/// during audio extraction, an engine/elapsed info line and a cancel
-/// action, pinned above the transcript panel body. The elapsed readout
-/// matters for the local sidecar pipeline: a 22-minute episode transcribes
-/// in minutes with no incremental progress, and without a ticking clock it
-/// looks hung.
+/// breadcrumb — 提取音频 → 识别 → 对齐 → 断句 — with a determinate bar, an
+/// engine/elapsed info line and a cancel action, pinned above the transcript
+/// panel body. Extraction gets no real fraction from the ffmpeg CLI, so it
+/// shows an indeterminate bar; the local recognition step rides the
+/// controller's wall-clock estimate (`AsrRecognitionProgress`) — a
+/// 22-minute episode transcribing in ~2–3 minutes used to look hung behind
+/// a spinner and a ticking clock alone. Terminal transitions surface a
+/// transient 完成/取消/失败 note that auto-dismisses.
 library;
 
 import 'dart:async';
@@ -57,6 +59,10 @@ class AsrGenerationProgressBanner extends ConsumerStatefulWidget {
 class _AsrGenerationProgressBannerState
     extends ConsumerState<AsrGenerationProgressBanner> {
   Timer? _ticker;
+  Timer? _noteTimer;
+  String? _note;
+  Color? _noteColor;
+  IconData? _noteIcon;
 
   @override
   void initState() {
@@ -71,7 +77,38 @@ class _AsrGenerationProgressBannerState
   @override
   void dispose() {
     _ticker?.cancel();
+    _noteTimer?.cancel();
     super.dispose();
+  }
+
+  /// Shows a transient terminal note ("已完成" / cancelled / error) that
+  /// auto-dismisses after a few seconds — the live banner used to vanish
+  /// without any completion feedback.
+  void _showNote(AsrGenerationJob job) {
+    final l10n = AppLocalizations.of(context)!;
+    final phase = job.phase;
+    _noteTimer?.cancel();
+    if (phase == AsrGenerationPhase.success) {
+      _note = l10n.asrStatusSuccess;
+      _noteColor = const Color(0xFF176B3A);
+      _noteIcon = EnjoyIcons.checkCircle;
+    } else if (phase == AsrGenerationPhase.cancelled) {
+      _note = l10n.asrStatusCancelled;
+      _noteColor = null;
+      _noteIcon = EnjoyIcons.info;
+    } else {
+      _note = asrMessageForKey(l10n, job.errorMessage);
+      _noteColor = Theme.of(context).colorScheme.error;
+      _noteIcon = EnjoyIcons.error;
+    }
+    _noteTimer = Timer(const Duration(seconds: 5), () {
+      if (!mounted) return;
+      setState(() {
+        _note = null;
+        _noteColor = null;
+        _noteIcon = null;
+      });
+    });
   }
 
   String _formatElapsed(Duration d) {
@@ -105,19 +142,36 @@ class _AsrGenerationProgressBannerState
         .watch(asrGenerationControllerProvider(widget.mediaId))
         .valueOrNull;
     final phase = job?.phase;
+
+    // Terminal-phase transition → transient completion note. Observed via
+    // listen so the note only appears for runs seen from this banner (not
+    // when reopening a page whose job finished long ago).
+    ref.listen(asrGenerationControllerProvider(widget.mediaId),
+        (previous, next) {
+      final prevPhase = previous?.valueOrNull?.phase;
+      final nextPhase = next.valueOrNull?.phase;
+      if (nextPhase == null || identical(prevPhase, nextPhase)) return;
+      if (nextPhase == AsrGenerationPhase.success ||
+          nextPhase == AsrGenerationPhase.cancelled ||
+          nextPhase == AsrGenerationPhase.error) {
+        _showNote(next.valueOrNull!);
+      }
+    });
+
     if (phase == null || !_activePhases.contains(phase)) {
-      return const SizedBox.shrink();
+      return _buildNote();
     }
 
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final progress = job!.progress;
-    // Numeric progress is only meaningful during audio extraction; every
-    // other phase is a single long-running step → indeterminate, with the
-    // info line standing in for missing granularity.
-    final determinate = phase == AsrGenerationPhase.extracting &&
-        progress != null &&
-        progress > 0;
+    // Recognition rides a wall-clock estimate (determinate); extraction gets
+    // no real fraction from the ffmpeg CLI (0 → 100 with nothing between), so
+    // it shows an indeterminate bar instead of a lying percentage. Upload/
+    // poll/persist are single steps and stay indeterminate too.
+    final determinate =
+        progress != null && phase == AsrGenerationPhase.recognizing;
+    final percent = determinate ? '${(progress * 100).round()}%' : null;
     final startedAt = job.startedAt;
     final elapsed = startedAt == null
         ? null
@@ -132,6 +186,7 @@ class _AsrGenerationProgressBannerState
     final infoParts = <String>[
       if (elapsed != null) '${l10n.asrBannerElapsed} ${_formatElapsed(elapsed)}',
       if (_engineLabel() case final engine?) l10n.asrBannerEngine(engine),
+      if (percent != null) percent,
       phaseText,
     ];
 
@@ -158,7 +213,7 @@ class _AsrGenerationProgressBannerState
             ),
             const SizedBox(height: 8),
             LinearProgressIndicator(
-              value: determinate ? progress.clamp(0.0, 1.0) : null,
+              value: determinate ? progress!.clamp(0.0, 1.0) : null,
               minHeight: 3,
             ),
             const SizedBox(height: 6),
@@ -169,6 +224,36 @@ class _AsrGenerationProgressBannerState
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// The transient terminal note, or nothing.
+  Widget _buildNote() {
+    final note = _note;
+    if (note == null) return const SizedBox.shrink();
+    final theme = Theme.of(context);
+    return Material(
+      color: theme.colorScheme.surfaceContainerHighest,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+        child: Row(
+          children: [
+            if (_noteIcon != null) ...[
+              Icon(_noteIcon, size: 16, color: _noteColor),
+              const SizedBox(width: 10),
+            ],
+            Expanded(
+              child: Text(
+                note,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: _noteColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
           ],
         ),

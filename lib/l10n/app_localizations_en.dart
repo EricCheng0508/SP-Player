@@ -146,6 +146,69 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transcriptFetchingSubtitles => 'Fetching subtitles…';
 
   @override
+  String get transcriptSearchHint => 'Search transcript';
+
+  @override
+  String get transcriptSearchNoMatches => 'No matching lines';
+
+  @override
+  String get lookupSectionExplain => 'Explain this sentence';
+
+  @override
+  String get lookupExplainRun => 'Explain';
+
+  @override
+  String get libraryTabPlaylists => 'Playlists';
+
+  @override
+  String get playlistCreateButton => 'New playlist';
+
+  @override
+  String get playlistRename => 'Rename playlist';
+
+  @override
+  String get playlistDelete => 'Delete playlist';
+
+  @override
+  String get playlistNameHint => 'Playlist name';
+
+  @override
+  String get playlistSave => 'Save';
+
+  @override
+  String get playlistEmptyTitle => 'No playlists yet';
+
+  @override
+  String get playlistEmptyHint =>
+      'Create a playlist to group media and play them in order.';
+
+  @override
+  String playlistItemCount(int count) {
+    return '$count items';
+  }
+
+  @override
+  String get playlistAddMedia => 'Add media';
+
+  @override
+  String get playlistPlayAll => 'Play all';
+
+  @override
+  String get playlistRemoveItem => 'Remove from playlist';
+
+  @override
+  String get playlistMoveUp => 'Move up';
+
+  @override
+  String get playlistMoveDown => 'Move down';
+
+  @override
+  String get playlistMissingMedia => 'Media no longer in library';
+
+  @override
+  String get playlistPickerNoMedia => 'Import media first, then add it here.';
+
+  @override
   String get asrStatusExtracting => 'Extracting audio…';
 
   @override
@@ -773,6 +836,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subtitlesAutoTranslateRetranslateLine => 'Re-translate this line';
 
   @override
+  String get subtitlesAutoTranslateRetranslateAll => 'Re-translate';
+
+  @override
   String get subtitlesAutoTranslateBlockedStalePrimary =>
       'The primary subtitle changed. Auto translate will rebuild from the new primary.';
 
@@ -952,14 +1018,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsSectionAiHint =>
-      'Choose Enjoy AI or bring your own API keys.';
+      'Configure your own API keys per feature; speech recognition and translation use local components by default.';
 
   @override
   String get settingsAiProvidersTileTitle => 'AI providers';
 
   @override
   String get settingsAiProvidersTileSubtitle =>
-      'Enjoy AI by default, or use your own keys per feature';
+      'Configure your own API keys per feature';
 
   @override
   String get settingsAiProvidersTitle => 'AI providers';
@@ -970,10 +1036,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsAiProvidersPrivacyNotice =>
-      'API keys are stored securely on this device only and are never synced to Enjoy cloud.';
+      'API keys are stored securely on this device only and are never uploaded to any cloud.';
 
   @override
-  String get settingsAiProvidersEnjoyAi => 'Enjoy AI';
+  String get settingsAiProvidersEnjoyAi => 'Default';
 
   @override
   String get settingsAiProvidersByok => 'Your API key';
@@ -986,7 +1052,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Chat, translation, dictionary, and contextual translation';
 
   @override
-  String get settingsAiProvidersModalityAsr => 'Speech recognition';
+  String get settingsAiProvidersModalityAsr => 'Speech recognition (subtitles)';
 
   @override
   String get settingsAiProvidersModalityAsrHint => 'Transcribe audio to text';
@@ -1064,18 +1130,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAiProvidersSaveSuccess => 'AI provider settings saved.';
 
   @override
-  String get settingsAiProvidersRemoveByok => 'Remove BYOK';
+  String get settingsAiProvidersRemoveByok => 'Remove';
 
   @override
-  String get settingsAiProvidersRemoveByokTitle => 'Remove BYOK credentials?';
+  String get settingsAiProvidersRemoveByokTitle => 'Remove the saved key?';
 
   @override
   String get settingsAiProvidersRemoveByokBody =>
-      'This deletes the saved API key on this device and reverts the feature to Enjoy AI.';
+      'This deletes the API key saved on this device.';
 
   @override
-  String get settingsAiProvidersRemoveByokSuccess =>
-      'BYOK credentials removed.';
+  String get settingsAiProvidersRemoveByokSuccess => 'Saved key removed.';
 
   @override
   String get settingsAiProvidersCancel => 'Cancel';
@@ -1109,13 +1174,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsAiProvidersSpeechKindHintAzure =>
-      'Azure Speech: required for pronunciation scoring. Also supports speech-to-text.';
+      'Azure Speech: phoneme-level pronunciation diagnosis. Also supports speech-to-text. Without it, take scoring falls back to local assessment.';
 
   @override
   String get settingsAiProvidersSpeechWhisperModelLabel => 'Whisper model';
 
   @override
   String get settingsAiProvidersSpeechWhisperModelHint => 'whisper-1';
+
+  @override
+  String get settingsAiEngineLocal => 'Local (default)';
+
+  @override
+  String get settingsAiEngineCloud => 'Custom cloud';
+
+  @override
+  String get settingsAiProvidersTtsLocalHint =>
+      'Uses the built-in Windows speech synthesis — no download needed. Voices follow your installed system voice packs (Settings → Time & language → Speech).';
+
+  @override
+  String get settingsAiProvidersAsrLocalHint =>
+      'Offline recognition via the local components; no network needed. First use guides you through the download.';
 
   @override
   String get settingsAiProvidersSpeechTtsModelLabel => 'TTS model';
@@ -1354,6 +1433,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hotkeysDescToggleFullscreen => 'Toggle fullscreen';
+
+  @override
+  String get hotkeysDescSearchTranscript => 'Search transcript (Ctrl+F)';
+
+  @override
+  String get hotkeysDescSeekBack => 'Seek back 3 seconds';
+
+  @override
+  String get hotkeysDescSeekForward => 'Seek forward 3 seconds';
+
+  @override
+  String get hotkeysDescVolumeUp => 'Volume up';
+
+  @override
+  String get hotkeysDescVolumeDown => 'Volume down';
+
+  @override
+  String get hotkeysDescToggleMute => 'Mute / unmute';
 
   @override
   String get hotkeysDescPrevLine => 'Play previous line';
@@ -2407,7 +2504,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aiPlaygroundIntro =>
-      'Exercise AI modalities using Enjoy cloud or your BYOK credentials from Settings → AI providers. Translation and dictionary follow the LLM provider.';
+      'Exercise AI modalities with your credentials from Settings → AI providers. Translation and dictionary follow the LLM provider.';
 
   @override
   String get aiPlaygroundActiveProviders => 'Active providers';
@@ -2468,7 +2565,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aiPlaygroundAssessmentTtsNote =>
-      'Enjoy TTS is not wired yet; configure TTS BYOK under AI providers for synthesis. Assessment uses the provider shown above.';
+      'TTS is not wired yet; configure TTS BYOK under AI providers for synthesis. Assessment uses the provider shown above.';
 
   @override
   String get aiPlaygroundOutput => 'Output';
@@ -4459,6 +4556,42 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get playerMore => 'More';
+
+  @override
+  String get playerMoreDescEditTranscript =>
+      'Edit the text and timing of the current transcript in the editor';
+
+  @override
+  String get playerMoreDescAddSubtitleFile =>
+      'Pick a .srt / .vtt subtitle file from your computer and import it as a new track';
+
+  @override
+  String get playerMoreDescEmbeddedSubtitles =>
+      'Extract subtitle tracks embedded inside the video file (MKV/MP4) - no speech recognition needed';
+
+  @override
+  String get playerMoreDescAiTranscript =>
+      'Generate or regenerate subtitles with local speech recognition; old videos get the latest timing calibration by re-transcribing';
+
+  @override
+  String get playerMoreDescWordTimings =>
+      'Add word-by-word timing and phonetics, for karaoke-style highlighting and shadowing practice';
+
+  @override
+  String get playerMoreDescRefreshFromCloud =>
+      'Re-fetch transcripts from the cloud (YouTube official captions, or subtitles synced while signed in)';
+
+  @override
+  String get playerMoreDescDownloadTranscript =>
+      'Export the current transcript as a .srt subtitle file on your computer';
+
+  @override
+  String get playerMoreDescEditDetails =>
+      'Edit the title, cover and other details of this video';
+
+  @override
+  String get playerMoreDescExportLoopClip =>
+      'Save the active Echo loop as a separate video clip (enabled while a loop is active)';
 
   @override
   String get playerMoreTranscriptSection => 'Transcript';

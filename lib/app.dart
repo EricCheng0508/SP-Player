@@ -8,6 +8,7 @@ import 'package:enjoy_player/core/network/proxy/proxy_providers.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:window_manager/window_manager.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
 
@@ -77,6 +78,15 @@ class EnjoyApp extends ConsumerStatefulWidget {
 
 class _EnjoyAppState extends ConsumerState<EnjoyApp>
     with WidgetsBindingObserver {
+  /// Whether the desktop window has been revealed (once, on the first
+  /// real-UI frame — never on the boot skeleton).
+  bool _windowRevealed = false;
+
+  /// Reveal requires the router branch to stay painted for a few consecutive
+  /// frames: prefs resolving can flip straight back into the auth-loading
+  /// branch, and revealing that frame re-introduces the dark skeleton flash.
+  bool _onLoadingBranch = false;
+
   /// Keeps locale/prefs visible while [appPreferencesCtrlProvider] reloads after
   /// auth-scoped DB switches (signed-in), avoiding a full-app loading flash.
   AppPreferencesState? _lastResolvedPrefs;
@@ -169,10 +179,13 @@ class _EnjoyAppState extends ConsumerState<EnjoyApp>
     ThemeData darkTheme,
     ThemeMode themeMode,
   ) {
+    // Boot cover is ALWAYS light-branded: a dark system theme must not turn
+    // the launch into a black flash — the final home is revealed from this
+    // light cover seamlessly.
     return _baseMaterialApp(
       theme: theme,
-      darkTheme: darkTheme,
-      themeMode: themeMode,
+      darkTheme: theme,
+      themeMode: ThemeMode.light,
       home: const ConstrainedAppViewport(
         child: Scaffold(body: Center(child: SkeletonAppBootstrap())),
       ),
@@ -219,6 +232,20 @@ class _EnjoyAppState extends ConsumerState<EnjoyApp>
     required ThemeMode themeMode,
     required AppPreferencesState prefs,
   }) {
+    _onLoadingBranch = false;
+    if (!_windowRevealed) {
+      _windowRevealed = true;
+      logNamed('boot-timing').info('[boot-timing] router-ready at build');
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        // Give the home page a couple of rasters before revealing, so the
+        // window's first visible frame is real content (no blank white pop).
+        await Future<void>.delayed(const Duration(milliseconds: 150));
+        await windowManager.show();
+        await windowManager.focus();
+        logNamed('boot-timing')
+            .info('[boot-timing] window-shown at show()+150ms');
+      });
+    }
     return _baseMaterialApp(
       theme: theme,
       darkTheme: darkTheme,
@@ -318,6 +345,8 @@ class _EnjoyAppState extends ConsumerState<EnjoyApp>
     }
 
     if (prefsProj.isLoading && !hasResolved) {
+      _onLoadingBranch = true;
+      logNamed('boot-timing').info('[boot-timing] loading-branch (prefs) at build');
       return _loadingBranch(lightTheme, darkTheme, themeMode);
     }
 
@@ -325,6 +354,8 @@ class _EnjoyAppState extends ConsumerState<EnjoyApp>
       authCtrlProvider.select((auth) => auth.isLoading && !auth.hasValue),
     );
     if (authBootstrapping) {
+      _onLoadingBranch = true;
+      logNamed('boot-timing').info('[boot-timing] loading-branch (auth) at build');
       return _loadingBranch(lightTheme, darkTheme, themeMode);
     }
 

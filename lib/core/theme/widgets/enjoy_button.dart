@@ -317,7 +317,7 @@ class _EnjoyButtonState extends State<EnjoyButton> {
     final instant = MediaQuery.disableAnimationsOf(context);
     return AnimatedScale(
       scale: _pressed && !instant ? 0.97 : 1,
-      duration: _pressed ? const Duration(milliseconds: 90) : t.motionFast,
+      duration: _pressed ? t.motionPress : t.motionFast,
       curve: _pressed ? Curves.easeOut : EnjoyThemeTokens.ease,
       child: button,
     );

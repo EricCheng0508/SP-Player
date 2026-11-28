@@ -106,6 +106,11 @@ class YoutubePlayerEngine
   @override
   Stream<bool> get buffering => _session.bufferingStream;
 
+  // The HTML5 video's buffered TimeRanges are not piped through the WebView
+  // bridge; the scrubber draws no buffered band for YouTube.
+  @override
+  Stream<Duration> get bufferEnd => const Stream<Duration>.empty();
+
   @override
   Stream<void> get completed => _session.completed;
 
@@ -163,6 +168,12 @@ class YoutubePlayerEngine
   Future<void> awaitSurfaceDetached() => _session.awaitSurfaceDetached();
 
   @override
+  Future<bool> waitForMediaReady({required Duration timeout}) async =>
+      // The WebView engine has no demuxer load phase; seeks are safe as soon
+      // as the surface is mounted (handled by awaitSurfaceReady).
+      true;
+
+  @override
   void prepareNativeBackend() {}
 
   @override
@@ -170,7 +181,7 @@ class YoutubePlayerEngine
       _webView.idleAfterClear(keepMounted: keepSurfaceMounted);
 
   @override
-  Future<void> open(PlayableSource source) async {
+  Future<void> open(PlayableSource source, {Duration? startAt}) async {
     final unavailable = switch (_availability) {
       final YouTubeUnavailable u => u,
       _ => null,

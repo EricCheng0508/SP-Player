@@ -12,7 +12,16 @@ import 'package:enjoy_player/features/player/application/leave_player_session.da
 import 'package:enjoy_player/features/player/application/player_controller.dart';
 
 Future<void> collapseExpandedPlayer(WidgetRef ref, BuildContext context) =>
-    collapseExpandedPlayerWith(ref.read, context);
+    collapseExpandedPlayerWith(
+      // The deferred teardown keeps reading providers across the exit
+      // transition (~240 ms), by which time the player widget that passed its
+      // `ref.read` tear-off may already be unmounted — reading through a dead
+      // WidgetRef throws and, uncaught in the release zone, kills the process
+      // (the "app exits seconds after opening" report). A provider container
+      // outlives the widget, so read through it instead.
+      ProviderScope.containerOf(context, listen: false).read,
+      context,
+    );
 
 /// Reader-based variant of [collapseExpandedPlayer] for callers outside the
 /// widget tree (the hotkey command interface): [read] is a `ref.read` /
@@ -29,6 +38,9 @@ Future<void> collapseExpandedPlayerWith(
   if (read(playerControllerProvider) == null) {
     read(playerControllerProvider.notifier).abandonPendingOpen();
   } else {
-    await clearLivePlaybackSessionWith(read);
+    // Deferred clear: the pop above starts the exit fade; tearing the engine
+    // down now would blank the stage mid-transition. Pause happens inside
+    // immediately, so audio stops right away.
+    await clearLivePlaybackSessionDeferredWith(read);
   }
 }

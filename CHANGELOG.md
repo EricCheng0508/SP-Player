@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.8] - 2026-11-25
+
+### Added
+
+- **True video fullscreen** — the fullscreen button now enters a real fullscreen: the OS window covers the whole screen (taskbar hidden, including when triggered from a maximized window), the top bar, transcript panel and docked margin panels collapse, and the video fills the display. The transport dock floats over the video, slides away after 3 seconds idle, and reappears on mouse move. Exit via the dock button or Esc.
+- **Fetch model list** — the cloud LLM profile dialog gains a "拉取模型" button that queries the endpoint's `GET /models` (OpenAI-compatible) and lets you pick from the returned list; it reuses the stored API key when the field is left empty.
+
+### Changed
+
+- Settings → Network → connection test no longer probes the removed Enjoy API endpoint; only the YouTube connectivity check remains.
+
+## [0.10.6] - 2026-11-24
+
+### Added
+
+- **Transcript search** — a search field in the transcript panel (Ctrl+F) with a dedicated result list, substring highlighting, and jump-to-line; search results replace the virtualised list so long transcripts stay responsive.
+- **AI line explanation** — the lookup sheet gains an "explain this line" section that runs automatically on expand (no second click), keeps its result when collapsed, and resets when the sentence or language changes.
+- **Playlists** — a new library tab with poster-card grids (cover preview + item count), rename/delete on the detail page, and a media picker for adding items.
+- **Local pronunciation scoring** — shadow-reading is scored without Azure configured (faster-whisper recognition plus word alignment).
+
+### Changed
+
+- Playlist cards now share the library's grid inset and spacing, so the "new playlist" button and every card align with the video and audio tabs.
+- Blind-listening mode hides the video caption overlay, and animation timings move to shared motion tokens (including a new press token).
+- The home screen drops the "today's goal" card, which had no statistics behind it; the hero takes the full width.
+- Settings → Local components: tiles get their missing horizontal inset, and the "必装" (required) copy becomes "离线用" (offline use) since every component is optional.
+- Sentence ruler draws the buffered range behind the played range — remote sources only, since a local file has nothing buffering.
+
+### Fixed
+
+- **Text-to-speech failed with "无法将文本转为语音"** — the local SAPI fallback both sent its script to `powershell -EncodedCommand` as UTF-8 (the parameter requires UTF-16LE) and decoded the child's console output as strict UTF-8 while Windows writes the system ANSI code page, so a `FormatException` aborted the call before the exit code was read. The payload now uses UTF-16LE, output decodes leniently, and a header-only wav is rejected instead of returning silence.
+- **Press H in blind-listening mode crashed** — the auto-scroll controller read `maxScrollExtent` mid-sliver-layout; the scroll focus, cue-visibility and line-jump paths now wait for content and viewport dimensions.
+- **Ghosting when switching between Vocabulary and Craft** — only some shell routes used the cross-fade transition while `/craft`, Craft history and the settings sub-pages still used the default one, which renders the outgoing and incoming pages on top of each other. All shell routes now share the same transition.
+- **The player's notice bar was hidden behind the transport dock** — the `playerWithTransport` shell branch was missing the bottom inset the other branches apply.
+- **The buffered range on the seek bar was misleading for local files** — the engine now emits buffer progress only for remote sources.
+
 ## [Unreleased]
 
 ### Added

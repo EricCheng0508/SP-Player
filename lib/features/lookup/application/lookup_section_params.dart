@@ -72,3 +72,25 @@ final class LookupDictionaryParams extends LookupTextParams {
     required super.targetLanguage,
   });
 }
+
+/// Sentence-explanation params: the sentence to explain plus an optional
+/// surrounding-line context (same shape as contextual translation).
+@immutable
+final class LookupExplainParams extends LookupTextParams {
+  const LookupExplainParams({
+    required super.text,
+    required super.sourceLanguage,
+    required super.targetLanguage,
+    this.context,
+  });
+
+  final String? context;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is LookupExplainParams && super == other && context == other.context;
+
+  @override
+  int get hashCode => Object.hash(super.hashCode, context);
+}

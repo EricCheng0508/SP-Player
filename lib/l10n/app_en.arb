@@ -81,6 +81,27 @@
   "transcriptErrorFriendlyTitle": "Transcript unavailable",
   "transcriptErrorFriendlyHint": "Try choosing another subtitle track or importing a file.",
   "transcriptFetchingSubtitles": "Fetching subtitles…",
+  "transcriptSearchHint": "Search transcript",
+  "transcriptSearchNoMatches": "No matching lines",
+  "lookupSectionExplain": "Explain this sentence",
+  "lookupExplainRun": "Explain",
+  "libraryTabPlaylists": "Playlists",
+  "playlistCreateButton": "New playlist",
+  "playlistRename": "Rename playlist",
+  "playlistDelete": "Delete playlist",
+  "playlistNameHint": "Playlist name",
+  "playlistSave": "Save",
+  "playlistEmptyTitle": "No playlists yet",
+  "playlistEmptyHint": "Create a playlist to group media and play them in order.",
+  "playlistItemCount": "{count} items",
+  "@playlistItemCount": { "placeholders": { "count": { "type": "int" } } },
+  "playlistAddMedia": "Add media",
+  "playlistPlayAll": "Play all",
+  "playlistRemoveItem": "Remove from playlist",
+  "playlistMoveUp": "Move up",
+  "playlistMoveDown": "Move down",
+  "playlistMissingMedia": "Media no longer in library",
+  "playlistPickerNoMedia": "Import media first, then add it here.",
   "asrStatusExtracting": "Extracting audio…",
   "asrStatusUploading": "Uploading audio…",
   "asrLanguageTitle": "Spoken language",
@@ -368,6 +389,7 @@
     }
   },
   "subtitlesAutoTranslateRetranslateLine": "Re-translate this line",
+  "subtitlesAutoTranslateRetranslateAll": "Re-translate",
   "subtitlesAutoTranslateBlockedStalePrimary": "The primary subtitle changed. Auto translate will rebuild from the new primary.",
   "subtitlesAutoTranslateLineFailed": "Couldn’t translate this line",
   "subtitlesAutoTranslatePendingLine": "Translating…",
@@ -501,7 +523,7 @@
   "@settingsSectionAi": {
     "description": "Header for the AI provider settings section."
   },
-  "settingsSectionAiHint": "Choose Enjoy AI or bring your own API keys.",
+  "settingsSectionAiHint": "Configure your own API keys per feature; speech recognition and translation use local components by default.",
   "@settingsSectionAiHint": {
     "description": "Subtitle under the AI settings section header."
   },
@@ -509,7 +531,7 @@
   "@settingsAiProvidersTileTitle": {
     "description": "Settings tile title for AI provider configuration."
   },
-  "settingsAiProvidersTileSubtitle": "Enjoy AI by default, or use your own keys per feature",
+  "settingsAiProvidersTileSubtitle": "Configure your own API keys per feature",
   "@settingsAiProvidersTileSubtitle": {
     "description": "Settings tile subtitle for AI provider configuration."
   },
@@ -521,11 +543,11 @@
   "@settingsAiProvidersSubtitle": {
     "description": "Screen subtitle for AI provider settings."
   },
-  "settingsAiProvidersPrivacyNotice": "API keys are stored securely on this device only and are never synced to Enjoy cloud.",
+  "settingsAiProvidersPrivacyNotice": "API keys are stored securely on this device only and are never uploaded to any cloud.",
   "@settingsAiProvidersPrivacyNotice": {
     "description": "Privacy notice on the AI providers settings screen."
   },
-  "settingsAiProvidersEnjoyAi": "Enjoy AI",
+  "settingsAiProvidersEnjoyAi": "Default",
   "@settingsAiProvidersEnjoyAi": {
     "description": "Label when a modality uses Enjoy cloud AI."
   },
@@ -541,7 +563,7 @@
   "@settingsAiProvidersModalityLlmHint": {
     "description": "Card subtitle for LLM modality."
   },
-  "settingsAiProvidersModalityAsr": "Speech recognition",
+  "settingsAiProvidersModalityAsr": "Speech recognition (subtitles)",
   "@settingsAiProvidersModalityAsr": {
     "description": "Card title for ASR modality."
   },
@@ -637,19 +659,19 @@
   "@settingsAiProvidersSaveSuccess": {
     "description": "Success notice after saving BYOK settings."
   },
-  "settingsAiProvidersRemoveByok": "Remove BYOK",
+  "settingsAiProvidersRemoveByok": "Remove",
   "@settingsAiProvidersRemoveByok": {
     "description": "Remove BYOK credentials action."
   },
-  "settingsAiProvidersRemoveByokTitle": "Remove BYOK credentials?",
+  "settingsAiProvidersRemoveByokTitle": "Remove the saved key?",
   "@settingsAiProvidersRemoveByokTitle": {
     "description": "Confirm dialog title for removing BYOK."
   },
-  "settingsAiProvidersRemoveByokBody": "This deletes the saved API key on this device and reverts the feature to Enjoy AI.",
+  "settingsAiProvidersRemoveByokBody": "This deletes the API key saved on this device.",
   "@settingsAiProvidersRemoveByokBody": {
     "description": "Confirm dialog body for removing BYOK."
   },
-  "settingsAiProvidersRemoveByokSuccess": "BYOK credentials removed.",
+  "settingsAiProvidersRemoveByokSuccess": "Saved key removed.",
   "@settingsAiProvidersRemoveByokSuccess": {
     "description": "Success notice after removing BYOK."
   },
@@ -686,7 +708,7 @@
   "@settingsAiProvidersSpeechKindHintOpenAi": {
     "description": "Hint under the speech provider segmented button, OpenAI option."
   },
-  "settingsAiProvidersSpeechKindHintAzure": "Azure Speech: required for pronunciation scoring. Also supports speech-to-text.",
+  "settingsAiProvidersSpeechKindHintAzure": "Azure Speech: phoneme-level pronunciation diagnosis. Also supports speech-to-text. Without it, take scoring falls back to local assessment.",
   "@settingsAiProvidersSpeechKindHintAzure": {
     "description": "Hint under the speech provider segmented button, Azure option."
   },
@@ -701,6 +723,10 @@
   "@settingsAiProvidersSpeechWhisperModelHint": {
     "description": "Hint for Whisper model field"
   },
+  "settingsAiEngineLocal": "Local (default)",
+  "settingsAiEngineCloud": "Custom cloud",
+  "settingsAiProvidersTtsLocalHint": "Uses the built-in Windows speech synthesis — no download needed. Voices follow your installed system voice packs (Settings → Time & language → Speech).",
+  "settingsAiProvidersAsrLocalHint": "Offline recognition via the local components; no network needed. First use guides you through the download.",
   "settingsAiProvidersSpeechTtsModelLabel": "TTS model",
   "@settingsAiProvidersSpeechTtsModelLabel": {
     "description": "Label for OpenAI-compatible TTS model field"
@@ -965,6 +991,12 @@
   "hotkeysDescTogglePlay": "Play / Pause",
   "hotkeysDescToggleExpand": "Toggle player expand/collapse",
   "hotkeysDescToggleFullscreen": "Toggle fullscreen",
+  "hotkeysDescSearchTranscript": "Search transcript (Ctrl+F)",
+  "hotkeysDescSeekBack": "Seek back 3 seconds",
+  "hotkeysDescSeekForward": "Seek forward 3 seconds",
+  "hotkeysDescVolumeUp": "Volume up",
+  "hotkeysDescVolumeDown": "Volume down",
+  "hotkeysDescToggleMute": "Mute / unmute",
   "hotkeysDescPrevLine": "Play previous line",
   "hotkeysDescNextLine": "Play next line",
   "hotkeysDescReplayLine": "Replay current line",
@@ -1446,7 +1478,7 @@
   "settingsAiPlaygroundTileTitle": "AI playground",
   "settingsAiPlaygroundTileSubtitle": "Exercise ASR, chat, translation, and dictionary APIs",
   "aiPlaygroundTitle": "AI playground",
-  "aiPlaygroundIntro": "Exercise AI modalities using Enjoy cloud or your BYOK credentials from Settings → AI providers. Translation and dictionary follow the LLM provider.",
+  "aiPlaygroundIntro": "Exercise AI modalities with your credentials from Settings → AI providers. Translation and dictionary follow the LLM provider.",
   "aiPlaygroundActiveProviders": "Active providers",
   "aiPlaygroundProviderByokDetail": "BYOK · {detail}",
   "@aiPlaygroundProviderByokDetail": {
@@ -1474,7 +1506,7 @@
   "aiPlaygroundAssessmentReference": "Reference text (what you spoke)",
   "aiPlaygroundAssessmentLanguage": "Language (e.g. en, en-US)",
   "aiPlaygroundAssess": "Run pronunciation assessment",
-  "aiPlaygroundAssessmentTtsNote": "Enjoy TTS is not wired yet; configure TTS BYOK under AI providers for synthesis. Assessment uses the provider shown above.",
+  "aiPlaygroundAssessmentTtsNote": "TTS is not wired yet; configure TTS BYOK under AI providers for synthesis. Assessment uses the provider shown above.",
   "aiPlaygroundOutput": "Output",
   "aiPlaygroundClearOutput": "Clear output",
   "aiPlaygroundSectionAsr": "ASR",
@@ -2714,6 +2746,15 @@
   },
   "@assessmentMarginOverline": {},
   "playerMore": "More",
+  "playerMoreDescEditTranscript": "Edit the text and timing of the current transcript in the editor",
+  "playerMoreDescAddSubtitleFile": "Pick a .srt / .vtt subtitle file from your computer and import it as a new track",
+  "playerMoreDescEmbeddedSubtitles": "Extract subtitle tracks embedded inside the video file (MKV/MP4) - no speech recognition needed",
+  "playerMoreDescAiTranscript": "Generate or regenerate subtitles with local speech recognition; old videos get the latest timing calibration by re-transcribing",
+  "playerMoreDescWordTimings": "Add word-by-word timing and phonetics, for karaoke-style highlighting and shadowing practice",
+  "playerMoreDescRefreshFromCloud": "Re-fetch transcripts from the cloud (YouTube official captions, or subtitles synced while signed in)",
+  "playerMoreDescDownloadTranscript": "Export the current transcript as a .srt subtitle file on your computer",
+  "playerMoreDescEditDetails": "Edit the title, cover and other details of this video",
+  "playerMoreDescExportLoopClip": "Save the active Echo loop as a separate video clip (enabled while a loop is active)",
   "@playerMore": {
     "description": "Top-bar button that opens the player's More menu."
   },

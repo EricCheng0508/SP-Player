@@ -82,6 +82,17 @@ class FakePlayerEngine
   @override
   Stream<bool> get buffering => _buffering.stream;
 
+  final StreamController<Duration> _bufferEnd =
+      StreamController<Duration>.broadcast();
+
+  /// Test-emittable buffered-end stream; defaults to empty (no band shown).
+  @override
+  Stream<Duration> get bufferEnd => _bufferEnd.stream;
+
+  void emitBufferEnd(Duration d) {
+    if (!_bufferEnd.isClosed) _bufferEnd.add(d);
+  }
+
   @override
   Stream<void> get completed => _completed.stream;
 
@@ -108,6 +119,9 @@ class FakePlayerEngine
     final gate = surfaceDetachGate;
     if (gate != null) await gate.future;
   }
+
+  @override
+  Future<bool> waitForMediaReady({required Duration timeout}) async => true;
 
   @override
   void prepareNativeBackend() {}
@@ -151,7 +165,7 @@ class FakePlayerEngine
   }
 
   @override
-  Future<void> open(PlayableSource source) async {
+  Future<void> open(PlayableSource source, {Duration? startAt}) async {
     _recordUriFromSource(source);
     if (!openEntered.isCompleted) openEntered.complete();
     final delay = openDelay;
@@ -234,6 +248,7 @@ class FakePlayerEngine
     await _duration.close();
     await _playing.close();
     await _buffering.close();
+    await _bufferEnd.close();
     await _completed.close();
   }
 }

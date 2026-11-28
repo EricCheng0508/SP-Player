@@ -8,7 +8,6 @@ import 'package:enjoy_player/features/ai/data/ai_modality_config_repository.dart
 import 'package:enjoy_player/features/ai/domain/byok_config_validator.dart';
 import 'package:enjoy_player/features/ai/domain/modality_kind.dart';
 import 'package:enjoy_player/features/ai/presentation/settings/ai_providers_screen.dart';
-import 'package:enjoy_player/features/ai/presentation/settings/widgets/modality_provider_card.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -74,24 +73,28 @@ void main() {
     await db.close();
   });
 
-  testWidgets(
-    'AiProvidersScreen renders title and four ModalityProviderCards',
-    (tester) async {
-      await tester.binding.setSurfaceSize(const Size(900, 1800));
-      addTearDown(() => tester.view.resetPhysicalSize());
+  testWidgets('AiProvidersScreen renders both engine sections', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(900, 1800));
+    addTearDown(() => tester.view.resetPhysicalSize());
 
-      await tester.pumpWidget(buildHost(container));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(AppBar), findsOneWidget);
-      expect(find.byType(ModalityProviderCard), findsNWidgets(4));
-    },
-  );
-
-  testWidgets('AiProvidersScreen shows privacy callout', (tester) async {
     await tester.pumpWidget(buildHost(container));
     await tester.pumpAndSettle();
 
-    expect(find.byIcon(EnjoyIcons.shield), findsOneWidget);
+    expect(find.byType(AppBar), findsOneWidget);
+    expect(find.text('字幕翻译与语言模型'), findsOneWidget);
+    expect(find.text('语音服务（识别与合成）'), findsOneWidget);
+    // Translation block sits above the speech block.
+    final mtOffset = tester.getTopLeft(find.text('字幕翻译与语言模型')).dy;
+    final speechOffset = tester.getTopLeft(find.text('语音服务（识别与合成）')).dy;
+    expect(mtOffset, lessThan(speechOffset));
+  });
+
+  testWidgets('AiProvidersScreen shows the key-only-on-device notice', (
+    tester,
+  ) async {
+    await tester.pumpWidget(buildHost(container));
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(EnjoyIcons.lock), findsOneWidget);
   });
 }

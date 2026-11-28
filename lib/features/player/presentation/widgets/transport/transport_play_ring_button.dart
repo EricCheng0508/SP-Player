@@ -61,7 +61,7 @@ class TransportPlayRingButton extends StatelessWidget {
                       ),
                     )
                   : AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 180),
+                      duration: t.motionFast,
                       switchInCurve: Curves.easeOutCubic,
                       switchOutCurve: Curves.easeInCubic,
                       transitionBuilder: (child, anim) =>

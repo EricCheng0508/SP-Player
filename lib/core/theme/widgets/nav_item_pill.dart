@@ -26,6 +26,7 @@ class NavItemPill extends StatelessWidget {
     this.maxLines,
     this.overflow,
     this.trailing,
+    this.collapsed = false,
   });
 
   final IconData icon;
@@ -52,6 +53,10 @@ class NavItemPill extends StatelessWidget {
   /// Optional trailing widget (count badge, keycap).
   final Widget? trailing;
 
+  /// Icon-only compact mode (sidebar collapsed) — label/trailing hidden,
+  /// content centred, [label] surfaces as a tooltip.
+  final bool collapsed;
+
   @override
   Widget build(BuildContext context) {
     final t = EnjoyThemeTokens.of(context);
@@ -67,6 +72,40 @@ class NavItemPill extends StatelessWidget {
         : ShapeDecoration(
             shape: RoundedSuperellipseBorder(borderRadius: radius),
           );
+
+    if (collapsed) {
+      return Padding(
+        padding: const EdgeInsets.only(left: 4, right: 4, bottom: 6),
+        child: Tooltip(
+          message: label,
+          child: EnjoyPressable(
+            onTap: onTap,
+            borderRadius: radius,
+            pressedScale: 0.985,
+            showHoverWash: !selected,
+            selected: selected,
+            child: AnimatedContainer(
+              duration: t.motionFast,
+              curve: Curves.easeOutCubic,
+              height: 38,
+              alignment: Alignment.center,
+              decoration: plate,
+              child: IconTheme(
+                data: IconThemeData(
+                  size: iconSize,
+                  color: selected ? t.brandInk : t.ink2,
+                ),
+                child: selected
+                    ? (selectedIconWidget ??
+                          iconWidget ??
+                          Icon(selectedIcon ?? icon, size: iconSize))
+                    : (iconWidget ?? Icon(icon, size: iconSize)),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),

@@ -124,7 +124,7 @@ class DockEchoControls extends StatelessWidget {
     );
 
     return SizedBox(
-      height: 76,
+      height: 64,
       child: Row(
         children: [
           Expanded(child: left),

@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:enjoy_player/core/interaction/enjoy_pressable.dart';
 import 'package:enjoy_player/core/riverpod/async_value_x.dart';
+import 'package:enjoy_player/core/theme/enjoy_icons.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 import 'package:enjoy_player/core/theme/widgets/anchored_popover_route.dart';
 import 'package:enjoy_player/core/theme/widgets/editorial_header.dart';
@@ -96,6 +97,7 @@ class PlayerMoreMenuPanel extends ConsumerWidget {
                   PlayerMenuRow(
                     key: action.key,
                     label: action.label,
+                    description: action.description,
                     autofocus: i == 0,
                     onTap: () => onChoose(action.run),
                   ),
@@ -107,6 +109,7 @@ class PlayerMoreMenuPanel extends ConsumerWidget {
                 PlayerMenuRow(
                   key: const ValueKey('player-more-edit-details'),
                   label: l10n.playerMoreEditDetails,
+                  description: l10n.playerMoreDescEditDetails,
                   onTap: () => onChoose(
                     (context) => editMediaDetailsForId(context, ref, mediaId),
                   ),
@@ -115,6 +118,7 @@ class PlayerMoreMenuPanel extends ConsumerWidget {
                   key: const ValueKey('player-more-export-loop-clip'),
                   label: l10n.playerMoreExportLoopClip,
                   enabled: exportAvailable,
+                  description: l10n.playerMoreDescExportLoopClip,
                   onTap: () => onChoose(
                     (context) => exportLoopAsClip(context, ref, mediaId),
                   ),
@@ -140,6 +144,7 @@ class PlayerMenuRow extends StatelessWidget {
     required this.label,
     required this.onTap,
     this.trailing,
+    this.description,
     this.autofocus = false,
     this.enabled = true,
     super.key,
@@ -148,6 +153,11 @@ class PlayerMenuRow extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
   final Widget? trailing;
+
+  /// Optional plain-language explanation revealed by hovering the ⓘ
+  /// affordance at the row's end.
+  final String? description;
+
   final bool autofocus;
 
   /// Disabled rows render dimmed and cannot be pressed or focused — the
@@ -185,6 +195,23 @@ class PlayerMenuRow extends StatelessWidget {
                   ),
                 ),
                 ?trailing,
+                if (description != null && trailing == null)
+                  Tooltip(
+                    message: description!,
+                    waitDuration: const Duration(milliseconds: 250),
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 8),
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.help,
+                        child: Icon(
+                          EnjoyIcons.info,
+                          size: 16,
+                          color: t.ink.withValues(alpha: 0.45),
+                        ),
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),

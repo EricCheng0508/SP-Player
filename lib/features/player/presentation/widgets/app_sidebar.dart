@@ -3,6 +3,7 @@
 library;
 
 import 'package:enjoy_player/core/theme/enjoy_icons.dart';
+import 'package:enjoy_player/features/live_captions/application/live_captions_controller.dart';
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,7 +27,13 @@ import '../../../library/application/library_search_focus_provider.dart';
 import '../../../library/application/library_search_provider.dart';
 
 class AppSidebar extends ConsumerStatefulWidget {
-  const AppSidebar({super.key});
+  const AppSidebar({super.key, this.collapsed = false, this.onToggleCollapse});
+
+  /// Icon-only rail mode.
+  final bool collapsed;
+
+  /// Expand/collapse toggle (chevron at the bottom).
+  final VoidCallback? onToggleCollapse;
 
   @override
   ConsumerState<AppSidebar> createState() => _AppSidebarState();
@@ -126,7 +133,7 @@ class _AppSidebarState extends ConsumerState<AppSidebar> {
     return Material(
       type: MaterialType.transparency,
       child: Container(
-        width: t.sidebarWidth,
+        width: widget.collapsed ? 64 : t.sidebarWidth,
         decoration: BoxDecoration(
           border: Border(right: BorderSide(color: t.line)),
         ),
@@ -146,24 +153,27 @@ class _AppSidebarState extends ConsumerState<AppSidebar> {
                     child: Row(
                       children: [
                         const EnjoyLogo(size: 22),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            l10n.appTitle,
-                            style: tt.titleSmall?.copyWith(
-                              fontSize: 14.5,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: -0.2,
+                        if (!widget.collapsed) ...[
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              l10n.appTitle,
+                              style: tt.titleSmall?.copyWith(
+                                fontSize: 14.5,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: -0.2,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
+                        ],
                       ],
                     ),
                   ),
                 ),
 
+                if (!widget.collapsed)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16),
                   child: Tooltip(
@@ -247,6 +257,7 @@ class _AppSidebarState extends ConsumerState<AppSidebar> {
                     EnjoyChromeGlyph.home,
                   ),
                   label: l10n.homeTitle,
+                  collapsed: widget.collapsed,
                   selected: path == '/',
                   onTap: () => context.go('/'),
                 ),
@@ -257,6 +268,7 @@ class _AppSidebarState extends ConsumerState<AppSidebar> {
                     EnjoyChromeGlyph.compass,
                   ),
                   label: l10n.discoverTitle,
+                  collapsed: widget.collapsed,
                   selected: path.startsWith('/discover'),
                   onTap: () => context.go('/discover'),
                 ),
@@ -267,6 +279,7 @@ class _AppSidebarState extends ConsumerState<AppSidebar> {
                     EnjoyChromeGlyph.library,
                   ),
                   label: l10n.libraryTitle,
+                  collapsed: widget.collapsed,
                   selected:
                       path.startsWith('/library') || path.startsWith('/cloud'),
                   onTap: () => context.go('/library'),
@@ -274,6 +287,7 @@ class _AppSidebarState extends ConsumerState<AppSidebar> {
                 NavItemPill(
                   icon: EnjoyIcons.book,
                   label: l10n.vocabularyTitle,
+                  collapsed: widget.collapsed,
                   selected: path.startsWith('/vocabulary'),
                   onTap: () => context.go('/vocabulary'),
                   trailing: const _VocabularyDueBadge(),
@@ -281,23 +295,74 @@ class _AppSidebarState extends ConsumerState<AppSidebar> {
                 NavItemPill(
                   icon: EnjoyIcons.edit,
                   label: l10n.craftScreenTitle,
+                  collapsed: widget.collapsed,
                   selected: path.startsWith('/craft'),
                   onTap: () => context.go('/craft'),
                   trailing: isDesktop ? EnjoyKeycap(label: craftKey) : null,
                 ),
+                NavItemPill(
+                  icon: EnjoyIcons.cc,
+                  label: '实时字幕',
+                  collapsed: widget.collapsed,
+                  selected: path.startsWith('/live-captions'),
+                  onTap: () => context.go('/live-captions'),
+                ),
 
                 const Spacer(),
 
-                NavItemPill(
-                  icon: EnjoyIcons.gear,
-                  iconWidget: const EnjoyChromeIcon(EnjoyChromeGlyph.gear),
-                  selectedIconWidget: const EnjoyChromeIcon(
-                    EnjoyChromeGlyph.gear,
+                if (widget.collapsed) ...[
+                  NavItemPill(
+                    icon: EnjoyIcons.gear,
+                    iconWidget: const EnjoyChromeIcon(EnjoyChromeGlyph.gear),
+                    selectedIconWidget: const EnjoyChromeIcon(
+                      EnjoyChromeGlyph.gear,
+                    ),
+                    label: l10n.settingsTitle,
+                    collapsed: true,
+                    selected: path.startsWith('/settings'),
+                    onTap: () => context.go('/settings'),
                   ),
-                  label: l10n.settingsTitle,
-                  selected: path.startsWith('/settings'),
-                  onTap: () => context.go('/settings'),
-                ),
+                  const SizedBox(height: 4),
+                  Center(
+                    child: IconButton(
+                      tooltip: '展开侧边栏',
+                      onPressed: widget.onToggleCollapse,
+                      icon: Icon(
+                        Icons.chevron_right_rounded,
+                        size: 20,
+                        color: t.ink2,
+                      ),
+                    ),
+                  ),
+                ] else ...[
+                  Row(
+                    children: [
+                      Expanded(
+                        child: NavItemPill(
+                          icon: EnjoyIcons.gear,
+                          iconWidget: const EnjoyChromeIcon(
+                            EnjoyChromeGlyph.gear,
+                          ),
+                          selectedIconWidget: const EnjoyChromeIcon(
+                            EnjoyChromeGlyph.gear,
+                          ),
+                          label: l10n.settingsTitle,
+                          selected: path.startsWith('/settings'),
+                          onTap: () => context.go('/settings'),
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: '折叠侧边栏',
+                        onPressed: widget.onToggleCollapse,
+                        icon: Icon(
+                          Icons.chevron_left_rounded,
+                          size: 20,
+                          color: t.ink2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),

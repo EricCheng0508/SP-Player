@@ -23,7 +23,6 @@ import 'package:enjoy_player/features/settings/presentation/widgets/sections/app
 import 'package:enjoy_player/features/settings/presentation/widgets/sections/cloud_sync_section.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/sections/developer_section.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/sections/keyboard_shortcuts_section.dart';
-import 'package:enjoy_player/features/local_components/presentation/local_components_section.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/sections/network_section.dart';
 import 'package:enjoy_player/features/settings/presentation/widgets/sections/recording_section.dart';
 import 'package:enjoy_player/l10n/app_localizations.dart';
@@ -177,36 +176,10 @@ final List<SettingsSectionSpec> kSettingsSectionSpecs = [
     icon: EnjoyIcons.sparkle,
     title: (l10n) => l10n.settingsSectionAi,
     hint: (l10n) => l10n.settingsSectionAiHint,
-    rows: [
-      SettingsRowSpec(
-        rowId: 'aiProviders',
-        title: (l10n) => l10n.settingsAiProvidersTileTitle,
-      ),
-    ],
+    rows: const [],
     body: () => const AiProvidersSectionBody(),
-    collapsedByDefault: true,
-  ),
-  SettingsSectionSpec(
-    sectionId: SettingsSectionIds.localComponents,
-    icon: Icons.download_for_offline_outlined,
-    title: (l10n) => l10n.settingsSectionLocalComponents,
-    hint: (l10n) => l10n.settingsSectionLocalComponentsHint,
-    rows: [
-      SettingsRowSpec(
-        rowId: 'componentList',
-        title: (l10n) => l10n.settingsSectionLocalComponents,
-        searchableText: (l10n) => const [
-          'local model',
-          'whisper',
-          'llama',
-          '模型',
-          '组件',
-          '离线',
-        ],
-      ),
-    ],
-    body: () => const LocalComponentsSectionBody(),
-    collapsedByDefault: true,
+    wrapInCard: false,
+    collapsedByDefault: false,
   ),
   SettingsSectionSpec(
     sectionId: SettingsSectionIds.network,

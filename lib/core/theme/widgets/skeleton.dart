@@ -5,6 +5,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import 'package:enjoy_player/core/theme/widgets/enjoy_logo.dart';
 import 'package:enjoy_player/core/theme/enjoy_tokens.dart';
 
 /// Hosts the single shared shimmer ticker for every [Skeleton] below it
@@ -209,11 +210,11 @@ class SkeletonAppBootstrap extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Skeleton.circle(diameter: 56),
+              const EnjoyLogo(size: 44),
               SizedBox(height: t.space24),
-              Skeleton.line(width: 200, height: 18),
-              SizedBox(height: t.space12),
-              Skeleton.line(width: 160, height: 14),
+              Skeleton.circle(diameter: 26),
+              SizedBox(height: t.space16),
+              Skeleton.line(width: 180, height: 14),
             ],
           ),
         ),

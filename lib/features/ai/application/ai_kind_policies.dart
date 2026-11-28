@@ -53,6 +53,11 @@ const _defaultPolicies = <AiKind, AiKindPolicy>{
     l2RowCap: 8192,
     l2AgeCutoff: Duration(days: 30),
   ),
+  AiKind.explain: AiKindPolicy(
+    ttl: Duration(minutes: 30),
+    l2RowCap: 2048,
+    l2AgeCutoff: Duration(days: 14),
+  ),
 };
 
 /// Default policies keyed by [AiKind]. Modifying the returned map mutates

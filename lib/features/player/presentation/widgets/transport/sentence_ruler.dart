@@ -19,6 +19,7 @@ import 'package:enjoy_player/core/utils/time_format.dart';
 import 'package:enjoy_player/data/subtitle/transcript_line.dart';
 import 'package:enjoy_player/features/player/application/echo_mode_provider.dart';
 import 'package:enjoy_player/features/player/application/player_interactions.dart';
+import 'package:enjoy_player/features/player/application/player_state_providers.dart';
 import 'package:enjoy_player/features/player/application/position_buckets.dart';
 import 'package:enjoy_player/features/player/application/ruler_geometry.dart';
 import 'package:enjoy_player/features/player/application/transport_slider_position_provider.dart';
@@ -27,10 +28,13 @@ import 'package:enjoy_player/features/transcript/application/transcript_line_rec
 import 'package:enjoy_player/features/transcript/application/transcript_lines_provider.dart';
 
 /// The dock's ruler row: mono elapsed · track · mono total, hit height 34.
+/// [bright] switches the mono times to near-white for dark translucent
+/// surfaces (the OS-fullscreen transport bar).
 class SentenceRuler extends ConsumerStatefulWidget {
-  const SentenceRuler({required this.chrome, super.key});
+  const SentenceRuler({required this.chrome, this.bright = false, super.key});
 
   final PlaybackChrome chrome;
+  final bool bright;
 
   @override
   ConsumerState<SentenceRuler> createState() => _SentenceRulerState();
@@ -40,6 +44,7 @@ class _SentenceRulerState extends ConsumerState<SentenceRuler> {
   static const Duration _pendingSeekHold = Duration(milliseconds: 1500);
 
   final _fraction = ValueNotifier<double>(0);
+  final _bufferedFraction = ValueNotifier<double>(0);
   final _hovered = ValueNotifier<bool>(false);
   final _elapsedText = ValueNotifier<String>('0:00');
 
@@ -75,6 +80,7 @@ class _SentenceRulerState extends ConsumerState<SentenceRuler> {
   void dispose() {
     _pendingSeekTimer?.cancel();
     _fraction.dispose();
+    _bufferedFraction.dispose();
     _hovered.dispose();
     _elapsedText.dispose();
     super.dispose();
@@ -189,7 +195,20 @@ class _SentenceRulerState extends ConsumerState<SentenceRuler> {
       durationSec: _durationSec,
     );
 
-    final timeStyle = enjoyMonoStyle(context, size: 12.5, color: t.ink3);
+    // Buffered-ahead band; 0 on engines without buffered-range data.
+    final bufferedEnd =
+        ref.watch(playerBufferEndProvider).valueOrNull ?? Duration.zero;
+    final bufferedFraction =
+        (bufferedEnd.inMilliseconds / 1000 / _durationSec).clamp(0.0, 1.0);
+    if (_bufferedFraction.value != bufferedFraction) {
+      _bufferedFraction.value = bufferedFraction;
+    }
+
+    final timeStyle = enjoyMonoStyle(
+      context,
+      size: 12.5,
+      color: widget.bright ? Colors.white.withValues(alpha: 0.9) : t.ink3,
+    );
 
     return MouseRegion(
       onEnter: (_) => _setHovered(true),
@@ -230,6 +249,7 @@ class _SentenceRulerState extends ConsumerState<SentenceRuler> {
                             painter: _RulerProgressPainter(
                               tokens: t,
                               fraction: _fraction,
+                              buffered: _bufferedFraction,
                             ),
                           ),
                         ),
@@ -311,17 +331,24 @@ class _SentenceRulerState extends ConsumerState<SentenceRuler> {
   }
 }
 
-/// The sunk track and the played fill that rides it; repaints on every
-/// playhead step, so it draws nothing that depends on the transcript.
+/// The sunk track, the buffered-ahead band and the played fill that rides
+/// it; repaints on every playhead step, so it draws nothing that depends on
+/// the transcript.
 class _RulerProgressPainter extends CustomPainter {
-  _RulerProgressPainter({required this.tokens, required this.fraction})
-    : _trackPaint = Paint()..color = tokens.sunk,
-      _playedPaint = Paint()..color = tokens.original,
-      super(repaint: fraction);
+  _RulerProgressPainter({
+    required this.tokens,
+    required this.fraction,
+    required this.buffered,
+  }) : _trackPaint = Paint()..color = tokens.sunk,
+       _bufferedPaint = Paint()..color = tokens.tick,
+       _playedPaint = Paint()..color = tokens.original,
+       super(repaint: Listenable.merge([fraction, buffered]));
 
   final EnjoyThemeTokens tokens;
   final ValueListenable<double> fraction;
+  final ValueListenable<double> buffered;
   final Paint _trackPaint;
+  final Paint _bufferedPaint;
   final Paint _playedPaint;
 
   @override
@@ -335,6 +362,18 @@ class _RulerProgressPainter extends CustomPainter {
       ),
       _trackPaint,
     );
+
+    final bufferedWidth =
+        size.width * buffered.value.clamp(0.0, 1.0);
+    if (bufferedWidth > size.width * fraction.value.clamp(0.0, 1.0)) {
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(0, trackTop, bufferedWidth, t.strokeRulerTrack),
+          const Radius.circular(2),
+        ),
+        _bufferedPaint,
+      );
+    }
 
     final playedWidth = size.width * fraction.value.clamp(0.0, 1.0);
     canvas.drawRRect(

@@ -17,8 +17,6 @@ import 'package:enjoy_player/core/utils/remote_thumbnail_url.dart';
 import 'package:enjoy_player/data/api/services/ai/ai_api_providers.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/data/db/media_registry_provider.dart';
-import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/discover/data/discover_repository.dart';
 import 'package:enjoy_player/features/discover/application/discover_feed_join.dart';
 import 'package:enjoy_player/features/discover/domain/discover_channel.dart';
@@ -274,10 +272,6 @@ Future<String> addDiscoverFeedEntryToLibrary(
   FeedEntry entry, {
   String? contentLanguage,
 }) async {
-  final auth = ref.read(authCtrlProvider).valueOrNull;
-  if (auth is! AuthSignedIn) {
-    throw StateError('addDiscoverFeedEntryToLibrary requires AuthSignedIn');
-  }
   return ref
       .read(discoverRepositoryProvider)
       .addFeedEntryToLibrary(entry, contentLanguage: contentLanguage);

@@ -287,7 +287,7 @@ void main() {
       'count-preserving library changes do not rebuild the tab bodies',
       (tester) async {
         final counts = StreamController<({int audio, int video})>();
-        final tabController = TabController(length: 2, vsync: tester);
+        final tabController = TabController(length: 3, vsync: tester);
         addTearDown(() async {
           tabController.dispose();
           await counts.close();

@@ -184,7 +184,7 @@ final class TranslationCapabilityProvider
 }
 
 String _$translationCapabilityHash() =>
-    r'3eb9b5d15a412389f117fa4f9719144ce8474fff';
+    r'69dfdb1d11a3e6e87f35dba249cb378aaa85e885';
 
 @ProviderFor(dictionaryCapability)
 final dictionaryCapabilityProvider = DictionaryCapabilityProvider._();
@@ -284,6 +284,54 @@ final class ContextualTranslationCapabilityProvider
 
 String _$contextualTranslationCapabilityHash() =>
     r'b765040dfc95c726897602749154e184edb339d7';
+
+@ProviderFor(lineExplanationCapability)
+final lineExplanationCapabilityProvider = LineExplanationCapabilityProvider._();
+
+final class LineExplanationCapabilityProvider
+    extends
+        $FunctionalProvider<
+          LineExplanationCapability,
+          LineExplanationCapability,
+          LineExplanationCapability
+        >
+    with $Provider<LineExplanationCapability> {
+  LineExplanationCapabilityProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'lineExplanationCapabilityProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$lineExplanationCapabilityHash();
+
+  @$internal
+  @override
+  $ProviderElement<LineExplanationCapability> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  LineExplanationCapability create(Ref ref) {
+    return lineExplanationCapability(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(LineExplanationCapability value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<LineExplanationCapability>(value),
+    );
+  }
+}
+
+String _$lineExplanationCapabilityHash() =>
+    r'd3eff1cc78c94d06e67e7e4d42d27afd480b5335';
 
 @ProviderFor(ttsCapability)
 final ttsCapabilityProvider = TtsCapabilityProvider._();

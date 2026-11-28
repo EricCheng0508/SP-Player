@@ -71,7 +71,7 @@ List<Override> _overrides({AppDatabase? db}) {
     ),
     transcriptPlaybackHighlightProvider(
       _mediaId,
-    ).overrideWith((ref) => (cueIndex: 2, wordIndex: null)),
+    ).overrideWith((ref) => (cueIndex: 2, visibleCueIndex: 2, wordIndex: null)),
     transcriptHasLinesForMediaProvider(
       _mediaId,
     ).overrideWith((ref) => Stream.value(true)),

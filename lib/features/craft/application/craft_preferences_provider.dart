@@ -10,11 +10,9 @@ import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:enjoy_player/core/logging/log.dart';
-import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/data/db/app_database_provider.dart';
 import 'package:enjoy_player/data/db/settings_keys.dart';
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/craft/domain/craft_preferences.dart';
 import 'package:enjoy_player/features/craft/domain/craft_screen_mode.dart';
 import 'package:enjoy_player/features/craft/domain/translation_style.dart';
@@ -36,8 +34,7 @@ class CraftPreferencesCtrl extends _$CraftPreferencesCtrl {
   @override
   CraftPreferences build() {
     _loadFuture = null;
-    final auth = ref.watch(authCtrlProvider).valueOrNull;
-    if (auth is AuthSignedIn) {
+    if (sessionUserIdOf(ref.watch(authCtrlProvider)) != null) {
       unawaited(Future<void>.microtask(load));
     }
     return CraftPreferences.defaults;
@@ -52,8 +49,7 @@ class CraftPreferencesCtrl extends _$CraftPreferencesCtrl {
     final readGeneration = _mutation;
     CraftPreferences? loaded;
     try {
-      final auth = ref.read(authCtrlProvider).valueOrNull;
-      if (auth is AuthSignedIn) {
+      if (sessionUserIdOf(ref.read(authCtrlProvider)) != null) {
         final decoded = await ref
             .read(appDatabaseProvider)
             .settingsDao
@@ -72,15 +68,13 @@ class CraftPreferencesCtrl extends _$CraftPreferencesCtrl {
   }
 
   Future<void> _persist() {
-    final auth = ref.read(authCtrlProvider).valueOrNull;
-    if (auth is! AuthSignedIn) return Future<void>.value();
+    final sessionUserId = sessionUserIdOf(ref.read(authCtrlProvider));
+    if (sessionUserId == null) return Future<void>.value();
 
-    final userId = auth.profile.id;
     final task = _persistQueue.then((_) async {
       if (!ref.mounted) return;
 
-      final cur = ref.read(authCtrlProvider).valueOrNull;
-      if (cur is! AuthSignedIn || cur.profile.id != userId) return;
+      if (sessionUserIdOf(ref.read(authCtrlProvider)) != sessionUserId) return;
 
       await ref
           .read(appDatabaseProvider)

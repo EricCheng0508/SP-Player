@@ -1,6 +1,7 @@
 /// media_kit playback engine for local files and generic HTTP(S) (ADR-0003).
 library;
 
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -70,13 +71,33 @@ class MediaKitPlayerEngine
     return const VideoControllerConfiguration(
       width: kVideoControllerWidth,
       height: kVideoControllerHeight,
+      // Hardware decoding + hardware rendering is the pairing media_kit is
+      // actually tested against. The software pairing (hwdec 'no' +
+      // enableHardwareAcceleration false) renders into a pixel-buffer texture
+      // that never reaches the compositor on Windows, so it is not an option.
       hwdec: 'auto-safe',
-      enableHardwareAcceleration: false,
+      enableHardwareAcceleration: true,
     );
   }
 
   VideoController get videoController {
     return _videoController ??= VideoController(
+      _player,
+      configuration: _videoControllerConfiguration,
+    );
+  }
+
+  /// Allocates the [VideoController] *before* any media is opened.
+  ///
+  /// The controller is what installs the render API and the video output on
+  /// the mpv handle. When `open()` runs first, mpv resolves a video output
+  /// against a handle that has no render context yet and then keeps that empty
+  /// output — audio plays, the stage stays black, and only an event that
+  /// forces mpv to re-initialise the output (a mode-tab switch, a resize)
+  /// ever produced a picture. That was the long-standing "black until I switch
+  /// tabs" report.
+  void ensureVideoOutput() {
+    _videoController ??= VideoController(
       _player,
       configuration: _videoControllerConfiguration,
     );
@@ -105,6 +126,31 @@ class MediaKitPlayerEngine
       );
       controller.onCancel = sub.cancel;
     });
+  }
+
+  /// Buffered-ahead end position. Only meaningful for network streams — a
+  /// local file's mpv cache band tells the user nothing, so [open] rewires
+  /// this to the empty stream for local sources (the scrubber hides the band).
+  final StreamController<Duration> _bufferEndController =
+      StreamController<Duration>.broadcast();
+  StreamSubscription<Duration>? _bufferEndSub;
+
+  @override
+  Stream<Duration> get bufferEnd => _bufferEndController.stream;
+
+  void _rewireBufferEnd(PlayableSource source) {
+    _bufferEndSub?.cancel();
+    _bufferEndSub = null;
+    final player = __player;
+    if (source is! RemoteUrlPlayableSource || player == null) {
+      // Local file: report an explicit zero so a stale band cannot linger.
+      _bufferEndController.add(Duration.zero);
+      return;
+    }
+    _bufferEndSub = player.stream.buffer.listen(
+      _bufferEndController.add,
+      onError: _bufferEndController.addError,
+    );
   }
 
   @override
@@ -171,7 +217,7 @@ class MediaKitPlayerEngine
       !(Platform.isWindows || Platform.isLinux || Platform.isMacOS);
 
   @override
-  Future<void> open(PlayableSource source) async {
+  Future<void> open(PlayableSource source, {Duration? startAt}) async {
     final uri = switch (source) {
       LocalFilePlayableSource(:final uri) => uri,
       RemoteUrlPlayableSource(:final uri) => uri,
@@ -187,7 +233,15 @@ class MediaKitPlayerEngine
     if (source is LocalFilePlayableSource) {
       _scopeToken = source.scopeToken;
     }
-    await _player.open(mk.Media(uri));
+    // Must precede `open()` — see [ensureVideoOutput].
+    ensureVideoOutput();
+    _rewireBufferEnd(source);
+    // [startAt] makes mpv decode from the resume position directly, so the
+    // first presented frame is already the right one — without it the player
+    // presents a 0:00 frame and then jumps to the restore position (the
+    // "video flashes from the beginning" report). The post-open restore seek
+    // in the open choreography stays as a fallback.
+    await _player.open(mk.Media(uri, start: startAt));
   }
 
   @override
@@ -197,52 +251,18 @@ class MediaKitPlayerEngine
   @override
   Future<void> seek(Duration target) => _player.seek(target);
 
-  /// Forces mpv to re-render and re-present the current frame.
-  ///
-  /// Two reliable repaint triggers, because a *forward ±1 ms* seek is not
-  /// one: media_kit issues `seek <t> absolute` without `exact`, and a target
-  /// that lands inside the currently-decoded frame can be optimized away by
-  /// mpv — no frame presented, stage stays black. This is why the earlier
-  /// 1 ms nudge failed while the user's manual tab-switch workaround
-  /// (a *backward* seek to the line start) always worked:
-  ///
-  /// 1. Micro-toggle `video-zoom` — a video-chain property change forces the
-  ///    renderer to recompose and re-present a frame into the shared texture.
-  /// 2. A *backward* seek (≥ 600 ms of headroom) — lands on an earlier
-  ///    keyframe, guaranteeing a different frame is decoded and displayed.
-  Future<void> nudgeVideoRender() async {
+  @override
+  Future<bool> waitForMediaReady({required Duration timeout}) async {
+    // Fast path: the demuxer is already open (duration known) — e.g. the file
+    // loaded while other open steps ran.
+    if (_player.state.duration > Duration.zero) return true;
     try {
-      final platform = _player.platform;
-      final pos = _player.state.position;
-      final target = pos > Duration.zero
-          ? (pos >= const Duration(milliseconds: 600)
-                ? pos - const Duration(milliseconds: 500)
-                : Duration.zero)
-          : const Duration(milliseconds: 250);
-      final seconds = (target.inMilliseconds / 1000).toStringAsFixed(4);
-      if (platform is mk.NativePlayer) {
-        // Micro-toggle a video-chain property: forces the renderer to
-        // recompose and re-present a frame into the shared texture.
-        await platform.setProperty('video-zoom', '0.0001',
-            waitForInitialization: false);
-        await platform.setProperty('video-zoom', '0',
-            waitForInitialization: false);
-        // Backward seek with `absolute+exact`: mpv decodes and presents the
-        // exact target frame. The stock [Player.seek] issues plain
-        // `absolute` without `exact`, and a forward ±1 ms target can land
-        // inside the currently-decoded frame and be optimized away — which
-        // is why the earlier 1 ms nudge failed while the user's manual
-        // tab-switch workaround (a backward seek) always worked.
-        await platform.command(
-          ['seek', seconds, 'absolute+exact'],
-          waitForInitialization: false,
-        );
-      } else {
-        // Non-native fallback: best-effort plain seek.
-        await _player.seek(target);
-      }
-    } on Object {
-      // Stage teardown raced the player; nothing to salvage.
+      await _player.stream.duration
+          .firstWhere((d) => d > Duration.zero)
+          .timeout(timeout);
+      return true;
+    } on TimeoutException {
+      return false;
     }
   }
 
@@ -281,6 +301,9 @@ class MediaKitPlayerEngine
     }
     await __player?.dispose();
     __player = null;
+    await _bufferEndSub?.cancel();
+    _bufferEndSub = null;
+    await _bufferEndController.close();
   }
 }
 

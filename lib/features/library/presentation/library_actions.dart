@@ -12,18 +12,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:enjoy_player/core/application/app_language_catalog.dart';
+import 'package:enjoy_player/core/config/local_mode.dart';
 import 'package:enjoy_player/core/errors/app_failure.dart';
 import 'package:enjoy_player/core/logging/log.dart';
 import 'package:enjoy_player/core/notices/app_notice.dart';
 import 'package:enjoy_player/data/files/media_resolver.dart';
 import 'package:enjoy_player/core/routing/player_navigation.dart';
-import 'package:enjoy_player/core/riverpod/async_value_x.dart';
 import 'package:enjoy_player/core/platform/mobile_platform.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_button.dart';
 import 'package:enjoy_player/core/theme/widgets/enjoy_modal.dart';
 import 'package:enjoy_player/core/theme/widgets/sheet_drag_handle.dart';
 import 'package:enjoy_player/features/auth/application/auth_controller.dart';
-import 'package:enjoy_player/features/auth/domain/auth_state.dart';
 import 'package:enjoy_player/features/library/application/library_media_provider.dart';
 import 'package:enjoy_player/features/library/application/library_repository_provider.dart';
 import 'package:enjoy_player/features/library/presentation/widgets/content_language_picker.dart';
@@ -129,7 +128,8 @@ Future<void> _runBlockingImport(
   required String unsupportedFileLabel,
 }) async {
   final l10n = AppLocalizations.of(context)!;
-  final auth = ref.read(authCtrlProvider).valueOrNull;
+  final sessionUserId =
+      sessionUserIdOf(ref.read(authCtrlProvider)) ?? kLocalSessionId;
   final dialogContextCompleter = Completer<BuildContext>();
   _importUiLog.info('blocking import: showing dialog');
   final dialogFuture = _showImportProgressDialog(
@@ -146,12 +146,7 @@ Future<void> _runBlockingImport(
   );
 
   try {
-    if (auth is! AuthSignedIn) {
-      _importUiLog.warning('blocking import: not signed in, dismissing dialog');
-      await dismiss('not-signed-in');
-      return;
-    }
-    final id = await import(auth.profile.id);
+    final id = await import(sessionUserId);
     _importUiLog.info(
       'blocking import: import finished id=$id, dismissing dialog',
     );

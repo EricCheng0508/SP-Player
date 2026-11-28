@@ -300,15 +300,25 @@ void main() {
     }
 
     group('build', () {
-      test('returns initial state when signed out', () async {
+      test('uses the local session DB when no auth state exists', () async {
         final container = await signedOutContainer();
         addTearDown(container.dispose);
 
         final state = await container.read(appPreferencesCtrlProvider.future);
+        final learn = canonicalFocusLanguageTag(null);
         expect(state.locale, kAppDefaultDisplayLocale);
-        expect(state.learningLanguage, isNull);
-        expect(state.nativeLanguage, isNull);
+        expect(state.learningLanguage, learn);
+        expect(
+          state.nativeLanguage,
+          coerceNativeIfEqualsLearning(null, learn),
+        );
         expect(state.themeMode, ThemeMode.system);
+        expect(
+          await db.settingsDao.getValue(
+            SettingsKeys.prefsLearningLanguage.name,
+          ),
+          learn,
+        );
       });
 
       test('reads and normalizes stored prefs when signed in', () async {
@@ -1064,22 +1074,25 @@ void main() {
         );
       });
 
-      test('updates memory but does not write DB when signed out', () async {
-        final container = await signedOutContainer();
-        addTearDown(container.dispose);
-        await container.read(appPreferencesCtrlProvider.future);
+      test(
+        'persists to the local session DB without an auth session',
+        () async {
+          final container = await signedOutContainer();
+          addTearDown(container.dispose);
+          await container.read(appPreferencesCtrlProvider.future);
 
-        await container
-            .read(appPreferencesCtrlProvider.notifier)
-            .setThemeMode(ThemeMode.dark);
+          await container
+              .read(appPreferencesCtrlProvider.notifier)
+              .setThemeMode(ThemeMode.dark);
 
-        final state = container.read(appPreferencesCtrlProvider).valueOrNull;
-        expect(state!.themeMode, ThemeMode.dark);
-        expect(
-          await db.settingsDao.getValue(SettingsKeys.prefsThemeMode.name),
-          isNull,
-        );
-      });
+          final state = container.read(appPreferencesCtrlProvider).valueOrNull;
+          expect(state!.themeMode, ThemeMode.dark);
+          expect(
+            await db.settingsDao.getValue(SettingsKeys.prefsThemeMode.name),
+            'dark',
+          );
+        },
+      );
     });
 
     group('signed-out server sync', () {

@@ -264,21 +264,6 @@ final List<SettingsSectionSpec> kSettingsSectionSpecs = [
     hint: (l10n) => l10n.settingsSectionAboutHint,
     rows: [
       SettingsRowSpec(
-        rowId: 'contact',
-        title: (l10n) => l10n.settingsAboutContactTitle,
-        searchableText: (l10n) => const [
-          'email',
-          '邮件',
-          'wechat',
-          '微信',
-          'mixin',
-          'feedback',
-          '反馈',
-          'bug report',
-          'bug',
-        ],
-      ),
-      SettingsRowSpec(
         rowId: 'analyticsCapture',
         title: (l10n) => l10n.settingsAnalyticsCaptureTitle,
         searchableText: (l10n) => const [

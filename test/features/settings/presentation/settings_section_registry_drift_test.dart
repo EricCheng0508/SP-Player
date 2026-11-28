@@ -258,7 +258,6 @@ void main() {
       };
       const zhTokensByRow = <String, List<String>>{
         'micPicker': ['麦克风'],
-        'contact': ['邮件', '微信', '反馈'],
         'analyticsCapture': ['数据', '遥测', '分析'],
       };
       final rowSpecs = {
@@ -285,13 +284,15 @@ void main() {
           );
         }
         final matched = filterSettingsEntries(
-          '邮件',
+          '遥测',
           localizedSettingsRegistry(l10n),
         );
         expect(
           matched.map((e) => e.rowId),
-          contains('contact'),
-          reason: 'zh query "邮件" must find the contact row in ${entry.key}',
+          contains('analyticsCapture'),
+          reason:
+              'zh query "遥测" must find the analyticsCapture row in '
+              '${entry.key}',
         );
       }
     });

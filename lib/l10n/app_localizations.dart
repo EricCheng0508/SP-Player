@@ -4983,54 +4983,6 @@ abstract class AppLocalizations {
   /// **'View source code on GitHub'**
   String get settingsAboutOpenSourceSubtitle;
 
-  /// No description provided for @settingsAboutContactTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Contact the developer'**
-  String get settingsAboutContactTitle;
-
-  /// No description provided for @settingsAboutContactSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Send feedback or report a bug directly'**
-  String get settingsAboutContactSubtitle;
-
-  /// No description provided for @settingsAboutContactEmailLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Email'**
-  String get settingsAboutContactEmailLabel;
-
-  /// No description provided for @settingsAboutContactWeChatLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'WeChat'**
-  String get settingsAboutContactWeChatLabel;
-
-  /// No description provided for @settingsAboutContactMixinLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Mixin'**
-  String get settingsAboutContactMixinLabel;
-
-  /// No description provided for @settingsAboutContactCopiedEmail.
-  ///
-  /// In en, this message translates to:
-  /// **'Email copied to clipboard'**
-  String get settingsAboutContactCopiedEmail;
-
-  /// No description provided for @settingsAboutContactCopiedWeChat.
-  ///
-  /// In en, this message translates to:
-  /// **'WeChat ID copied to clipboard'**
-  String get settingsAboutContactCopiedWeChat;
-
-  /// No description provided for @settingsAboutContactCopiedMixin.
-  ///
-  /// In en, this message translates to:
-  /// **'Mixin ID copied to clipboard'**
-  String get settingsAboutContactCopiedMixin;
-
   /// No description provided for @settingsDiagnosticsLoggingTitle.
   ///
   /// In en, this message translates to:
